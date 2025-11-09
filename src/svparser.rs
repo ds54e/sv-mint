@@ -1,10 +1,9 @@
 use crate::config::Config;
 use crate::textutil::{line_starts, linecol_at};
 use anyhow::{anyhow, Result};
-use regex::Regex;
 use serde::Deserialize;
 use serde_json::{json, Value};
-use std::collections::{BTreeMap, HashMap, HashSet};
+use std::collections::{BTreeMap, HashMap};
 use std::path::{Path, PathBuf};
 use sv_parser::{
     parse_sv, preprocess, unwrap_locate, unwrap_node, Define, DefineText, Defines, Locate, NodeEvent, RefNode,
@@ -130,35 +129,45 @@ fn collect_declarations_and_references(tree: &SyntaxTree, file: &str) -> (Vec<De
     let mut declarations: Vec<DeclInfo> = Vec::new();
     let mut references: Vec<ReferenceInfo> = Vec::new();
     let scope: Vec<String> = Vec::new();
-    let mut in_port_decl = false;
+
     let mut port_decl_kind: Option<&'static str> = None;
+
     let mut in_data_decl = false;
+    let mut in_data_type_head = false;
+
+    let mut in_param_decl = false;
+    let mut in_param_assign = false;
+
+    let mut in_typedef = false;
+    let mut typedef_last_name: Option<String> = None;
+    let mut typedef_last_byte: Option<usize> = None;
+
     let mut lhs_depth: i32 = 0;
-    let mut decl_seen: HashSet<String> = HashSet::new();
+
+    let mut decl_seen: std::collections::HashSet<String> = std::collections::HashSet::new();
     let str_of = |tree: &SyntaxTree, loc: &Locate| -> String { tree.get_str(loc).unwrap().to_string() };
 
     for ev in tree.into_iter().event() {
         match ev {
             NodeEvent::Enter(n) => match n {
                 RefNode::InputDeclaration(_) => {
-                    in_port_decl = true;
                     port_decl_kind = Some("input");
                 }
                 RefNode::OutputDeclaration(_) => {
-                    in_port_decl = true;
                     port_decl_kind = Some("output");
                 }
                 RefNode::InoutDeclaration(_) => {
-                    in_port_decl = true;
                     port_decl_kind = Some("inout");
                 }
                 RefNode::AnsiPortDeclaration(_) => {
-                    in_port_decl = true;
                     port_decl_kind = None;
                 }
+
                 RefNode::DataDeclaration(_) => {
                     in_data_decl = true;
+                    in_data_type_head = true;
                 }
+
                 RefNode::VariableLvalue(_) | RefNode::NetLvalue(_) => {
                     lhs_depth += 1;
                 }
@@ -183,30 +192,14 @@ fn collect_declarations_and_references(tree: &SyntaxTree, file: &str) -> (Vec<De
                                 });
                             }
                         }
-                    } else if let Some(loc) = unwrap_locate!(n) {
-                        let name = str_of(tree, loc);
-                        if decl_seen.insert(name.clone()) {
-                            declarations.push(DeclInfo {
-                                name,
-                                kind: "port".to_string(),
-                                decl_type: DeclType::Var,
-                                data_type: None,
-                                range: None,
-                                init: None,
-                                file: file.to_string(),
-                                line: 1,
-                                col: 1,
-                                scope: scope.clone(),
-                                byte_begin: loc.offset,
-                            });
-                        }
                     }
                 }
 
-                RefNode::VariableIdentifier(_) => {
-                    if let Some(loc) = unwrap_locate!(n) {
-                        let name = str_of(tree, loc);
-                        if in_data_decl {
+                RefNode::VariableIdentifier(_) | RefNode::NetIdentifier(_) => {
+                    if in_data_decl {
+                        in_data_type_head = false;
+                        if let Some(loc) = unwrap_locate!(n) {
+                            let name = str_of(tree, loc);
                             if decl_seen.insert(name.clone()) {
                                 declarations.push(DeclInfo {
                                     name,
@@ -222,60 +215,57 @@ fn collect_declarations_and_references(tree: &SyntaxTree, file: &str) -> (Vec<De
                                     byte_begin: loc.offset,
                                 });
                             }
-                        } else {
-                            let k = if lhs_depth > 0 { RefKind::Lhs } else { RefKind::Rhs };
-                            references.push(ReferenceInfo {
-                                name,
-                                kind: k,
-                                file: file.to_string(),
-                                line: 1,
-                                col: 1,
-                                scope: scope.clone(),
-                                byte_begin: loc.offset,
-                            });
                         }
                     }
                 }
 
-                RefNode::NetIdentifier(_) => {
-                    if let Some(loc) = unwrap_locate!(n) {
-                        let name = str_of(tree, loc);
-                        if in_data_decl {
-                            if decl_seen.insert(name.clone()) {
-                                declarations.push(DeclInfo {
+                RefNode::ParameterDeclarationParam(_)
+                | RefNode::LocalParameterDeclarationParam(_)
+                | RefNode::ParameterPortDeclaration(_) => {
+                    in_param_decl = true;
+                }
+
+                RefNode::ParamAssignment(_) => {
+                    if in_param_decl {
+                        in_param_assign = true;
+                    }
+                }
+
+                RefNode::Identifier(_) => {
+                    if let Some(id) = unwrap_node!(n, SimpleIdentifier, EscapedIdentifier) {
+                        if let Some(loc) = unwrap_locate!(id) {
+                            let name = str_of(tree, loc);
+
+                            if in_param_assign {
+                                if decl_seen.insert(name.clone()) {
+                                    declarations.push(DeclInfo {
+                                        name,
+                                        kind: "parameter".to_string(),
+                                        decl_type: DeclType::Param,
+                                        data_type: None,
+                                        range: None,
+                                        init: None,
+                                        file: file.to_string(),
+                                        line: 1,
+                                        col: 1,
+                                        scope: scope.clone(),
+                                        byte_begin: loc.offset,
+                                    });
+                                }
+                            } else if in_typedef {
+                                typedef_last_name = Some(name);
+                                typedef_last_byte = Some(loc.offset);
+                            } else if in_data_decl && in_data_type_head {
+                                references.push(ReferenceInfo {
                                     name,
-                                    kind: "net".to_string(),
-                                    decl_type: DeclType::Var,
-                                    data_type: None,
-                                    range: None,
-                                    init: None,
+                                    kind: RefKind::TypeRef,
                                     file: file.to_string(),
                                     line: 1,
                                     col: 1,
                                     scope: scope.clone(),
                                     byte_begin: loc.offset,
                                 });
-                            }
-                        } else {
-                            let k = if lhs_depth > 0 { RefKind::Lhs } else { RefKind::Rhs };
-                            references.push(ReferenceInfo {
-                                name,
-                                kind: k,
-                                file: file.to_string(),
-                                line: 1,
-                                col: 1,
-                                scope: scope.clone(),
-                                byte_begin: loc.offset,
-                            });
-                        }
-                    }
-                }
-
-                RefNode::Identifier(_) => {
-                    if !in_data_decl && !in_port_decl && lhs_depth == 0 {
-                        if let Some(id) = unwrap_node!(n, SimpleIdentifier, EscapedIdentifier) {
-                            if let Some(loc) = unwrap_locate!(id) {
-                                let name = str_of(tree, loc);
+                            } else if lhs_depth == 0 {
                                 references.push(ReferenceInfo {
                                     name,
                                     kind: RefKind::Rhs,
@@ -290,22 +280,61 @@ fn collect_declarations_and_references(tree: &SyntaxTree, file: &str) -> (Vec<De
                     }
                 }
 
+                RefNode::TypeDeclaration(_) => {
+                    in_typedef = true;
+                    typedef_last_name = None;
+                    typedef_last_byte = None;
+                }
+
                 _ => {}
             },
+
             NodeEvent::Leave(n) => match n {
                 RefNode::InputDeclaration(_)
                 | RefNode::OutputDeclaration(_)
                 | RefNode::InoutDeclaration(_)
                 | RefNode::AnsiPortDeclaration(_) => {
-                    in_port_decl = false;
                     port_decl_kind = None;
                 }
+
                 RefNode::DataDeclaration(_) => {
                     in_data_decl = false;
+                    in_data_type_head = false;
                 }
+
                 RefNode::VariableLvalue(_) | RefNode::NetLvalue(_) => {
                     lhs_depth -= 1;
                 }
+
+                RefNode::ParamAssignment(_) => {
+                    in_param_assign = false;
+                }
+
+                RefNode::ParameterDeclarationParam(_)
+                | RefNode::LocalParameterDeclarationParam(_)
+                | RefNode::ParameterPortDeclaration(_) => {
+                    in_param_decl = false;
+                }
+
+                RefNode::TypeDeclaration(_) => {
+                    if let Some(name) = typedef_last_name.take() {
+                        declarations.push(DeclInfo {
+                            name,
+                            kind: "typedef".to_string(),
+                            decl_type: DeclType::Typedef,
+                            data_type: None,
+                            range: None,
+                            init: None,
+                            file: file.to_string(),
+                            line: 1,
+                            col: 1,
+                            scope: scope.clone(),
+                            byte_begin: typedef_last_byte.unwrap_or(0),
+                        });
+                    }
+                    in_typedef = false;
+                }
+
                 _ => {}
             },
         }
@@ -361,54 +390,6 @@ fn build_symbol_table_and_rw_class(declarations: &[DeclInfo], references: &[Refe
         }
     }
     SymbolTable { scopes }
-}
-
-#[allow(dead_code)]
-fn scan_params_typedefs(pp_text: &str, file: &str, existing: &mut Vec<DeclInfo>) {
-    let mut exists = std::collections::HashSet::new();
-    for d in existing.iter() {
-        exists.insert((d.name.clone(), d.kind.clone()));
-    }
-    #[allow(unused_variables)]
-    let bytes = pp_text.as_bytes();
-    let mut add_decl = |name: String, kind: &str, byte_begin: usize| {
-        if exists.contains(&(name.clone(), kind.to_string())) {
-            return;
-        }
-        let starts = line_starts(pp_text);
-        let (line, col) = linecol_at(&starts, byte_begin);
-        existing.push(DeclInfo {
-            name,
-            kind: kind.to_string(),
-            decl_type: if kind == "typedef" {
-                DeclType::Typedef
-            } else {
-                DeclType::Param
-            },
-            data_type: None,
-            range: None,
-            init: None,
-            file: file.to_string(),
-            line,
-            col,
-            scope: Vec::new(),
-            byte_begin,
-        });
-    };
-    let re_param = Regex::new(
-        r"(?m)^(?P<lead>\\s*)(?P<kw>parameter|localparam)\\b[^;\\n]*?\\b(?P<name>[A-Za-z_][A-Za-z0-9_$]*)\\b",
-    )
-    .unwrap();
-    for cap in re_param.captures_iter(pp_text) {
-        let name = cap.name("name").unwrap();
-        add_decl(name.as_str().to_string(), "parameter", name.start());
-    }
-    let re_typedef =
-        Regex::new(r"(?m)^(?P<lead>\\s*)typedef\\b[^;\\n]*?\\b(?P<name>[A-Za-z_][A-Za-z0-9_$]*)\\b\\s*;").unwrap();
-    for cap in re_typedef.captures_iter(pp_text) {
-        let name = cap.name("name").unwrap();
-        add_decl(name.as_str().to_string(), "typedef", name.start());
-    }
 }
 
 pub fn build_ast_payload(input_path: &Path, pp_text: &str, cst_opt: &Option<SyntaxTree>) -> Value {

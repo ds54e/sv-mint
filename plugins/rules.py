@@ -4,80 +4,73 @@ def emit(stage,violations):
     sys.stdout.write(json.dumps({"type":"ViolationsStage","stage":stage,"violations":violations}))
     sys.stdout.flush()
 
-def mk_violation(rule_id,name,line,col):
+def mk(rule_id,name,line,col):
     return {"rule_id":rule_id,"severity":"warning","message":"'%s' declared but never used"%name,"location":{"line":int(line),"col":int(col),"end_line":int(line),"end_col":int(col)}}
 
-def from_symbol_table(ast):
-    out=[]
-    scopes=ast.get("symbol_table",{}).get("scopes",{})
-    if not isinstance(scopes,dict) or not scopes:
-        return out,False
-    for names in scopes.values():
-        if not isinstance(names,dict):
-            continue
-        for n,info in names.items():
-            if not isinstance(info,dict):
-                continue
-            rw=info.get("rw_class")
-            d=info.get("decl",{})
-            dt=(d.get("decl_type") or info.get("decl_type") or "").lower()
-            if rw=="unused":
-                if dt=="param":
-                    out.append(mk_violation("decl.unused.param",n,d.get("line",1),d.get("col",1)))
-                elif dt=="typedef":
-                    out.append(mk_violation("decl.unused.typedef",n,d.get("line",1),d.get("col",1)))
-                else:
-                    out.append(mk_violation("decl.unused",n,d.get("line",1),d.get("col",1)))
-    return out,True
+def norm_decl_type(s):
+    s=(s or "").strip().lower()
+    if s in ("param","parameter","localparam"):
+        return "param"
+    if s in ("typedef",):
+        return "typedef"
+    if s in ("var","variable","net"):
+        return "var"
+    return s
 
-def from_lists(ast):
-    out=[]
-    decls=ast.get("declarations",[])
-    refs=ast.get("references",[])
-    used_rhs={r.get("name") for r in refs if r.get("name") and r.get("kind") in ("Rhs","Lhs")}
-    used_type={r.get("name") for r in refs if r.get("name") and r.get("kind")=="TypeRef"}
-    pos={}
-    dtype={}
-    for d in decls:
-        n=d.get("name")
-        if not n:
-            continue
-        if n not in pos:
-            pos[n]=(d.get("line",1),d.get("col",1))
-            dtype[n]=(d.get("decl_type") or "").lower()
-    for d in decls:
-        n=d.get("name")
-        if not n:
-            continue
-        dt=(d.get("decl_type") or "").lower()
-        if dt=="param":
-            if n not in used_rhs and n not in used_type:
-                ln,col=pos.get(n,(1,1))
-                out.append(mk_violation("decl.unused.param",n,ln,col))
-        elif dt=="typedef":
-            if n not in used_type:
-                ln,col=pos.get(n,(1,1))
-                out.append(mk_violation("decl.unused.typedef",n,ln,col))
-        else:
-            if n not in used_rhs:
-                ln,col=pos.get(n,(1,1))
-                out.append(mk_violation("decl.unused",n,ln,col))
-    return out
+def collect_ref_kinds_by_binding(refs):
+    m={}
+    for r in refs or []:
+        n=r.get("name"); k=r.get("kind"); sc=r.get("scope") or ""
+        if not n or not k: continue
+        m.setdefault((sc,n),set()).add(k)
+    return m
+
+def used_judgement(dt,kinds):
+    if dt=="param":
+        return ("Rhs" in kinds) or ("TypeRef" in kinds)
+    if dt=="typedef":
+        return ("TypeRef" in kinds) or ("Rhs" in kinds)
+    return ("Rhs" in kinds) or ("Lhs" in kinds)
 
 def main():
     req=json.load(sys.stdin)
     if req.get("type")!="CheckFileStage":
-        emit(req.get("stage") or "raw_text",[])
-        return
-    stage=req.get("stage")
-    if stage!="ast":
-        emit(stage,[])
-        return
-    ast=req.get("payload",{}).get("ast",{})
-    out,ok=from_symbol_table(ast)
-    if not ok:
-        out=from_lists(ast)
-    emit(stage,out)
+        emit(req.get("stage") or "raw_text",[]); return
+    if req.get("stage")!="ast":
+        emit(req.get("stage"),[]); return
+    ast=req.get("payload",{}).get("ast",{}) or {}
+    refs=ast.get("references",[]) or []
+    refmap=collect_ref_kinds_by_binding(refs)
+    out=[]
+    scopes=(ast.get("symbol_table",{}) or {}).get("scopes",{}) or {}
+    if isinstance(scopes,dict) and scopes:
+        for scope_name,names in scopes.items():
+            for n,info in (names or {}).items():
+                d=(info or {}).get("decl",{}) or {}
+                dt=norm_decl_type(d.get("decl_type") or info.get("decl_type"))
+                kinds=set()
+                if "refs" in info and isinstance(info["refs"],list):
+                    for idx in info["refs"]:
+                        if isinstance(idx,int) and 0<=idx<len(refs):
+                            k=refs[idx].get("kind")
+                            if k: kinds.add(k)
+                kinds.update(refmap.get((d.get("scope") or scope_name or "",n),set()))
+                if not used_judgement(dt,kinds):
+                    ln=int(d.get("line",1)); col=int(d.get("col",1))
+                    if dt=="param": out.append(mk("decl.unused.param",n,ln,col))
+                    elif dt=="typedef": out.append(mk("decl.unused.typedef",n,ln,col))
+                    else: out.append(mk("decl.unused",n,ln,col))
+        emit("ast",out); return
+    decls=ast.get("declarations",[]) or []
+    for d in decls:
+        n=d.get("name"); dt=norm_decl_type(d.get("decl_type"))
+        if not n: continue
+        kinds=refmap.get((d.get("scope") or "",n),set())
+        if not used_judgement(dt,kinds):
+            ln=int(d.get("line",1)); col=int(d.get("col",1))
+            if dt=="param": out.append(mk("decl.unused.param",n,ln,col))
+            elif dt=="typedef": out.append(mk("decl.unused.typedef",n,ln,col))
+            else: out.append(mk("decl.unused",n,ln,col))
+    emit("ast",out)
 
-if __name__=="__main__":
-    main()
+if __name__=="__main__": main()
