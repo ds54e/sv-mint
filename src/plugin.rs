@@ -85,6 +85,7 @@ fn call_plugin(cmd: &str, args: &[String], request_json: &str, timeout: Duration
             .write_all(request_json.as_bytes())
             .context("failed to write request to plugin stdin")?;
         stdin.flush().ok();
+        drop(stdin);
     } else {
         return Err(anyhow!("plugin stdin not available"));
     }

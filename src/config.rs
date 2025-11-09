@@ -71,12 +71,3 @@ pub fn validate_config(cfg: &Config) -> Result<()> {
     ensure!(!cfg.plugin.cmd.trim().is_empty(), "plugin cmd empty");
     Ok(())
 }
-
-pub fn strip_unc_prefix(p: &Path) -> String {
-    let s = p.to_string_lossy();
-    if let Some(stripped) = s.strip_prefix(r"\\?\") {
-        stripped.to_string()
-    } else {
-        s.to_string()
-    }
-}

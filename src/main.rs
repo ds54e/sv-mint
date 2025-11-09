@@ -62,17 +62,19 @@ fn run() -> Result<ExitCode> {
             Stage::RawText => json!({ "text": &normalized_text }),
             Stage::PpText => svparser::build_pp_payload(&cfg, &pp_text, &final_defs),
             Stage::Cst => svparser::build_cst_payload(&cst_opt),
-            Stage::Ast => svparser::build_ast_payload(&input_path, &normalized_text, &cst_opt),
+            Stage::Ast => svparser::build_ast_payload(&input_path, &pp_text, &cst_opt),
         };
         let vs = run_plugin_once(&cfg_dir, &cfg, stage.as_str(), &input_path, payload)?;
         all_violations.extend(vs);
     }
 
-    let path_for_print = config::strip_unc_prefix(&input_path);
-    print_violations(Path::new(&path_for_print), &all_violations);
-    Ok(if all_violations.is_empty() {
-        ExitCode::from(0)
-    } else {
+    print_violations(Path::new(&input_path), &all_violations);
+    let has_err_or_warn = all_violations
+        .iter()
+        .any(|v| matches!(v.severity, types::Severity::Error | types::Severity::Warning));
+    Ok(if has_err_or_warn {
         ExitCode::from(2)
+    } else {
+        ExitCode::from(0)
     })
 }
