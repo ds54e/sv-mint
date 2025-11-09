@@ -84,8 +84,7 @@ fn call_plugin(cmd: &str, args: &[String], request_json: &str, timeout: Duration
         stdin
             .write_all(request_json.as_bytes())
             .context("failed to write request to plugin stdin")?;
-        stdin.flush().ok();
-        drop(stdin);
+        let _ = stdin.flush();
     } else {
         return Err(anyhow!("plugin stdin not available"));
     }
@@ -219,8 +218,16 @@ fn truncate_preview(s: &str, max: usize) -> String {
     if s.len() <= max {
         s.to_owned()
     } else {
-        let mut t = s[..max].to_owned();
-        t.push_str(" ...");
-        t
+        let mut end = max.min(s.len());
+        while end > 0 && !s.is_char_boundary(end) {
+            end -= 1;
+        }
+        if end == 0 {
+            String::new()
+        } else {
+            let mut t = s[..end].to_owned();
+            t.push_str(" ...");
+            t
+        }
     }
 }

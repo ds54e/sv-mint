@@ -1,7 +1,10 @@
 use crate::types::{Severity, Violation};
 use std::fs;
 use std::path::Path;
-#[allow(dead_code)]
+
+const TABSTOP: usize = 8;
+const MAX_COLS: usize = 200;
+
 pub fn normalize_windows_path_for_output(p: &str) -> String {
     if let Some(rest) = p.strip_prefix(r"\\?\UNC\") {
         return format!(r"\\{}", rest);
@@ -31,6 +34,7 @@ fn truncate_preview_utf8(s: &str, max: usize) -> String {
 fn read_file_text_lf(path: &Path) -> Option<String> {
     let bytes = fs::read(path).ok()?;
     let s = String::from_utf8(bytes).ok()?;
+    let s = crate::textutil::strip_bom(s);
     let s = s.replace("\r\n", "\n").replace('\r', "\n");
     Some(s)
 }
@@ -67,7 +71,7 @@ fn get_line_str<'a>(text: &'a str, starts: &[usize], line: usize) -> &'a str {
     }
 }
 
-pub fn make_line_excerpt_from_file(path: &Path, line: usize, tabstop: usize, max_cols: usize) -> String {
+pub fn make_line_excerpt_from_file(path: &Path, line: usize) -> String {
     let text = match read_file_text_lf(path) {
         Some(t) => t,
         None => return String::new(),
@@ -77,8 +81,8 @@ pub fn make_line_excerpt_from_file(path: &Path, line: usize, tabstop: usize, max
     let mut cols = 0usize;
     let mut out = String::new();
     for ch in s.chars() {
-        let w = if ch == '\t' { tabstop } else { 1 };
-        if cols + w > max_cols {
+        let w = if ch == '\t' { TABSTOP } else { 1 };
+        if cols + w > MAX_COLS {
             out.push_str(" ...");
             return out;
         }
@@ -106,9 +110,9 @@ pub fn print_violations(path: &Path, violations: &[Violation]) {
             v.rule_id,
             v.message
         );
-        let excerpt = make_line_excerpt_from_file(path, line as usize, 8, 200);
+        let excerpt = make_line_excerpt_from_file(path, line as usize);
         if !excerpt.is_empty() {
-            println!("    > {}", truncate_preview_utf8(&excerpt, 200));
+            println!("    > {}", truncate_preview_utf8(&excerpt, MAX_COLS));
         }
     }
 }
