@@ -1,6 +1,7 @@
 use crate::config::Config;
 use crate::textutil::{line_starts, linecol_at};
 use anyhow::{anyhow, Result};
+use regex::Regex;
 use serde::Deserialize;
 use serde_json::{json, Value};
 use std::collections::{BTreeMap, HashMap, HashSet};
@@ -23,10 +24,19 @@ pub struct FinalDefs {
     pub names: Vec<String>,
 }
 
+#[derive(Clone, Copy, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq)]
+pub enum DeclType {
+    Net,
+    Var,
+    Param,
+    Typedef,
+    Other,
+}
 #[derive(Clone, serde::Serialize, serde::Deserialize)]
 pub struct DeclInfo {
     pub name: String,
     pub kind: String,
+    pub decl_type: DeclType,
     pub data_type: Option<String>,
     pub range: Option<(i64, i64)>,
     pub init: Option<String>,
@@ -43,6 +53,8 @@ pub enum RefKind {
     Lhs,
     Rhs,
     PortConn,
+
+    TypeRef,
 }
 
 #[derive(Clone, serde::Serialize, serde::Deserialize)]
@@ -159,6 +171,7 @@ fn collect_declarations_and_references(tree: &SyntaxTree, file: &str) -> (Vec<De
                                 declarations.push(DeclInfo {
                                     name,
                                     kind: kind.to_string(),
+                                    decl_type: DeclType::Var,
                                     data_type: None,
                                     range: None,
                                     init: None,
@@ -176,6 +189,7 @@ fn collect_declarations_and_references(tree: &SyntaxTree, file: &str) -> (Vec<De
                             declarations.push(DeclInfo {
                                 name,
                                 kind: "port".to_string(),
+                                decl_type: DeclType::Var,
                                 data_type: None,
                                 range: None,
                                 init: None,
@@ -197,6 +211,7 @@ fn collect_declarations_and_references(tree: &SyntaxTree, file: &str) -> (Vec<De
                                 declarations.push(DeclInfo {
                                     name,
                                     kind: "var".to_string(),
+                                    decl_type: DeclType::Var,
                                     data_type: None,
                                     range: None,
                                     init: None,
@@ -230,6 +245,7 @@ fn collect_declarations_and_references(tree: &SyntaxTree, file: &str) -> (Vec<De
                                 declarations.push(DeclInfo {
                                     name,
                                     kind: "net".to_string(),
+                                    decl_type: DeclType::Var,
                                     data_type: None,
                                     range: None,
                                     init: None,
@@ -321,7 +337,7 @@ fn build_symbol_table_and_rw_class(declarations: &[DeclInfo], references: &[Refe
                 let k = references[ri].kind;
                 if k == RefKind::Lhs {
                     has_l = true;
-                } else if k == RefKind::Rhs {
+                } else if k == RefKind::Rhs || k == RefKind::TypeRef {
                     has_r = true;
                 }
             }
@@ -345,6 +361,54 @@ fn build_symbol_table_and_rw_class(declarations: &[DeclInfo], references: &[Refe
         }
     }
     SymbolTable { scopes }
+}
+
+#[allow(dead_code)]
+fn scan_params_typedefs(pp_text: &str, file: &str, existing: &mut Vec<DeclInfo>) {
+    let mut exists = std::collections::HashSet::new();
+    for d in existing.iter() {
+        exists.insert((d.name.clone(), d.kind.clone()));
+    }
+    #[allow(unused_variables)]
+    let bytes = pp_text.as_bytes();
+    let mut add_decl = |name: String, kind: &str, byte_begin: usize| {
+        if exists.contains(&(name.clone(), kind.to_string())) {
+            return;
+        }
+        let starts = line_starts(pp_text);
+        let (line, col) = linecol_at(&starts, byte_begin);
+        existing.push(DeclInfo {
+            name,
+            kind: kind.to_string(),
+            decl_type: if kind == "typedef" {
+                DeclType::Typedef
+            } else {
+                DeclType::Param
+            },
+            data_type: None,
+            range: None,
+            init: None,
+            file: file.to_string(),
+            line,
+            col,
+            scope: Vec::new(),
+            byte_begin,
+        });
+    };
+    let re_param = Regex::new(
+        r"(?m)^(?P<lead>\\s*)(?P<kw>parameter|localparam)\\b[^;\\n]*?\\b(?P<name>[A-Za-z_][A-Za-z0-9_$]*)\\b",
+    )
+    .unwrap();
+    for cap in re_param.captures_iter(pp_text) {
+        let name = cap.name("name").unwrap();
+        add_decl(name.as_str().to_string(), "parameter", name.start());
+    }
+    let re_typedef =
+        Regex::new(r"(?m)^(?P<lead>\\s*)typedef\\b[^;\\n]*?\\b(?P<name>[A-Za-z_][A-Za-z0-9_$]*)\\b\\s*;").unwrap();
+    for cap in re_typedef.captures_iter(pp_text) {
+        let name = cap.name("name").unwrap();
+        add_decl(name.as_str().to_string(), "typedef", name.start());
+    }
 }
 
 pub fn build_ast_payload(input_path: &Path, pp_text: &str, cst_opt: &Option<SyntaxTree>) -> Value {
