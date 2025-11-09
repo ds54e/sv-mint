@@ -1,0 +1,6 @@
+[defaults]
+timeout_ms_per_file = 3000
+
+[plugin]
+cmd  = "py"
+args = ["-3", "-u", "plugins/define_naming.py"]
