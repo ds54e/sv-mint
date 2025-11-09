@@ -1,5 +1,5 @@
 use crate::config::Config;
-use crate::output::Violation;
+use crate::types::Violation;
 use anyhow::{anyhow, bail, ensure, Context, Result};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;

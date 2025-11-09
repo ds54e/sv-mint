@@ -6,7 +6,7 @@ cmd  = "py"
 args = ["-3", "-u", "plugins/rules.py"]
 
 [stages]
-enabled = ["raw_text", "pp_text", "cst"]
+enabled = ["raw_text", "pp_text", "cst", "ast"]
 
 [svparser]
 include_paths     = ["./include", "../common/include"]

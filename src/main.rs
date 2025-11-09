@@ -2,6 +2,8 @@ mod config;
 mod output;
 mod plugin;
 mod svparser;
+mod textutil;
+mod types;
 
 use anyhow::Result;
 use clap::Parser;
@@ -10,9 +12,10 @@ use output::print_violations;
 use plugin::run_plugin_once;
 use serde_json::json;
 use std::fs;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 use svparser::run_svparser;
+use types::Stage;
 
 #[derive(Parser, Debug)]
 #[command(
@@ -55,18 +58,18 @@ fn run() -> Result<ExitCode> {
 
     let mut all_violations = Vec::new();
     for stage in &cfg.stages.enabled {
-        let payload = match stage.as_str() {
-            "raw_text" => json!({ "text": &normalized_text }),
-            "pp_text" => svparser::build_pp_payload(&cfg, &pp_text, &final_defs),
-            "cst" => svparser::build_cst_payload(&cst_opt),
-            _ => continue,
+        let payload = match stage {
+            Stage::RawText => json!({ "text": &normalized_text }),
+            Stage::PpText => svparser::build_pp_payload(&cfg, &pp_text, &final_defs),
+            Stage::Cst => svparser::build_cst_payload(&cst_opt),
+            Stage::Ast => svparser::build_ast_payload(&input_path, &normalized_text, &cst_opt),
         };
-        let vs = run_plugin_once(&cfg_dir, &cfg, stage, &input_path, payload)?;
+        let vs = run_plugin_once(&cfg_dir, &cfg, stage.as_str(), &input_path, payload)?;
         all_violations.extend(vs);
     }
 
     let path_for_print = config::strip_unc_prefix(&input_path);
-    print_violations(&path_for_print, &normalized_text, &all_violations)?;
+    print_violations(Path::new(&path_for_print), &all_violations);
     Ok(if all_violations.is_empty() {
         ExitCode::from(0)
     } else {

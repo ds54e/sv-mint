@@ -1,69 +1,40 @@
-#!/usr/bin/env python3
-import sys, json, re
+import sys, json
 
-def build_regex(pattern, allow_leading_underscore):
-    if pattern:
-        return re.compile(pattern)
-    if allow_leading_underscore:
-        return re.compile(r"^_?[A-Z][A-Z0-9_]*$")
-    return re.compile(r"^[A-Z][A-Z0-9_]*$")
-
-def main():
-    try:
-        req = json.loads(sys.stdin.read())
-    except Exception:
-        return
-
-    if req.get("type") != "CheckFileStage":
-        return
-
-    stage = req.get("stage")
-    if stage not in ("pp_text", "raw_text", "cst"):
-        return
-
-    payload = req.get("payload", {})
-    violations = []
-
-    if stage == "pp_text":
-        rules = payload.get("rules", {}).get("define_upper", {})
-        pattern = rules.get("pattern", None)
-        allow_leading_underscore = rules.get("allow_leading_underscore", False)
-        include_predefines = rules.get("include_predefines", False)
-        regex = build_regex(pattern, allow_leading_underscore)
-
-        names = list(payload.get("defines_table", []))
-        predefined = set(payload.get("predefined_names", []))
-
-        if not include_predefines:
-            names = [n for n in names if n not in predefined]
-
-        meta = {m.get("name"): m for m in payload.get("defines_table_meta", [])}
-
-        for name in names:
-            if not regex.match(name):
-                m = meta.get(name, {})
-                line = m.get("line", 1)
-                col = m.get("col", 1)
-                violations.append({
-                    "rule_id": "naming.define_upper",
-                    "severity": "error",
-                    "message": f"`define '{name}' should match pattern",
-                    "location": {
-                        "line": line,
-                        "col": col,
-                        "end_line": line,
-                        "end_col": col
-                    }
-                })
-
-    resp = {
+def respond(stage, violations):
+    out = {
         "type": "ViolationsStage",
         "stage": stage,
-        "violations": violations
+        "violations": violations,
     }
-
-    sys.stdout.write(json.dumps(resp, ensure_ascii=False) + "\n")
+    sys.stdout.write(json.dumps(out))
     sys.stdout.flush()
+
+def handle_ast(req):
+    ast = req.get("payload", {}).get("ast", {})
+    decls = {d.get("name") for d in ast.get("declarations", []) if d.get("name")}
+    used = {r.get("name") for r in ast.get("references", []) if r.get("name") and r.get("kind") in ("Rhs", "Lhs")}
+    unused = sorted(n for n in decls - used if n)
+    viol = []
+    for n in unused:
+        viol.append({
+            "rule_id": "decl.unused",
+            "severity": "warning",
+            "message": f"'{n}' declared but never used",
+            "location": {"line": 1, "col": 1, "end_line": 1, "end_col": 1}
+        })
+    return viol
+
+def main():
+    req = json.load(sys.stdin)
+    if req.get("type") != "CheckFileStage":
+        respond(req.get("stage") or "raw_text", [])
+        return
+    stage = req.get("stage")
+    if stage == "ast":
+        violations = handle_ast(req)
+    else:
+        violations = []
+    respond(stage, violations)
 
 if __name__ == "__main__":
     main()

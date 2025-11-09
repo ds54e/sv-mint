@@ -1,4 +1,5 @@
 use crate::svparser::SvParserCfg;
+use crate::textutil::{normalize_lf, strip_bom};
 use anyhow::{anyhow, ensure, Result};
 use serde::Deserialize;
 use serde_json::Value;
@@ -30,7 +31,7 @@ pub struct Plugin {
 
 #[derive(Deserialize)]
 pub struct Stages {
-    pub enabled: Vec<String>,
+    pub enabled: Vec<crate::types::Stage>,
 }
 
 pub const E_CONFIG_NOT_FOUND: &str = "config not found";
@@ -78,15 +79,4 @@ pub fn strip_unc_prefix(p: &Path) -> String {
     } else {
         s.to_string()
     }
-}
-
-fn strip_bom(mut s: String) -> String {
-    if s.as_bytes().starts_with(&[0xEF, 0xBB, 0xBF]) {
-        s.drain(..3);
-    }
-    s
-}
-
-fn normalize_lf(s: String) -> String {
-    s.replace("\r\n", "\n").replace('\r', "\n")
 }
