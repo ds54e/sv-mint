@@ -1,4 +1,5 @@
 use crate::config::Config;
+use crate::textutil::{find_substring_byte_index, line_starts, linecol_at};
 use anyhow::{anyhow, Result};
 use serde::Deserialize;
 use serde_json::{json, Value};
@@ -338,7 +339,7 @@ fn build_symbol_table_and_rw_class(declarations: &[DeclInfo], references: &[Refe
     SymbolTable { scopes }
 }
 
-pub fn build_ast_payload(input_path: &Path, _normalized_text: &str, cst_opt: &Option<SyntaxTree>) -> Value {
+pub fn build_ast_payload(input_path: &Path, normalized_text: &str, cst_opt: &Option<SyntaxTree>) -> Value {
     let file = input_path.to_string_lossy().to_string();
     let mut declarations: Vec<DeclInfo> = Vec::new();
     let mut references: Vec<ReferenceInfo> = Vec::new();
@@ -349,6 +350,21 @@ pub fn build_ast_payload(input_path: &Path, _normalized_text: &str, cst_opt: &Op
         references = refs;
     }
 
+    let starts = line_starts(normalized_text);
+    for d in &mut declarations {
+        if let Some(idx) = find_substring_byte_index(normalized_text, &d.name) {
+            let (ln, col) = linecol_at(&starts, idx);
+            d.line = ln;
+            d.col = col;
+        }
+    }
+    for r in &mut references {
+        if let Some(idx) = find_substring_byte_index(normalized_text, &r.name) {
+            let (ln, col) = linecol_at(&starts, idx);
+            r.line = ln;
+            r.col = col;
+        }
+    }
     let symtab = build_symbol_table_and_rw_class(&declarations, &references);
 
     json!({

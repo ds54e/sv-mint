@@ -8,3 +8,40 @@ pub fn strip_bom(mut s: String) -> String {
 pub fn normalize_lf(s: String) -> String {
     s.replace("\r\n", "\n").replace('\r', "\n")
 }
+
+pub fn line_starts(s: &str) -> Vec<usize> {
+    let mut v = Vec::with_capacity(1024);
+    v.push(0);
+    for (i, ch) in s.char_indices() {
+        if ch == '\n' && i < s.len() {
+            v.push(i + 1);
+        }
+    }
+    v
+}
+
+pub fn linecol_at(starts: &[usize], byte_idx: usize) -> (u32, u32) {
+    if starts.is_empty() {
+        return (1, 1);
+    }
+    let mut lo = 0usize;
+    let mut hi = starts.len();
+    while lo + 1 < hi {
+        let mid = (lo + hi) / 2;
+        if starts[mid] <= byte_idx {
+            lo = mid;
+        } else {
+            hi = mid;
+        }
+    }
+    let line = (lo + 1) as u32;
+    let col = (byte_idx.saturating_sub(starts[lo]) + 1) as u32;
+    (line, col)
+}
+
+pub fn find_substring_byte_index(haystack: &str, needle: &str) -> Option<usize> {
+    if needle.is_empty() {
+        return None;
+    }
+    haystack.find(needle)
+}
