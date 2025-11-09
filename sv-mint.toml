@@ -3,4 +3,20 @@ timeout_ms_per_file = 3000
 
 [plugin]
 cmd  = "py"
-args = ["-3", "-u", "plugins/define_naming.py"]
+args = ["-3", "-u", "plugins/rules.py"]
+
+[stages]
+enabled = ["raw_text", "pp_text", "cst"]
+
+[svparser]
+include_paths     = ["./include", "../common/include"]
+defines           = ["SYNTH=1", "USE_XYZ"]
+strip_comments    = false
+ignore_include    = false
+allow_incomplete  = false
+
+[rules.define_upper]
+enable = true
+include_predefines = false
+allow_leading_underscore = false
+pattern = "^[A-Z][A-Z0-9_]*$"
