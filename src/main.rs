@@ -56,7 +56,7 @@ fn run() -> Result<ExitCode> {
     let mut all_violations = Vec::new();
     for stage in &cfg.stages.enabled {
         let payload = match stage.as_str() {
-            "raw_text" => json!({ "text": normalized_text }),
+            "raw_text" => json!({ "text": &normalized_text }),
             "pp_text" => svparser::build_pp_payload(&cfg, &pp_text, &final_defs),
             "cst" => svparser::build_cst_payload(&cst_opt),
             _ => continue,
