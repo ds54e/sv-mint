@@ -38,10 +38,3 @@ pub fn linecol_at(starts: &[usize], byte_idx: usize) -> (u32, u32) {
     let col = (byte_idx.saturating_sub(starts[lo]) + 1) as u32;
     (line, col)
 }
-
-pub fn find_substring_byte_index(haystack: &str, needle: &str) -> Option<usize> {
-    if needle.is_empty() {
-        return None;
-    }
-    haystack.find(needle)
-}

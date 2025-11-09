@@ -1,5 +1,5 @@
 use crate::config::Config;
-use crate::textutil::{find_substring_byte_index, line_starts, linecol_at};
+use crate::textutil::{line_starts, linecol_at};
 use anyhow::{anyhow, Result};
 use serde::Deserialize;
 use serde_json::{json, Value};
@@ -34,6 +34,8 @@ pub struct DeclInfo {
     pub line: u32,
     pub col: u32,
     pub scope: Vec<String>,
+    #[serde(skip_serializing)]
+    pub byte_begin: usize,
 }
 
 #[derive(Clone, Copy, serde::Serialize, serde::Deserialize, PartialEq, Eq)]
@@ -51,6 +53,8 @@ pub struct ReferenceInfo {
     pub line: u32,
     pub col: u32,
     pub scope: Vec<String>,
+    #[serde(skip_serializing)]
+    pub byte_begin: usize,
 }
 
 #[derive(Clone, serde::Serialize, serde::Deserialize)]
@@ -69,13 +73,11 @@ pub fn run_svparser(
     input_path: &Path,
     cfg_dir: &Path,
     opt: &SvParserCfg,
-    normalized_text: &str,
 ) -> Result<(String, FinalDefs, Option<SyntaxTree>)> {
     let abs_includes = absolutize_many(cfg_dir, &opt.include_paths);
     let pre = build_predefines(&opt.defines)?;
-    let (_pp_text_ignored, final_defs) =
-        preprocess(input_path, &pre, &abs_includes, opt.strip_comments, opt.ignore_include)
-            .map_err(|_| anyhow!("preprocess failed"))?;
+    let (pp_text_pre, final_defs) = preprocess(input_path, &pre, &abs_includes, opt.strip_comments, opt.ignore_include)
+        .map_err(|_| anyhow!("preprocess failed"))?;
     let tree = parse_sv(
         input_path,
         &pre,
@@ -86,8 +88,7 @@ pub fn run_svparser(
     .map(|(t, _)| Some(t))
     .map_err(|_| anyhow!("parsing failed"))?;
     let names = collect_define_names(&final_defs);
-    let pp_text = normalized_text.to_string();
-    Ok((pp_text, FinalDefs { names }, tree))
+    Ok((pp_text_pre.text().to_string(), FinalDefs { names }, tree))
 }
 
 pub fn build_pp_payload(cfg: &Config, pp_text: &str, final_defs: &FinalDefs) -> Value {
@@ -165,6 +166,7 @@ fn collect_declarations_and_references(tree: &SyntaxTree, file: &str) -> (Vec<De
                                     line: 1,
                                     col: 1,
                                     scope: scope.clone(),
+                                    byte_begin: loc.offset,
                                 });
                             }
                         }
@@ -181,6 +183,7 @@ fn collect_declarations_and_references(tree: &SyntaxTree, file: &str) -> (Vec<De
                                 line: 1,
                                 col: 1,
                                 scope: scope.clone(),
+                                byte_begin: loc.offset,
                             });
                         }
                     }
@@ -201,6 +204,7 @@ fn collect_declarations_and_references(tree: &SyntaxTree, file: &str) -> (Vec<De
                                     line: 1,
                                     col: 1,
                                     scope: scope.clone(),
+                                    byte_begin: loc.offset,
                                 });
                             }
                         } else {
@@ -212,6 +216,7 @@ fn collect_declarations_and_references(tree: &SyntaxTree, file: &str) -> (Vec<De
                                 line: 1,
                                 col: 1,
                                 scope: scope.clone(),
+                                byte_begin: loc.offset,
                             });
                         }
                     }
@@ -232,6 +237,7 @@ fn collect_declarations_and_references(tree: &SyntaxTree, file: &str) -> (Vec<De
                                     line: 1,
                                     col: 1,
                                     scope: scope.clone(),
+                                    byte_begin: loc.offset,
                                 });
                             }
                         } else {
@@ -243,6 +249,7 @@ fn collect_declarations_and_references(tree: &SyntaxTree, file: &str) -> (Vec<De
                                 line: 1,
                                 col: 1,
                                 scope: scope.clone(),
+                                byte_begin: loc.offset,
                             });
                         }
                     }
@@ -260,6 +267,7 @@ fn collect_declarations_and_references(tree: &SyntaxTree, file: &str) -> (Vec<De
                                     line: 1,
                                     col: 1,
                                     scope: scope.clone(),
+                                    byte_begin: loc.offset,
                                 });
                             }
                         }
@@ -339,7 +347,7 @@ fn build_symbol_table_and_rw_class(declarations: &[DeclInfo], references: &[Refe
     SymbolTable { scopes }
 }
 
-pub fn build_ast_payload(input_path: &Path, normalized_text: &str, cst_opt: &Option<SyntaxTree>) -> Value {
+pub fn build_ast_payload(input_path: &Path, pp_text: &str, cst_opt: &Option<SyntaxTree>) -> Value {
     let file = input_path.to_string_lossy().to_string();
     let mut declarations: Vec<DeclInfo> = Vec::new();
     let mut references: Vec<ReferenceInfo> = Vec::new();
@@ -350,20 +358,16 @@ pub fn build_ast_payload(input_path: &Path, normalized_text: &str, cst_opt: &Opt
         references = refs;
     }
 
-    let starts = line_starts(normalized_text);
+    let starts = line_starts(pp_text);
     for d in &mut declarations {
-        if let Some(idx) = find_substring_byte_index(normalized_text, &d.name) {
-            let (ln, col) = linecol_at(&starts, idx);
-            d.line = ln;
-            d.col = col;
-        }
+        let (ln, col) = linecol_at(&starts, d.byte_begin);
+        d.line = ln;
+        d.col = col;
     }
     for r in &mut references {
-        if let Some(idx) = find_substring_byte_index(normalized_text, &r.name) {
-            let (ln, col) = linecol_at(&starts, idx);
-            r.line = ln;
-            r.col = col;
-        }
+        let (ln, col) = linecol_at(&starts, r.byte_begin);
+        r.line = ln;
+        r.col = col;
     }
     let symtab = build_symbol_table_and_rw_class(&declarations, &references);
 
