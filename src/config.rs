@@ -1,11 +1,12 @@
+use crate::errors::ConfigError;
 use crate::svparser::SvParserCfg;
 use crate::textutil::{normalize_lf, strip_bom};
-use anyhow::{anyhow, ensure, Result};
 use env_logger::Builder;
 use log::LevelFilter;
 use serde::Deserialize;
 use serde_json::Value;
 use std::fs;
+use std::io::Write;
 use std::path::{Path, PathBuf};
 
 #[derive(serde::Deserialize, Clone)]
@@ -59,41 +60,58 @@ pub struct Stages {
     pub enabled: Vec<crate::types::Stage>,
 }
 
-pub const E_CONFIG_NOT_FOUND: &str = "config not found";
-pub const E_INVALID_TOML: &str = "invalid toml";
-
-pub fn resolve_path(opt: Option<PathBuf>) -> Result<PathBuf> {
+pub fn resolve_path(opt: Option<PathBuf>) -> Result<PathBuf, ConfigError> {
     match opt {
         Some(p) if p.exists() => Ok(p),
-        Some(p) => Err(anyhow!("{E_CONFIG_NOT_FOUND} (from --config): {}", p.display())),
+        Some(p) => Err(ConfigError::NotFound {
+            path: p.display().to_string(),
+        }),
         None => {
             let p = PathBuf::from("sv-mint.toml");
-            ensure!(p.exists(), "{}: {}", E_CONFIG_NOT_FOUND, p.display());
+            if !p.exists() {
+                return Err(ConfigError::NotFound {
+                    path: p.display().to_string(),
+                });
+            }
             Ok(p)
         }
     }
 }
 
-pub fn load(cfg_text: &str) -> Result<Config> {
-    let cfg: Config = toml::from_str(cfg_text).map_err(|_| anyhow!(E_INVALID_TOML))?;
-    Ok(cfg)
+pub fn load(cfg_text: &str) -> Result<Config, ConfigError> {
+    toml::from_str(cfg_text).map_err(|e| ConfigError::InvalidToml { detail: e.to_string() })
 }
 
-pub fn read_input(path: &Path) -> Result<(String, PathBuf)> {
-    let raw = fs::read(path)?;
-    ensure!(std::str::from_utf8(&raw).is_ok(), "invalid utf-8");
-    let text = normalize_lf(strip_bom(String::from_utf8(raw)?));
+pub fn read_input(path: &Path) -> Result<(String, PathBuf), ConfigError> {
+    let raw = fs::read(path).map_err(|_| ConfigError::NotFound {
+        path: path.display().to_string(),
+    })?;
+    if std::str::from_utf8(&raw).is_err() {
+        return Err(ConfigError::InvalidUtf8 {
+            path: path.display().to_string(),
+        });
+    }
+    let text = normalize_lf(strip_bom(String::from_utf8(raw).map_err(|_| {
+        ConfigError::InvalidUtf8 {
+            path: path.display().to_string(),
+        }
+    })?));
     Ok((text, path.to_path_buf()))
 }
 
-pub fn validate_config(cfg: &Config) -> Result<()> {
+pub fn validate_config(cfg: &Config) -> Result<(), ConfigError> {
     const TIMEOUT_MIN_MS: u64 = 100;
     const TIMEOUT_MAX_MS: u64 = 60_000;
-    ensure!(
-        (TIMEOUT_MIN_MS..=TIMEOUT_MAX_MS).contains(&cfg.defaults.timeout_ms_per_file),
-        "timeout out of range"
-    );
-    ensure!(!cfg.plugin.cmd.trim().is_empty(), "plugin cmd empty");
+    if !(TIMEOUT_MIN_MS..=TIMEOUT_MAX_MS).contains(&cfg.defaults.timeout_ms_per_file) {
+        return Err(ConfigError::InvalidValue {
+            detail: "timeout out of range".to_string(),
+        });
+    }
+    if cfg.plugin.cmd.trim().is_empty() {
+        return Err(ConfigError::InvalidValue {
+            detail: "plugin cmd empty".to_string(),
+        });
+    }
     let mut b = Builder::new();
     let lvl = match cfg.logging.level.as_str() {
         "error" => LevelFilter::Error,
@@ -103,6 +121,10 @@ pub fn validate_config(cfg: &Config) -> Result<()> {
         _ => LevelFilter::Info,
     };
     b.filter_level(lvl);
+    b.format(|buf, record| {
+        let ts = buf.timestamp_millis();
+        writeln!(buf, "[{}] [{}] {}", ts, record.level(), record.args())
+    });
     let _ = b.try_init();
     let _ = (
         cfg.logging.stderr_snippet_bytes,

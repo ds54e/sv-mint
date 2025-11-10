@@ -1,6 +1,6 @@
 use crate::config::Config;
+use crate::errors::ParseError;
 use crate::textutil::{line_starts, linecol_at};
-use anyhow::{anyhow, Result};
 use serde::Deserialize;
 use serde_json::{json, Value};
 use std::collections::{BTreeMap, HashMap};
@@ -9,6 +9,7 @@ use sv_parser::{
     parse_sv, preprocess, unwrap_locate, unwrap_node, Define, DefineText, Defines, Locate, NodeEvent, RefNode,
     SyntaxTree,
 };
+
 #[derive(Debug, Clone, Deserialize, Default)]
 pub struct SvParserCfg {
     pub include_paths: Vec<String>,
@@ -51,7 +52,6 @@ pub enum RefKind {
     Lhs,
     Rhs,
     PortConn,
-
     TypeRef,
 }
 
@@ -83,11 +83,13 @@ pub fn run_svparser(
     input_path: &Path,
     cfg_dir: &Path,
     opt: &SvParserCfg,
-) -> Result<(String, FinalDefs, Option<SyntaxTree>)> {
+) -> Result<(String, FinalDefs, Option<SyntaxTree>), ParseError> {
     let abs_includes = absolutize_many(cfg_dir, &opt.include_paths);
-    let pre = build_predefines(&opt.defines)?;
+    let pre = build_predefines(&opt.defines).map_err(|e| ParseError::PreprocessFailed { detail: e })?;
     let (pp_text_pre, final_defs) = preprocess(input_path, &pre, &abs_includes, opt.strip_comments, opt.ignore_include)
-        .map_err(|_| anyhow!("preprocess failed"))?;
+        .map_err(|e| ParseError::PreprocessFailed {
+            detail: format!("{}", e),
+        })?;
     let tree = parse_sv(
         input_path,
         &pre,
@@ -96,7 +98,9 @@ pub fn run_svparser(
         opt.allow_incomplete,
     )
     .map(|(t, _)| Some(t))
-    .map_err(|_| anyhow!("parsing failed"))?;
+    .map_err(|e| ParseError::ParseFailed {
+        detail: format!("{}", e),
+    })?;
     let names = collect_define_names(&final_defs);
     Ok((pp_text_pre.text().to_string(), FinalDefs { names }, tree))
 }
@@ -464,7 +468,7 @@ fn scope_key(scope: &[String]) -> String {
     }
 }
 
-fn build_predefines(defines: &[String]) -> Result<HashMap<String, Option<Define>>> {
+fn build_predefines(defines: &[String]) -> Result<HashMap<String, Option<Define>>, String> {
     let mut pre = HashMap::new();
     for d in defines {
         if let Some((n, v)) = d.split_once('=') {

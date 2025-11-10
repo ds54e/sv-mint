@@ -17,12 +17,19 @@ def norm_decl_type(s):
         return "var"
     return s
 
+def scope_key(sc):
+    if isinstance(sc,list):
+        return "::".join(sc) if sc else "::"
+    if isinstance(sc,str) and sc:
+        return sc
+    return "::"
+
 def collect_ref_kinds_by_binding(refs):
     m={}
     for r in refs or []:
-        n=r.get("name"); k=r.get("kind"); sc=r.get("scope") or ""
+        n=r.get("name"); k=r.get("kind"); sc=r.get("scope")
         if not n or not k: continue
-        m.setdefault((sc,n),set()).add(k)
+        m.setdefault((scope_key(sc),n),set()).add(k)
     return m
 
 def used_judgement(dt,kinds):
@@ -54,7 +61,7 @@ def main():
                         if isinstance(idx,int) and 0<=idx<len(refs):
                             k=refs[idx].get("kind")
                             if k: kinds.add(k)
-                kinds.update(refmap.get((d.get("scope") or scope_name or "",n),set()))
+                kinds.update(refmap.get((scope_key(d.get("scope")) or scope_name or "::",n),set()))
                 if not used_judgement(dt,kinds):
                     ln=int(d.get("line",1)); col=int(d.get("col",1))
                     if dt=="param": out.append(mk("decl.unused.param",n,ln,col))
@@ -65,7 +72,7 @@ def main():
     for d in decls:
         n=d.get("name"); dt=norm_decl_type(d.get("decl_type"))
         if not n: continue
-        kinds=refmap.get((d.get("scope") or "",n),set())
+        kinds=refmap.get((scope_key(d.get("scope")),n),set())
         if not used_judgement(dt,kinds):
             ln=int(d.get("line",1)); col=int(d.get("col",1))
             if dt=="param": out.append(mk("decl.unused.param",n,ln,col))

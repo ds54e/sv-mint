@@ -6,10 +6,10 @@ mod svparser;
 mod textutil;
 mod types;
 
-use anyhow::Result;
+use crate::errors::AppResult;
 use clap::Parser;
 use config::validate_config;
-use log::info;
+use log::{error, info};
 use output::print_violations;
 use plugin::run_plugin_once;
 use serde_json::json;
@@ -37,12 +37,13 @@ fn main() -> ExitCode {
         Ok(code) => code,
         Err(e) => {
             eprintln!("{}", e);
+            error!("event=error msg={}", e);
             ExitCode::from(3)
         }
     }
 }
 
-fn run() -> Result<ExitCode> {
+fn run() -> AppResult<ExitCode> {
     let cli = Cli::parse();
 
     let cfg_path = config::resolve_path(cli.config)?;
@@ -61,7 +62,11 @@ fn run() -> Result<ExitCode> {
     let mut all_violations = Vec::new();
     for stage in &cfg.stages.enabled {
         if cfg.logging.show_stage_events {
-            info!("event=stage_start stage={}", stage.as_str());
+            info!(
+                "event=stage_start stage={} path={}",
+                stage.as_str(),
+                input_path.display()
+            );
         }
         let payload = match stage {
             Stage::RawText => json!({ "text": &normalized_text }),
@@ -72,7 +77,11 @@ fn run() -> Result<ExitCode> {
         let vs = run_plugin_once(&cfg_dir, &cfg, stage.as_str(), &input_path, payload)?;
         all_violations.extend(vs);
         if cfg.logging.show_stage_events {
-            info!("event=stage_done stage={}", stage.as_str());
+            info!(
+                "event=stage_done stage={} path={}",
+                stage.as_str(),
+                input_path.display()
+            );
         }
     }
 
