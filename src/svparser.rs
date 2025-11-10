@@ -1,10 +1,12 @@
 use crate::config::Config;
 use crate::errors::ParseError;
 use crate::textutil::{line_starts, linecol_at};
+use log::info;
 use serde::Deserialize;
 use serde_json::{json, Value};
 use std::collections::{BTreeMap, HashMap};
 use std::path::{Path, PathBuf};
+use std::time::Instant;
 use sv_parser::{
     parse_sv, preprocess, unwrap_locate, unwrap_node, Define, DefineText, Defines, Locate, NodeEvent, RefNode,
     SyntaxTree,
@@ -83,13 +85,43 @@ pub fn run_svparser(
     input_path: &Path,
     cfg_dir: &Path,
     opt: &SvParserCfg,
+    show_parse_events: bool,
 ) -> Result<(String, FinalDefs, Option<SyntaxTree>), ParseError> {
     let abs_includes = absolutize_many(cfg_dir, &opt.include_paths);
+    if show_parse_events {
+        info!(
+            "event=parse_preprocess_start path={} strip_comments={} ignore_include={} defines={} includes={}",
+            input_path.display(),
+            opt.strip_comments,
+            opt.ignore_include,
+            opt.defines.len(),
+            opt.include_paths.len()
+        );
+    }
+    let t0 = Instant::now();
     let pre = build_predefines(&opt.defines).map_err(|e| ParseError::PreprocessFailed { detail: e })?;
     let (pp_text_pre, final_defs) = preprocess(input_path, &pre, &abs_includes, opt.strip_comments, opt.ignore_include)
         .map_err(|e| ParseError::PreprocessFailed {
             detail: format!("{}", e),
         })?;
+    if show_parse_events {
+        info!(
+            "event=parse_preprocess_done path={} elapsed_ms={} defines_final={}",
+            input_path.display(),
+            t0.elapsed().as_millis(),
+            collect_define_names(&final_defs).len()
+        );
+    }
+
+    if show_parse_events {
+        info!(
+            "event=parse_parse_start path={} allow_incomplete={} ignore_include={}",
+            input_path.display(),
+            opt.allow_incomplete,
+            opt.ignore_include
+        );
+    }
+    let t1 = Instant::now();
     let tree = parse_sv(
         input_path,
         &pre,
@@ -101,6 +133,15 @@ pub fn run_svparser(
     .map_err(|e| ParseError::ParseFailed {
         detail: format!("{}", e),
     })?;
+    if show_parse_events {
+        info!(
+            "event=parse_parse_done path={} elapsed_ms={} has_cst={}",
+            input_path.display(),
+            t1.elapsed().as_millis(),
+            tree.is_some()
+        );
+    }
+
     let names = collect_define_names(&final_defs);
     Ok((pp_text_pre.text().to_string(), FinalDefs { names }, tree))
 }
@@ -427,7 +468,12 @@ fn build_symbol_table_and_rw_class(declarations: &[DeclInfo], references: &[Refe
     SymbolTable { scopes }
 }
 
-pub fn build_ast_payload(input_path: &Path, pp_text: &str, cst_opt: &Option<SyntaxTree>) -> Value {
+pub fn build_ast_payload(
+    input_path: &Path,
+    pp_text: &str,
+    cst_opt: &Option<SyntaxTree>,
+    show_parse_events: bool,
+) -> Value {
     let file = input_path.to_string_lossy().to_string();
     let mut declarations: Vec<DeclInfo> = Vec::new();
     let mut references: Vec<ReferenceInfo> = Vec::new();
@@ -450,6 +496,15 @@ pub fn build_ast_payload(input_path: &Path, pp_text: &str, cst_opt: &Option<Synt
         r.col = col;
     }
     let symtab = build_symbol_table_and_rw_class(&declarations, &references);
+    if show_parse_events {
+        info!(
+            "event=parse_ast_collect_done path={} decls={} refs={} scopes={}",
+            input_path.display(),
+            declarations.len(),
+            references.len(),
+            symtab.scopes.len()
+        );
+    }
 
     json!({
         "ast": {

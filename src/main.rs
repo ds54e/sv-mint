@@ -34,7 +34,13 @@ struct Cli {
 
 fn main() -> ExitCode {
     match run() {
-        Ok(code) => code,
+        Ok(n_violations) => {
+            if n_violations == 0 {
+                ExitCode::from(0)
+            } else {
+                ExitCode::from(2)
+            }
+        }
         Err(e) => {
             eprintln!("{}", e);
             error!("event=error msg={}", e);
@@ -43,7 +49,7 @@ fn main() -> ExitCode {
     }
 }
 
-fn run() -> AppResult<ExitCode> {
+fn run() -> AppResult<usize> {
     let cli = Cli::parse();
 
     let cfg_path = config::resolve_path(cli.config)?;
@@ -57,7 +63,8 @@ fn run() -> AppResult<ExitCode> {
     validate_config(&cfg)?;
 
     let (normalized_text, input_path) = config::read_input(&cli.input)?;
-    let (pp_text, final_defs, cst_opt) = run_svparser(&input_path, &cfg_dir, &cfg.svparser)?;
+    let (pp_text, final_defs, cst_opt) =
+        run_svparser(&input_path, &cfg_dir, &cfg.svparser, cfg.logging.show_parse_events)?;
 
     let mut all_violations = Vec::new();
     for stage in &cfg.stages.enabled {
@@ -72,7 +79,7 @@ fn run() -> AppResult<ExitCode> {
             Stage::RawText => json!({ "text": &normalized_text }),
             Stage::PpText => svparser::build_pp_payload(&cfg, &pp_text, &final_defs),
             Stage::Cst => svparser::build_cst_payload(&cst_opt),
-            Stage::Ast => svparser::build_ast_payload(&input_path, &pp_text, &cst_opt),
+            Stage::Ast => svparser::build_ast_payload(&input_path, &pp_text, &cst_opt, cfg.logging.show_parse_events),
         };
         let vs = run_plugin_once(&cfg_dir, &cfg, stage.as_str(), &input_path, payload)?;
         all_violations.extend(vs);
@@ -86,9 +93,5 @@ fn run() -> AppResult<ExitCode> {
     }
 
     print_violations(Path::new(&input_path), &all_violations);
-    Ok(if all_violations.is_empty() {
-        ExitCode::from(0)
-    } else {
-        ExitCode::from(2)
-    })
+    Ok(all_violations.len())
 }
