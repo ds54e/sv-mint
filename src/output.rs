@@ -1,3 +1,4 @@
+use crate::textutil::{line_starts, normalize_lf, strip_bom};
 use crate::types::{Severity, Violation};
 use std::fs;
 use std::path::Path;
@@ -34,20 +35,9 @@ fn truncate_preview_utf8(s: &str, max: usize) -> String {
 fn read_file_text_lf(path: &Path) -> Option<String> {
     let bytes = fs::read(path).ok()?;
     let s = String::from_utf8(bytes).ok()?;
-    let s = crate::textutil::strip_bom(s);
-    let s = s.replace("\r\n", "\n").replace('\r', "\n");
+    let s = strip_bom(s);
+    let s = normalize_lf(s);
     Some(s)
-}
-
-fn line_starts(text: &str) -> Vec<usize> {
-    let mut v = Vec::with_capacity(1024);
-    v.push(0);
-    for (i, b) in text.as_bytes().iter().enumerate() {
-        if *b == b'\n' && i + 1 < text.len() {
-            v.push(i + 1);
-        }
-    }
-    v
 }
 
 fn get_line_str<'a>(text: &'a str, starts: &[usize], line: usize) -> &'a str {
