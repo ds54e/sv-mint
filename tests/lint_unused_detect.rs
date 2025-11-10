@@ -1,4 +1,3 @@
-
 use std::fs::{create_dir_all, write};
 use std::path::PathBuf;
 use std::process::Command;
@@ -85,8 +84,16 @@ allow_incomplete = true
     c1.arg("--config").arg(&cfg1).arg(&inp1);
     c1.assert()
         .code(2)
-        .stdout(predicate::str::contains("decl.unused.typedef").and(predicate::str::contains(":3:23:")).and(predicate::str::contains("T_UNUSED")))
-        .stdout(predicate::str::contains("decl.unused.param").and(predicate::str::contains(":4:18:")).and(predicate::str::contains("P_UNUSED")));
+        .stdout(
+            predicate::str::contains("decl.unused.typedef")
+                .and(predicate::str::contains(":3:23:"))
+                .and(predicate::str::contains("T_UNUSED")),
+        )
+        .stdout(
+            predicate::str::contains("decl.unused.param")
+                .and(predicate::str::contains(":4:18:"))
+                .and(predicate::str::contains("P_UNUSED")),
+        );
     let sv2 = "\u{feff}`define ONE 1\r\nmodule m;\r\n  typedef int TUN2;\r\n  localparam int PUN2 = `ONE;\r\n  logic x;\r\nendmodule\r\n";
     let (cfg2, inp2) = write_case(root, "bom_crlf", sv2, rules_py, toml);
     let mut c2 = bin();

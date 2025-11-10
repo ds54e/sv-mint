@@ -1,6 +1,9 @@
 use std::fs::{create_dir_all, write};
 use std::path::PathBuf;
 use std::process::Command;
+
+use assert_cmd::prelude::*;
+use predicates::prelude::*;
 use tempfile::tempdir;
 
 fn bin() -> Command {
@@ -20,7 +23,7 @@ fn write_case(root: &std::path::Path, name: &str, sv: &str, rules_py: &str, toml
 }
 
 #[test]
-fn typedef_and_param_used_should_be_clean() {
+fn ansi_ports_used_should_be_clean() {
     let td = tempdir().unwrap();
     let root = td.path();
     let rules_py = r#"import sys, json
@@ -72,11 +75,10 @@ allow_incomplete = true
 
 [rules]
 "#;
-    let sv = "module m;\n  typedef int T;\n  localparam int P = 8;\n  T x;\n  assign x = P;\nendmodule\n";
-    let (cfg, inp) = write_case(root, "used_ok", sv, rules_py, toml);
+
+    let sv_ok = "module top(\n  input logic a,\n  output logic q\n);\n  assign q = a;\nendmodule\n";
+    let (cfg, inp) = write_case(root, "ports_ok", sv_ok, rules_py, toml);
     let mut c = bin();
     c.arg("--config").arg(&cfg).arg(&inp);
-    let out = c.output().expect("run");
-    assert_eq!(out.status.code().unwrap_or(-1), 0);
-    assert!(String::from_utf8_lossy(&out.stdout).trim().is_empty());
+    c.assert().code(0).stdout(predicate::str::is_empty());
 }

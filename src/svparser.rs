@@ -9,7 +9,6 @@ use sv_parser::{
     parse_sv, preprocess, unwrap_locate, unwrap_node, Define, DefineText, Defines, Locate, NodeEvent, RefNode,
     SyntaxTree,
 };
-
 #[derive(Debug, Clone, Deserialize, Default)]
 pub struct SvParserCfg {
     pub include_paths: Vec<String>,
@@ -128,8 +127,8 @@ pub fn build_cst_payload(_cst_opt: &Option<SyntaxTree>) -> Value {
 fn collect_declarations_and_references(tree: &SyntaxTree, file: &str) -> (Vec<DeclInfo>, Vec<ReferenceInfo>) {
     let mut declarations: Vec<DeclInfo> = Vec::new();
     let mut references: Vec<ReferenceInfo> = Vec::new();
-    let scope: Vec<String> = Vec::new();
 
+    let mut in_port_decl: bool = false;
     let mut port_decl_kind: Option<&'static str> = None;
 
     let mut in_data_decl = false;
@@ -144,12 +143,16 @@ fn collect_declarations_and_references(tree: &SyntaxTree, file: &str) -> (Vec<De
 
     let mut lhs_depth: i32 = 0;
 
+    let scope: Vec<String> = Vec::new();
     let mut decl_seen: std::collections::HashSet<String> = std::collections::HashSet::new();
     let str_of = |tree: &SyntaxTree, loc: &Locate| -> String { tree.get_str(loc).unwrap().to_string() };
 
     for ev in tree.into_iter().event() {
         match ev {
             NodeEvent::Enter(n) => match n {
+                RefNode::AnsiPortDeclaration(_) | RefNode::PortDeclaration(_) | RefNode::ListOfPortDeclarations(_) => {
+                    in_port_decl = true;
+                }
                 RefNode::InputDeclaration(_) => {
                     port_decl_kind = Some("input");
                 }
@@ -158,9 +161,6 @@ fn collect_declarations_and_references(tree: &SyntaxTree, file: &str) -> (Vec<De
                 }
                 RefNode::InoutDeclaration(_) => {
                     port_decl_kind = Some("inout");
-                }
-                RefNode::AnsiPortDeclaration(_) => {
-                    port_decl_kind = None;
                 }
 
                 RefNode::DataDeclaration(_) => {
@@ -173,13 +173,14 @@ fn collect_declarations_and_references(tree: &SyntaxTree, file: &str) -> (Vec<De
                 }
 
                 RefNode::PortIdentifier(_) => {
-                    if let Some(kind) = port_decl_kind {
+                    if in_port_decl || port_decl_kind.is_some() {
                         if let Some(loc) = unwrap_locate!(n) {
                             let name = str_of(tree, loc);
                             if decl_seen.insert(name.clone()) {
+                                let k = port_decl_kind.unwrap_or("port").to_string();
                                 declarations.push(DeclInfo {
                                     name,
-                                    kind: kind.to_string(),
+                                    kind: k,
                                     decl_type: DeclType::Var,
                                     data_type: None,
                                     range: None,
@@ -232,10 +233,30 @@ fn collect_declarations_and_references(tree: &SyntaxTree, file: &str) -> (Vec<De
                 }
 
                 RefNode::Identifier(_) => {
-                    if let Some(id) = unwrap_node!(n, SimpleIdentifier, EscapedIdentifier) {
+                    if in_port_decl {
+                        if let Some(id) = unwrap_node!(n, SimpleIdentifier, EscapedIdentifier) {
+                            if let Some(loc) = unwrap_locate!(id) {
+                                let name = str_of(tree, loc);
+                                if decl_seen.insert(name.clone()) {
+                                    declarations.push(DeclInfo {
+                                        name,
+                                        kind: "port".to_string(),
+                                        decl_type: DeclType::Var,
+                                        data_type: None,
+                                        range: None,
+                                        init: None,
+                                        file: file.to_string(),
+                                        line: 1,
+                                        col: 1,
+                                        scope: Vec::new(),
+                                        byte_begin: loc.offset,
+                                    });
+                                }
+                            }
+                        }
+                    } else if let Some(id) = unwrap_node!(n, SimpleIdentifier, EscapedIdentifier) {
                         if let Some(loc) = unwrap_locate!(id) {
                             let name = str_of(tree, loc);
-
                             if in_param_assign {
                                 if decl_seen.insert(name.clone()) {
                                     declarations.push(DeclInfo {
@@ -265,7 +286,17 @@ fn collect_declarations_and_references(tree: &SyntaxTree, file: &str) -> (Vec<De
                                     scope: scope.clone(),
                                     byte_begin: loc.offset,
                                 });
-                            } else if lhs_depth == 0 {
+                            } else if lhs_depth > 0 {
+                                references.push(ReferenceInfo {
+                                    name,
+                                    kind: RefKind::Lhs,
+                                    file: file.to_string(),
+                                    line: 1,
+                                    col: 1,
+                                    scope: scope.clone(),
+                                    byte_begin: loc.offset,
+                                });
+                            } else {
                                 references.push(ReferenceInfo {
                                     name,
                                     kind: RefKind::Rhs,
@@ -288,12 +319,12 @@ fn collect_declarations_and_references(tree: &SyntaxTree, file: &str) -> (Vec<De
 
                 _ => {}
             },
-
             NodeEvent::Leave(n) => match n {
-                RefNode::InputDeclaration(_)
-                | RefNode::OutputDeclaration(_)
-                | RefNode::InoutDeclaration(_)
-                | RefNode::AnsiPortDeclaration(_) => {
+                RefNode::AnsiPortDeclaration(_) | RefNode::PortDeclaration(_) | RefNode::ListOfPortDeclarations(_) => {
+                    in_port_decl = false;
+                }
+
+                RefNode::InputDeclaration(_) | RefNode::OutputDeclaration(_) | RefNode::InoutDeclaration(_) => {
                     port_decl_kind = None;
                 }
 
