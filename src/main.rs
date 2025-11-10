@@ -12,7 +12,7 @@ use output::print_violations;
 use plugin::run_plugin_once;
 use serde_json::json;
 use std::fs;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use std::process::ExitCode;
 use svparser::run_svparser;
 use types::Stage;
@@ -68,7 +68,7 @@ fn run() -> Result<ExitCode> {
         all_violations.extend(vs);
     }
 
-    print_violations(Path::new(&input_path), &all_violations);
+    print_violations(&input_path, &all_violations);
     Ok(if all_violations.is_empty() {
         ExitCode::from(0)
     } else {

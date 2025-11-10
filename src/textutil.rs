@@ -38,3 +38,19 @@ pub fn linecol_at(starts: &[usize], byte_idx: usize) -> (u32, u32) {
     let col = (byte_idx.saturating_sub(starts[lo]) + 1) as u32;
     (line, col)
 }
+
+pub fn truncate_preview_utf8(s: &str, max: usize) -> String {
+    if s.len() <= max {
+        return s.to_owned();
+    }
+    let mut end = max.min(s.len());
+    while end > 0 && !s.is_char_boundary(end) {
+        end -= 1;
+    }
+    if end == 0 {
+        return String::new();
+    }
+    let mut t = s[..end].to_owned();
+    t.push_str(" ...");
+    t
+}

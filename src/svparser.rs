@@ -84,7 +84,7 @@ pub fn run_svparser(
     cfg_dir: &Path,
     opt: &SvParserCfg,
 ) -> Result<(String, FinalDefs, Option<SyntaxTree>)> {
-    let abs_includes = absolutize_many(cfg_dir, &opt.include_paths);
+    let abs_includes = absolutize_paths(cfg_dir, &opt.include_paths);
     let pre = build_predefines(&opt.defines)?;
     let (pp_text_pre, final_defs) = preprocess(input_path, &pre, &abs_includes, opt.strip_comments, opt.ignore_include)
         .map_err(|_| anyhow!("preprocess failed"))?;
@@ -483,6 +483,6 @@ fn collect_define_names(defs: &Defines) -> Vec<String> {
     v
 }
 
-fn absolutize_many(base: &Path, rels: &[String]) -> Vec<PathBuf> {
+fn absolutize_paths(base: &Path, rels: &[String]) -> Vec<PathBuf> {
     rels.iter().map(|p| base.join(p)).collect()
 }

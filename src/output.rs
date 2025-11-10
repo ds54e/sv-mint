@@ -1,4 +1,4 @@
-use crate::textutil::{line_starts, normalize_lf, strip_bom};
+use crate::textutil::{line_starts, normalize_lf, strip_bom, truncate_preview_utf8};
 use crate::types::{Severity, Violation};
 use std::fs;
 use std::path::Path;
@@ -14,22 +14,6 @@ pub fn normalize_windows_path_for_output(p: &str) -> String {
         return rest.to_string();
     }
     p.to_string()
-}
-
-fn truncate_preview_utf8(s: &str, max: usize) -> String {
-    if s.len() <= max {
-        return s.to_owned();
-    }
-    let mut end = max.min(s.len());
-    while end > 0 && !s.is_char_boundary(end) {
-        end -= 1;
-    }
-    if end == 0 {
-        return String::new();
-    }
-    let mut t = s[..end].to_owned();
-    t.push_str(" ...");
-    t
 }
 
 fn read_file_text_lf(path: &Path) -> Option<String> {
