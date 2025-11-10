@@ -16,3 +16,10 @@ ignore_include = false
 allow_incomplete = true
 
 [rules]
+
+[logging]
+level = "info"
+stderr_snippet_bytes = 2048
+show_stage_events = true
+show_plugin_events = true
+show_parse_events = true

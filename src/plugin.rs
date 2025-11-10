@@ -183,7 +183,7 @@ fn call_plugin(cmd: &str, args: &[String], request_json: &str, timeout: Duration
         let _ = child.wait();
     }
     if !err_text.trim().is_empty() {
-        let shown = crate::textutil::truncate_preview_utf8(&err_text, 8 * 1024);
+        let shown = truncate_preview(&err_text, 8 * 1024);
         eprintln!("[plugin stderr] {}", shown.trim_end());
     }
 
@@ -210,6 +210,24 @@ fn wait_with_timeout(child: &mut Child, dur: Duration) -> Result<()> {
 }
 
 fn truncate_for_context(s: String) -> anyhow::Error {
-    let shown = crate::textutil::truncate_preview_utf8(&s, 2048);
+    let shown = truncate_preview(&s, 2048);
     anyhow!(shown)
+}
+
+fn truncate_preview(s: &str, max: usize) -> String {
+    if s.len() <= max {
+        s.to_owned()
+    } else {
+        let mut end = max.min(s.len());
+        while end > 0 && !s.is_char_boundary(end) {
+            end -= 1;
+        }
+        if end == 0 {
+            String::new()
+        } else {
+            let mut t = s[..end].to_owned();
+            t.push_str(" ...");
+            t
+        }
+    }
 }

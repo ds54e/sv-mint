@@ -1,4 +1,5 @@
 mod config;
+mod errors;
 mod output;
 mod plugin;
 mod svparser;
@@ -8,11 +9,12 @@ mod types;
 use anyhow::Result;
 use clap::Parser;
 use config::validate_config;
+use log::info;
 use output::print_violations;
 use plugin::run_plugin_once;
 use serde_json::json;
 use std::fs;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 use svparser::run_svparser;
 use types::Stage;
@@ -58,6 +60,9 @@ fn run() -> Result<ExitCode> {
 
     let mut all_violations = Vec::new();
     for stage in &cfg.stages.enabled {
+        if cfg.logging.show_stage_events {
+            info!("event=stage_start stage={}", stage.as_str());
+        }
         let payload = match stage {
             Stage::RawText => json!({ "text": &normalized_text }),
             Stage::PpText => svparser::build_pp_payload(&cfg, &pp_text, &final_defs),
@@ -66,9 +71,12 @@ fn run() -> Result<ExitCode> {
         };
         let vs = run_plugin_once(&cfg_dir, &cfg, stage.as_str(), &input_path, payload)?;
         all_violations.extend(vs);
+        if cfg.logging.show_stage_events {
+            info!("event=stage_done stage={}", stage.as_str());
+        }
     }
 
-    print_violations(&input_path, &all_violations);
+    print_violations(Path::new(&input_path), &all_violations);
     Ok(if all_violations.is_empty() {
         ExitCode::from(0)
     } else {

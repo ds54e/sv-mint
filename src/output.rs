@@ -1,4 +1,6 @@
-use crate::textutil::{line_starts, normalize_lf, strip_bom, truncate_preview_utf8};
+use crate::errors::OutputError;
+use crate::textutil::truncate_preview_utf8;
+use crate::textutil::{line_starts, normalize_lf, strip_bom};
 use crate::types::{Severity, Violation};
 use std::fs;
 use std::path::Path;
@@ -16,12 +18,15 @@ pub fn normalize_windows_path_for_output(p: &str) -> String {
     p.to_string()
 }
 
-fn read_file_text_lf(path: &Path) -> Option<String> {
-    let bytes = fs::read(path).ok()?;
-    let s = String::from_utf8(bytes).ok()?;
-    let s = strip_bom(s);
-    let s = normalize_lf(s);
-    Some(s)
+fn read_file_text_lf(path: &Path) -> Result<String, OutputError> {
+    let bytes = fs::read(path).map_err(|e| OutputError::ReadFailed {
+        path: path.display().to_string(),
+        source: Some(e),
+    })?;
+    let s = String::from_utf8(bytes).map_err(|_| OutputError::InvalidUtf8 {
+        path: path.display().to_string(),
+    })?;
+    Ok(normalize_lf(strip_bom(s)))
 }
 
 fn get_line_str<'a>(text: &'a str, starts: &[usize], line: usize) -> &'a str {
@@ -47,8 +52,8 @@ fn get_line_str<'a>(text: &'a str, starts: &[usize], line: usize) -> &'a str {
 
 pub fn make_line_excerpt_from_file(path: &Path, line: usize) -> String {
     let text = match read_file_text_lf(path) {
-        Some(t) => t,
-        None => return String::new(),
+        Ok(t) => t,
+        Err(_) => return String::new(),
     };
     let starts = line_starts(&text);
     let s = get_line_str(&text, &starts, line);

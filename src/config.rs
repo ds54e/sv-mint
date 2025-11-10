@@ -1,13 +1,38 @@
 use crate::svparser::SvParserCfg;
 use crate::textutil::{normalize_lf, strip_bom};
 use anyhow::{anyhow, ensure, Result};
+use env_logger::Builder;
+use log::LevelFilter;
 use serde::Deserialize;
 use serde_json::Value;
 use std::fs;
 use std::path::{Path, PathBuf};
 
+#[derive(serde::Deserialize, Clone)]
+pub struct LoggingConfig {
+    pub level: String,
+    pub stderr_snippet_bytes: usize,
+    pub show_stage_events: bool,
+    pub show_plugin_events: bool,
+    pub show_parse_events: bool,
+}
+
+impl Default for LoggingConfig {
+    fn default() -> Self {
+        Self {
+            level: "info".to_string(),
+            stderr_snippet_bytes: 2048,
+            show_stage_events: true,
+            show_plugin_events: true,
+            show_parse_events: true,
+        }
+    }
+}
+
 #[derive(Deserialize)]
 pub struct Config {
+    #[serde(default)]
+    pub logging: LoggingConfig,
     pub defaults: Defaults,
     pub plugin: Plugin,
     pub stages: Stages,
@@ -69,5 +94,21 @@ pub fn validate_config(cfg: &Config) -> Result<()> {
         "timeout out of range"
     );
     ensure!(!cfg.plugin.cmd.trim().is_empty(), "plugin cmd empty");
+    let mut b = Builder::new();
+    let lvl = match cfg.logging.level.as_str() {
+        "error" => LevelFilter::Error,
+        "warn" => LevelFilter::Warn,
+        "debug" => LevelFilter::Debug,
+        "info" => LevelFilter::Info,
+        _ => LevelFilter::Info,
+    };
+    b.filter_level(lvl);
+    let _ = b.try_init();
+    let _ = (
+        cfg.logging.stderr_snippet_bytes,
+        cfg.logging.show_stage_events,
+        cfg.logging.show_plugin_events,
+        cfg.logging.show_parse_events,
+    );
     Ok(())
 }
