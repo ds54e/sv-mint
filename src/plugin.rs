@@ -66,7 +66,7 @@ pub fn run_plugin_once(
     let raw = match call_plugin(
         &cmd,
         &argv,
-        &serde_json::to_string(&req).unwrap(),
+        &serde_json::to_string(&req).map_err(|e| PluginError::BadJson { detail: e.to_string() })?,
         CallOpts {
             timeout: Duration::from_millis(cfg.defaults.timeout_ms_per_file),
             stderr_snippet_max: cfg.logging.stderr_snippet_bytes,

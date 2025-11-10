@@ -112,10 +112,17 @@ pub fn validate_config(cfg: &Config) -> Result<(), ConfigError> {
             detail: "plugin cmd empty".to_string(),
         });
     }
+    if cfg.stages.enabled.is_empty() {
+        return Err(ConfigError::InvalidValue {
+            detail: "stages.enabled empty".to_string(),
+        });
+    }
+
     let mut b = Builder::new();
     let lvl = match cfg.logging.level.as_str() {
         "error" => LevelFilter::Error,
         "warn" => LevelFilter::Warn,
+        "trace" => LevelFilter::Trace,
         "debug" => LevelFilter::Debug,
         "info" => LevelFilter::Info,
         _ => LevelFilter::Info,

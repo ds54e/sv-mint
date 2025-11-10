@@ -122,6 +122,6 @@ fn run_for_one(input: &Path, cfg: &config::Config, cfg_dir: &Path) -> AppResult<
         }
     }
 
-    print_violations(Path::new(&input_path), &all_violations);
+    print_violations(&input_path, &all_violations);
     Ok(all_violations.len())
 }
