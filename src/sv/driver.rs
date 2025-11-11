@@ -4,6 +4,7 @@ use crate::diag::logging::log_event;
 use crate::sv::model::{AstSummary, DefineInfo, ParseArtifacts};
 use serde::{Deserialize, Serialize};
 use std::path::Path;
+use std::time::Instant;
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct SvParserCfg {
@@ -26,21 +27,28 @@ impl<'a> SvDriver<'a> {
     pub fn parse_text(&self, text: &str, input_path: &Path) -> ParseArtifacts {
         let path_s = input_path.to_string_lossy().into_owned();
         log_event(Ev::new(Event::ParsePreprocessStart, &path_s));
-
+        let t0 = Instant::now();
         let pp_text = if self.cfg.strip_comments {
             strip_comments(text)
         } else {
             text.to_string()
         };
         let defines = parse_defines(&self.cfg.defines);
-        log_event(Ev::new(Event::ParsePreprocessDone, &path_s));
-        log_event(Ev::new(Event::ParseParseStart, &path_s));
+        let pp_elapsed = t0.elapsed().as_millis();
+        log_event(Ev::new(Event::ParsePreprocessDone, &path_s).with_duration_ms(pp_elapsed));
 
+        log_event(Ev::new(Event::ParseParseStart, &path_s));
+        let t1 = Instant::now();
         let has_cst = !pp_text.is_empty();
-        log_event(Ev::new(Event::ParseParseDone, &path_s));
-        log_event(Ev::new(Event::ParseAstCollectDone, &path_s));
-        let raw_text = text.to_string();
+        let parse_elapsed = t1.elapsed().as_millis();
+        log_event(Ev::new(Event::ParseParseDone, &path_s).with_duration_ms(parse_elapsed));
+
+        let t2 = Instant::now();
         let ast = AstSummary::default();
+        let ast_elapsed = t2.elapsed().as_millis();
+        log_event(Ev::new(Event::ParseAstCollectDone, &path_s).with_duration_ms(ast_elapsed));
+
+        let raw_text = text.to_string();
         let line_map = LineMap::new(&raw_text);
         ParseArtifacts {
             raw_text,
@@ -94,4 +102,15 @@ fn strip_comments(src: &str) -> String {
         }
     }
     out
+}
+
+trait EvExt<'a> {
+    fn with_duration_ms(self, ms: u128) -> Self;
+}
+
+impl<'a> EvExt<'a> for Ev<'a> {
+    fn with_duration_ms(mut self, ms: u128) -> Self {
+        self.duration_ms = Some(ms);
+        self
+    }
 }
