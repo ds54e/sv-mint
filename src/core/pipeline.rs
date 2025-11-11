@@ -1,4 +1,6 @@
 use crate::config::{read_input, Config};
+use crate::diag::event::{Ev, Event};
+use crate::diag::logging::log_event;
 use crate::output::print_violations;
 use crate::plugin::run_plugin_once;
 use crate::sv::model::ParseArtifacts;
@@ -29,9 +31,11 @@ impl<'a> Pipeline<'a> {
         let mut all: Vec<Violation> = Vec::new();
 
         for stage in &self.cfg.stages.enabled {
+            log_event(Ev::new(Event::StageStart, &input_path.to_string_lossy()).with_stage(stage.as_str()));
             let payload = payload_for(stage, &artifacts);
             let vs = run_plugin_once(stage.as_str(), &input_path, payload)?;
             all.extend(vs);
+            log_event(Ev::new(Event::StageDone, &input_path.to_string_lossy()).with_stage(stage.as_str()));
         }
 
         print_violations(&all, &input_path);
@@ -71,5 +75,16 @@ fn payload_for(stage: &Stage, a: &ParseArtifacts) -> serde_json::Value {
             "refs": a.ast.refs,
             "symbols": a.ast.symbols
         }),
+    }
+}
+
+trait EvExt<'a> {
+    fn with_stage(self, s: &'a str) -> Self;
+}
+
+impl<'a> EvExt<'a> for Ev<'a> {
+    fn with_stage(mut self, s: &'a str) -> Self {
+        self.stage = Some(s);
+        self
     }
 }

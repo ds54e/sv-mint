@@ -11,3 +11,5 @@ pub mod plugin;
 
 pub mod sv;
 pub use sv::driver as svparser;
+
+pub mod diag;

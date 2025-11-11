@@ -4,6 +4,7 @@ use std::process::ExitCode;
 
 use sv_mint::config::{load, resolve_path, validate_config, Config};
 use sv_mint::core::pipeline::Pipeline;
+use sv_mint::diag::logging::init as log_init;
 
 #[derive(Parser, Debug)]
 #[command(
@@ -33,6 +34,9 @@ fn main() -> ExitCode {
         Err(_) => return ExitCode::from(3),
     };
     if validate_config(&cfg).is_err() {
+        return ExitCode::from(3);
+    }
+    if log_init(&cfg.logging).is_err() {
         return ExitCode::from(3);
     }
 
