@@ -60,15 +60,19 @@ impl<'a> SvDriver<'a> {
 
         log_event(Ev::new(Event::ParseParseStart, &path_s));
         let t1 = Instant::now();
-        let (has_cst, final_defines, decls) = match parse_sv(
+        let (has_cst, final_defines, decls, refs) = match parse_sv(
             input_path,
             &pre_defines,
             &include_paths,
             self.cfg.ignore_include,
             self.cfg.allow_incomplete,
         ) {
-            Ok((syntax_tree, defs)) => (true, defs, collect_decls(&syntax_tree)),
-            Err(_) => (false, pre_defines.clone(), Vec::new()),
+            Ok((syntax_tree, defs)) => {
+                let d = collect_decls(&syntax_tree);
+                let r = collect_refs(&syntax_tree);
+                (true, defs, d, r)
+            }
+            Err(_) => (false, pre_defines.clone(), Vec::new(), Vec::new()),
         };
         let elapsed_parse = t1.elapsed().as_millis();
         log_event(Ev::new(Event::ParseParseDone, &path_s).with_duration_ms(elapsed_parse));
@@ -77,7 +81,7 @@ impl<'a> SvDriver<'a> {
         let defines: Vec<DefineInfo> = defines_to_info(&final_defines);
         let ast = AstSummary {
             decls,
-            refs: Vec::new(),
+            refs,
             symbols: Vec::new(),
         };
         let line_map = LineMap::new(&raw_text);
@@ -155,6 +159,21 @@ fn collect_decls(syntax_tree: &SyntaxTree) -> Vec<serde_json::Value> {
         }
     }
     decls
+}
+
+fn collect_refs(syntax_tree: &SyntaxTree) -> Vec<serde_json::Value> {
+    let mut refs = Vec::new();
+    for node in syntax_tree {
+        if let RefNode::HierarchicalIdentifier(x) = node {
+            let rn: RefNode = RefNode::from(x);
+            if let Some(idloc) = get_identifier(rn) {
+                if let Some(name) = syntax_tree.get_str(&idloc) {
+                    refs.push(json!({"name":name}));
+                }
+            }
+        }
+    }
+    refs
 }
 
 fn get_identifier(node: RefNode) -> Option<Locate> {
