@@ -65,7 +65,9 @@ fn payload_for(stage: &Stage, a: &ParseArtifacts) -> serde_json::Value {
             json!({ "text": a.pp_text, "defines": a.defines.iter().map(|d| json!({ "name": d.name, "value": d.value })).collect::<Vec<_>>() })
         }
         Stage::Cst => json!({ "has_cst": a.has_cst }),
-        Stage::Ast => json!({ "decls": a.ast.decls, "refs": a.ast.refs, "symbols": a.ast.symbols }),
+        Stage::Ast => {
+            json!({ "decls": a.ast.decls, "refs": a.ast.refs, "symbols": a.ast.symbols, "assigns": a.ast.assigns, "pp_text": a.ast.pp_text })
+        }
     }
 }
 

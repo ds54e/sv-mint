@@ -228,6 +228,7 @@ fn collect_refs_rw_with_loc(syntax_tree: &SyntaxTree, line_map: &LineMap) -> Vec
     let mut refs = Vec::new();
     let mut current_module: Option<String> = None;
     let mut write_offsets: HashSet<usize> = HashSet::new();
+    let mut decl_offsets: HashSet<usize> = HashSet::new();
 
     for node in syntax_tree {
         if let RefNode::ModuleDeclarationNonansi(x) = node {
@@ -246,6 +247,34 @@ fn collect_refs_rw_with_loc(syntax_tree: &SyntaxTree, line_map: &LineMap) -> Vec
                     if let Some(name) = syntax_tree.get_str(&idloc) {
                         current_module = Some(name.to_string());
                     }
+                }
+            }
+            continue;
+        }
+
+        if let RefNode::ParamAssignment(x) = node {
+            let rn: RefNode = RefNode::from(x);
+            if let Some(idloc) = get_identifier(rn) {
+                if let Some(start) = origin_start(syntax_tree, &idloc) {
+                    decl_offsets.insert(start);
+                }
+            }
+            continue;
+        }
+        if let RefNode::NetDeclAssignment(x) = node {
+            let rn: RefNode = RefNode::from(x);
+            if let Some(idloc) = get_identifier(rn) {
+                if let Some(start) = origin_start(syntax_tree, &idloc) {
+                    decl_offsets.insert(start);
+                }
+            }
+            continue;
+        }
+        if let RefNode::VariableDeclAssignment(x) = node {
+            let rn: RefNode = RefNode::from(x);
+            if let Some(idloc) = get_identifier(rn) {
+                if let Some(start) = origin_start(syntax_tree, &idloc) {
+                    decl_offsets.insert(start);
                 }
             }
             continue;
@@ -315,6 +344,26 @@ fn collect_refs_rw_with_loc(syntax_tree: &SyntaxTree, line_map: &LineMap) -> Vec
                 if let Some(name) = syntax_tree.get_str(&idloc) {
                     if let Some(start) = origin_start(syntax_tree, &idloc) {
                         if write_offsets.contains(&start) {
+                            continue;
+                        }
+                    }
+                    let loc = to_loc_json(syntax_tree, line_map, &idloc);
+                    refs.push(json!({
+                        "name": name,
+                        "module": current_module.clone().unwrap_or_default(),
+                        "rw": "read",
+                        "loc": loc
+                    }));
+                }
+            }
+            continue;
+        }
+        if let RefNode::SimpleIdentifier(x) = node {
+            let rn: RefNode = RefNode::from(x);
+            if let Some(idloc) = get_identifier(rn) {
+                if let Some(name) = syntax_tree.get_str(&idloc) {
+                    if let Some(start) = origin_start(syntax_tree, &idloc) {
+                        if write_offsets.contains(&start) || decl_offsets.contains(&start) {
                             continue;
                         }
                     }
