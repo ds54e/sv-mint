@@ -21,27 +21,49 @@ struct Cli {
 
 fn main() -> ExitCode {
     let cli = Cli::parse();
+
     let cfg_path = match resolve_path(cli.config) {
         Ok(p) => p,
-        Err(_) => return ExitCode::from(3),
+        Err(e) => {
+            eprintln!("{}", e);
+            return ExitCode::from(3);
+        }
     };
+
     let cfg_text = match std::fs::read_to_string(&cfg_path) {
         Ok(s) => s,
-        Err(_) => return ExitCode::from(3),
+        Err(e) => {
+            eprintln!("{}", e);
+            return ExitCode::from(3);
+        }
     };
+
     let cfg: Config = match load(&cfg_text) {
         Ok(c) => c,
-        Err(_) => return ExitCode::from(3),
+        Err(e) => {
+            eprintln!("{}", e);
+            return ExitCode::from(3);
+        }
     };
-    if validate_config(&cfg).is_err() {
+
+    if let Err(e) = validate_config(&cfg) {
+        eprintln!("{}", e);
         return ExitCode::from(3);
     }
-    if log_init(&cfg.logging).is_err() {
+
+    if let Err(e) = log_init(&cfg.logging) {
+        eprintln!("{}", e);
         return ExitCode::from(3);
     }
 
     let pipeline = Pipeline::new(&cfg);
-    let summary = pipeline.run_files(&cli.input);
+    let summary = match pipeline.run_files(&cli.input) {
+        Ok(s) => s,
+        Err(e) => {
+            eprintln!("{}", e);
+            return ExitCode::from(3);
+        }
+    };
 
     if summary.had_error {
         ExitCode::from(3)

@@ -16,12 +16,27 @@ pub struct RunSummary {
 }
 
 pub struct Pipeline<'a> {
-    cfg: &'a Config,
+    pub cfg: &'a Config,
 }
 
 impl<'a> Pipeline<'a> {
     pub fn new(cfg: &'a Config) -> Self {
         Self { cfg }
+    }
+
+    pub fn run_files(&self, inputs: &[PathBuf]) -> Result<RunSummary> {
+        let mut total_violations = 0usize;
+        let mut had_error = false;
+        for p in inputs {
+            match self.run_file(p) {
+                Ok(n) => total_violations += n,
+                Err(_) => had_error = true,
+            }
+        }
+        Ok(RunSummary {
+            violations: total_violations,
+            had_error,
+        })
     }
 
     pub fn run_file(&self, input: &Path) -> Result<usize> {
@@ -41,40 +56,16 @@ impl<'a> Pipeline<'a> {
         print_violations(&all, &input_path);
         Ok(all.len())
     }
-
-    pub fn run_files(&self, inputs: &[PathBuf]) -> RunSummary {
-        let mut had_error = false;
-        let mut n_viol: usize = 0;
-
-        for inp in inputs {
-            match self.run_file(inp) {
-                Ok(n) => n_viol += n,
-                Err(_) => had_error = true,
-            }
-        }
-        RunSummary {
-            violations: n_viol,
-            had_error,
-        }
-    }
 }
 
 fn payload_for(stage: &Stage, a: &ParseArtifacts) -> serde_json::Value {
     match stage {
         Stage::RawText => json!({ "text": a.raw_text }),
-        Stage::PpText => json!({
-            "text": a.pp_text,
-            "defines": a.defines.iter().map(|d| json!({
-                "name": d.name,
-                "value": d.value
-            })).collect::<Vec<_>>()
-        }),
+        Stage::PpText => {
+            json!({ "text": a.pp_text, "defines": a.defines.iter().map(|d| json!({ "name": d.name, "value": d.value })).collect::<Vec<_>>() })
+        }
         Stage::Cst => json!({ "has_cst": a.has_cst }),
-        Stage::Ast => json!({
-            "decls": a.ast.decls,
-            "refs": a.ast.refs,
-            "symbols": a.ast.symbols
-        }),
+        Stage::Ast => json!({ "decls": a.ast.decls, "refs": a.ast.refs, "symbols": a.ast.symbols }),
     }
 }
 
