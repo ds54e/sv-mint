@@ -33,7 +33,7 @@ impl<'a> Pipeline<'a> {
         for stage in &self.cfg.stages.enabled {
             log_event(Ev::new(Event::StageStart, &input_path.to_string_lossy()).with_stage(stage.as_str()));
             let payload = payload_for(stage, &artifacts);
-            let vs = run_plugin_once(stage.as_str(), &input_path, payload)?;
+            let vs = run_plugin_once(self.cfg, stage.as_str(), &input_path, payload)?;
             all.extend(vs);
             log_event(Ev::new(Event::StageDone, &input_path.to_string_lossy()).with_stage(stage.as_str()));
         }
