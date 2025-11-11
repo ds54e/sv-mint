@@ -42,6 +42,7 @@ impl<'a> SvDriver<'a> {
                 pre_defines.insert(d.clone(), None);
             }
         }
+
         log_event(Ev::new(Event::ParsePreprocessStart, &path_s));
         let t0 = Instant::now();
         let pp_text = match preprocess(
@@ -56,6 +57,7 @@ impl<'a> SvDriver<'a> {
         };
         let elapsed_pp = t0.elapsed().as_millis();
         log_event(Ev::new(Event::ParsePreprocessDone, &path_s).with_duration_ms(elapsed_pp));
+
         log_event(Ev::new(Event::ParseParseStart, &path_s));
         let t1 = Instant::now();
         let (has_cst, final_defines, decls) = match parse_sv(
@@ -71,6 +73,7 @@ impl<'a> SvDriver<'a> {
         let elapsed_parse = t1.elapsed().as_millis();
         log_event(Ev::new(Event::ParseParseDone, &path_s).with_duration_ms(elapsed_parse));
         log_event(Ev::new(Event::ParseAstCollectDone, &path_s));
+
         let defines: Vec<DefineInfo> = defines_to_info(&final_defines);
         let ast = AstSummary {
             decls,
@@ -78,6 +81,7 @@ impl<'a> SvDriver<'a> {
             symbols: Vec::new(),
         };
         let line_map = LineMap::new(&raw_text);
+
         ParseArtifacts {
             raw_text,
             pp_text,
@@ -128,6 +132,22 @@ fn collect_decls(syntax_tree: &SyntaxTree) -> Vec<serde_json::Value> {
                 if let Some(idloc) = get_identifier(rn) {
                     if let Some(name) = syntax_tree.get_str(&idloc) {
                         decls.push(json!({"kind":"param","name":name}));
+                    }
+                }
+            }
+            RefNode::NetDeclAssignment(x) => {
+                let rn: RefNode = RefNode::from(x);
+                if let Some(idloc) = get_identifier(rn) {
+                    if let Some(name) = syntax_tree.get_str(&idloc) {
+                        decls.push(json!({"kind":"net","name":name}));
+                    }
+                }
+            }
+            RefNode::VariableDeclAssignment(x) => {
+                let rn: RefNode = RefNode::from(x);
+                if let Some(idloc) = get_identifier(rn) {
+                    if let Some(name) = syntax_tree.get_str(&idloc) {
+                        decls.push(json!({"kind":"var","name":name}));
                     }
                 }
             }
