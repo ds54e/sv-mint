@@ -1,24 +1,16 @@
-mod config;
-mod errors;
-mod output;
-mod plugin;
-mod svparser;
-mod textutil;
-mod types;
-
-use crate::errors::AppResult;
 use clap::Parser;
-use config::validate_config;
 use log::{error, info};
-use output::print_violations;
-use plugin::run_plugin_once;
 use serde_json::json;
 use std::fs;
 use std::io;
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
-use svparser::run_svparser;
-use types::Stage;
+use sv_mint::config::validate_config;
+use sv_mint::errors::AppResult;
+use sv_mint::output::print_violations;
+use sv_mint::plugin::run_plugin_once;
+use sv_mint::svparser::run_svparser;
+use sv_mint::types::Stage;
 
 #[derive(Parser, Debug)]
 #[command(
@@ -56,14 +48,14 @@ fn main() -> ExitCode {
 fn run() -> AppResult<usize> {
     let cli = Cli::parse();
 
-    let cfg_path = config::resolve_path(cli.config)?;
+    let cfg_path = sv_mint::config::resolve_path(cli.config)?;
     let cfg_dir = cfg_path
         .parent()
         .map(|p| p.to_path_buf())
         .unwrap_or_else(|| PathBuf::from("."));
 
     let cfg_text = fs::read_to_string(&cfg_path)?;
-    let cfg = config::load(&cfg_text)?;
+    let cfg = sv_mint::config::load(&cfg_text)?;
     validate_config(&cfg)?;
 
     let mut total_violations = 0usize;
@@ -91,8 +83,8 @@ fn run() -> AppResult<usize> {
     Ok(total_violations)
 }
 
-fn run_for_one(input: &Path, cfg: &config::Config, cfg_dir: &Path) -> AppResult<usize> {
-    let (normalized_text, input_path) = config::read_input(input)?;
+fn run_for_one(input: &Path, cfg: &sv_mint::config::Config, cfg_dir: &Path) -> AppResult<usize> {
+    let (normalized_text, input_path) = sv_mint::config::read_input(input)?;
     let (pp_text, final_defs, cst_opt) =
         run_svparser(&input_path, cfg_dir, &cfg.svparser, cfg.logging.show_parse_events)?;
 
@@ -107,9 +99,11 @@ fn run_for_one(input: &Path, cfg: &config::Config, cfg_dir: &Path) -> AppResult<
         }
         let payload = match stage {
             Stage::RawText => json!({ "text": &normalized_text }),
-            Stage::PpText => svparser::build_pp_payload(cfg, &pp_text, &final_defs),
-            Stage::Cst => svparser::build_cst_payload(&cst_opt),
-            Stage::Ast => svparser::build_ast_payload(&input_path, &pp_text, &cst_opt, cfg.logging.show_parse_events),
+            Stage::PpText => sv_mint::svparser::build_pp_payload(cfg, &pp_text, &final_defs),
+            Stage::Cst => sv_mint::svparser::build_cst_payload(&cst_opt),
+            Stage::Ast => {
+                sv_mint::svparser::build_ast_payload(&input_path, &pp_text, &cst_opt, cfg.logging.show_parse_events)
+            }
         };
         let vs = run_plugin_once(cfg_dir, cfg, stage.as_str(), &input_path, payload)?;
         all_violations.extend(vs);
