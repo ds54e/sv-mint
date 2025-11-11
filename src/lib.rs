@@ -1,7 +1,13 @@
-pub mod config;
-pub mod errors;
-pub mod output;
+pub mod core;
+pub use core::errors;
+pub use core::types;
+
+pub mod io;
+pub use io::config;
+pub use io::output;
+pub use io::textutil;
+
 pub mod plugin;
-pub mod svparser;
-pub mod textutil;
-pub mod types;
+
+pub mod sv;
+pub use sv::driver as svparser;

@@ -1,121 +1,73 @@
 use clap::Parser;
-use log::{error, info};
-use serde_json::json;
-use std::fs;
-use std::io;
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
-use sv_mint::config::validate_config;
-use sv_mint::errors::AppResult;
+
+use sv_mint::config::{load, read_input, resolve_path, validate_config, Config};
 use sv_mint::output::print_violations;
 use sv_mint::plugin::run_plugin_once;
-use sv_mint::svparser::run_svparser;
-use sv_mint::types::Stage;
+use sv_mint::types::{Stage, Violation};
 
 #[derive(Parser, Debug)]
 #[command(
+    name = "sv-mint",
     version,
-    author,
-    about = "sv-mint: SystemVerilog linter (Windows, sv-parser integrated)"
+    about = "SystemVerilog linter (Windows, sv-parser integrated)"
 )]
 struct Cli {
-    #[arg(long = "config", help = "Path to sv-mint.toml")]
+    #[arg(long, value_name = "CONFIG")]
     config: Option<PathBuf>,
-    #[arg(
-        help = "Paths to input SystemVerilog files (.sv/.svh). Multiple files allowed.",
-        required = true
-    )]
-    inputs: Vec<PathBuf>,
+    #[arg(value_name = "INPUT", required = true)]
+    input: Vec<PathBuf>,
+}
+
+fn run_for_one(input: &Path, cfg: &Config) -> anyhow::Result<usize> {
+    let (normalized_text, input_path) = read_input(input)?;
+    let mut all: Vec<Violation> = Vec::new();
+
+    for stage in &cfg.stages.enabled {
+        let payload = match stage {
+            Stage::RawText => serde_json::json!({ "text": normalized_text }),
+            Stage::PpText => serde_json::json!({ "text": normalized_text, "defines": [] }),
+            Stage::Cst => serde_json::json!({ "has_cst": false }),
+            Stage::Ast => serde_json::json!({ "decls": [], "refs": [], "symbols": [] }),
+        };
+        let vs = run_plugin_once(stage.as_str(), &input_path, payload)?;
+        all.extend(vs);
+    }
+
+    print_violations(&all, &input_path);
+    Ok(all.len())
 }
 
 fn main() -> ExitCode {
-    match run() {
-        Ok(n_violations) => {
-            if n_violations == 0 {
-                ExitCode::from(0)
-            } else {
-                ExitCode::from(2)
-            }
-        }
-        Err(e) => {
-            eprintln!("{}", e);
-            error!("event=error msg={}", e);
-            ExitCode::from(3)
-        }
+    if let Err(code) = real_main() {
+        return code;
     }
+    ExitCode::from(0)
 }
 
-fn run() -> AppResult<usize> {
+fn real_main() -> Result<(), ExitCode> {
     let cli = Cli::parse();
+    let cfg_path = resolve_path(cli.config).map_err(|_| ExitCode::from(3))?;
+    let cfg_text = std::fs::read_to_string(&cfg_path).map_err(|_| ExitCode::from(3))?;
+    let cfg = load(&cfg_text).map_err(|_| ExitCode::from(3))?;
+    validate_config(&cfg).map_err(|_| ExitCode::from(3))?;
 
-    let cfg_path = sv_mint::config::resolve_path(cli.config)?;
-    let cfg_dir = cfg_path
-        .parent()
-        .map(|p| p.to_path_buf())
-        .unwrap_or_else(|| PathBuf::from("."));
+    let mut had_error = false;
+    let mut n_viol: usize = 0;
 
-    let cfg_text = fs::read_to_string(&cfg_path)?;
-    let cfg = sv_mint::config::load(&cfg_text)?;
-    validate_config(&cfg)?;
-
-    let mut total_violations = 0usize;
-    let mut any_error = false;
-
-    for input in &cli.inputs {
-        if !input.is_file() {
-            error!("event=input_not_file path={}", input.display());
-            any_error = true;
-            continue;
-        }
-
-        match run_for_one(input, &cfg, &cfg_dir) {
-            Ok(n) => total_violations += n,
-            Err(e) => {
-                error!("event=file_error path={} msg={}", input.display(), e);
-                any_error = true;
-            }
+    for inp in &cli.input {
+        match run_for_one(inp, &cfg) {
+            Ok(n) => n_viol += n,
+            Err(_) => had_error = true,
         }
     }
 
-    if any_error {
-        return Err(io::Error::other("one or more files failed").into());
+    if had_error {
+        Err(ExitCode::from(3))
+    } else if n_viol > 0 {
+        Err(ExitCode::from(2))
+    } else {
+        Ok(())
     }
-    Ok(total_violations)
-}
-
-fn run_for_one(input: &Path, cfg: &sv_mint::config::Config, cfg_dir: &Path) -> AppResult<usize> {
-    let (normalized_text, input_path) = sv_mint::config::read_input(input)?;
-    let (pp_text, final_defs, cst_opt) =
-        run_svparser(&input_path, cfg_dir, &cfg.svparser, cfg.logging.show_parse_events)?;
-
-    let mut all_violations = Vec::new();
-    for stage in &cfg.stages.enabled {
-        if cfg.logging.show_stage_events {
-            info!(
-                "event=stage_start stage={} path={}",
-                stage.as_str(),
-                input_path.display()
-            );
-        }
-        let payload = match stage {
-            Stage::RawText => json!({ "text": &normalized_text }),
-            Stage::PpText => sv_mint::svparser::build_pp_payload(cfg, &pp_text, &final_defs),
-            Stage::Cst => sv_mint::svparser::build_cst_payload(&cst_opt),
-            Stage::Ast => {
-                sv_mint::svparser::build_ast_payload(&input_path, &pp_text, &cst_opt, cfg.logging.show_parse_events)
-            }
-        };
-        let vs = run_plugin_once(cfg_dir, cfg, stage.as_str(), &input_path, payload)?;
-        all_violations.extend(vs);
-        if cfg.logging.show_stage_events {
-            info!(
-                "event=stage_done stage={} path={}",
-                stage.as_str(),
-                input_path.display()
-            );
-        }
-    }
-
-    print_violations(&input_path, &all_violations);
-    Ok(all_violations.len())
 }

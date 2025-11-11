@@ -24,8 +24,7 @@ pub struct Violation {
     pub location: Location,
 }
 
-#[derive(Clone, Copy, serde::Serialize, serde::Deserialize, Eq, PartialEq, Hash, Debug)]
-#[serde(rename_all = "snake_case")]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Stage {
     RawText,
     PpText,

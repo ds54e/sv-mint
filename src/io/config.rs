@@ -89,11 +89,13 @@ pub fn read_input(path: &Path) -> Result<(String, PathBuf), ConfigError> {
     if std::str::from_utf8(&raw).is_err() {
         return Err(ConfigError::InvalidUtf8 {
             path: path.display().to_string(),
+            source: None,
         });
     }
     let text = normalize_lf(strip_bom(String::from_utf8(raw).map_err(|_| {
         ConfigError::InvalidUtf8 {
             path: path.display().to_string(),
+            source: None,
         }
     })?));
     Ok((text, path.to_path_buf()))
@@ -127,17 +129,17 @@ pub fn validate_config(cfg: &Config) -> Result<(), ConfigError> {
         "info" => LevelFilter::Info,
         _ => LevelFilter::Info,
     };
-    b.filter_level(lvl);
+    b.filter(None, lvl);
     b.format(|buf, record| {
-        let ts = buf.timestamp_millis();
-        writeln!(buf, "[{}] [{}] {}", ts, record.level(), record.args())
+        writeln!(
+            buf,
+            "[{}] [{}] {}",
+            chrono::Local::now().format("%H:%M:%S"),
+            record.level(),
+            record.args()
+        )
     });
-    let _ = b.try_init();
-    let _ = (
-        cfg.logging.stderr_snippet_bytes,
-        cfg.logging.show_stage_events,
-        cfg.logging.show_plugin_events,
-        cfg.logging.show_parse_events,
-    );
+    b.init();
+
     Ok(())
 }
