@@ -13,3 +13,4 @@ pub mod sv;
 pub use sv::driver as svparser;
 
 pub mod diag;
+pub mod plugin_scripts;

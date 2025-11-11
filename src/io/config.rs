@@ -41,6 +41,8 @@ pub struct Config {
     pub svparser: SvParserCfg,
     #[serde(default)]
     pub rules: Value,
+    #[serde(default)]
+    pub ruleset: Ruleset,
 }
 
 #[derive(Deserialize)]
@@ -58,6 +60,13 @@ pub struct Plugin {
 #[derive(Deserialize)]
 pub struct Stages {
     pub enabled: Vec<crate::types::Stage>,
+}
+
+#[derive(Deserialize, Clone, Default)]
+pub struct Ruleset {
+    pub scripts: Vec<String>,
+    #[serde(default, rename = "override")]
+    pub severity_override: std::collections::HashMap<String, String>,
 }
 
 pub fn resolve_path(opt: Option<PathBuf>) -> Result<PathBuf, ConfigError> {

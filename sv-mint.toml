@@ -3,7 +3,14 @@ timeout_ms_per_file = 3000
 
 [plugin]
 cmd = "py"
-args = ["-3","-u","plugins/rules.py"]
+args = ["-3","-u"]
+
+[ruleset]
+scripts = [
+  "plugins/decl_unused_param.py",
+  "plugins/decl_unused_net.py",
+  "plugins/decl_unused_var.py"
+]
 
 [stages]
 enabled = ["raw_text","pp_text","cst","ast"]
@@ -14,8 +21,6 @@ defines = []
 strip_comments = true
 ignore_include = false
 allow_incomplete = true
-
-[rules]
 
 [logging]
 level = "info"

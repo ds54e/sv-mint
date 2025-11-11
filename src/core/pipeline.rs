@@ -2,7 +2,7 @@ use crate::config::{read_input, Config};
 use crate::diag::event::{Ev, Event};
 use crate::diag::logging::log_event;
 use crate::output::print_violations;
-use crate::plugin::run_plugin_once;
+use crate::plugin_scripts::run_plugins_for_stage;
 use crate::sv::model::ParseArtifacts;
 use crate::svparser::SvDriver;
 use crate::types::{Stage, Violation};
@@ -48,7 +48,7 @@ impl<'a> Pipeline<'a> {
         for stage in &self.cfg.stages.enabled {
             log_event(Ev::new(Event::StageStart, &input_path.to_string_lossy()).with_stage(stage.as_str()));
             let payload = payload_for(stage, &artifacts);
-            let vs = run_plugin_once(self.cfg, stage.as_str(), &input_path, payload)?;
+            let vs = run_plugins_for_stage(self.cfg, stage.as_str(), &input_path, payload)?;
             all.extend(vs);
             log_event(Ev::new(Event::StageDone, &input_path.to_string_lossy()).with_stage(stage.as_str()));
         }

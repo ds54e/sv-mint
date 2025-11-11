@@ -13,8 +13,9 @@ use std::sync::mpsc;
 use std::thread;
 use std::time::{Duration, Instant};
 
-pub fn run_plugin_once(
+pub fn run_plugin_once_with_args(
     cfg: &Config,
+    args: &[String],
     stage: &str,
     input_path: &Path,
     payload: Value,
@@ -26,7 +27,7 @@ pub fn run_plugin_once(
     let limits = TransportLimits::default();
 
     let mut child = Command::new(&cfg.plugin.cmd)
-        .args(&cfg.plugin.args)
+        .args(args)
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
@@ -126,6 +127,15 @@ pub fn run_plugin_once(
             Ok(resp.violations)
         }
     }
+}
+
+pub fn run_plugin_once(
+    cfg: &Config,
+    stage: &str,
+    input_path: &Path,
+    payload: Value,
+) -> Result<Vec<Violation>, PluginError> {
+    run_plugin_once_with_args(cfg, &cfg.plugin.args, stage, input_path, payload)
 }
 
 fn read_limited<R: Read>(mut r: R, cap: usize, is_stdout: bool) -> Result<Vec<u8>, PluginError> {
