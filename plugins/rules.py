@@ -30,31 +30,46 @@ def offset_to_line_col(line_index, offset):
             break
     return ln, col
 
-num_pat = re.compile(r"(?i)^\s*(?:(\d+)\s*'([bdho]))?\s*([0-9a-f_xz?]+)\s*$")
+sized_num_pat = re.compile(r"^\s*([0-9]+)\s*'\s*([bdhoBDHO])\s*([0-9a-fA-F_xzXZ?]+)\s*$")
+unsized_base_pat = re.compile(r"^\s*'\s*([bdhoBDHO])\s*([0-9a-fA-F_xzXZ?]+)\s*$")
+dec_num_pat = re.compile(r"^\s*([0-9][0-9_]*)\s*$")
 
 def parse_sized_number(tok):
-    m = num_pat.match(tok)
-    if not m:
-        return None, None
-    size, base, digits = m.groups()
-    if base:
+    m = sized_num_pat.match(tok)
+    if m:
+        size, base, digits = m.groups()
         base = base.lower()
-    val = 0
-    clean = re.sub(r"[xz?_]", "0", digits, flags=re.I)
-    try:
-        if base == 'b':
-            val = int(clean, 2)
-        elif base == 'd' or base is None:
-            val = int(clean, 10)
-        elif base == 'h':
-            val = int(clean, 16)
-        elif base == 'o':
-            val = int(clean, 8)
-    except Exception:
-        return None, None
-    width = int(size) if size is not None else None
-    return val, width
-
+        clean = re.sub(r"[xz?_]", "0", digits, flags=re.I)
+        try:
+            if base == 'b': val = int(clean, 2)
+            elif base == 'd': val = int(clean, 10)
+            elif base == 'h': val = int(clean, 16)
+            elif base == 'o': val = int(clean, 8)
+            else: return None, None
+        except Exception:
+            return None, None
+        return val, int(size)
+    m = unsized_base_pat.match(tok)
+    if m:
+        base, digits = m.groups()
+        base = base.lower()
+        clean = re.sub(r"[xz?_]", "0", digits, flags=re.I)
+        try:
+            if base == 'b': val = int(clean, 2)
+            elif base == 'd': val = int(clean, 10)
+            elif base == 'h': val = int(clean, 16)
+            elif base == 'o': val = int(clean, 8)
+            else: return None, None
+        except Exception:
+            return None, None
+        return val, None
+    m = dec_num_pat.match(tok)
+    if m:
+        try:
+            return int(m.group(1).replace('_','')), None
+        except Exception:
+            return None, None
+    return None, None
 expr_token_pat = re.compile(r"[A-Za-z_][A-Za-z0-9_$]*|[()]+|<<|>>|&&|\|\||==|!=|<=|>=|[~!%^&|+\-*/<>?:]|\d+(?:\s*'[bdho]\s*[0-9a-f_xz?]+)?", re.I)
 
 def safe_eval_expr(expr, params):
@@ -204,7 +219,7 @@ def width_of_expr(expr, params, widths):
     if val is not None:
         if w is not None:
             return w
-        return 32
+        return None
     if re.fullmatch(r"[A-Za-z_][A-Za-z0-9_$]*", expr):
         return widths.get(expr)
     parts = re.split(r"[+\-|&^|*/<>]", expr)
