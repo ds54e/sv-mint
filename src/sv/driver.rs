@@ -3,6 +3,7 @@ use crate::diag::event::{Ev, Event};
 use crate::diag::logging::log_event;
 use crate::sv::model::{AstSummary, DefineInfo, ParseArtifacts};
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 use std::path::Path;
 use std::time::Instant;
 
@@ -26,29 +27,56 @@ impl<'a> SvDriver<'a> {
 
     pub fn parse_text(&self, text: &str, input_path: &Path) -> ParseArtifacts {
         let path_s = input_path.to_string_lossy().into_owned();
+        let raw_text = text.to_owned();
+        let include_paths: Vec<std::path::PathBuf> =
+            self.cfg.include_paths.iter().map(std::path::PathBuf::from).collect();
+        type Defines = HashMap<String, Option<sv_parser::Define>>;
+        let mut pre_defines: Defines = HashMap::new();
+        for d in &self.cfg.defines {
+            if let Some(eq) = d.find('=') {
+                let name = d[..eq].to_string();
+                pre_defines.insert(name, None);
+            } else {
+                pre_defines.insert(d.clone(), None);
+            }
+        }
         log_event(Ev::new(Event::ParsePreprocessStart, &path_s));
         let t0 = Instant::now();
-        let pp_text = if self.cfg.strip_comments {
-            strip_comments(text)
-        } else {
-            text.to_string()
+        let (pp_text, defs_after_pp) = match sv_parser::preprocess(
+            input_path,
+            &pre_defines,
+            &include_paths,
+            self.cfg.strip_comments,
+            self.cfg.ignore_include,
+        ) {
+            Ok((pp, defs)) => (pp.text().to_owned(), Some(defs)),
+            Err(_) => (raw_text.clone(), None),
         };
-        let defines = parse_defines(&self.cfg.defines);
-        let pp_elapsed = t0.elapsed().as_millis();
-        log_event(Ev::new(Event::ParsePreprocessDone, &path_s).with_duration_ms(pp_elapsed));
-
+        let elapsed_pp = t0.elapsed().as_millis();
+        log_event(Ev::new(Event::ParsePreprocessDone, &path_s).with_duration_ms(elapsed_pp));
         log_event(Ev::new(Event::ParseParseStart, &path_s));
         let t1 = Instant::now();
-        let has_cst = !pp_text.is_empty();
-        let parse_elapsed = t1.elapsed().as_millis();
-        log_event(Ev::new(Event::ParseParseDone, &path_s).with_duration_ms(parse_elapsed));
-
-        let t2 = Instant::now();
+        let has_cst = sv_parser::parse_sv(
+            input_path,
+            &pre_defines,
+            &include_paths,
+            self.cfg.ignore_include,
+            self.cfg.allow_incomplete,
+        )
+        .is_ok();
+        let elapsed_parse = t1.elapsed().as_millis();
+        log_event(Ev::new(Event::ParseParseDone, &path_s).with_duration_ms(elapsed_parse));
+        log_event(Ev::new(Event::ParseAstCollectDone, &path_s));
+        let defines: Vec<DefineInfo> = if let Some(defs) = defs_after_pp {
+            let mut names: Vec<String> = defs.keys().cloned().collect();
+            names.sort();
+            names.into_iter().map(|n| DefineInfo { name: n, value: None }).collect()
+        } else {
+            let mut names: Vec<String> = pre_defines.keys().cloned().collect();
+            names.sort();
+            names.into_iter().map(|n| DefineInfo { name: n, value: None }).collect()
+        };
         let ast = AstSummary::default();
-        let ast_elapsed = t2.elapsed().as_millis();
-        log_event(Ev::new(Event::ParseAstCollectDone, &path_s).with_duration_ms(ast_elapsed));
-
-        let raw_text = text.to_string();
         let line_map = LineMap::new(&raw_text);
         ParseArtifacts {
             raw_text,
@@ -59,49 +87,6 @@ impl<'a> SvDriver<'a> {
             line_map,
         }
     }
-}
-
-fn parse_defines(items: &[String]) -> Vec<DefineInfo> {
-    let mut out = Vec::with_capacity(items.len());
-    for s in items {
-        if let Some(pos) = s.find('=') {
-            let name = s[..pos].to_string();
-            let value = Some(s[pos + 1..].to_string());
-            out.push(DefineInfo { name, value });
-        } else {
-            out.push(DefineInfo {
-                name: s.to_string(),
-                value: None,
-            });
-        }
-    }
-    out
-}
-
-fn strip_comments(src: &str) -> String {
-    let mut out = String::with_capacity(src.len());
-    let mut i = 0;
-    let b = src.as_bytes();
-    let n = b.len();
-    while i < n {
-        if i + 1 < n && b[i] == b'/' && b[i + 1] == b'/' {
-            while i < n && b[i] != b'\n' {
-                i += 1;
-            }
-        } else if i + 1 < n && b[i] == b'/' && b[i + 1] == b'*' {
-            i += 2;
-            while i + 1 < n && !(b[i] == b'*' && b[i + 1] == b'/') {
-                i += 1;
-            }
-            if i + 1 < n {
-                i += 2;
-            }
-        } else {
-            out.push(b[i] as char);
-            i += 1;
-        }
-    }
-    out
 }
 
 trait EvExt<'a> {
