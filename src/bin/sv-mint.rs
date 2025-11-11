@@ -5,6 +5,7 @@ use std::process::ExitCode;
 use sv_mint::config::{load, read_input, resolve_path, validate_config, Config};
 use sv_mint::output::print_violations;
 use sv_mint::plugin::run_plugin_once;
+use sv_mint::svparser::SvDriver;
 use sv_mint::types::{Stage, Violation};
 
 #[derive(Parser, Debug)]
@@ -22,14 +23,28 @@ struct Cli {
 
 fn run_for_one(input: &Path, cfg: &Config) -> anyhow::Result<usize> {
     let (normalized_text, input_path) = read_input(input)?;
+
+    let driver = SvDriver::new(&cfg.svparser);
+    let artifacts = driver.parse_text(&normalized_text);
+
     let mut all: Vec<Violation> = Vec::new();
 
     for stage in &cfg.stages.enabled {
         let payload = match stage {
-            Stage::RawText => serde_json::json!({ "text": normalized_text }),
-            Stage::PpText => serde_json::json!({ "text": normalized_text, "defines": [] }),
-            Stage::Cst => serde_json::json!({ "has_cst": false }),
-            Stage::Ast => serde_json::json!({ "decls": [], "refs": [], "symbols": [] }),
+            Stage::RawText => serde_json::json!({ "text": artifacts.raw_text }),
+            Stage::PpText => serde_json::json!({
+                "text": artifacts.pp_text,
+                "defines": artifacts.defines.iter().map(|d| serde_json::json!({
+                    "name": d.name,
+                    "value": d.value
+                })).collect::<Vec<_>>()
+            }),
+            Stage::Cst => serde_json::json!({ "has_cst": artifacts.has_cst }),
+            Stage::Ast => serde_json::json!({
+                "decls": artifacts.ast.decls,
+                "refs": artifacts.ast.refs,
+                "symbols": artifacts.ast.symbols
+            }),
         };
         let vs = run_plugin_once(stage.as_str(), &input_path, payload)?;
         all.extend(vs);
