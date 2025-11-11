@@ -81,11 +81,9 @@ def safe_eval_expr(expr, params):
         return None
     allowed = (ast.Expression, ast.BinOp, ast.UnaryOp, ast.Num, ast.operator, ast.Add, ast.Sub, ast.Mult, ast.Div, ast.FloorDiv, ast.Mod, ast.Pow,
                ast.LShift, ast.RShift, ast.BitOr, ast.BitAnd, ast.BitXor, ast.Invert, ast.USub, ast.UAdd, ast.Load, ast.Constant, ast.And, ast.Or,
-               ast.Not, ast.Compare, ast.Eq, ast.NotEq, ast.Lt, ast.LtE, ast.Gt, ast.GtE, ast.Call, ast.Name)
+               ast.Not, ast.Compare, ast.Eq, ast.NotEq, ast.Lt, ast.LtE, ast.Gt, ast.GtE, ast.Name)
     for node in ast.walk(tree):
         if not isinstance(node, allowed):
-            return None
-        if isinstance(node, ast.Call):
             return None
         if isinstance(node, ast.Name) and node.id not in params:
             return None
@@ -173,9 +171,9 @@ def width_of_expr(expr, params, widths):
         depth = 0
         cur = []
         for ch in inner:
-            if ch == "{" or ch == "(":
+            if ch in "{(":
                 depth += 1
-            elif ch == "}" or ch == ")":
+            elif ch in "})":
                 depth -= 1
             if ch == "," and depth == 0:
                 parts.append("".join(cur).strip())
@@ -206,7 +204,7 @@ def width_of_expr(expr, params, widths):
     if val is not None:
         if w is not None:
             return w
-        return None
+        return 32
     if re.fullmatch(r"[A-Za-z_][A-Za-z0-9_$]*", expr):
         return widths.get(expr)
     parts = re.split(r"[+\-|&^|*/<>]", expr)
@@ -215,24 +213,6 @@ def width_of_expr(expr, params, widths):
         if all(wi is not None for wi in ws):
             return max(ws)
     return None
-
-assign_pat = re.compile(r"\bassign\b\s+(.+?)\s*=\s*(.+?);", re.I)
-
-def find_width_mismatch_pp(text):
-    viols = []
-    line_index = make_line_index(text)
-    params = parse_params(text)
-    widths = parse_signal_widths(text, params)
-    for m in assign_pat.finditer(text):
-        lhs = m.group(1).strip()
-        rhs = m.group(2).strip()
-        wl = width_of_expr(lhs, params, widths)
-        wr = width_of_expr(rhs, params, widths)
-        if wl is not None and wr is not None and wl != wr:
-            ln, col = offset_to_line_col(line_index, m.start(1))
-            loc = {"line": ln, "col": col, "end_line": ln, "end_col": col + len(lhs)}
-            viols.append(to_viol("width.mismatch", f"width mismatch: lhs={wl} vs rhs={wr}", loc))
-    return viols
 
 def find_unconnected_ports_pp(text):
     viols = []
@@ -255,9 +235,21 @@ def main():
     if stage == "pp_text":
         txt = payload.get("text") or ""
         violations.extend(find_unconnected_ports_pp(txt))
-        violations.extend(find_width_mismatch_pp(txt))
 
     if stage == "ast":
+        assigns = payload.get("assigns") or []
+        pp_text = payload.get("pp_text") or ""
+        params = parse_params(pp_text)
+        widths = parse_signal_widths(pp_text, params)
+        for a in assigns:
+            lhs = a.get("lhs") or ""
+            rhs = a.get("rhs") or ""
+            loc = a.get("loc") or {"line":1,"col":1,"end_line":1,"end_col":1}
+            wl = width_of_expr(lhs, params, widths)
+            wr = width_of_expr(rhs, params, widths)
+            if wl is not None and wr is not None and wl != wr:
+                violations.append(to_viol("width.mismatch", f"width mismatch: lhs={wl} vs rhs={wr}", loc))
+
         symbols = payload.get("symbols") or []
         for s in symbols:
             cls = s.get("class")
@@ -268,9 +260,8 @@ def main():
             if cls in ("param", "net", "var"):
                 if r == 0 and w == 0:
                     violations.append(to_viol("decl.unused", f"'{name}' declared but never used", loc))
-            if cls == "var":
-                if w > 0 and r == 0:
-                    violations.append(to_viol("var.writeonly", f"'{name}' written but never read", loc))
+            if cls == "var" and w > 0 and r == 0:
+                violations.append(to_viol("var.writeonly", f"'{name}' written but never read", loc))
 
     resp = {"type": "ViolationsStage", "stage": stage, "violations": violations}
     sys.stdout.write(json.dumps(resp))

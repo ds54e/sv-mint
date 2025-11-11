@@ -1,17 +1,19 @@
 use crate::core::linemap::LineMap;
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Debug, Serialize, Deserialize, Default)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct DefineInfo {
     pub name: String,
     pub value: Option<String>,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct AstSummary {
     pub decls: Vec<serde_json::Value>,
     pub refs: Vec<serde_json::Value>,
     pub symbols: Vec<serde_json::Value>,
+    pub assigns: Vec<serde_json::Value>,
+    pub pp_text: Option<String>,
 }
 
 #[derive(Clone, Debug)]

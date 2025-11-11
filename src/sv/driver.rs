@@ -63,7 +63,7 @@ impl<'a> SvDriver<'a> {
 
         log_event(Ev::new(Event::ParseParseStart, &path_s));
         let t1 = Instant::now();
-        let (has_cst, final_defines, decls, refs, symbols) = match parse_sv(
+        let (has_cst, final_defines, decls, refs, symbols, assigns) = match parse_sv(
             input_path,
             &pre_defines,
             &include_paths,
@@ -74,16 +74,31 @@ impl<'a> SvDriver<'a> {
                 let d = collect_decls_with_loc(&syntax_tree, &line_map);
                 let r = collect_refs_rw_with_loc(&syntax_tree, &line_map);
                 let s = analyze_symbols(&d, &r);
-                (true, defs, d, r, s)
+                let a = collect_assigns_from_lvalues(&syntax_tree, &line_map, &raw_text);
+                (true, defs, d, r, s, a)
             }
-            Err(_) => (false, pre_defines.clone(), Vec::new(), Vec::new(), Vec::new()),
+            Err(_) => (
+                false,
+                pre_defines.clone(),
+                Vec::new(),
+                Vec::new(),
+                Vec::new(),
+                Vec::new(),
+            ),
         };
         let elapsed_parse = t1.elapsed().as_millis();
         log_event(Ev::new(Event::ParseParseDone, &path_s).with_duration_ms(elapsed_parse));
         log_event(Ev::new(Event::ParseAstCollectDone, &path_s));
 
         let defines: Vec<DefineInfo> = defines_to_info(&final_defines);
-        let ast = AstSummary { decls, refs, symbols };
+        let mut ast = AstSummary {
+            decls,
+            refs,
+            symbols,
+            assigns,
+            pp_text: None,
+        };
+        ast.pp_text = Some(pp_text.clone());
 
         ParseArtifacts {
             raw_text,
@@ -364,6 +379,161 @@ fn analyze_symbols(decls: &[serde_json::Value], refs: &[serde_json::Value]) -> V
         }));
     }
     out
+}
+
+fn collect_assigns_from_lvalues(
+    syntax_tree: &SyntaxTree,
+    line_map: &LineMap,
+    raw_text: &str,
+) -> Vec<serde_json::Value> {
+    let mut assigns = Vec::new();
+    let mut current_module: Option<String> = None;
+
+    for node in syntax_tree {
+        if let RefNode::ModuleDeclarationNonansi(x) = node {
+            if let Some(id) = unwrap_node!(x, ModuleIdentifier) {
+                if let Some(idloc) = get_identifier(id) {
+                    if let Some(name) = syntax_tree.get_str(&idloc) {
+                        current_module = Some(name.to_string());
+                    }
+                }
+            }
+            continue;
+        }
+        if let RefNode::ModuleDeclarationAnsi(x) = node {
+            if let Some(id) = unwrap_node!(x, ModuleIdentifier) {
+                if let Some(idloc) = get_identifier(id) {
+                    if let Some(name) = syntax_tree.get_str(&idloc) {
+                        current_module = Some(name.to_string());
+                    }
+                }
+            }
+            continue;
+        }
+
+        let (rn, is_lhs) = match node {
+            RefNode::NetLvalue(x) => (Some(RefNode::from(x)), true),
+            RefNode::VariableLvalue(x) => (Some(RefNode::from(x)), true),
+            _ => (None, false),
+        };
+        if !is_lhs {
+            continue;
+        }
+        if let Some(rn) = rn {
+            if let Some(idloc) = get_identifier(rn) {
+                if let Some(_lhs_name) = syntax_tree.get_str(&idloc) {
+                    if let Some(start) = origin_start(syntax_tree, &idloc) {
+                        if let Some((op, lhs_expr, rhs_expr, rhs_start, rhs_end)) = scan_assignment_at(raw_text, start)
+                        {
+                            let span = SpanBytes {
+                                start: rhs_start,
+                                end: rhs_end,
+                            };
+                            let ln = line_map.to_lines(span);
+                            let loc = json!({
+                                "line": ln.line,
+                                "col": ln.col,
+                                "end_line": ln.end_line,
+                                "end_col": ln.end_col
+                            });
+                            assigns.push(json!({
+                                "module": current_module.clone().unwrap_or_default(),
+                                "op": op,
+                                "lhs": lhs_expr,
+                                "rhs": rhs_expr,
+                                "loc": loc
+                            }));
+                        }
+                    }
+                }
+            }
+        }
+    }
+    assigns
+}
+
+fn scan_assignment_at(text: &str, lhs_start: usize) -> Option<(&'static str, String, String, usize, usize)> {
+    let bytes = text.as_bytes();
+    let n = bytes.len();
+    let mut i = lhs_start;
+    let mut depth_paren = 0usize;
+    let mut depth_brack = 0usize;
+    let mut depth_brace = 0usize;
+
+    while i < n {
+        let c = bytes[i] as char;
+        match c {
+            '(' => depth_paren += 1,
+            ')' => {
+                depth_paren = depth_paren.saturating_sub(1);
+            }
+            '[' => depth_brack += 1,
+            ']' => {
+                depth_brack = depth_brack.saturating_sub(1);
+            }
+            '{' => depth_brace += 1,
+            '}' => {
+                depth_brace = depth_brace.saturating_sub(1);
+            }
+            '<' => {
+                if i + 1 < n && bytes[i + 1] as char == '=' && depth_paren == 0 && depth_brack == 0 && depth_brace == 0
+                {
+                    let lhs_expr = text[lhs_start..i].trim().to_string();
+                    let (rhs_start, rhs_end) = find_stmt_rhs_range(text, i + 2)?;
+                    let rhs_expr = text[rhs_start..rhs_end].trim().to_string();
+                    return Some(("nonblocking", lhs_expr, rhs_expr, rhs_start, rhs_end));
+                }
+            }
+            '=' => {
+                let prev = if i > 0 { bytes[i - 1] as char } else { '\0' };
+                let next = if i + 1 < n { bytes[i + 1] as char } else { '\0' };
+                if prev != '=' && next != '=' && depth_paren == 0 && depth_brack == 0 && depth_brace == 0 {
+                    let lhs_expr = text[lhs_start..i].trim().to_string();
+                    let (rhs_start, rhs_end) = find_stmt_rhs_range(text, i + 1)?;
+                    let rhs_expr = text[rhs_start..rhs_end].trim().to_string();
+                    return Some(("blocking_or_cont", lhs_expr, rhs_expr, rhs_start, rhs_end));
+                }
+            }
+            ';' => break,
+            _ => {}
+        }
+        i += 1;
+    }
+    None
+}
+
+fn find_stmt_rhs_range(text: &str, rhs_start: usize) -> Option<(usize, usize)> {
+    let bytes = text.as_bytes();
+    let n = bytes.len();
+    let mut i = rhs_start;
+    let mut depth_paren = 0usize;
+    let mut depth_brack = 0usize;
+    let mut depth_brace = 0usize;
+    while i < n {
+        let c = bytes[i] as char;
+        match c {
+            '(' => depth_paren += 1,
+            ')' => {
+                depth_paren = depth_paren.saturating_sub(1);
+            }
+            '[' => depth_brack += 1,
+            ']' => {
+                depth_brack = depth_brack.saturating_sub(1);
+            }
+            '{' => depth_brace += 1,
+            '}' => {
+                depth_brace = depth_brace.saturating_sub(1);
+            }
+            ';' => {
+                if depth_paren == 0 && depth_brack == 0 && depth_brace == 0 {
+                    return Some((rhs_start, i));
+                }
+            }
+            _ => {}
+        }
+        i += 1;
+    }
+    None
 }
 
 fn get_identifier(node: RefNode) -> Option<Locate> {
