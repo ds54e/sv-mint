@@ -4,7 +4,7 @@ use crate::diag::logging::log_event;
 use crate::sv::model::{AstSummary, DefineInfo, ParseArtifacts};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::path::Path;
 use std::time::Instant;
 use sv_parser::{parse_sv, preprocess, unwrap_node, Locate, RefNode, SyntaxTree};
@@ -72,7 +72,7 @@ impl<'a> SvDriver<'a> {
         ) {
             Ok((syntax_tree, defs)) => {
                 let d = collect_decls_with_loc(&syntax_tree, &line_map);
-                let r = collect_refs_with_modules(&syntax_tree);
+                let r = collect_refs_rw_with_loc(&syntax_tree, &line_map);
                 let s = analyze_symbols(&d, &r);
                 (true, defs, d, r, s)
             }
@@ -122,9 +122,14 @@ fn to_loc_json(st: &SyntaxTree, lm: &LineMap, idloc: &Locate) -> serde_json::Val
             });
         }
     }
-    json!({
-        "line": 1, "col": 1, "end_line": 1, "end_col": 1
-    })
+    json!({"line":1,"col":1,"end_line":1,"end_col":1})
+}
+
+fn origin_start(st: &SyntaxTree, idloc: &Locate) -> Option<usize> {
+    if let Some((_p, start)) = st.get_origin(idloc) {
+        return Some(start);
+    }
+    None
 }
 
 fn collect_decls_with_loc(syntax_tree: &SyntaxTree, line_map: &LineMap) -> Vec<serde_json::Value> {
@@ -204,9 +209,70 @@ fn collect_decls_with_loc(syntax_tree: &SyntaxTree, line_map: &LineMap) -> Vec<s
     decls
 }
 
-fn collect_refs_with_modules(syntax_tree: &SyntaxTree) -> Vec<serde_json::Value> {
+fn collect_refs_rw_with_loc(syntax_tree: &SyntaxTree, line_map: &LineMap) -> Vec<serde_json::Value> {
     let mut refs = Vec::new();
     let mut current_module: Option<String> = None;
+    let mut write_offsets: HashSet<usize> = HashSet::new();
+
+    for node in syntax_tree {
+        if let RefNode::ModuleDeclarationNonansi(x) = node {
+            if let Some(id) = unwrap_node!(x, ModuleIdentifier) {
+                if let Some(idloc) = get_identifier(id) {
+                    if let Some(name) = syntax_tree.get_str(&idloc) {
+                        current_module = Some(name.to_string());
+                    }
+                }
+            }
+            continue;
+        }
+        if let RefNode::ModuleDeclarationAnsi(x) = node {
+            if let Some(id) = unwrap_node!(x, ModuleIdentifier) {
+                if let Some(idloc) = get_identifier(id) {
+                    if let Some(name) = syntax_tree.get_str(&idloc) {
+                        current_module = Some(name.to_string());
+                    }
+                }
+            }
+            continue;
+        }
+        if let RefNode::NetLvalue(x) = node {
+            let rn: RefNode = RefNode::from(x);
+            if let Some(idloc) = get_identifier(rn) {
+                if let Some(name) = syntax_tree.get_str(&idloc) {
+                    if let Some(start) = origin_start(syntax_tree, &idloc) {
+                        write_offsets.insert(start);
+                    }
+                    let loc = to_loc_json(syntax_tree, line_map, &idloc);
+                    refs.push(json!({
+                        "name": name,
+                        "module": current_module.clone().unwrap_or_default(),
+                        "rw": "write",
+                        "loc": loc
+                    }));
+                }
+            }
+            continue;
+        }
+        if let RefNode::VariableLvalue(x) = node {
+            let rn: RefNode = RefNode::from(x);
+            if let Some(idloc) = get_identifier(rn) {
+                if let Some(name) = syntax_tree.get_str(&idloc) {
+                    if let Some(start) = origin_start(syntax_tree, &idloc) {
+                        write_offsets.insert(start);
+                    }
+                    let loc = to_loc_json(syntax_tree, line_map, &idloc);
+                    refs.push(json!({
+                        "name": name,
+                        "module": current_module.clone().unwrap_or_default(),
+                        "rw": "write",
+                        "loc": loc
+                    }));
+                }
+            }
+            continue;
+        }
+    }
+
     for node in syntax_tree {
         if let RefNode::ModuleDeclarationNonansi(x) = node {
             if let Some(id) = unwrap_node!(x, ModuleIdentifier) {
@@ -232,15 +298,24 @@ fn collect_refs_with_modules(syntax_tree: &SyntaxTree) -> Vec<serde_json::Value>
             let rn: RefNode = RefNode::from(x);
             if let Some(idloc) = get_identifier(rn) {
                 if let Some(name) = syntax_tree.get_str(&idloc) {
+                    if let Some(start) = origin_start(syntax_tree, &idloc) {
+                        if write_offsets.contains(&start) {
+                            continue;
+                        }
+                    }
+                    let loc = to_loc_json(syntax_tree, line_map, &idloc);
                     refs.push(json!({
                         "name": name,
-                        "module": current_module.clone().unwrap_or_default()
+                        "module": current_module.clone().unwrap_or_default(),
+                        "rw": "read",
+                        "loc": loc
                     }));
                 }
             }
             continue;
         }
     }
+
     refs
 }
 
@@ -251,30 +326,39 @@ fn analyze_symbols(decls: &[serde_json::Value], refs: &[serde_json::Value]) -> V
         if kind == "param" || kind == "net" || kind == "var" {
             let name = d.get("name").and_then(|x| x.as_str()).unwrap_or("").to_string();
             let module = d.get("module").and_then(|x| x.as_str()).unwrap_or("").to_string();
-            let loc = d.get("loc").cloned().unwrap_or_else(|| {
-                json!({
-                    "line": 1, "col": 1, "end_line": 1, "end_col": 1
-                })
-            });
+            let loc = d
+                .get("loc")
+                .cloned()
+                .unwrap_or_else(|| json!({"line":1,"col":1,"end_line":1,"end_col":1}));
             decls_map.insert((module, name, kind.to_string()), loc);
         }
     }
 
-    let mut ref_counts: HashMap<(String, String), usize> = HashMap::new();
+    let mut read_counts: HashMap<(String, String), usize> = HashMap::new();
+    let mut write_counts: HashMap<(String, String), usize> = HashMap::new();
     for r in refs {
         let name = r.get("name").and_then(|x| x.as_str()).unwrap_or("").to_string();
         let module = r.get("module").and_then(|x| x.as_str()).unwrap_or("").to_string();
-        *ref_counts.entry((module, name)).or_insert(0) += 1;
+        let rw = r.get("rw").and_then(|x| x.as_str()).unwrap_or("read");
+        if rw == "write" {
+            *write_counts.entry((module, name)).or_insert(0) += 1;
+        } else {
+            *read_counts.entry((module, name)).or_insert(0) += 1;
+        }
     }
 
     let mut out = Vec::with_capacity(decls_map.len());
     for ((module, name, class), loc) in decls_map {
-        let n = *ref_counts.get(&(module.clone(), name.clone())).unwrap_or(&0);
+        let r = *read_counts.get(&(module.clone(), name.clone())).unwrap_or(&0);
+        let w = *write_counts.get(&(module.clone(), name.clone())).unwrap_or(&0);
+        let n = r + w;
         out.push(json!({
             "module": module,
             "name": name,
             "class": class,
             "ref_count": n,
+            "read_count": r,
+            "write_count": w,
             "used": n > 0,
             "loc": loc
         }));
