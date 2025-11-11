@@ -27,7 +27,7 @@ impl<'a> Pipeline<'a> {
     pub fn run_file(&self, input: &Path) -> Result<usize> {
         let (normalized_text, input_path) = read_input(input)?;
         let driver = SvDriver::new(&self.cfg.svparser);
-        let artifacts = driver.parse_text(&normalized_text);
+        let artifacts = driver.parse_text(&normalized_text, &input_path);
         let mut all: Vec<Violation> = Vec::new();
 
         for stage in &self.cfg.stages.enabled {
