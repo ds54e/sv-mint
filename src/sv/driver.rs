@@ -30,8 +30,10 @@ impl<'a> SvDriver<'a> {
     pub fn parse_text(&self, text: &str, input_path: &Path) -> ParseArtifacts {
         let path_s = input_path.to_string_lossy().into_owned();
         let raw_text = text.to_owned();
+
         let include_paths: Vec<std::path::PathBuf> =
             self.cfg.include_paths.iter().map(std::path::PathBuf::from).collect();
+
         type Defines = HashMap<String, Option<sv_parser::Define>>;
         let mut pre_defines: Defines = HashMap::new();
         for d in &self.cfg.defines {
@@ -60,7 +62,7 @@ impl<'a> SvDriver<'a> {
 
         log_event(Ev::new(Event::ParseParseStart, &path_s));
         let t1 = Instant::now();
-        let (has_cst, final_defines, decls, refs) = match parse_sv(
+        let (has_cst, final_defines, decls, refs, symbols) = match parse_sv(
             input_path,
             &pre_defines,
             &include_paths,
@@ -68,22 +70,19 @@ impl<'a> SvDriver<'a> {
             self.cfg.allow_incomplete,
         ) {
             Ok((syntax_tree, defs)) => {
-                let d = collect_decls(&syntax_tree);
-                let r = collect_refs(&syntax_tree);
-                (true, defs, d, r)
+                let d = collect_decls_with_modules(&syntax_tree);
+                let r = collect_refs_with_modules(&syntax_tree);
+                let s = analyze_symbols(&d, &r);
+                (true, defs, d, r, s)
             }
-            Err(_) => (false, pre_defines.clone(), Vec::new(), Vec::new()),
+            Err(_) => (false, pre_defines.clone(), Vec::new(), Vec::new(), Vec::new()),
         };
         let elapsed_parse = t1.elapsed().as_millis();
         log_event(Ev::new(Event::ParseParseDone, &path_s).with_duration_ms(elapsed_parse));
         log_event(Ev::new(Event::ParseAstCollectDone, &path_s));
 
         let defines: Vec<DefineInfo> = defines_to_info(&final_defines);
-        let ast = AstSummary {
-            decls,
-            refs,
-            symbols: Vec::new(),
-        };
+        let ast = AstSummary { decls, refs, symbols };
         let line_map = LineMap::new(&raw_text);
 
         ParseArtifacts {
@@ -109,71 +108,145 @@ fn defines_to_info(defs: &HashMap<String, Option<sv_parser::Define>>) -> Vec<Def
     v
 }
 
-fn collect_decls(syntax_tree: &SyntaxTree) -> Vec<serde_json::Value> {
+fn collect_decls_with_modules(syntax_tree: &SyntaxTree) -> Vec<serde_json::Value> {
     let mut decls = Vec::new();
+    let mut current_module: Option<String> = None;
     for node in syntax_tree {
-        match node {
-            RefNode::ModuleDeclarationNonansi(x) => {
-                if let Some(id) = unwrap_node!(x, ModuleIdentifier) {
-                    if let Some(idloc) = get_identifier(id) {
-                        if let Some(name) = syntax_tree.get_str(&idloc) {
-                            decls.push(json!({"kind":"module","name":name}));
-                        }
-                    }
-                }
-            }
-            RefNode::ModuleDeclarationAnsi(x) => {
-                if let Some(id) = unwrap_node!(x, ModuleIdentifier) {
-                    if let Some(idloc) = get_identifier(id) {
-                        if let Some(name) = syntax_tree.get_str(&idloc) {
-                            decls.push(json!({"kind":"module","name":name}));
-                        }
-                    }
-                }
-            }
-            RefNode::ParamAssignment(x) => {
-                let rn: RefNode = RefNode::from(x);
-                if let Some(idloc) = get_identifier(rn) {
+        if let RefNode::ModuleDeclarationNonansi(x) = node {
+            if let Some(id) = unwrap_node!(x, ModuleIdentifier) {
+                if let Some(idloc) = get_identifier(id) {
                     if let Some(name) = syntax_tree.get_str(&idloc) {
-                        decls.push(json!({"kind":"param","name":name}));
+                        current_module = Some(name.to_string());
+                        decls.push(json!({ "kind":"module", "name":name }));
                     }
                 }
             }
-            RefNode::NetDeclAssignment(x) => {
-                let rn: RefNode = RefNode::from(x);
-                if let Some(idloc) = get_identifier(rn) {
+            continue;
+        }
+        if let RefNode::ModuleDeclarationAnsi(x) = node {
+            if let Some(id) = unwrap_node!(x, ModuleIdentifier) {
+                if let Some(idloc) = get_identifier(id) {
                     if let Some(name) = syntax_tree.get_str(&idloc) {
-                        decls.push(json!({"kind":"net","name":name}));
+                        current_module = Some(name.to_string());
+                        decls.push(json!({ "kind":"module", "name":name }));
                     }
                 }
             }
-            RefNode::VariableDeclAssignment(x) => {
-                let rn: RefNode = RefNode::from(x);
-                if let Some(idloc) = get_identifier(rn) {
-                    if let Some(name) = syntax_tree.get_str(&idloc) {
-                        decls.push(json!({"kind":"var","name":name}));
-                    }
+            continue;
+        }
+        if let RefNode::ParamAssignment(x) = node {
+            let rn: RefNode = RefNode::from(x);
+            if let Some(idloc) = get_identifier(rn) {
+                if let Some(name) = syntax_tree.get_str(&idloc) {
+                    decls.push(json!({
+                        "kind": "param",
+                        "name": name,
+                        "module": current_module.clone().unwrap_or_default()
+                    }));
                 }
             }
-            _ => {}
+            continue;
+        }
+        if let RefNode::NetDeclAssignment(x) = node {
+            let rn: RefNode = RefNode::from(x);
+            if let Some(idloc) = get_identifier(rn) {
+                if let Some(name) = syntax_tree.get_str(&idloc) {
+                    decls.push(json!({
+                        "kind": "net",
+                        "name": name,
+                        "module": current_module.clone().unwrap_or_default()
+                    }));
+                }
+            }
+            continue;
+        }
+        if let RefNode::VariableDeclAssignment(x) = node {
+            let rn: RefNode = RefNode::from(x);
+            if let Some(idloc) = get_identifier(rn) {
+                if let Some(name) = syntax_tree.get_str(&idloc) {
+                    decls.push(json!({
+                        "kind": "var",
+                        "name": name,
+                        "module": current_module.clone().unwrap_or_default()
+                    }));
+                }
+            }
+            continue;
         }
     }
     decls
 }
 
-fn collect_refs(syntax_tree: &SyntaxTree) -> Vec<serde_json::Value> {
+fn collect_refs_with_modules(syntax_tree: &SyntaxTree) -> Vec<serde_json::Value> {
     let mut refs = Vec::new();
+    let mut current_module: Option<String> = None;
     for node in syntax_tree {
+        if let RefNode::ModuleDeclarationNonansi(x) = node {
+            if let Some(id) = unwrap_node!(x, ModuleIdentifier) {
+                if let Some(idloc) = get_identifier(id) {
+                    if let Some(name) = syntax_tree.get_str(&idloc) {
+                        current_module = Some(name.to_string());
+                    }
+                }
+            }
+            continue;
+        }
+        if let RefNode::ModuleDeclarationAnsi(x) = node {
+            if let Some(id) = unwrap_node!(x, ModuleIdentifier) {
+                if let Some(idloc) = get_identifier(id) {
+                    if let Some(name) = syntax_tree.get_str(&idloc) {
+                        current_module = Some(name.to_string());
+                    }
+                }
+            }
+            continue;
+        }
         if let RefNode::HierarchicalIdentifier(x) = node {
             let rn: RefNode = RefNode::from(x);
             if let Some(idloc) = get_identifier(rn) {
                 if let Some(name) = syntax_tree.get_str(&idloc) {
-                    refs.push(json!({"name":name}));
+                    refs.push(json!({
+                        "name": name,
+                        "module": current_module.clone().unwrap_or_default()
+                    }));
                 }
             }
+            continue;
         }
     }
     refs
+}
+
+fn analyze_symbols(decls: &[serde_json::Value], refs: &[serde_json::Value]) -> Vec<serde_json::Value> {
+    let mut decls_map: HashMap<(String, String, String), ()> = HashMap::new();
+    for d in decls {
+        let kind = d.get("kind").and_then(|x| x.as_str()).unwrap_or("");
+        if kind == "param" || kind == "net" || kind == "var" {
+            let name = d.get("name").and_then(|x| x.as_str()).unwrap_or("").to_string();
+            let module = d.get("module").and_then(|x| x.as_str()).unwrap_or("").to_string();
+            decls_map.insert((module, name, kind.to_string()), ());
+        }
+    }
+
+    let mut ref_counts: HashMap<(String, String), usize> = HashMap::new();
+    for r in refs {
+        let name = r.get("name").and_then(|x| x.as_str()).unwrap_or("").to_string();
+        let module = r.get("module").and_then(|x| x.as_str()).unwrap_or("").to_string();
+        *ref_counts.entry((module, name)).or_insert(0) += 1;
+    }
+
+    let mut out = Vec::with_capacity(decls_map.len());
+    for ((module, name, class), _) in decls_map {
+        let n = *ref_counts.get(&(module.clone(), name.clone())).unwrap_or(&0);
+        out.push(json!({
+            "module": module,
+            "name": name,
+            "class": class,
+            "ref_count": n,
+            "used": n > 0
+        }));
+    }
+    out
 }
 
 fn get_identifier(node: RefNode) -> Option<Locate> {
