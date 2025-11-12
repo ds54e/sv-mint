@@ -14,6 +14,8 @@ pub enum ConfigError {
     },
     #[error("invalid value: {detail}")]
     InvalidValue { detail: String },
+    #[error("config io error: {detail}")]
+    IoFailed { detail: String },
 }
 
 #[derive(Debug, Error)]

@@ -20,6 +20,9 @@ pub fn init(cfg: &LoggingConfig) -> Result<(), ConfigError> {
         plugin: cfg.show_plugin_events,
         parse: cfg.show_parse_events,
     });
+    for key in cfg.extra.keys() {
+        tracing::warn!(target: "sv-mint::logging", "unused logging option {}", key);
+    }
 
     let res = match cfg.format {
         LogFormat::Text => tracing_subscriber::fmt()

@@ -3,8 +3,10 @@ use crate::svparser::SvParserCfg;
 use crate::textutil::{normalize_lf, strip_bom};
 use serde::Deserialize;
 use serde_json::Value;
+use std::collections::HashMap;
 use std::fs;
 use std::path::{Path, PathBuf};
+use toml::Value as TomlValue;
 
 #[derive(serde::Deserialize, Clone)]
 pub struct LoggingConfig {
@@ -15,6 +17,8 @@ pub struct LoggingConfig {
     pub show_parse_events: bool,
     #[serde(default)]
     pub format: LogFormat,
+    #[serde(flatten, default)]
+    pub extra: HashMap<String, TomlValue>,
 }
 
 impl Default for LoggingConfig {
@@ -26,6 +30,7 @@ impl Default for LoggingConfig {
             show_plugin_events: true,
             show_parse_events: true,
             format: LogFormat::Text,
+            extra: HashMap::new(),
         }
     }
 }
@@ -102,6 +107,16 @@ pub fn resolve_path(opt: Option<PathBuf>) -> Result<PathBuf, ConfigError> {
 
 pub fn load(cfg_text: &str) -> Result<Config, ConfigError> {
     toml::from_str(cfg_text).map_err(|e| ConfigError::InvalidToml { detail: e.to_string() })
+}
+
+pub fn load_from_path(opt: Option<PathBuf>) -> Result<(Config, PathBuf), ConfigError> {
+    let path = resolve_path(opt)?;
+    let cfg_text = fs::read_to_string(&path).map_err(|e| ConfigError::IoFailed {
+        detail: format!("{} ({})", path.display(), e),
+    })?;
+    let cfg = load(&cfg_text)?;
+    validate_config(&cfg)?;
+    Ok((cfg, path))
 }
 
 pub fn read_input(path: &Path) -> Result<(String, PathBuf), ConfigError> {
