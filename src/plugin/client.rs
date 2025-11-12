@@ -1,27 +1,33 @@
 use crate::config::Config;
 use crate::core::errors::PluginError;
+use crate::core::payload::StagePayload;
 use crate::diag::event::{Ev, Event};
 use crate::diag::logging::log_event;
 use crate::plugin_scripts::{resolve_script_path, resolve_scripts};
 use crate::types::{Severity, Stage, Violation};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use std::io::{BufRead, BufReader, Read, Write};
+use std::collections::HashMap;
 use std::path::Path;
-use std::process::{Child, ChildStdin, Command, Stdio};
-use std::sync::{mpsc, Arc, Mutex};
-use std::thread;
+use std::process::Stdio;
+use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
+use tokio::io::{AsyncBufReadExt, AsyncReadExt, AsyncWriteExt, BufReader};
+use tokio::process::{Child, ChildStderr, ChildStdin, ChildStdout, Command};
+use tokio::runtime::Runtime;
+use tokio::sync::mpsc::{UnboundedReceiver, UnboundedSender};
+use tokio::time;
 
 pub struct PythonHost {
+    runtime: Runtime,
     child: Child,
     stdin: ChildStdin,
-    stdout_rx: mpsc::Receiver<String>,
+    stdout_rx: UnboundedReceiver<String>,
     stderr_buf: Arc<Mutex<Vec<u8>>>,
     stderr_pos: usize,
     timeout: Duration,
     snippet_limit: usize,
-    severity_override: std::collections::HashMap<String, Severity>,
+    severity_override: HashMap<String, Severity>,
 }
 
 #[derive(Serialize)]
@@ -50,30 +56,35 @@ impl PythonHost {
     pub fn start(cfg: &Config) -> Result<Self, PluginError> {
         let scripts = resolve_scripts(cfg);
         let host_path = resolve_script_path("plugins/lib/rule_host.py");
-        let mut cmd = Command::new(&cfg.plugin.cmd);
-        cmd.args(&cfg.plugin.args)
-            .arg(&host_path)
-            .stdin(Stdio::piped())
-            .stdout(Stdio::piped())
-            .stderr(Stdio::piped());
-        let mut child = cmd
-            .spawn()
-            .map_err(|e| PluginError::SpawnFailed { detail: e.to_string() })?;
-        let stdin = child.stdin.take().ok_or_else(|| PluginError::IoFailed {
-            detail: "stdin unavailable".to_string(),
-        })?;
-        let stdout = child.stdout.take().ok_or_else(|| PluginError::IoFailed {
-            detail: "stdout unavailable".to_string(),
-        })?;
-        let stderr = child.stderr.take().ok_or_else(|| PluginError::IoFailed {
-            detail: "stderr unavailable".to_string(),
-        })?;
-        let stdout_rx = spawn_stdout(stdout);
-        let stderr_buf = spawn_stderr(stderr);
+        let runtime = Runtime::new().map_err(|e| PluginError::SpawnFailed { detail: e.to_string() })?;
         let timeout = Duration::from_millis(cfg.defaults.timeout_ms_per_file);
         let snippet_limit = cfg.logging.stderr_snippet_bytes;
         let severity_override = build_severity_override(&cfg.ruleset.severity_override);
+        let (child, stdin, stdout, stderr) = runtime.block_on(async {
+            let mut cmd = Command::new(&cfg.plugin.cmd);
+            cmd.args(&cfg.plugin.args)
+                .arg(&host_path)
+                .stdin(Stdio::piped())
+                .stdout(Stdio::piped())
+                .stderr(Stdio::piped());
+            let mut child = cmd
+                .spawn()
+                .map_err(|e| PluginError::SpawnFailed { detail: e.to_string() })?;
+            let stdin = child.stdin.take().ok_or_else(|| PluginError::IoFailed {
+                detail: "stdin unavailable".to_string(),
+            })?;
+            let stdout = child.stdout.take().ok_or_else(|| PluginError::IoFailed {
+                detail: "stdout unavailable".to_string(),
+            })?;
+            let stderr = child.stderr.take().ok_or_else(|| PluginError::IoFailed {
+                detail: "stderr unavailable".to_string(),
+            })?;
+            Ok((child, stdin, stdout, stderr))
+        })?;
+        let stdout_rx = spawn_stdout(&runtime, stdout);
+        let stderr_buf = spawn_stderr(&runtime, stderr);
         let mut host = Self {
+            runtime,
             child,
             stdin,
             stdout_rx,
@@ -91,16 +102,18 @@ impl PythonHost {
         &mut self,
         stage: &Stage,
         input_path: &Path,
-        payload: Value,
+        payload: StagePayload<'_>,
     ) -> Result<Vec<Violation>, PluginError> {
         let path_s = input_path.to_string_lossy().into_owned();
         let stage_name = stage.as_str();
         log_event(Ev::new(Event::PluginInvoke, &path_s).with_stage(stage_name));
         let t0 = Instant::now();
+        let payload_value =
+            serde_json::to_value(&payload).map_err(|e| PluginError::BadJson { detail: e.to_string() })?;
         let req = HostRequest::RunStage {
             stage: stage_name,
             path: input_path,
-            payload,
+            payload: payload_value,
         };
         self.send(&req)?;
         let resp = match self.recv() {
@@ -154,27 +167,38 @@ impl PythonHost {
     }
 
     fn send(&mut self, req: &HostRequest<'_>) -> Result<(), PluginError> {
-        let text = serde_json::to_vec(req).map_err(|e| PluginError::BadJson { detail: e.to_string() })?;
-        self.stdin
-            .write_all(&text)
-            .and_then(|_| self.stdin.write_all(b"\n"))
-            .and_then(|_| self.stdin.flush())
+        let data = serde_json::to_vec(req).map_err(|e| PluginError::BadJson { detail: e.to_string() })?;
+        let stdin = &mut self.stdin;
+        self.runtime
+            .block_on(async {
+                stdin.write_all(&data).await?;
+                stdin.write_all(b"\n").await?;
+                stdin.flush().await
+            })
             .map_err(|e| PluginError::IoFailed { detail: e.to_string() })
     }
 
     fn recv(&mut self) -> Result<HostResponse, PluginError> {
-        match self.stdout_rx.recv_timeout(self.timeout) {
-            Ok(line) => serde_json::from_str(&line).map_err(|e| PluginError::BadJson { detail: e.to_string() }),
-            Err(mpsc::RecvTimeoutError::Timeout) => {
-                let _ = self.child.kill();
-                Err(PluginError::Timeout {
-                    timeout_ms: self.timeout.as_millis() as u64,
-                })
+        let timeout = self.timeout;
+        let stdout_rx = &mut self.stdout_rx;
+        let child = &mut self.child;
+        self.runtime.block_on(async {
+            match time::timeout(timeout, stdout_rx.recv()).await {
+                Ok(Some(line)) => {
+                    serde_json::from_str(&line).map_err(|e| PluginError::BadJson { detail: e.to_string() })
+                }
+                Ok(None) => Err(PluginError::ProtocolError {
+                    detail: "host closed stdout".to_string(),
+                }),
+                Err(_) => {
+                    let _ = child.start_kill();
+                    let _ = child.wait().await;
+                    Err(PluginError::Timeout {
+                        timeout_ms: timeout.as_millis() as u64,
+                    })
+                }
             }
-            Err(_) => Err(PluginError::ProtocolError {
-                detail: "host closed stdout".to_string(),
-            }),
-        }
+        })
     }
 
     fn apply_overrides(&self, mut violations: Vec<Violation>) -> Vec<Violation> {
@@ -214,62 +238,68 @@ impl PythonHost {
 
 impl Drop for PythonHost {
     fn drop(&mut self) {
-        let req = HostRequest::Shutdown;
-        let _ = self.send(&req);
-        let _ = self.child.kill();
-        let _ = self.child.wait();
+        let _ = self.send(&HostRequest::Shutdown);
+        let child = &mut self.child;
+        let _ = self.runtime.block_on(async {
+            let _ = child.start_kill();
+            let _ = child.wait().await;
+        });
     }
 }
 
-fn spawn_stdout(stdout: impl Read + Send + 'static) -> mpsc::Receiver<String> {
-    let (tx, rx) = mpsc::channel();
-    thread::spawn(move || {
-        let mut reader = BufReader::new(stdout);
-        loop {
-            let mut line = String::new();
-            match reader.read_line(&mut line) {
-                Ok(0) => break,
-                Ok(_) => {
-                    if line.ends_with('\n') {
-                        line.pop();
-                        if line.ends_with('\r') {
-                            line.pop();
-                        }
-                    }
-                    let _ = tx.send(line);
-                }
-                Err(_) => break,
-            }
-        }
+fn spawn_stdout(runtime: &Runtime, stdout: ChildStdout) -> UnboundedReceiver<String> {
+    let (tx, rx) = tokio::sync::mpsc::unbounded_channel();
+    runtime.spawn(async move {
+        read_stdout(stdout, tx).await;
     });
     rx
 }
 
-fn spawn_stderr(stderr: impl Read + Send + 'static) -> Arc<Mutex<Vec<u8>>> {
+fn spawn_stderr(runtime: &Runtime, stderr: ChildStderr) -> Arc<Mutex<Vec<u8>>> {
     let buf = Arc::new(Mutex::new(Vec::new()));
-    let buf_clone = buf.clone();
-    thread::spawn(move || {
-        let mut reader = BufReader::new(stderr);
-        let mut tmp = [0u8; 4096];
-        loop {
-            match reader.read(&mut tmp) {
-                Ok(0) => break,
-                Ok(n) => {
-                    if let Ok(mut dst) = buf_clone.lock() {
-                        dst.extend_from_slice(&tmp[..n]);
-                    }
-                }
-                Err(_) => break,
-            }
-        }
+    let dst = buf.clone();
+    runtime.spawn(async move {
+        read_stderr(stderr, dst).await;
     });
     buf
 }
 
-fn build_severity_override(
-    raw: &std::collections::HashMap<String, String>,
-) -> std::collections::HashMap<String, Severity> {
-    let mut map = std::collections::HashMap::new();
+async fn read_stdout(stdout: ChildStdout, tx: UnboundedSender<String>) {
+    let mut reader = BufReader::new(stdout);
+    let mut line = String::new();
+    loop {
+        line.clear();
+        match reader.read_line(&mut line).await {
+            Ok(0) => break,
+            Ok(_) => {
+                while line.ends_with('\n') || line.ends_with('\r') {
+                    line.pop();
+                }
+                let _ = tx.send(line.clone());
+            }
+            Err(_) => break,
+        }
+    }
+}
+
+async fn read_stderr(stderr: ChildStderr, dst: Arc<Mutex<Vec<u8>>>) {
+    let mut reader = BufReader::new(stderr);
+    let mut tmp = [0u8; 4096];
+    loop {
+        match reader.read(&mut tmp).await {
+            Ok(0) => break,
+            Ok(n) => {
+                if let Ok(mut buf) = dst.lock() {
+                    buf.extend_from_slice(&tmp[..n]);
+                }
+            }
+            Err(_) => break,
+        }
+    }
+}
+
+fn build_severity_override(raw: &HashMap<String, String>) -> HashMap<String, Severity> {
+    let mut map = HashMap::new();
     for (k, v) in raw {
         if let Some(sev) = parse_severity(v) {
             map.insert(k.clone(), sev);

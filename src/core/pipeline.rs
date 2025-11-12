@@ -1,15 +1,14 @@
 use crate::config::{read_input, Config};
+use crate::core::payload::{payload_for, StagePayload};
 use crate::core::size_guard::{enforce_request_size, OnExceed, SizePolicy, StageOutcome, StageStatus};
 use crate::diag::event::{Ev, Event};
 use crate::diag::logging::log_event;
 use crate::output::print_violations;
 use crate::plugin::client::PythonHost;
-use crate::sv::model::ParseArtifacts;
 use crate::svparser::SvDriver;
 use crate::types::{Stage, Violation};
 use anyhow::Result;
 use serde::Serialize;
-use serde_json::json;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::time::Instant;
@@ -136,7 +135,8 @@ impl<'a> Pipeline<'a> {
         for stage in &self.cfg.stages.enabled {
             log_event(Ev::new(Event::StageStart, &input_path.to_string_lossy()).with_stage(stage.as_str()));
             let payload = payload_for(stage, &artifacts);
-            let invocation = StageInvocation {
+            let invocation = StageRequest {
+                kind: "run_stage",
                 stage: stage.as_str(),
                 path: &input_path,
                 payload: &payload,
@@ -176,33 +176,6 @@ fn is_required_stage(_cfg: &Config, stage: &Stage) -> bool {
     matches!(stage, Stage::RawText | Stage::PpText)
 }
 
-fn payload_for(stage: &Stage, a: &ParseArtifacts) -> serde_json::Value {
-    match stage {
-        Stage::RawText => json!({ "text": a.raw_text }),
-        Stage::PpText => {
-            json!({ "text": a.pp_text, "defines": a.defines.iter().map(|d| json!({ "name": d.name, "value": d.value })).collect::<Vec<_>>() })
-        }
-        Stage::Cst => {
-            if let Some(ir) = &a.cst_ir {
-                serde_json::json!({ "mode": "inline", "cst_ir": ir })
-            } else {
-                serde_json::json!({ "mode": "none", "has_cst": a.has_cst })
-            }
-        }
-        Stage::Ast => {
-            json!({
-                "schema_version": a.ast.schema_version,
-                "decls": a.ast.decls,
-                "refs": a.ast.refs,
-                "symbols": a.ast.symbols,
-                "assigns": a.ast.assigns,
-                "scopes": a.ast.scopes,
-                "pp_text": a.ast.pp_text
-            })
-        }
-    }
-}
-
 fn record_outcome(path: &Path, outcome: &StageOutcome) {
     let status = match outcome.status {
         StageStatus::Ran => "ran",
@@ -238,8 +211,10 @@ impl<'a> Pipeline<'a> {
 }
 
 #[derive(Serialize)]
-struct StageInvocation<'a> {
+struct StageRequest<'a> {
+    kind: &'static str,
     stage: &'a str,
     path: &'a Path,
-    payload: &'a serde_json::Value,
+    #[serde(borrow)]
+    payload: &'a StagePayload<'a>,
 }
