@@ -1,18 +1,23 @@
 use crate::config::{read_input, Config};
+use crate::core::size_guard::{enforce_request_size, OnExceed, SizePolicy, StageOutcome, StageStatus};
 use crate::diag::event::{Ev, Event};
 use crate::diag::logging::log_event;
 use crate::output::print_violations;
 use crate::plugin::client::PythonHost;
 use crate::sv::model::ParseArtifacts;
 use crate::svparser::SvDriver;
-use crate::types::{Location, Severity, Stage, Violation};
+use crate::types::{Stage, Violation};
 use anyhow::Result;
+use serde::Serialize;
 use serde_json::json;
 use std::path::{Path, PathBuf};
-use tracing::{error, warn};
+use std::sync::atomic::{AtomicUsize, Ordering};
+use std::time::Instant;
+use tracing::{debug, error};
 
 const MAX_REQ_BYTES: usize = 16_000_000;
 const WARN_REQ_BYTES: usize = 12_000_000;
+const MAX_RESP_BYTES: usize = 16_000_000;
 
 pub struct RunSummary {
     pub violations: usize,
@@ -51,14 +56,15 @@ impl<'a> Pipeline<'a> {
             .map(|n| n.get())
             .unwrap_or(1)
             .min(inputs.len());
-        let chunk_size = (inputs.len() + worker_count - 1) / worker_count;
+        let total = inputs.len();
+        let index = AtomicUsize::new(0);
         let mut results: Vec<Result<RunSummary>> = Vec::new();
         std::thread::scope(|scope| {
             let mut handles = Vec::new();
-            for chunk in inputs.chunks(chunk_size) {
-                let chunk_paths: Vec<PathBuf> = chunk.iter().cloned().collect();
+            for _ in 0..worker_count {
                 let pipeline = Pipeline { cfg: self.cfg };
-                handles.push(scope.spawn(move || pipeline.run_file_batch(&chunk_paths)));
+                let counter = &index;
+                handles.push(scope.spawn(move || pipeline.run_worker(inputs, total, counter)));
             }
             for handle in handles {
                 results.push(handle.join().unwrap());
@@ -98,6 +104,29 @@ impl<'a> Pipeline<'a> {
         Ok(summary)
     }
 
+    fn run_worker(&self, inputs: &[PathBuf], total: usize, counter: &AtomicUsize) -> Result<RunSummary> {
+        let mut host = PythonHost::start(self.cfg).map_err(anyhow::Error::new)?;
+        let mut summary = RunSummary {
+            violations: 0,
+            had_error: false,
+        };
+        loop {
+            let next = counter.fetch_add(1, Ordering::SeqCst);
+            if next >= total {
+                break;
+            }
+            let path = &inputs[next];
+            match self.run_file_with_host(path, &mut host) {
+                Ok(n) => summary.violations += n,
+                Err(e) => {
+                    summary.had_error = true;
+                    error!("{}: {}", path.display(), e);
+                }
+            }
+        }
+        Ok(summary)
+    }
+
     fn run_file_with_host(&self, input: &Path, host: &mut PythonHost) -> Result<usize> {
         let (normalized_text, input_path) = read_input(input)?;
         let driver = SvDriver::new(&self.cfg.svparser);
@@ -107,56 +136,34 @@ impl<'a> Pipeline<'a> {
         for stage in &self.cfg.stages.enabled {
             log_event(Ev::new(Event::StageStart, &input_path.to_string_lossy()).with_stage(stage.as_str()));
             let payload = payload_for(stage, &artifacts);
-            let req_bytes = serde_json::to_vec(&json!({
-                "stage": stage.as_str(),
-                "path": input_path,
-                "payload": payload.clone(),
-            }))
-            .map_err(anyhow::Error::new)?
-            .len();
-            if (WARN_REQ_BYTES..=MAX_REQ_BYTES).contains(&req_bytes) {
-                warn!(
-                    "{} payload nearing limit: {} / {}",
-                    stage.as_str(),
-                    req_bytes,
-                    MAX_REQ_BYTES
-                );
-            }
-            if req_bytes > MAX_REQ_BYTES {
-                let sev = if is_required_stage(self.cfg, stage) {
-                    Severity::Error
-                } else {
-                    Severity::Warning
-                };
-                let is_err = matches!(sev, Severity::Error);
-                let v = Violation {
-                    rule_id: "sys.stage.skipped.size".to_string(),
-                    severity: sev,
-                    message: format!(
-                        "Stage '{}' skipped: request payload {} bytes exceeds limit {} bytes.",
-                        stage.as_str(),
-                        req_bytes,
-                        MAX_REQ_BYTES
-                    ),
-                    location: Location {
-                        line: 1,
-                        col: 1,
-                        end_line: 1,
-                        end_col: 1,
-                    },
-                };
-                all.push(v);
+            let invocation = StageInvocation {
+                stage: stage.as_str(),
+                path: &input_path,
+                payload: &payload,
+            };
+            let policy = self.size_policy(stage);
+            if let Err(outcome) = enforce_request_size(stage.as_str(), &invocation, &policy) {
+                all.extend(outcome.violations.iter().cloned());
+                record_outcome(&input_path, &outcome);
                 log_event(Ev::new(Event::StageDone, &input_path.to_string_lossy()).with_stage(stage.as_str()));
-                if is_err {
+                if matches!(outcome.status, StageStatus::Failed) {
                     print_violations(&all, &input_path);
                     return Ok(all.len());
                 }
                 continue;
             }
+            let t0 = Instant::now();
             let vs = host
                 .run_stage(stage, &input_path, payload)
                 .map_err(anyhow::Error::new)?;
-            all.extend(vs);
+            let outcome = StageOutcome {
+                stage: stage.as_str().to_string(),
+                status: StageStatus::Ran,
+                violations: vs,
+                duration_ms: t0.elapsed().as_millis() as u64,
+            };
+            all.extend(outcome.violations.iter().cloned());
+            record_outcome(&input_path, &outcome);
             log_event(Ev::new(Event::StageDone, &input_path.to_string_lossy()).with_stage(stage.as_str()));
         }
 
@@ -194,4 +201,45 @@ fn payload_for(stage: &Stage, a: &ParseArtifacts) -> serde_json::Value {
             })
         }
     }
+}
+
+fn record_outcome(path: &Path, outcome: &StageOutcome) {
+    let status = match outcome.status {
+        StageStatus::Ran => "ran",
+        StageStatus::Skipped => "skipped",
+        StageStatus::Failed => "failed",
+    };
+    debug!(
+        target: "sv-mint::stage",
+        path = %path.display(),
+        stage = outcome.stage.as_str(),
+        status,
+        violations = outcome.violations.len(),
+        duration_ms = outcome.duration_ms,
+    );
+}
+
+fn size_policy_for_stage(cfg: &Config, stage: &Stage) -> SizePolicy {
+    let required = is_required_stage(cfg, stage);
+    SizePolicy {
+        max_request_bytes: MAX_REQ_BYTES,
+        warn_request_bytes: WARN_REQ_BYTES,
+        max_response_bytes: MAX_RESP_BYTES,
+        on_exceed: if required { OnExceed::Error } else { OnExceed::Skip },
+        fail_ci_on_skip: false,
+        is_required_stage: required,
+    }
+}
+
+impl<'a> Pipeline<'a> {
+    fn size_policy(&self, stage: &Stage) -> SizePolicy {
+        size_policy_for_stage(self.cfg, stage)
+    }
+}
+
+#[derive(Serialize)]
+struct StageInvocation<'a> {
+    stage: &'a str,
+    path: &'a Path,
+    payload: &'a serde_json::Value,
 }
