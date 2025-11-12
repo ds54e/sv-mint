@@ -232,6 +232,8 @@ def check(req):
 | `fixtures/multiple_nonblocking.sv` | `flow.multiple_nonblocking` | `cargo run -- fixtures/multiple_nonblocking.sv` |
 | `fixtures/width_literal_violation.sv` | `width.unsized_base_literal` | `cargo run -- fixtures/width_literal_violation.sv` |
 | `fixtures/case_unique_violation.sv` | `lang.case_requires_unique` | `cargo run -- fixtures/case_unique_violation.sv` |
+| `fixtures/case_begin_violation.sv` | `format.case_begin_required` | `cargo run -- fixtures/case_begin_violation.sv` |
+| `fixtures/package_mismatch.sv` | `package.multiple` / `package.define_in_package` | `cargo run -- fixtures/package_mismatch.sv` |
 
 どのコマンドも違反が発生した場合は終了コード 2 で終了します。複数ファイルを一度に検証したい場合は `cargo run -- fixtures/*.sv` のようにワイルドカードを渡してください。
 

@@ -94,3 +94,13 @@ fn detects_macro_spacing() {
 fn detects_case_unique_violations() {
     run_fixture("fixtures/case_unique_violation.sv", "lang.case_requires_unique");
 }
+
+#[test]
+fn detects_case_begin_violations() {
+    run_fixture("fixtures/case_begin_violation.sv", "format.case_begin_required");
+}
+
+#[test]
+fn detects_package_mismatch() {
+    run_fixture("fixtures/package_mismatch.sv", "package.multiple");
+}

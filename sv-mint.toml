@@ -24,7 +24,9 @@ scripts = [
   "plugins/global_define_rules.py",
   "plugins/assignment_rules.py",
   "plugins/width_literal_rules.py",
-  "plugins/case_unique_required.py"
+  "plugins/case_unique_required.py",
+  "plugins/format_case_begin_cst.py",
+  "plugins/package_rules.py"
 ]
 
 [logging]
