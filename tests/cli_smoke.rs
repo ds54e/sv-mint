@@ -65,6 +65,11 @@ fn detects_global_define_violations() {
 }
 
 #[test]
+fn detects_multiple_nonblocking_assignments() {
+    run_fixture("fixtures/multiple_nonblocking.sv", "flow.multiple_nonblocking");
+}
+
+#[test]
 fn detects_ascii_and_newline_violations() {
     run_temp_source(
         "module ascii_check; // é",
