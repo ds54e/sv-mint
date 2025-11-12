@@ -3,7 +3,7 @@ use crate::core::linemap::LineMap;
 use crate::diag::event::{Ev, Event};
 use crate::diag::logging::log_event;
 use crate::sv::collect::{analyze_symbols, collect_all};
-use crate::sv::cst_ir::build_cst_ir_stub;
+use crate::sv::cst_ir::build_cst_ir;
 pub use crate::sv::model::SvParserCfg;
 use crate::sv::model::{AstSummary, DefineInfo, ParseArtifacts};
 use crate::sv::preprocess::ParserInputs;
@@ -59,7 +59,13 @@ impl SvDriver {
 
         let line_starts = line_starts(&pp_text);
         let cst_ir = if has_cst {
-            Some(build_cst_ir_stub(&path_s, "", &line_starts, &pp_text))
+            Some(build_cst_ir(
+                tree,
+                &path_s,
+                "",
+                &line_starts,
+                &pp_text,
+            ))
         } else {
             None
         };

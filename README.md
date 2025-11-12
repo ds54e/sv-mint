@@ -12,6 +12,7 @@
 - [ステージ別 payload](#ステージ別-payload)
 - [プラグイン仕様](#プラグイン仕様)
 - [ログとサイズガード](#ログとサイズガード)
+- [サンプルフィクスチャと再現コマンド](#サンプルフィクスチャと再現コマンド)
 - [バイトコード抑止](#バイトコード抑止)
 - [診断出力形式](#診断出力形式)
 - [生成情報](#生成情報)
@@ -140,7 +141,7 @@ Rust 側では全ステージを `StagePayload` enum で表現し、シリアラ
   }
 }
 ```
-現行実装では `nodes` と `tokens` が空の場合があります。プラグインは `pp_text` と `line_starts` を用いたフォールバックで動作させてください。将来、`nodes` と `tokens` が埋まる実装に置き換え予定です。
+`nodes` と `tokens` には `sv-parser` の構文木から抽出した情報が格納されます。`kind_table` / `tok_kind_table` はノード種別・トークン種別の名前テーブルで、`nodes[].first_token` と `last_token` を組み合わせて個々の構文片に含まれるトークン範囲を求められます。
 
 ### ast
 ```
@@ -211,6 +212,18 @@ def check(req):
 - raw_text と pp_text は必須ステージとして扱い、スキップ時はエラー終了にします。
 
 すべてのステージ結果は `StageOutcome` として集計され、path / stage / 所要時間が `sv-mint::stage` ログに出力されます。並列処理中でも各ステージの成功・スキップ状態をロギングで追跡できます。
+
+## サンプルフィクスチャと再現コマンド
+
+`fixtures/` ディレクトリには代表的な規約違反を再現する SystemVerilog ソースを保管しています。ルール実装やリグレッション確認の際に以下のコマンドを実行して挙動を確認できます。
+
+| フィクスチャ | 想定ルール | コマンド |
+| --- | --- | --- |
+| `fixtures/format_line_length_violation.sv` | `format.line_length`（行長 100 列超過） | `cargo run -- fixtures/format_line_length_violation.sv` |
+| `fixtures/port_wildcard_violation.sv` | `module.no_port_wildcard`（`.*` 接続禁止） | `cargo run -- fixtures/port_wildcard_violation.sv` |
+| `fixtures/case_missing_default.sv` | `case.missing_default`（default 項目必須） | `cargo run -- fixtures/case_missing_default.sv` |
+
+どのコマンドも違反が発生した場合は終了コード 2 で終了します。複数ファイルを一度に検証したい場合は `cargo run -- fixtures/*.sv` のようにワイルドカードを渡してください。
 
 ## バイトコード抑止
 - 起動引数に `-B` を付与します（既定 args を参照）。

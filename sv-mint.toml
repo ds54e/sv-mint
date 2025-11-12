@@ -11,7 +11,10 @@ scripts = [
   "plugins/comb_nb_in_alwayscomb.py",
   "plugins/decl_unused_param.py",
   "plugins/decl_unused_net.py",
-  "plugins/decl_unused_var.py"
+  "plugins/decl_unused_var.py",
+  "plugins/format_line_length.py",
+  "plugins/no_port_wildcard.py",
+  "plugins/case_default_required.py"
 ]
 
 [logging]
