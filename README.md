@@ -223,6 +223,7 @@ def check(req):
 | `fixtures/port_wildcard_violation.sv` | `module.no_port_wildcard`（`.*` 接続禁止） | `cargo run -- fixtures/port_wildcard_violation.sv` |
 | `fixtures/case_missing_default.sv` | `case.missing_default`（default 項目必須） | `cargo run -- fixtures/case_missing_default.sv` |
 | `fixtures/end_else_newline.sv` | `format.end_else_inline`（`end else` 同一行） | `cargo run -- fixtures/end_else_newline.sv` |
+| `fixtures/if_without_begin.sv` | `format.begin_required`（複数行ブロックの begin/end 必須） | `cargo run -- fixtures/if_without_begin.sv` |
 
 どのコマンドも違反が発生した場合は終了コード 2 で終了します。複数ファイルを一度に検証したい場合は `cargo run -- fixtures/*.sv` のようにワイルドカードを渡してください。
 
