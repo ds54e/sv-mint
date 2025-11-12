@@ -55,6 +55,11 @@ fn detects_naming_violations() {
 }
 
 #[test]
+fn detects_parameter_violations() {
+    run_fixture("fixtures/parameter_violation.sv", "naming.parameter_upper");
+}
+
+#[test]
 fn detects_language_violations() {
     run_fixture("fixtures/lang_violations.sv", "lang.prefer_always_comb");
 }
@@ -123,4 +128,9 @@ fn detects_typedef_violations() {
 #[test]
 fn detects_indent_violations() {
     run_fixture("fixtures/indent_violation.sv", "format.indent_multiple_of_two");
+}
+
+#[test]
+fn detects_always_ff_violations() {
+    run_fixture("fixtures/always_ff_violation.sv", "lang.always_ff_reset");
 }

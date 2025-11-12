@@ -1,3 +1,4 @@
+
 import re
 
 LOWER_SNAKE = re.compile(r"^[a-z][a-z0-9_]*$")
@@ -18,6 +19,7 @@ def check(req):
         name = decl.get("name") or ""
         loc = decl.get("loc")
         out.extend(validate_name(name, loc, "naming.module_case"))
+    name_set = {sym.get("name") for sym in symbols}
     for sym in symbols:
         if sym.get("class") not in ("net", "var"):
             continue
@@ -33,6 +35,9 @@ def check(req):
         out.extend(check_suffixes(name, loc))
         out.extend(check_clock_reset(name, loc))
     out.extend(check_clock_reset_order(ports))
+    out.extend(check_differential_pairs(ports))
+    out.extend(check_pipeline_suffixes(name_set))
+    out.extend(check_parameter_naming(decls))
     return out
 
 
@@ -118,5 +123,73 @@ def check_clock_reset_order(ports):
                     "location": loc,
                 })
             rst_phase = True
+    return issues
+
+
+def check_differential_pairs(ports):
+    issues = []
+    modules = {}
+    for port in ports:
+        modules.setdefault(port.get("module"), []).append(port)
+    for module, plist in modules.items():
+        names = {p.get("name") or "": p for p in plist}
+        for name, port in names.items():
+            if name.endswith("_p"):
+                twin = name[:-2] + "_n"
+                if twin not in names:
+                    issues.append({
+                        "rule_id": "naming.differential_pair",
+                        "severity": "warning",
+                        "message": f"differential pair missing counterpart for {name}",
+                        "location": port.get("loc") or {"line": 1, "col": 1, "end_line": 1, "end_col": 1},
+                    })
+    return issues
+
+
+def check_pipeline_suffixes(names):
+    issues = []
+    for name in names:
+        if name.endswith("_q"):
+            continue
+        if name.endswith("_q0"):
+            continue
+        if re_match := _pipeline_match(name):
+            base, stage = re_match
+            prev = base + ("_q" if stage == 2 else f"_q{stage-1}")
+            if prev not in names:
+                issues.append({
+                    "rule_id": "naming.pipeline_sequence",
+                    "severity": "warning",
+                    "message": f"pipeline stage {name} missing previous stage {prev}",
+                    "location": {"line": 1, "col": 1, "end_line": 1, "end_col": 1},
+                })
+    return issues
+
+
+def _pipeline_match(name):
+    import re
+
+    m = re.match(r"(.+)_q(\d+)$", name)
+    if not m:
+        return None
+    stage = int(m.group(2))
+    if stage < 2:
+        return None
+    return m.group(1), stage
+
+
+def check_parameter_naming(decls):
+    issues = []
+    for decl in decls:
+        if decl.get("kind") != "param":
+            continue
+        name = decl.get("name") or ""
+        if not name or not name[0].isupper():
+            issues.append({
+                "rule_id": "naming.parameter_upper",
+                "severity": "warning",
+                "message": f"parameter {name} should use UpperCamelCase",
+                "location": decl.get("loc") or {"line": 1, "col": 1, "end_line": 1, "end_col": 1},
+            })
     return issues
     return issues

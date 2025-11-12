@@ -19,6 +19,8 @@ def check(req):
     out.extend(find_delays(text))
     out.extend(find_always_star(text))
     out.extend(find_always_latch(text))
+    out.extend(check_always_ff(text))
+    out.extend(check_always_comb(text))
     return out
 
 
@@ -85,5 +87,51 @@ def find_always_latch(text):
             "message": "always_latch is discouraged; prefer flip-flops",
             "location": locate(text, pos, length=len(needle)),
         })
+        idx = pos + 1
+    return out
+
+
+def check_always_ff(text):
+    out = []
+    needle = "always_ff"
+    idx = 0
+    while True:
+        pos = text.find(needle, idx)
+        if pos < 0:
+            break
+        start = text.find("@", pos)
+        if start >= 0:
+            end = text.find(")", start)
+            if end > start:
+                window = text[start:end]
+                if "negedge" not in window:
+                    out.append({
+                        "rule_id": "lang.always_ff_reset",
+                        "severity": "warning",
+                        "message": "always_ff should include asynchronous reset (negedge rst_n)",
+                        "location": locate(text, pos, length=len(needle)),
+                    })
+        idx = pos + 1
+    return out
+
+
+def check_always_comb(text):
+    out = []
+    needle = "always_comb"
+    idx = 0
+    while True:
+        pos = text.find(needle, idx)
+        if pos < 0:
+            break
+        after = pos + len(needle)
+        while after < len(text) and text[after].isspace():
+            after += 1
+        if after < len(text) and text[after] == "@":
+            out.append({
+                "rule_id": "lang.always_comb_at",
+                "severity": "warning",
+                "message": "always_comb must not have sensitivity list",
+                "location": locate(text, pos, length=len(needle)),
+            })
         idx = pos + 1
     return out

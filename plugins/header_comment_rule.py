@@ -9,11 +9,22 @@ def check(req):
     payload = req.get("payload") or {}
     text = payload.get("text") or ""
     snippet = text[:200]
-    if SPDX_RE.search(snippet):
-        return []
-    return [{
-        "rule_id": "header.missing_spdx",
-        "severity": "warning",
-        "message": "file should include SPDX-License-Identifier header",
-        "location": {"line": 1, "col": 1, "end_line": 1, "end_col": 1},
-    }]
+    issues = []
+    if not SPDX_RE.search(snippet):
+        issues.append({
+            "rule_id": "header.missing_spdx",
+            "severity": "warning",
+            "message": "file should include SPDX-License-Identifier header",
+            "location": {"line": 1, "col": 1, "end_line": 1, "end_col": 1},
+        })
+    lines = text.splitlines()
+    if lines:
+        has_comment = any(line.strip().startswith("//") for line in lines[:5])
+        if not has_comment:
+            issues.append({
+                "rule_id": "header.missing_comment",
+                "severity": "warning",
+                "message": "file header should include descriptive comment",
+                "location": {"line": 1, "col": 1, "end_line": 1, "end_col": 1},
+            })
+    return issues

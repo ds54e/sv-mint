@@ -238,6 +238,8 @@ def check(req):
 | `fixtures/header_missing.sv` | `header.missing_spdx` | `cargo run -- fixtures/header_missing.sv` |
 | `fixtures/typedef_violation.sv` | `typedef.enum_suffix` / `typedef.type_suffix` | `cargo run -- fixtures/typedef_violation.sv` |
 | `fixtures/indent_violation.sv` | `format.indent_multiple_of_two` / `format.line_continuation_right` | `cargo run -- fixtures/indent_violation.sv` |
+| `fixtures/parameter_violation.sv` | `naming.parameter_upper` | `cargo run -- fixtures/parameter_violation.sv` |
+| `fixtures/always_ff_violation.sv` | `lang.always_ff_reset` / `lang.always_comb_at` | `cargo run -- fixtures/always_ff_violation.sv` |
 
 どのコマンドも違反が発生した場合は終了コード 2 で終了します。複数ファイルを一度に検証したい場合は `cargo run -- fixtures/*.sv` のようにワイルドカードを渡してください。
 
