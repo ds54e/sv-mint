@@ -1,6 +1,7 @@
 use crate::core::linemap::{LineMap, SpanBytes};
 use crate::diag::event::{Ev, Event};
 use crate::diag::logging::log_event;
+use crate::sv::cst_ir::build_cst_ir_stub;
 use crate::sv::model::{AstSummary, DefineInfo, ParseArtifacts};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
@@ -102,12 +103,26 @@ impl<'a> SvDriver<'a> {
         };
         ast.pp_text = Some(pp_text.clone());
 
+        let mut line_starts: Vec<usize> = Vec::with_capacity(pp_text.len() / 32 + 2);
+        line_starts.push(0);
+        for (i, ch) in pp_text.char_indices() {
+            if ch == '\n' {
+                line_starts.push(i + 1);
+            }
+        }
+        let cst_ir = if has_cst {
+            Some(build_cst_ir_stub(&path_s, "", &line_starts, &pp_text))
+        } else {
+            None
+        };
+
         ParseArtifacts {
             raw_text,
             pp_text,
             defines,
             has_cst,
             ast,
+            cst_ir,
             line_map,
         }
     }

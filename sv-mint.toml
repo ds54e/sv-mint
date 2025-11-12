@@ -3,28 +3,38 @@ timeout_ms_per_file = 3000
 
 [plugin]
 cmd = "py"
-args = ["-3","-u"]
+args = ["-3", "-u", "-B"]
 
 [ruleset]
 scripts = [
+  "plugins/seq_blocking_in_alwaysff.py",
+  "plugins/comb_nb_in_alwayscomb.py",
   "plugins/decl_unused_param.py",
   "plugins/decl_unused_net.py",
   "plugins/decl_unused_var.py"
 ]
 
-[stages]
-enabled = ["raw_text","pp_text","cst","ast"]
+[logging]
+level = "info"
+stderr_snippet_bytes = 2000
+show_stage_events = false
+show_plugin_events = false
+show_parse_events = false
 
 [svparser]
 include_paths = []
 defines = []
 strip_comments = true
-ignore_include = false
+ignore_include = true
 allow_incomplete = true
 
-[logging]
-level = "info"
-stderr_snippet_bytes = 2048
-show_stage_events = false
-show_plugin_events = false
-show_parse_events = false
+[stages]
+enabled = ["raw_text", "pp_text", "cst", "ast"]
+required = ["raw_text", "pp_text"]
+
+[transport]
+max_request_bytes = 16777216
+warn_margin_bytes = 1048576
+max_response_bytes = 16777216
+on_exceed = "skip"
+fail_ci_on_skip = false

@@ -1,4 +1,5 @@
 use crate::core::linemap::LineMap;
+use crate::sv::cst_ir::CstIr;
 use serde::Serialize;
 use serde_json::Value;
 
@@ -42,6 +43,8 @@ pub struct ParseArtifacts {
     pub defines: Vec<DefineInfo>,
     pub has_cst: bool,
     pub ast: AstSummary,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub cst_ir: Option<CstIr>,
     #[serde(skip_serializing)]
     pub line_map: LineMap,
 }
