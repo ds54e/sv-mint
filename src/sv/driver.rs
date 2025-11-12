@@ -105,14 +105,3 @@ fn line_starts(s: &str) -> Vec<usize> {
     }
     starts
 }
-
-trait EvExt<'a> {
-    fn with_duration_ms(self, ms: u128) -> Self;
-}
-
-impl<'a> EvExt<'a> for Ev<'a> {
-    fn with_duration_ms(mut self, ms: u128) -> Self {
-        self.duration_ms = Some(ms);
-        self
-    }
-}

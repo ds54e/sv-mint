@@ -56,4 +56,29 @@ impl<'a> Ev<'a> {
             message: None,
         }
     }
+
+    pub fn with_stage(mut self, stage: &'a str) -> Self {
+        self.stage = Some(stage);
+        self
+    }
+
+    pub fn with_duration_ms(mut self, ms: u128) -> Self {
+        self.duration_ms = Some(ms);
+        self
+    }
+
+    pub fn with_exit_code(mut self, code: i32) -> Self {
+        self.exit_code = Some(code);
+        self
+    }
+
+    pub fn with_stderr_snippet(mut self, snippet: &'a str) -> Self {
+        self.stderr_snippet = Some(snippet);
+        self
+    }
+
+    pub fn with_message(mut self, message: &'a str) -> Self {
+        self.message = Some(message);
+        self
+    }
 }

@@ -28,24 +28,73 @@ impl<'a> Pipeline<'a> {
     }
 
     pub fn run_files(&self, inputs: &[PathBuf]) -> Result<RunSummary> {
-        let mut total_violations = 0usize;
-        let mut had_error = false;
-        let mut host = PythonHost::start(self.cfg).map_err(anyhow::Error::new)?;
-        for p in inputs {
-            match self.run_file_with_host(p, &mut host) {
-                Ok(n) => total_violations += n,
-                Err(_) => had_error = true,
-            }
+        if inputs.is_empty() {
+            return Ok(RunSummary {
+                violations: 0,
+                had_error: false,
+            });
         }
-        Ok(RunSummary {
-            violations: total_violations,
-            had_error,
-        })
+        if inputs.len() == 1 {
+            return self.run_file_batch(inputs);
+        }
+        self.run_files_parallel(inputs)
     }
 
     pub fn run_file(&self, input: &Path) -> Result<usize> {
         let mut host = PythonHost::start(self.cfg).map_err(anyhow::Error::new)?;
         self.run_file_with_host(input, &mut host)
+    }
+
+    fn run_files_parallel(&self, inputs: &[PathBuf]) -> Result<RunSummary> {
+        let worker_count = std::thread::available_parallelism()
+            .map(|n| n.get())
+            .unwrap_or(1)
+            .min(inputs.len());
+        let chunk_size = (inputs.len() + worker_count - 1) / worker_count;
+        let mut results: Vec<Result<RunSummary>> = Vec::new();
+        std::thread::scope(|scope| {
+            let mut handles = Vec::new();
+            for chunk in inputs.chunks(chunk_size) {
+                let chunk_paths: Vec<PathBuf> = chunk.iter().cloned().collect();
+                let pipeline = Pipeline { cfg: self.cfg };
+                handles.push(scope.spawn(move || pipeline.run_file_batch(&chunk_paths)));
+            }
+            for handle in handles {
+                results.push(handle.join().unwrap());
+            }
+        });
+        let mut summary = RunSummary {
+            violations: 0,
+            had_error: false,
+        };
+        for res in results {
+            match res {
+                Ok(r) => {
+                    summary.violations += r.violations;
+                    summary.had_error |= r.had_error;
+                }
+                Err(e) => return Err(e),
+            }
+        }
+        Ok(summary)
+    }
+
+    fn run_file_batch(&self, inputs: &[PathBuf]) -> Result<RunSummary> {
+        let mut host = PythonHost::start(self.cfg).map_err(anyhow::Error::new)?;
+        let mut summary = RunSummary {
+            violations: 0,
+            had_error: false,
+        };
+        for path in inputs {
+            match self.run_file_with_host(path, &mut host) {
+                Ok(n) => summary.violations += n,
+                Err(e) => {
+                    summary.had_error = true;
+                    log::error!("{}: {}", path.display(), e);
+                }
+            }
+        }
+        Ok(summary)
     }
 
     fn run_file_with_host(&self, input: &Path, host: &mut PythonHost) -> Result<usize> {
@@ -57,8 +106,13 @@ impl<'a> Pipeline<'a> {
         for stage in &self.cfg.stages.enabled {
             log_event(Ev::new(Event::StageStart, &input_path.to_string_lossy()).with_stage(stage.as_str()));
             let payload = payload_for(stage, &artifacts);
-            let req = json!({ "stage": stage.as_str(), "path": input_path, "payload": payload });
-            let req_bytes = serde_json::to_vec(&req).unwrap_or_default().len();
+            let req_bytes = serde_json::to_vec(&json!({
+                "stage": stage.as_str(),
+                "path": input_path,
+                "payload": payload.clone(),
+            }))
+            .map_err(anyhow::Error::new)?
+            .len();
             if (WARN_REQ_BYTES..=MAX_REQ_BYTES).contains(&req_bytes) {
                 log::warn!(
                     "{} payload nearing limit: {} / {}",
@@ -128,18 +182,15 @@ fn payload_for(stage: &Stage, a: &ParseArtifacts) -> serde_json::Value {
             }
         }
         Stage::Ast => {
-            json!({ "schema_version": 1, "decls": a.ast.decls, "refs": a.ast.refs, "symbols": a.ast.symbols, "assigns": a.ast.assigns, "scopes": [], "pp_text": a.ast.pp_text })
+            json!({
+                "schema_version": a.ast.schema_version,
+                "decls": a.ast.decls,
+                "refs": a.ast.refs,
+                "symbols": a.ast.symbols,
+                "assigns": a.ast.assigns,
+                "scopes": a.ast.scopes,
+                "pp_text": a.ast.pp_text
+            })
         }
-    }
-}
-
-trait EvExt<'a> {
-    fn with_stage(self, s: &'a str) -> Self;
-}
-
-impl<'a> EvExt<'a> for Ev<'a> {
-    fn with_stage(mut self, s: &'a str) -> Self {
-        self.stage = Some(s);
-        self
     }
 }

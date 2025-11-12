@@ -1,12 +1,9 @@
 use crate::errors::ConfigError;
 use crate::svparser::SvParserCfg;
 use crate::textutil::{normalize_lf, strip_bom};
-use env_logger::Builder;
-use log::LevelFilter;
 use serde::Deserialize;
 use serde_json::Value;
 use std::fs;
-use std::io::Write;
 use std::path::{Path, PathBuf};
 
 #[derive(serde::Deserialize, Clone)]
@@ -128,27 +125,5 @@ pub fn validate_config(cfg: &Config) -> Result<(), ConfigError> {
             detail: "stages.enabled empty".to_string(),
         });
     }
-
-    let mut b = Builder::new();
-    let lvl = match cfg.logging.level.as_str() {
-        "error" => LevelFilter::Error,
-        "warn" => LevelFilter::Warn,
-        "trace" => LevelFilter::Trace,
-        "debug" => LevelFilter::Debug,
-        "info" => LevelFilter::Info,
-        _ => LevelFilter::Info,
-    };
-    b.filter(None, lvl);
-    b.format(|buf, record| {
-        writeln!(
-            buf,
-            "[{}] [{}] {}",
-            chrono::Local::now().format("%H:%M:%S"),
-            record.level(),
-            record.args()
-        )
-    });
-    b.init();
-
     Ok(())
 }

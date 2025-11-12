@@ -4,7 +4,8 @@ use crate::diag::event::{Ev, Event};
 use crate::diag::logging::log_event;
 use crate::plugin_scripts::{resolve_script_path, resolve_scripts};
 use crate::types::{Severity, Stage, Violation};
-use serde_json::{json, Value};
+use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use std::io::{BufRead, BufReader, Read, Write};
 use std::path::Path;
 use std::process::{Child, ChildStdin, Command, Stdio};
@@ -21,6 +22,28 @@ pub struct PythonHost {
     timeout: Duration,
     snippet_limit: usize,
     severity_override: std::collections::HashMap<String, Severity>,
+}
+
+#[derive(Serialize)]
+#[serde(tag = "kind", rename_all = "snake_case")]
+enum HostRequest<'a> {
+    Init {
+        scripts: &'a [String],
+    },
+    RunStage {
+        stage: &'a str,
+        path: &'a Path,
+        payload: Value,
+    },
+    Shutdown,
+}
+
+#[derive(Deserialize)]
+#[serde(tag = "type", rename_all = "lowercase")]
+enum HostResponse {
+    Ready,
+    Violations { violations: Vec<Violation> },
+    Error { detail: Option<String> },
 }
 
 impl PythonHost {
@@ -74,12 +97,11 @@ impl PythonHost {
         let stage_name = stage.as_str();
         log_event(Ev::new(Event::PluginInvoke, &path_s).with_stage(stage_name));
         let t0 = Instant::now();
-        let req = json!({
-            "kind": "run_stage",
-            "stage": stage_name,
-            "path": input_path,
-            "payload": payload,
-        });
+        let req = HostRequest::RunStage {
+            stage: stage_name,
+            path: input_path,
+            payload,
+        };
         self.send(&req)?;
         let resp = match self.recv() {
             Ok(r) => r,
@@ -94,27 +116,18 @@ impl PythonHost {
             }
             Err(e) => return Err(e),
         };
-        if resp.kind == "error" {
-            let detail = resp
-                .value
-                .get("detail")
-                .and_then(|v| v.as_str())
-                .unwrap_or("plugin error")
-                .to_string();
-            return Err(PluginError::ProtocolError { detail });
-        }
-        if resp.kind != "violations" {
-            return Err(PluginError::ProtocolError {
-                detail: "unexpected response".to_string(),
-            });
-        }
-        let violations: Vec<Violation> = serde_json::from_value(
-            resp.value
-                .get("violations")
-                .cloned()
-                .unwrap_or_else(|| Value::Array(Vec::new())),
-        )
-        .map_err(|e| PluginError::BadJson { detail: e.to_string() })?;
+        let violations = match resp {
+            HostResponse::Violations { violations } => violations,
+            HostResponse::Error { detail } => {
+                let detail = detail.unwrap_or_else(|| "plugin error".to_string());
+                return Err(PluginError::ProtocolError { detail });
+            }
+            HostResponse::Ready => {
+                return Err(PluginError::ProtocolError {
+                    detail: "unexpected ready response".to_string(),
+                })
+            }
+        };
         let adjusted = self.apply_overrides(violations);
         self.log_stderr(&path_s, stage_name);
         let elapsed = t0.elapsed().as_millis();
@@ -127,22 +140,21 @@ impl PythonHost {
     }
 
     fn init(&mut self, scripts: Vec<String>) -> Result<(), PluginError> {
-        let req = json!({
-            "kind": "init",
-            "scripts": scripts,
-        });
+        let req = HostRequest::Init { scripts: &scripts };
         self.send(&req)?;
-        let resp = self.recv()?;
-        if resp.kind != "ready" {
-            return Err(PluginError::ProtocolError {
-                detail: "init failed".to_string(),
-            });
+        match self.recv()? {
+            HostResponse::Ready => Ok(()),
+            HostResponse::Error { detail } => Err(PluginError::ProtocolError {
+                detail: detail.unwrap_or_else(|| "init failed".to_string()),
+            }),
+            HostResponse::Violations { .. } => Err(PluginError::ProtocolError {
+                detail: "unexpected violations response during init".to_string(),
+            }),
         }
-        Ok(())
     }
 
-    fn send(&mut self, value: &Value) -> Result<(), PluginError> {
-        let text = serde_json::to_vec(value).map_err(|e| PluginError::BadJson { detail: e.to_string() })?;
+    fn send(&mut self, req: &HostRequest<'_>) -> Result<(), PluginError> {
+        let text = serde_json::to_vec(req).map_err(|e| PluginError::BadJson { detail: e.to_string() })?;
         self.stdin
             .write_all(&text)
             .and_then(|_| self.stdin.write_all(b"\n"))
@@ -150,19 +162,9 @@ impl PythonHost {
             .map_err(|e| PluginError::IoFailed { detail: e.to_string() })
     }
 
-    fn recv(&mut self) -> Result<HostMessage, PluginError> {
+    fn recv(&mut self) -> Result<HostResponse, PluginError> {
         match self.stdout_rx.recv_timeout(self.timeout) {
-            Ok(line) => {
-                let v: Value =
-                    serde_json::from_str(&line).map_err(|e| PluginError::BadJson { detail: e.to_string() })?;
-                let kind = v
-                    .get("type")
-                    .or_else(|| v.get("kind"))
-                    .and_then(|s| s.as_str())
-                    .unwrap_or("")
-                    .to_string();
-                Ok(HostMessage { kind, value: v })
-            }
+            Ok(line) => serde_json::from_str(&line).map_err(|e| PluginError::BadJson { detail: e.to_string() }),
             Err(mpsc::RecvTimeoutError::Timeout) => {
                 let _ = self.child.kill();
                 Err(PluginError::Timeout {
@@ -212,15 +214,11 @@ impl PythonHost {
 
 impl Drop for PythonHost {
     fn drop(&mut self) {
-        let _ = self.send(&json!({ "kind": "shutdown" }));
+        let req = HostRequest::Shutdown;
+        let _ = self.send(&req);
         let _ = self.child.kill();
         let _ = self.child.wait();
     }
-}
-
-struct HostMessage {
-    kind: String,
-    value: Value,
 }
 
 fn spawn_stdout(stdout: impl Read + Send + 'static) -> mpsc::Receiver<String> {
@@ -286,28 +284,5 @@ fn parse_severity(s: &str) -> Option<Severity> {
         "warning" => Some(Severity::Warning),
         "info" => Some(Severity::Info),
         _ => None,
-    }
-}
-
-trait EvExt<'a> {
-    fn with_stage(self, s: &'a str) -> Self;
-    fn with_duration_ms(self, ms: u128) -> Self;
-    fn with_stderr_snippet(self, s: &'a str) -> Self;
-}
-
-impl<'a> EvExt<'a> for Ev<'a> {
-    fn with_stage(mut self, s: &'a str) -> Self {
-        self.stage = Some(s);
-        self
-    }
-
-    fn with_duration_ms(mut self, ms: u128) -> Self {
-        self.duration_ms = Some(ms);
-        self
-    }
-
-    fn with_stderr_snippet(mut self, s: &'a str) -> Self {
-        self.stderr_snippet = Some(s);
-        self
     }
 }
