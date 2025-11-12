@@ -18,7 +18,8 @@ scripts = [
   "plugins/no_port_wildcard.py",
   "plugins/case_default_required.py",
   "plugins/end_else_same_line.py",
-  "plugins/begin_end_required.py"
+  "plugins/begin_end_required.py",
+  "plugins/naming_rules.py"
 ]
 
 [logging]

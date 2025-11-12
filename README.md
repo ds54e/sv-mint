@@ -226,6 +226,7 @@ def check(req):
 | `fixtures/if_without_begin.sv` | `format.begin_required`（複数行ブロックの begin/end 必須） | `cargo run -- fixtures/if_without_begin.sv` |
 | `fixtures/whitespace_violations.sv` | `format.no_tabs` / `format.no_trailing_whitespace` | `cargo run -- fixtures/whitespace_violations.sv` |
 | `fixtures/spacing_violations.sv` | `format.call_spacing` / `format.case_colon_spacing` など | `cargo run -- fixtures/spacing_violations.sv` |
+| `fixtures/naming_violations.sv` | `naming.module_case` / `naming.clk_prefix` など | `cargo run -- fixtures/naming_violations.sv` |
 
 どのコマンドも違反が発生した場合は終了コード 2 で終了します。複数ファイルを一度に検証したい場合は `cargo run -- fixtures/*.sv` のようにワイルドカードを渡してください。
 

@@ -50,6 +50,11 @@ fn detects_spacing_violations() {
 }
 
 #[test]
+fn detects_naming_violations() {
+    run_fixture("fixtures/naming_violations.sv", "naming.module_case");
+}
+
+#[test]
 fn detects_ascii_and_newline_violations() {
     run_temp_source(
         "module ascii_check; // é",
