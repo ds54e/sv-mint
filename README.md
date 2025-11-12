@@ -241,6 +241,23 @@ def check(req):
 | `fixtures/parameter_violation.sv` | `naming.parameter_upper` | `cargo run -- fixtures/parameter_violation.sv` |
 | `fixtures/always_ff_violation.sv` | `lang.always_ff_reset` / `lang.always_comb_at` | `cargo run -- fixtures/always_ff_violation.sv` |
 
+## LowRISC ルール実装状況
+
+### 実装済み（中〜小規模）
+- 文字種・行長・タブ/末尾空白・プリプロ指令・行継続・`case` の `begin/end` などの整形ルール
+- モジュール/信号/ポート命名（`clk/rst` 順序、差動ペア、パイプライン段 `_q2`）、`typedef` `_e/_t`、`parameter` UpperCamelCaseなどの命名規則
+- `always_comb` 推奨、`always_ff` の非同期リセット、`always_latch`・`always @*` 禁止、`case` の `default`・`unique/priority` 推奨、複数ノンブロッキング代入検知などの言語安全ルール
+- `package` 内 `` `define`` や複数 `package` 宣言、`module` インスタンスの `.*` / 位置指定ポート、SPDX ヘッダー、グローバル `` `define`` など設定・ヘッダーポリシー
+- CLI スモークテスト 21 ケースで代表的な違反を検証済み
+
+### 未実装（大規模解析が必要）
+- ブールでの多ビット使用禁止、暗黙幅ミスマッチ、演算結果の幅管理などのビット幅解析
+- `unique/priority case` の網羅率や `casez/casex`、`X` 伝播の検証
+- `package` 依存グラフの循環検知や `parameter/localparam` の詳細な運用ルール
+- タブラーアライメントやコメント配置など、より厳密なフォーマット細則全般
+
+これらの未実装項目は新しい解析パスや IR 追加が必要になるため、今後の大規模タスクとして別途対応予定です。
+
 どのコマンドも違反が発生した場合は終了コード 2 で終了します。複数ファイルを一度に検証したい場合は `cargo run -- fixtures/*.sv` のようにワイルドカードを渡してください。
 
 ## バイトコード抑止
