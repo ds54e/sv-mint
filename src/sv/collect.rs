@@ -86,9 +86,10 @@ struct AstCollector<'a> {
     decls: Vec<Declaration>,
     refs: Vec<Reference>,
     assigns: Vec<Assignment>,
-    ports: Vec<crate::sv::model::PortInfo>,
+    ports: Vec<PortInfo>,
     write_offsets: HashSet<usize>,
     decl_offsets: HashSet<usize>,
+    port_dir_stack: Vec<&'static str>,
 }
 
 impl<'a> AstCollector<'a> {
@@ -104,6 +105,7 @@ impl<'a> AstCollector<'a> {
             ports: Vec::new(),
             write_offsets: HashSet::new(),
             decl_offsets: HashSet::new(),
+            port_dir_stack: Vec::new(),
         }
     }
 
@@ -188,6 +190,14 @@ impl<'a> AstCollector<'a> {
             direction: direction.to_string(),
             loc,
         });
+    }
+
+    fn record_port_identifier(&mut self, node: RefNode<'_>) {
+        if let Some(dir) = self.port_dir_stack.last().copied() {
+            if let Some((name, loc, _)) = self.lookup_identifier(node) {
+                self.record_port(name, loc, dir);
+            }
+        }
     }
 
     fn lookup_identifier(&self, node: RefNode<'_>) -> Option<(String, Location, usize)> {
@@ -287,6 +297,11 @@ impl<'a> SyntaxVisitor for AstCollector<'a> {
             RefNode::VariableDeclAssignment(x) => {
                 self.record_decl(RefNode::from(x), DeclKind::Var);
             }
+            RefNode::PortDeclarationInput(_) => self.port_dir_stack.push("input"),
+            RefNode::PortDeclarationOutput(_) => self.port_dir_stack.push("output"),
+            RefNode::PortDeclarationInout(_) => self.port_dir_stack.push("inout"),
+            RefNode::PortDeclarationRef(_) => self.port_dir_stack.push("ref"),
+            RefNode::PortDeclarationInterface(_) => self.port_dir_stack.push("interface"),
             RefNode::AnsiPortDeclarationNet(x) => {
                 self.handle_ansi_port_net(x);
             }
@@ -295,6 +310,9 @@ impl<'a> SyntaxVisitor for AstCollector<'a> {
             }
             RefNode::AnsiPortDeclarationParen(x) => {
                 self.handle_ansi_port_paren(x);
+            }
+            RefNode::PortIdentifier(x) => {
+                self.record_port_identifier(RefNode::PortIdentifier(x));
             }
             RefNode::NetLvalue(x) => {
                 self.record_write(RefNode::from(x));
@@ -316,6 +334,13 @@ impl<'a> SyntaxVisitor for AstCollector<'a> {
         match node {
             RefNode::ModuleDeclarationAnsi(_) | RefNode::ModuleDeclarationNonansi(_) => {
                 self.scopes.pop();
+            }
+            RefNode::PortDeclarationInput(_)
+            | RefNode::PortDeclarationOutput(_)
+            | RefNode::PortDeclarationInout(_)
+            | RefNode::PortDeclarationRef(_)
+            | RefNode::PortDeclarationInterface(_) => {
+                self.port_dir_stack.pop();
             }
             _ => {}
         }
