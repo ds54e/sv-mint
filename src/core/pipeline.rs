@@ -2,7 +2,7 @@ use crate::config::{read_input, Config};
 use crate::diag::event::{Ev, Event};
 use crate::diag::logging::log_event;
 use crate::output::print_violations;
-use crate::plugin_scripts::run_plugins_for_stage;
+use crate::plugin::client::PythonHost;
 use crate::sv::model::ParseArtifacts;
 use crate::svparser::SvDriver;
 use crate::types::{Location, Severity, Stage, Violation};
@@ -30,8 +30,9 @@ impl<'a> Pipeline<'a> {
     pub fn run_files(&self, inputs: &[PathBuf]) -> Result<RunSummary> {
         let mut total_violations = 0usize;
         let mut had_error = false;
+        let mut host = PythonHost::start(self.cfg).map_err(anyhow::Error::new)?;
         for p in inputs {
-            match self.run_file(p) {
+            match self.run_file_with_host(p, &mut host) {
                 Ok(n) => total_violations += n,
                 Err(_) => had_error = true,
             }
@@ -43,6 +44,11 @@ impl<'a> Pipeline<'a> {
     }
 
     pub fn run_file(&self, input: &Path) -> Result<usize> {
+        let mut host = PythonHost::start(self.cfg).map_err(anyhow::Error::new)?;
+        self.run_file_with_host(input, &mut host)
+    }
+
+    fn run_file_with_host(&self, input: &Path, host: &mut PythonHost) -> Result<usize> {
         let (normalized_text, input_path) = read_input(input)?;
         let driver = SvDriver::new(&self.cfg.svparser);
         let artifacts = driver.parse_text(&normalized_text, &input_path);
@@ -92,7 +98,9 @@ impl<'a> Pipeline<'a> {
                 }
                 continue;
             }
-            let vs = run_plugins_for_stage(self.cfg, stage.as_str(), &input_path, payload)?;
+            let vs = host
+                .run_stage(stage, &input_path, payload)
+                .map_err(anyhow::Error::new)?;
             all.extend(vs);
             log_event(Ev::new(Event::StageDone, &input_path.to_string_lossy()).with_stage(stage.as_str()));
         }

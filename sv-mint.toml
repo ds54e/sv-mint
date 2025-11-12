@@ -2,8 +2,8 @@
 timeout_ms_per_file = 3000
 
 [plugin]
-cmd = "py"
-args = ["-3", "-u", "-B"]
+cmd = "python3"
+args = ["-u", "-B"]
 
 [ruleset]
 scripts = [
