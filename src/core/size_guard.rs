@@ -1,5 +1,6 @@
 use crate::types::{Location, Severity, Violation};
 use serde::Serialize;
+use tracing::warn;
 
 #[derive(Clone, Debug)]
 pub enum OnExceed {
@@ -74,7 +75,7 @@ pub fn enforce_request_size<T: Serialize>(stage: &str, req: &T, pol: &SizePolicy
     };
     let len = bytes.len();
     if len >= pol.warn_request_bytes && len <= pol.max_request_bytes {
-        log::warn!("{} payload nearing limit: {} / {}", stage, len, pol.max_request_bytes);
+        warn!("{} payload nearing limit: {} / {}", stage, len, pol.max_request_bytes);
     }
     if len > pol.max_request_bytes {
         let sev = if pol.is_required_stage || matches!(pol.on_exceed, OnExceed::Error) {

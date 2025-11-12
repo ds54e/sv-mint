@@ -9,6 +9,7 @@ use crate::types::{Location, Severity, Stage, Violation};
 use anyhow::Result;
 use serde_json::json;
 use std::path::{Path, PathBuf};
+use tracing::{error, warn};
 
 const MAX_REQ_BYTES: usize = 16_000_000;
 const WARN_REQ_BYTES: usize = 12_000_000;
@@ -90,7 +91,7 @@ impl<'a> Pipeline<'a> {
                 Ok(n) => summary.violations += n,
                 Err(e) => {
                     summary.had_error = true;
-                    log::error!("{}: {}", path.display(), e);
+                    error!("{}: {}", path.display(), e);
                 }
             }
         }
@@ -114,7 +115,7 @@ impl<'a> Pipeline<'a> {
             .map_err(anyhow::Error::new)?
             .len();
             if (WARN_REQ_BYTES..=MAX_REQ_BYTES).contains(&req_bytes) {
-                log::warn!(
+                warn!(
                     "{} payload nearing limit: {} / {}",
                     stage.as_str(),
                     req_bytes,

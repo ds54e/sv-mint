@@ -13,6 +13,8 @@ pub struct LoggingConfig {
     pub show_stage_events: bool,
     pub show_plugin_events: bool,
     pub show_parse_events: bool,
+    #[serde(default)]
+    pub format: LogFormat,
 }
 
 impl Default for LoggingConfig {
@@ -23,7 +25,21 @@ impl Default for LoggingConfig {
             show_stage_events: true,
             show_plugin_events: true,
             show_parse_events: true,
+            format: LogFormat::Text,
         }
+    }
+}
+
+#[derive(Deserialize, Clone, Copy)]
+#[serde(rename_all = "lowercase")]
+pub enum LogFormat {
+    Text,
+    Json,
+}
+
+impl Default for LogFormat {
+    fn default() -> Self {
+        LogFormat::Text
     }
 }
 
