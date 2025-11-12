@@ -237,6 +237,7 @@ def check(req):
 | `fixtures/module_inst_violation.sv` | `module.named_ports_required` / `module.no_port_wildcard` | `cargo run -- fixtures/module_inst_violation.sv` |
 | `fixtures/header_missing.sv` | `header.missing_spdx` | `cargo run -- fixtures/header_missing.sv` |
 | `fixtures/typedef_violation.sv` | `typedef.enum_suffix` / `typedef.type_suffix` | `cargo run -- fixtures/typedef_violation.sv` |
+| `fixtures/indent_violation.sv` | `format.indent_multiple_of_two` / `format.line_continuation_right` | `cargo run -- fixtures/indent_violation.sv` |
 
 どのコマンドも違反が発生した場合は終了コード 2 で終了します。複数ファイルを一度に検証したい場合は `cargo run -- fixtures/*.sv` のようにワイルドカードを渡してください。
 

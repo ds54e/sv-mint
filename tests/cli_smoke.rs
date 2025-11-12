@@ -119,3 +119,8 @@ fn detects_header_missing() {
 fn detects_typedef_violations() {
     run_fixture("fixtures/typedef_violation.sv", "typedef.enum_suffix");
 }
+
+#[test]
+fn detects_indent_violations() {
+    run_fixture("fixtures/indent_violation.sv", "format.indent_multiple_of_two");
+}
