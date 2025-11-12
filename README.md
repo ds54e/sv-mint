@@ -222,6 +222,7 @@ def check(req):
 | `fixtures/format_line_length_violation.sv` | `format.line_length`（行長 100 列超過） | `cargo run -- fixtures/format_line_length_violation.sv` |
 | `fixtures/port_wildcard_violation.sv` | `module.no_port_wildcard`（`.*` 接続禁止） | `cargo run -- fixtures/port_wildcard_violation.sv` |
 | `fixtures/case_missing_default.sv` | `case.missing_default`（default 項目必須） | `cargo run -- fixtures/case_missing_default.sv` |
+| `fixtures/end_else_newline.sv` | `format.end_else_inline`（`end else` 同一行） | `cargo run -- fixtures/end_else_newline.sv` |
 
 どのコマンドも違反が発生した場合は終了コード 2 で終了します。複数ファイルを一度に検証したい場合は `cargo run -- fixtures/*.sv` のようにワイルドカードを渡してください。
 
