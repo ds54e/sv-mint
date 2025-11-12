@@ -66,7 +66,7 @@ fn payload_for(stage: &Stage, a: &ParseArtifacts) -> serde_json::Value {
         }
         Stage::Cst => json!({ "has_cst": a.has_cst }),
         Stage::Ast => {
-            json!({ "decls": a.ast.decls, "refs": a.ast.refs, "symbols": a.ast.symbols, "assigns": a.ast.assigns, "pp_text": a.ast.pp_text })
+            json!({ "schema_version": 1, "decls": a.ast.decls, "refs": a.ast.refs, "symbols": a.ast.symbols, "assigns": a.ast.assigns, "scopes": [], "pp_text": a.ast.pp_text })
         }
     }
 }

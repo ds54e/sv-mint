@@ -1,27 +1,47 @@
 use crate::core::linemap::LineMap;
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
+use serde_json::Value;
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize)]
 pub struct DefineInfo {
     pub name: String,
     pub value: Option<String>,
 }
 
-#[derive(Clone, Debug, Default, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize)]
 pub struct AstSummary {
-    pub decls: Vec<serde_json::Value>,
-    pub refs: Vec<serde_json::Value>,
-    pub symbols: Vec<serde_json::Value>,
-    pub assigns: Vec<serde_json::Value>,
+    pub decls: Vec<Value>,
+    pub refs: Vec<Value>,
+    pub symbols: Vec<Value>,
+    pub assigns: Vec<Value>,
     pub pp_text: Option<String>,
+    #[serde(default)]
+    pub schema_version: u32,
+    #[serde(default)]
+    pub scopes: Vec<Value>,
 }
 
-#[derive(Clone, Debug)]
+impl Default for AstSummary {
+    fn default() -> Self {
+        Self {
+            decls: Vec::new(),
+            refs: Vec::new(),
+            symbols: Vec::new(),
+            assigns: Vec::new(),
+            pp_text: None,
+            schema_version: 1,
+            scopes: Vec::new(),
+        }
+    }
+}
+
+#[derive(Clone, Debug, Serialize)]
 pub struct ParseArtifacts {
     pub raw_text: String,
     pub pp_text: String,
     pub defines: Vec<DefineInfo>,
     pub has_cst: bool,
     pub ast: AstSummary,
+    #[serde(skip_serializing)]
     pub line_map: LineMap,
 }

@@ -97,6 +97,8 @@ impl<'a> SvDriver<'a> {
             symbols,
             assigns,
             pp_text: None,
+            schema_version: 1,
+            scopes: Vec::new(),
         };
         ast.pp_text = Some(pp_text.clone());
 
