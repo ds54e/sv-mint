@@ -224,6 +224,8 @@ def check(req):
 | `fixtures/case_missing_default.sv` | `case.missing_default`（default 項目必須） | `cargo run -- fixtures/case_missing_default.sv` |
 | `fixtures/end_else_newline.sv` | `format.end_else_inline`（`end else` 同一行） | `cargo run -- fixtures/end_else_newline.sv` |
 | `fixtures/if_without_begin.sv` | `format.begin_required`（複数行ブロックの begin/end 必須） | `cargo run -- fixtures/if_without_begin.sv` |
+| `fixtures/whitespace_violations.sv` | `format.no_tabs` / `format.no_trailing_whitespace` | `cargo run -- fixtures/whitespace_violations.sv` |
+| `fixtures/spacing_violations.sv` | `format.call_spacing` / `format.case_colon_spacing` など | `cargo run -- fixtures/spacing_violations.sv` |
 
 どのコマンドも違反が発生した場合は終了コード 2 で終了します。複数ファイルを一度に検証したい場合は `cargo run -- fixtures/*.sv` のようにワイルドカードを渡してください。
 
