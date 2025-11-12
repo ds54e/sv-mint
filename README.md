@@ -1,7 +1,7 @@
 # sv-mint
 
 ## 概要
-sv-mint は SystemVerilog 向けの Linter です。Rust 製コアが sv-parser による前処理・構文解析を行い、raw_text / pp_text / cst / ast の各ステージ payload を構築します。ステージ診断は常駐型の Python ホスト（`plugins/lib/rule_host.py`）へ NDJSON で送信され、ホストが ruleset に列挙された Python スクリプトの `check(req)` を順次実行します。CST はインライン JSON で配信し、payload サイズが警告・スキップの上限を超えた場合はステージをスキップして診断を代わりに返します。
+sv-mint は SystemVerilog 向けの Linter です。Rust 製コアが sv-parser による前処理・構文解析を行い、raw_text / pp_text / cst / ast の各ステージ payload を構築します。複数入力ファイルを与えるとステージ処理はワーカースレッドを並列起動して自動的に分散されます。ステージ診断は常駐型の Python ホスト（`plugins/lib/rule_host.py`）へ NDJSON で送信され、ホストが ruleset に列挙された Python スクリプトの `check(req)` を順次実行します。CST はインライン JSON で配信し、payload サイズが警告・スキップの上限を超えた場合はステージをスキップして診断を代わりに返します。
 
 ## 対象環境
 - OS: Windows 10 以降 / Linux / macOS
@@ -58,18 +58,20 @@ allow_incomplete = true
 
 [logging]
 level = "info"
+format = "text" # text / json
 stderr_snippet_bytes = 2048
 show_stage_events = true
 show_plugin_events = true
 show_parse_events = true
 ```
+`logging` セクションに追加された `format` は `text` / `json` を切り替えられます。それ以外の未知キーを設定した場合は起動時に警告ログで通知されます。
 サイズガードのしきい値は現在固定です（警告 12,000,000 バイト、スキップ 16,000,000 バイト）。TOML での変更は未対応です。
 
 ## 処理フロー
 1. 入力ソースを UTF-8 に正規化します。
 2. sv-parser により前処理と構文解析を行います。
 3. raw_text、pp_text、cst、ast の順にステージ payload を構築します。
-4. ruleset.scripts に列挙した Python スクリプトを常駐ホストへロードし、ステージごとに `check(req)` を同期実行します。
+4. ruleset.scripts に列挙した Python スクリプトを常駐ホストへロードし、ステージごとに `check(req)` を実行します（Rust 側は非同期 I/O でホストと通信します）。
 5. 返却された違反オブジェクトの配列を集約して標準出力へ整形します。
 
 ## ステージ別 payload
@@ -163,6 +165,7 @@ def check(req):
 - 直列化後のリクエストが 12,000,000 バイト以上 16,000,000 バイト以下の場合に警告ログを出します。
 - 直列化後のリクエストが 16,000,000 バイトを超える場合、そのステージを実行せず `sys.stage.skipped.size` を1件出力します。
 - raw_text と pp_text は必須ステージとして扱い、スキップ時はエラー終了にします。
+すべてのステージ結果は `StageOutcome` として集計され、path / stage / 所要時間が `sv-mint::stage` ログに出力されます。並列処理中でも各ステージの成功・スキップ状態をロギングで追跡できます。
 
 ## バイトコード抑止
 - 起動引数に `-B` を付与します（既定 args を参照）。
