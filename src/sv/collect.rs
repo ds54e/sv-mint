@@ -12,19 +12,24 @@ pub(crate) struct CollectResult {
     pub assigns: Vec<Assignment>,
 }
 
-pub(crate) fn collect_all(syntax_tree: &SyntaxTree, line_map: &LineMap, raw_text: &str) -> CollectResult {
-    let mut state = State::new(line_map, raw_text, syntax_tree);
-    for event in syntax_tree.into_iter().event() {
+pub(crate) trait SyntaxVisitor {
+    fn enter(&mut self, node: RefNode<'_>);
+    fn leave(&mut self, node: RefNode<'_>);
+}
+
+pub(crate) fn walk_syntax(tree: &SyntaxTree, visitor: &mut impl SyntaxVisitor) {
+    for event in tree.into_iter().event() {
         match event {
-            NodeEvent::Enter(node) => state.on_enter(node),
-            NodeEvent::Leave(node) => state.on_leave(node),
+            NodeEvent::Enter(node) => visitor.enter(node),
+            NodeEvent::Leave(node) => visitor.leave(node),
         }
     }
-    CollectResult {
-        decls: state.decls,
-        refs: state.refs,
-        assigns: state.assigns,
-    }
+}
+
+pub(crate) fn collect_all(syntax_tree: &SyntaxTree, line_map: &LineMap, raw_text: &str) -> CollectResult {
+    let mut collector = AstCollector::new(line_map, raw_text, syntax_tree);
+    walk_syntax(syntax_tree, &mut collector);
+    collector.finish()
 }
 
 pub(crate) fn analyze_symbols(decls: &[Declaration], refs: &[Reference]) -> Vec<SymbolUsage> {
@@ -72,7 +77,7 @@ pub(crate) fn analyze_symbols(decls: &[Declaration], refs: &[Reference]) -> Vec<
     symbols
 }
 
-struct State<'a> {
+struct AstCollector<'a> {
     line_map: &'a LineMap,
     raw_text: &'a str,
     syntax_tree: &'a SyntaxTree,
@@ -84,7 +89,7 @@ struct State<'a> {
     decl_offsets: HashSet<usize>,
 }
 
-impl<'a> State<'a> {
+impl<'a> AstCollector<'a> {
     fn new(line_map: &'a LineMap, raw_text: &'a str, syntax_tree: &'a SyntaxTree) -> Self {
         Self {
             line_map,
@@ -99,7 +104,117 @@ impl<'a> State<'a> {
         }
     }
 
-    fn on_enter(&mut self, node: RefNode<'a>) {
+    fn finish(self) -> CollectResult {
+        CollectResult {
+            decls: self.decls,
+            refs: self.refs,
+            assigns: self.assigns,
+        }
+    }
+
+    fn module_info(&self, node: RefNode<'_>) -> Option<(String, Location)> {
+        if let Some(id) = unwrap_node!(node, ModuleIdentifier) {
+            if let Some(idloc) = get_identifier(id) {
+                if let Some(name) = self.syntax_tree.get_str(&idloc) {
+                    if let Some((loc, _)) = self.locate(&idloc) {
+                        return Some((name.to_string(), loc));
+                    }
+                }
+            }
+        }
+        None
+    }
+
+    fn record_decl(&mut self, node: RefNode<'_>, kind: DeclKind) {
+        if let Some((ident, loc, origin)) = self.lookup_identifier(node) {
+            let module = self.scopes.last().cloned();
+            self.decls.push(Declaration {
+                kind,
+                name: ident,
+                module,
+                loc,
+            });
+            self.decl_offsets.insert(origin);
+        }
+    }
+
+    fn record_write(&mut self, node: RefNode<'_>) {
+        if let Some((ident, loc, origin)) = self.lookup_identifier(node) {
+            let module = self.scopes.last().cloned();
+            self.refs.push(Reference {
+                name: ident.clone(),
+                module: module.clone(),
+                kind: ReferenceKind::Write,
+                loc,
+            });
+            self.write_offsets.insert(origin);
+            if let Some((op, lhs, rhs, start, end)) = scan_assignment_at(self.raw_text, origin) {
+                let loc = self.span_location(start, end);
+                self.assigns.push(Assignment {
+                    module,
+                    op,
+                    lhs,
+                    rhs,
+                    loc,
+                });
+            }
+        }
+    }
+
+    fn record_read(&mut self, node: RefNode<'_>) {
+        if let Some((ident, loc, origin)) = self.lookup_identifier(node) {
+            if self.write_offsets.contains(&origin) || self.decl_offsets.contains(&origin) {
+                return;
+            }
+            let module = self.scopes.last().cloned();
+            self.refs.push(Reference {
+                name: ident,
+                module,
+                kind: ReferenceKind::Read,
+                loc,
+            });
+        }
+    }
+
+    fn lookup_identifier(&self, node: RefNode<'_>) -> Option<(String, Location, usize)> {
+        let idloc = get_identifier(node)?;
+        let name = self.syntax_tree.get_str(&idloc)?.to_string();
+        let (loc, origin) = self.locate(&idloc)?;
+        Some((name, loc, origin))
+    }
+
+    fn locate(&self, idloc: &Locate) -> Option<(Location, usize)> {
+        if let Some((_path, start)) = self.syntax_tree.get_origin(idloc) {
+            if let Some(text) = self.syntax_tree.get_str(idloc) {
+                let end = start + text.len();
+                let span = SpanBytes::new(start, end);
+                let lines = self.line_map.to_lines(span);
+                let loc = Location {
+                    line: lines.line,
+                    col: lines.col,
+                    end_line: lines.end_line,
+                    end_col: lines.end_col,
+                };
+                return Some((loc, start));
+            }
+        }
+        None
+    }
+
+    fn span_location(&self, start: usize, end: usize) -> Location {
+        let span = SpanBytes::new(start, end);
+        let lines = self.line_map.to_lines(span);
+        Location {
+            line: lines.line,
+            col: lines.col,
+            end_line: lines.end_line,
+            end_col: lines.end_col,
+        }
+    }
+}
+
+impl<'a> SyntaxVisitor for AstCollector<'a> {
+    fn enter(&mut self, node: RefNode<'_>) {
         match node {
             RefNode::ModuleDeclarationAnsi(x) => {
                 if let Some((name, loc)) = self.module_info(RefNode::ModuleDeclarationAnsi(x)) {
@@ -148,112 +263,12 @@ impl<'a> State<'a> {
         }
     }
 
-    fn on_leave(&mut self, node: RefNode<'a>) {
+    fn leave(&mut self, node: RefNode<'_>) {
         match node {
             RefNode::ModuleDeclarationAnsi(_) | RefNode::ModuleDeclarationNonansi(_) => {
                 self.scopes.pop();
             }
             _ => {}
-        }
-    }
-
-    fn module_info(&self, node: RefNode<'a>) -> Option<(String, Location)> {
-        if let Some(id) = unwrap_node!(node, ModuleIdentifier) {
-            if let Some(idloc) = get_identifier(id) {
-                if let Some(name) = self.syntax_tree.get_str(&idloc) {
-                    if let Some((loc, _)) = self.locate(&idloc) {
-                        return Some((name.to_string(), loc));
-                    }
-                }
-            }
-        }
-        None
-    }
-
-    fn record_decl(&mut self, node: RefNode<'a>, kind: DeclKind) {
-        if let Some((ident, loc, origin)) = self.lookup_identifier(node) {
-            let module = self.scopes.last().cloned();
-            self.decls.push(Declaration {
-                kind,
-                name: ident,
-                module,
-                loc,
-            });
-            self.decl_offsets.insert(origin);
-        }
-    }
-
-    fn record_write(&mut self, node: RefNode<'a>) {
-        if let Some((ident, loc, origin)) = self.lookup_identifier(node) {
-            let module = self.scopes.last().cloned();
-            self.refs.push(Reference {
-                name: ident.clone(),
-                module: module.clone(),
-                kind: ReferenceKind::Write,
-                loc,
-            });
-            self.write_offsets.insert(origin);
-            if let Some((op, lhs, rhs, start, end)) = scan_assignment_at(self.raw_text, origin) {
-                let loc = self.span_location(start, end);
-                self.assigns.push(Assignment {
-                    module,
-                    op,
-                    lhs,
-                    rhs,
-                    loc,
-                });
-            }
-        }
-    }
-
-    fn record_read(&mut self, node: RefNode<'a>) {
-        if let Some((ident, loc, origin)) = self.lookup_identifier(node) {
-            if self.write_offsets.contains(&origin) || self.decl_offsets.contains(&origin) {
-                return;
-            }
-            let module = self.scopes.last().cloned();
-            self.refs.push(Reference {
-                name: ident,
-                module,
-                kind: ReferenceKind::Read,
-                loc,
-            });
-        }
-    }
-
-    fn lookup_identifier(&self, node: RefNode<'a>) -> Option<(String, Location, usize)> {
-        let idloc = get_identifier(node)?;
-        let name = self.syntax_tree.get_str(&idloc)?.to_string();
-        let (loc, origin) = self.locate(&idloc)?;
-        Some((name, loc, origin))
-    }
-
-    fn locate(&self, idloc: &Locate) -> Option<(Location, usize)> {
-        if let Some((_path, start)) = self.syntax_tree.get_origin(idloc) {
-            if let Some(text) = self.syntax_tree.get_str(idloc) {
-                let end = start + text.len();
-                let span = SpanBytes::new(start, end);
-                let lines = self.line_map.to_lines(span);
-                let loc = Location {
-                    line: lines.line,
-                    col: lines.col,
-                    end_line: lines.end_line,
-                    end_col: lines.end_col,
-                };
-                return Some((loc, start));
-            }
-        }
-        None
-    }
-
-    fn span_location(&self, start: usize, end: usize) -> Location {
-        let span = SpanBytes::new(start, end);
-        let lines = self.line_map.to_lines(span);
-        Location {
-            line: lines.line,
-            col: lines.col,
-            end_line: lines.end_line,
-            end_col: lines.end_col,
         }
     }
 }

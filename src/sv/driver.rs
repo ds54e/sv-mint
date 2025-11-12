@@ -1,7 +1,8 @@
+use crate::core::errors::ParseError;
 use crate::core::linemap::LineMap;
 use crate::diag::event::{Ev, Event};
 use crate::diag::logging::log_event;
-use crate::sv::collect::{analyze_symbols, collect_all, CollectResult};
+use crate::sv::collect::{analyze_symbols, collect_all};
 use crate::sv::cst_ir::build_cst_ir_stub;
 pub use crate::sv::model::SvParserCfg;
 use crate::sv::model::{AstSummary, DefineInfo, ParseArtifacts};
@@ -20,7 +21,7 @@ impl SvDriver {
         }
     }
 
-    pub fn parse_text(&self, text: &str, input_path: &Path) -> ParseArtifacts {
+    pub fn parse_text(&self, text: &str, input_path: &Path) -> Result<ParseArtifacts, ParseError> {
         let path_s = input_path.to_string_lossy().into_owned();
         let raw_text = text.to_owned();
         let line_map = LineMap::new(&raw_text);
@@ -38,19 +39,11 @@ impl SvDriver {
         let elapsed_parse = t1.elapsed().as_millis();
         log_event(Ev::new(Event::ParseParseDone, &path_s).with_duration_ms(elapsed_parse));
 
-        let (has_cst, collect) = if let Some(tree) = parse_out.syntax_tree.as_ref() {
-            let collected = collect_all(tree, &line_map, &raw_text);
-            (parse_out.has_cst, collected)
-        } else {
-            (
-                false,
-                CollectResult {
-                    decls: Vec::new(),
-                    refs: Vec::new(),
-                    assigns: Vec::new(),
-                },
-            )
-        };
+        let tree = parse_out.syntax_tree.as_ref().ok_or_else(|| ParseError::ParseFailed {
+            detail: format!("{}: parser produced no syntax tree", path_s),
+        })?;
+        let collect = collect_all(tree, &line_map, &raw_text);
+        let has_cst = parse_out.has_cst;
         log_event(Ev::new(Event::ParseAstCollectDone, &path_s));
 
         let defines = defines_to_info(&parse_out.defines);
@@ -71,7 +64,7 @@ impl SvDriver {
             None
         };
 
-        ParseArtifacts {
+        Ok(ParseArtifacts {
             raw_text,
             pp_text,
             defines,
@@ -79,7 +72,7 @@ impl SvDriver {
             ast,
             cst_ir,
             line_map,
-        }
+        })
     }
 }
 

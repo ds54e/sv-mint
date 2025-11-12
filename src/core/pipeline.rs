@@ -6,7 +6,7 @@ use crate::diag::logging::log_event;
 use crate::output::print_violations;
 use crate::plugin::client::PythonHost;
 use crate::svparser::SvDriver;
-use crate::types::{Stage, Violation};
+use crate::types::{Location, Severity, Stage, Violation};
 use anyhow::Result;
 use serde::Serialize;
 use std::path::{Path, PathBuf};
@@ -129,7 +129,24 @@ impl<'a> Pipeline<'a> {
     fn run_file_with_host(&self, input: &Path, host: &mut PythonHost) -> Result<usize> {
         let (normalized_text, input_path) = read_input(input)?;
         let driver = SvDriver::new(&self.cfg.svparser);
-        let artifacts = driver.parse_text(&normalized_text, &input_path);
+        let artifacts = match driver.parse_text(&normalized_text, &input_path) {
+            Ok(a) => a,
+            Err(e) => {
+                let violation = Violation {
+                    rule_id: "sys.parse.failed".to_string(),
+                    severity: Severity::Error,
+                    message: e.to_string(),
+                    location: Location {
+                        line: 1,
+                        col: 1,
+                        end_line: 1,
+                        end_col: 1,
+                    },
+                };
+                print_violations(&[violation], &input_path);
+                return Ok(1);
+            }
+        };
         let mut all: Vec<Violation> = Vec::new();
 
         for stage in &self.cfg.stages.enabled {
