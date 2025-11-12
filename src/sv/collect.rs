@@ -1,6 +1,6 @@
 use crate::core::linemap::{LineMap, SpanBytes};
 use crate::sv::model::{
-    AssignOp, Assignment, DeclKind, Declaration, Reference, ReferenceKind, SymbolClass, SymbolUsage,
+    AssignOp, Assignment, DeclKind, Declaration, PortInfo, Reference, ReferenceKind, SymbolClass, SymbolUsage,
 };
 use crate::types::Location;
 use std::collections::{HashMap, HashSet};
@@ -10,6 +10,7 @@ pub(crate) struct CollectResult {
     pub decls: Vec<Declaration>,
     pub refs: Vec<Reference>,
     pub assigns: Vec<Assignment>,
+    pub ports: Vec<PortInfo>,
 }
 
 pub(crate) trait SyntaxVisitor {
@@ -85,6 +86,7 @@ struct AstCollector<'a> {
     decls: Vec<Declaration>,
     refs: Vec<Reference>,
     assigns: Vec<Assignment>,
+    ports: Vec<crate::sv::model::PortInfo>,
     write_offsets: HashSet<usize>,
     decl_offsets: HashSet<usize>,
 }
@@ -99,6 +101,7 @@ impl<'a> AstCollector<'a> {
             decls: Vec::new(),
             refs: Vec::new(),
             assigns: Vec::new(),
+            ports: Vec::new(),
             write_offsets: HashSet::new(),
             decl_offsets: HashSet::new(),
         }
@@ -109,6 +112,7 @@ impl<'a> AstCollector<'a> {
             decls: self.decls,
             refs: self.refs,
             assigns: self.assigns,
+            ports: self.ports,
         }
     }
 
@@ -176,11 +180,47 @@ impl<'a> AstCollector<'a> {
         }
     }
 
+    fn record_port(&mut self, name: String, loc: Location, direction: &str) {
+        let module = self.scopes.last().cloned();
+        self.ports.push(PortInfo {
+            module,
+            name,
+            direction: direction.to_string(),
+            loc,
+        });
+    }
+
     fn lookup_identifier(&self, node: RefNode<'_>) -> Option<(String, Location, usize)> {
         let idloc = get_identifier(node)?;
         let name = self.syntax_tree.get_str(&idloc)?.to_string();
         let (loc, origin) = self.locate(&idloc)?;
         Some((name, loc, origin))
+    }
+
+    fn handle_ansi_port_net(&mut self, port: &sv_parser::AnsiPortDeclarationNet) {
+        if let Some((name, loc, _)) = self.lookup_identifier(RefNode::from(&port.nodes.1)) {
+            let direction = net_header_direction(port.nodes.0.as_ref());
+            self.record_port(name, loc, direction);
+        }
+    }
+
+    fn handle_ansi_port_var(&mut self, port: &sv_parser::AnsiPortDeclarationVariable) {
+        if let Some((name, loc, _)) = self.lookup_identifier(RefNode::from(&port.nodes.1)) {
+            let direction = variable_header_direction(port.nodes.0.as_ref());
+            self.record_port(name, loc, direction);
+        }
+    }
+
+    fn handle_ansi_port_paren(&mut self, port: &sv_parser::AnsiPortDeclarationParen) {
+        if let Some((name, loc, _)) = self.lookup_identifier(RefNode::from(&port.nodes.2)) {
+            let direction = port
+                .nodes
+                .0
+                .as_ref()
+                .map(port_direction_to_str)
+                .unwrap_or("unspecified");
+            self.record_port(name, loc, direction);
+        }
     }
 
     fn locate(&self, idloc: &Locate) -> Option<(Location, usize)> {
@@ -247,6 +287,15 @@ impl<'a> SyntaxVisitor for AstCollector<'a> {
             RefNode::VariableDeclAssignment(x) => {
                 self.record_decl(RefNode::from(x), DeclKind::Var);
             }
+            RefNode::AnsiPortDeclarationNet(x) => {
+                self.handle_ansi_port_net(x);
+            }
+            RefNode::AnsiPortDeclarationVariable(x) => {
+                self.handle_ansi_port_var(x);
+            }
+            RefNode::AnsiPortDeclarationParen(x) => {
+                self.handle_ansi_port_paren(x);
+            }
             RefNode::NetLvalue(x) => {
                 self.record_write(RefNode::from(x));
             }
@@ -279,6 +328,34 @@ fn get_identifier(node: RefNode) -> Option<Locate> {
         Some(RefNode::EscapedIdentifier(x)) => Some(x.nodes.0),
         _ => None,
     }
+}
+
+fn port_direction_to_str(dir: &sv_parser::PortDirection) -> &'static str {
+    match dir {
+        sv_parser::PortDirection::Input(_) => "input",
+        sv_parser::PortDirection::Output(_) => "output",
+        sv_parser::PortDirection::Inout(_) => "inout",
+        sv_parser::PortDirection::Ref(_) => "ref",
+    }
+}
+
+fn net_header_direction(header: Option<&sv_parser::NetPortHeaderOrInterfacePortHeader>) -> &'static str {
+    if let Some(header) = header {
+        match header {
+            sv_parser::NetPortHeaderOrInterfacePortHeader::NetPortHeader(h) => {
+                h.nodes.0.as_ref().map(port_direction_to_str).unwrap_or("unspecified")
+            }
+            sv_parser::NetPortHeaderOrInterfacePortHeader::InterfacePortHeader(_) => "interface",
+        }
+    } else {
+        "unspecified"
+    }
+}
+
+fn variable_header_direction(header: Option<&sv_parser::VariablePortHeader>) -> &'static str {
+    header
+        .and_then(|h| h.nodes.0.as_ref().map(port_direction_to_str))
+        .unwrap_or("unspecified")
 }
 
 fn scan_assignment_at(text: &str, lhs_start: usize) -> Option<(AssignOp, String, String, usize, usize)> {

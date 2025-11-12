@@ -52,6 +52,7 @@ impl SvDriver {
             decls: collect.decls,
             refs: collect.refs,
             assigns: collect.assigns,
+            ports: collect.ports,
             symbols,
             pp_text: Some(pp_text.clone()),
             ..AstSummary::default()
@@ -59,13 +60,7 @@ impl SvDriver {
 
         let line_starts = line_starts(&pp_text);
         let cst_ir = if has_cst {
-            Some(build_cst_ir(
-                tree,
-                &path_s,
-                "",
-                &line_starts,
-                &pp_text,
-            ))
+            Some(build_cst_ir(tree, &path_s, "", &line_starts, &pp_text))
         } else {
             None
         };

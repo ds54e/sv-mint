@@ -86,6 +86,15 @@ pub struct Assignment {
     pub loc: Location,
 }
 
+#[derive(Clone, Debug, Serialize)]
+pub struct PortInfo {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub module: Option<String>,
+    pub name: String,
+    pub direction: String,
+    pub loc: Location,
+}
+
 #[derive(Clone, Debug, Serialize, PartialEq, Eq, Hash)]
 #[serde(rename_all = "lowercase")]
 pub enum SymbolClass {
@@ -121,6 +130,8 @@ pub struct AstSummary {
     pub refs: Vec<Reference>,
     pub symbols: Vec<SymbolUsage>,
     pub assigns: Vec<Assignment>,
+    #[serde(default)]
+    pub ports: Vec<PortInfo>,
     pub pp_text: Option<String>,
     #[serde(default)]
     pub schema_version: u32,
@@ -135,6 +146,7 @@ impl Default for AstSummary {
             refs: Vec::new(),
             symbols: Vec::new(),
             assigns: Vec::new(),
+            ports: Vec::new(),
             pp_text: None,
             schema_version: 1,
             scopes: Vec::new(),

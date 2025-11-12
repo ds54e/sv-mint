@@ -10,6 +10,7 @@ def check(req):
     payload = req.get("payload") or {}
     decls = payload.get("decls") or []
     symbols = payload.get("symbols") or []
+    ports = payload.get("ports") or []
     out = []
     for decl in decls:
         if decl.get("kind") != "module":
@@ -23,6 +24,12 @@ def check(req):
         name = sym.get("name") or ""
         loc = sym.get("loc")
         out.extend(validate_name(name, loc, "naming.signal_case"))
+        out.extend(check_suffixes(name, loc))
+        out.extend(check_clock_reset(name, loc))
+    for port in ports:
+        name = port.get("name") or ""
+        loc = port.get("loc")
+        out.extend(validate_name(name, loc, "naming.port_case"))
         out.extend(check_suffixes(name, loc))
         out.extend(check_clock_reset(name, loc))
     return out
