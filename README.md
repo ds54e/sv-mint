@@ -1,12 +1,12 @@
 # sv-mint
 
 ## 概要
-sv-mint は SystemVerilog 向けの Linter です。Rust 製コアが sv-parser により前処理と構文解析を行い、各ステージの成果物を Python 製プラグインへ渡して診断を実行します。現在の実装では CST を要約せず、ステージ payload に インライン JSON で渡します。全ステージに共通のサイズガードを設け、直列化後のリクエストがしきい値を超えた場合はステージをスキップして警告を返します。
+sv-mint は SystemVerilog 向けの Linter です。Rust 製コアが sv-parser による前処理・構文解析を行い、raw_text / pp_text / cst / ast の各ステージ payload を構築します。ステージ診断は常駐型の Python ホスト（`plugins/lib/rule_host.py`）へ NDJSON で送信され、ホストが ruleset に列挙された Python スクリプトの `check(req)` を順次実行します。CST はインライン JSON で配信し、payload サイズが警告・スキップの上限を超えた場合はステージをスキップして診断を代わりに返します。
 
 ## 対象環境
-- OS: Windows 10 以降
-- Rust: stable (MSVC)
-- Python: 3.x（py ランチャー経由で実行）
+- OS: Windows 10 以降 / Linux / macOS
+- Rust: stable（MSVC / GNU いずれも可）
+- Python: 3.x（`python3` もしくは PATH 上の CPython）
 - 文字コード: UTF-8（BOM 可）
 - 改行コード: CRLF/LF 両対応（内部で LF 正規化）
 
@@ -34,8 +34,8 @@ sv-mint --config .\sv-mint.toml path\to\file.sv
 timeout_ms_per_file = 3000
 
 [plugin]
-cmd = "py"
-args = ["-3","-u","-B"]
+cmd = "python3"
+args = ["-u","-B"]
 
 [ruleset]
 scripts = [
@@ -69,8 +69,8 @@ show_parse_events = true
 1. 入力ソースを UTF-8 に正規化します。
 2. sv-parser により前処理と構文解析を行います。
 3. raw_text、pp_text、cst、ast の順にステージ payload を構築します。
-4. ruleset.scripts に列挙した Python プラグインをステージごとに順次起動します。
-5. 各プラグインの JSON 応答を集約して出力します。
+4. ruleset.scripts に列挙した Python スクリプトを常駐ホストへロードし、ステージごとに `check(req)` を同期実行します。
+5. 返却された違反オブジェクトの配列を集約して標準出力へ整形します。
 
 ## ステージ別 payload
 
@@ -121,46 +121,42 @@ show_parse_events = true
 
 ## プラグイン仕様
 
-### 入力 (STDIN)
-```
-{
-  "stage": "raw_text|pp_text|cst|ast",
-  "path": "<ファイルパス>",
-  "payload": { ... }
-}
-```
-`type` フィールドは必須ではありません。
+### 常駐ホストとのプロトコル
+1. Rust 側が `plugins/lib/rule_host.py` を 1 回だけ起動し、最初の行で `{"kind":"init","scripts":[...絶対/相対パス...]}` を送信します。
+2. ホストは各スクリプトを import し、`{"type":"ready"}` を返します。
+3. ステージを処理するたびに `{"kind":"run_stage","stage":"ast", "path":"...","payload":{...}}` を送信します。
+4. ホストは読み込んだ順に `module.check(req)` を呼び、返却された違反配列を結合して `{"type":"violations","violations":[...]}` を返します。
+5. Rust 側終了時に `{"kind":"shutdown"}` を送信し、ホストは自身を終了させます。
 
-### 出力 (STDOUT)
+### スクリプトの書式
+- ファイルは `check(req: dict) -> list[dict]` を定義してください。
+- `req["stage"]`, `req["path"]`, `req["payload"]` を参照できます。
+- 返り値は `Violation` 互換の辞書（下記フォーマット）をリストで返します。
+- エラーを送出するとホストは `{ "type":"error", "detail":... }` を Rust 側へ返し、その時点で処理が停止します。
+
+### Violation 辞書
 ```
 {
-  "type": "ViolationsStage",
-  "stage": "<同一ステージ名>",
-  "violations": [
-    {
-      "rule_id": "<規則ID>",
-      "severity": "error|warning|info",
-      "message": "<メッセージ>",
-      "location": { "line": n, "col": n, "end_line": n, "end_col": n }
-    }
-  ]
+  "rule_id": "<規則ID>",
+  "severity": "error|warning|info",
+  "message": "<メッセージ>",
+  "location": { "line": n, "col": n, "end_line": n, "end_col": n }
 }
 ```
-STDERR はログとして記録します。
+未指定の場合は `severity_override` による上書きのみ行われます。
 
 ## サンプルプラグイン
 ```
-import sys, json
-req = json.loads(sys.stdin.read() or "{}")
-stage = str(req.get("stage", ""))
-viol = {
-  "rule_id": "debug.ping",
-  "severity": "warning",
-  "message": "ping",
-  "location": {"line": 1, "col": 1, "end_line": 1, "end_col": 1}
-}
-out = {"type": "ViolationsStage", "stage": stage, "violations": [viol]}
-sys.stdout.write(json.dumps(out))
+def check(req):
+    stage = req.get("stage")
+    payload = req.get("payload") or {}
+    count = len(payload.get("symbols") or [])
+    return [{
+        "rule_id": "debug.ping",
+        "severity": "warning",
+        "message": f"ping: stage={stage}, symbols={count}",
+        "location": {"line":1,"col":1,"end_line":1,"end_col":1}
+    }]
 ```
 
 ## サイズガード挙動
@@ -169,9 +165,9 @@ sys.stdout.write(json.dumps(out))
 - raw_text と pp_text は必須ステージとして扱い、スキップ時はエラー終了にします。
 
 ## バイトコード抑止
-- 起動引数に `-B` を付与します。
+- 起動引数に `-B` を付与します（既定 args を参照）。
 - 必要に応じて環境変数 `PYTHONDONTWRITEBYTECODE=1` を設定します。
-- `.gitignore` に `__pycache__/` と `*.pyc` を追加します。
+- `.gitignore` に `__pycache__/` と `*.pyc` を追加済みです。
 
 ## 診断出力形式
 ```
