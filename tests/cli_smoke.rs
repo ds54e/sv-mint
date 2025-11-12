@@ -55,6 +55,11 @@ fn detects_naming_violations() {
 }
 
 #[test]
+fn detects_language_violations() {
+    run_fixture("fixtures/lang_violations.sv", "lang.prefer_always_comb");
+}
+
+#[test]
 fn detects_ascii_and_newline_violations() {
     run_temp_source(
         "module ascii_check; // é",
