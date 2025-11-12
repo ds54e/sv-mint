@@ -1,6 +1,7 @@
 import re
 
 UNSIZED_BASE = re.compile(r"(?<![0-9_])'(?:[bBdDhHoO])")
+BOOLEAN_MULTIBIT = re.compile(r"(!|&&|\\|\\||==|!=|<|>)(\\s*)([A-Za-z_]\\w*)")
 
 
 def locate(text, index):

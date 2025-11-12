@@ -43,13 +43,7 @@ pub struct CstIr {
     pub nodes: Vec<NodeRec>,
 }
 
-pub fn build_cst_ir(
-    tree: &SyntaxTree,
-    file: &str,
-    sv_parser_ver: &str,
-    line_starts: &[usize],
-    pp_text: &str,
-) -> CstIr {
+pub fn build_cst_ir(tree: &SyntaxTree, file: &str, sv_parser_ver: &str, line_starts: &[usize], pp_text: &str) -> CstIr {
     let mut builder = CstBuilder::new(file, sv_parser_ver, line_starts, pp_text);
     builder.walk(tree);
     builder.finish()
@@ -123,7 +117,10 @@ impl CstBuilder {
             file: self.file,
             hash: String::new(),
             line_starts: self.line_starts,
-            include: CstIncludeFlags { text: true, tokens: true },
+            include: CstIncludeFlags {
+                text: true,
+                tokens: true,
+            },
             pp_text: Some(self.pp_text),
             kind_table: self.kind_table,
             tok_kind_table: self.tok_kind_table,
