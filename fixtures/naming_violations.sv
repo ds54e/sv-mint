@@ -1,6 +1,7 @@
 module BadModuleName (
   input logic dramClk_i,
   input logic rst_i,
+  input logic clk_aux_i,
   output logic DATA_OUT_O
 );
 

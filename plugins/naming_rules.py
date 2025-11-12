@@ -32,6 +32,7 @@ def check(req):
         out.extend(validate_name(name, loc, "naming.port_case"))
         out.extend(check_suffixes(name, loc))
         out.extend(check_clock_reset(name, loc))
+    out.extend(check_clock_reset_order(ports))
     return out
 
 
@@ -88,4 +89,34 @@ def check_clock_reset(name, loc):
             "message": f"{name} must end with '_n' for active-low resets",
             "location": loc,
         })
+    return issues
+
+
+def check_clock_reset_order(ports):
+    issues = []
+    clk_seen = False
+    rst_phase = False
+    for port in ports:
+        name = port.get("name") or ""
+        loc = port.get("loc")
+        direction = port.get("direction") or ""
+        if name.startswith("clk"):
+            if clk_seen and rst_phase and loc:
+                issues.append({
+                    "rule_id": "naming.clk_order",
+                    "severity": "warning",
+                    "message": "clk ports should appear before resets and other ports",
+                    "location": loc,
+                })
+            clk_seen = True
+        elif name.startswith("rst"):
+            if not clk_seen and loc:
+                issues.append({
+                    "rule_id": "naming.rst_before_clk",
+                    "severity": "warning",
+                    "message": "rst ports should follow clk ports",
+                    "location": loc,
+                })
+            rst_phase = True
+    return issues
     return issues

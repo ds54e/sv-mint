@@ -226,7 +226,7 @@ def check(req):
 | `fixtures/if_without_begin.sv` | `format.begin_required`（複数行ブロックの begin/end 必須） | `cargo run -- fixtures/if_without_begin.sv` |
 | `fixtures/whitespace_violations.sv` | `format.no_tabs` / `format.no_trailing_whitespace` | `cargo run -- fixtures/whitespace_violations.sv` |
 | `fixtures/spacing_violations.sv` | `format.call_spacing` / `format.case_colon_spacing` など | `cargo run -- fixtures/spacing_violations.sv` |
-| `fixtures/naming_violations.sv` | `naming.module_case` / `naming.clk_prefix` など | `cargo run -- fixtures/naming_violations.sv` |
+| `fixtures/naming_violations.sv` | `naming.module_case` / `naming.clk_order` など | `cargo run -- fixtures/naming_violations.sv` |
 | `fixtures/lang_violations.sv` | `lang.prefer_always_comb` / `lang.no_delays` | `cargo run -- fixtures/lang_violations.sv` |
 | `fixtures/global_define_violations.sv` | `global.prefer_parameters` / `global.local_define_undef` | `cargo run -- fixtures/global_define_violations.sv` |
 | `fixtures/multiple_nonblocking.sv` | `flow.multiple_nonblocking` | `cargo run -- fixtures/multiple_nonblocking.sv` |
