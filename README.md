@@ -234,6 +234,9 @@ def check(req):
 | `fixtures/case_unique_violation.sv` | `lang.case_requires_unique` | `cargo run -- fixtures/case_unique_violation.sv` |
 | `fixtures/case_begin_violation.sv` | `format.case_begin_required` | `cargo run -- fixtures/case_begin_violation.sv` |
 | `fixtures/package_mismatch.sv` | `package.multiple` / `package.define_in_package` | `cargo run -- fixtures/package_mismatch.sv` |
+| `fixtures/module_inst_violation.sv` | `module.named_ports_required` / `module.no_port_wildcard` | `cargo run -- fixtures/module_inst_violation.sv` |
+| `fixtures/header_missing.sv` | `header.missing_spdx` | `cargo run -- fixtures/header_missing.sv` |
+| `fixtures/typedef_violation.sv` | `typedef.enum_suffix` / `typedef.type_suffix` | `cargo run -- fixtures/typedef_violation.sv` |
 
 どのコマンドも違反が発生した場合は終了コード 2 で終了します。複数ファイルを一度に検証したい場合は `cargo run -- fixtures/*.sv` のようにワイルドカードを渡してください。
 

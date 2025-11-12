@@ -26,7 +26,10 @@ scripts = [
   "plugins/width_literal_rules.py",
   "plugins/case_unique_required.py",
   "plugins/format_case_begin_cst.py",
-  "plugins/package_rules.py"
+  "plugins/package_rules.py",
+  "plugins/module_inst_rules.py",
+  "plugins/header_comment_rule.py",
+  "plugins/typedef_naming_rules.py"
 ]
 
 [logging]

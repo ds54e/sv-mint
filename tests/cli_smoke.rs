@@ -104,3 +104,18 @@ fn detects_case_begin_violations() {
 fn detects_package_mismatch() {
     run_fixture("fixtures/package_mismatch.sv", "package.multiple");
 }
+
+#[test]
+fn detects_module_inst_violations() {
+    run_fixture("fixtures/module_inst_violation.sv", "module.named_ports_required");
+}
+
+#[test]
+fn detects_header_missing() {
+    run_fixture("fixtures/header_missing.sv", "header.missing_spdx");
+}
+
+#[test]
+fn detects_typedef_violations() {
+    run_fixture("fixtures/typedef_violation.sv", "typedef.enum_suffix");
+}
