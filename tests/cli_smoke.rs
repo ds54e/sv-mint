@@ -60,6 +60,11 @@ fn detects_language_violations() {
 }
 
 #[test]
+fn detects_global_define_violations() {
+    run_fixture("fixtures/global_define_violations.sv", "global.prefer_parameters");
+}
+
+#[test]
 fn detects_ascii_and_newline_violations() {
     run_temp_source(
         "module ascii_check; // é",

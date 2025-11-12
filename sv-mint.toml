@@ -20,7 +20,8 @@ scripts = [
   "plugins/end_else_same_line.py",
   "plugins/begin_end_required.py",
   "plugins/naming_rules.py",
-  "plugins/lang_construct_rules.py"
+  "plugins/lang_construct_rules.py",
+  "plugins/global_define_rules.py"
 ]
 
 [logging]

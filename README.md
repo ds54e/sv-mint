@@ -228,6 +228,7 @@ def check(req):
 | `fixtures/spacing_violations.sv` | `format.call_spacing` / `format.case_colon_spacing` など | `cargo run -- fixtures/spacing_violations.sv` |
 | `fixtures/naming_violations.sv` | `naming.module_case` / `naming.clk_prefix` など | `cargo run -- fixtures/naming_violations.sv` |
 | `fixtures/lang_violations.sv` | `lang.prefer_always_comb` / `lang.no_delays` | `cargo run -- fixtures/lang_violations.sv` |
+| `fixtures/global_define_violations.sv` | `global.prefer_parameters` / `global.local_define_undef` | `cargo run -- fixtures/global_define_violations.sv` |
 
 どのコマンドも違反が発生した場合は終了コード 2 で終了します。複数ファイルを一度に検証したい場合は `cargo run -- fixtures/*.sv` のようにワイルドカードを渡してください。
 
