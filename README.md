@@ -230,6 +230,8 @@ def check(req):
 | `fixtures/lang_violations.sv` | `lang.prefer_always_comb` / `lang.no_delays` | `cargo run -- fixtures/lang_violations.sv` |
 | `fixtures/global_define_violations.sv` | `global.prefer_parameters` / `global.local_define_undef` | `cargo run -- fixtures/global_define_violations.sv` |
 | `fixtures/multiple_nonblocking.sv` | `flow.multiple_nonblocking` | `cargo run -- fixtures/multiple_nonblocking.sv` |
+| `fixtures/width_literal_violation.sv` | `width.unsized_base_literal` | `cargo run -- fixtures/width_literal_violation.sv` |
+| `fixtures/case_unique_violation.sv` | `lang.case_requires_unique` | `cargo run -- fixtures/case_unique_violation.sv` |
 
 どのコマンドも違反が発生した場合は終了コード 2 で終了します。複数ファイルを一度に検証したい場合は `cargo run -- fixtures/*.sv` のようにワイルドカードを渡してください。
 

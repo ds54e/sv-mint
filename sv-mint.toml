@@ -22,7 +22,9 @@ scripts = [
   "plugins/naming_rules.py",
   "plugins/lang_construct_rules.py",
   "plugins/global_define_rules.py",
-  "plugins/assignment_rules.py"
+  "plugins/assignment_rules.py",
+  "plugins/width_literal_rules.py",
+  "plugins/case_unique_required.py"
 ]
 
 [logging]

@@ -65,6 +65,11 @@ fn detects_global_define_violations() {
 }
 
 #[test]
+fn detects_width_literal_violations() {
+    run_fixture("fixtures/width_literal_violation.sv", "width.unsized_base_literal");
+}
+
+#[test]
 fn detects_multiple_nonblocking_assignments() {
     run_fixture("fixtures/multiple_nonblocking.sv", "flow.multiple_nonblocking");
 }
@@ -83,4 +88,9 @@ fn detects_macro_spacing() {
         "`define FOO(x) x\nmodule macro_spacing;\ninitial begin\n  `FOO (x)\nend\nendmodule\n",
         &["format.macro_spacing"],
     );
+}
+
+#[test]
+fn detects_case_unique_violations() {
+    run_fixture("fixtures/case_unique_violation.sv", "lang.case_requires_unique");
 }
