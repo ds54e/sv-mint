@@ -69,42 +69,7 @@ sv-mint --config ./sv-mint.toml path/to/file.sv
 詳細な payload 仕様やプロトコルは [docs/plugin_author.md](docs/plugin_author.md) と [docs/internal_spec.md](docs/internal_spec.md) を参照してください。
 
 ## サンプル設定
-```toml
-[defaults]
-timeout_ms_per_file = 3000
-
-[plugin]
-cmd = "python3"
-args = ["-u", "-B"]
-
-[ruleset]
-scripts = [
-  "plugins/seq_blocking_in_alwaysff.py",
-  "plugins/comb_nb_in_alwayscomb.py",
-  "plugins/decl_unused_param.py",
-  "plugins/decl_unused_net.py",
-  "plugins/decl_unused_var.py"
-]
-
-[stages]
-enabled = ["raw_text", "pp_text", "cst", "ast"]
-
-[svparser]
-include_paths = []
-defines = []
-strip_comments = true
-ignore_include = false
-allow_incomplete = true
-
-[logging]
-level = "info"
-format = "text" # text / json
-stderr_snippet_bytes = 2048
-show_stage_events = true
-show_plugin_events = true
-show_parse_events = true
-```
-より詳しいオプション解説は [docs/user_guide.md](docs/user_guide.md#sv-minttoml-設定) を参照してください。
+代表的な `sv-mint.toml` の全体例とキーごとの説明は [docs/user_guide.md](docs/user_guide.md#sv-minttoml-設定) に集約しています。自組織向けのテンプレートを作成する際はそちらを参照して最新のオプションと注意事項を確認してください。
 
 ## サポートリソース
 - `fixtures/`: CLI テストやルール検証に使える SystemVerilog サンプル。

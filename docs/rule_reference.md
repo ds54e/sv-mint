@@ -23,6 +23,16 @@
 | パッケージ/typedef | `package.multiple`, `typedef.enum_suffix` | `ast` | `package_rules.py` / `typedef_naming_rules.py` | パッケージ内の重複や typedef の命名規則を確認。 |
 | その他のテンプレート | `header.missing_spdx`, `debug.ping` | `raw_text` | `header_comment_rule.py` / `debug_ping.py` | SPDX ライセンス表記の不足やデバッグ用 ping ルール。 |
 
+### 1.1 CLI 出力例
+代表的なルールについて、実際の CLI 行を挙げます。
+```
+src/top.sv:42:81: [warning] format.line_length: line exceeds 100 columns (118)
+src/top.sv:10:7: [error] format.begin_required: if-statement must be wrapped in begin/end
+src/foo.sv:5:10: [warning] naming.module_case: module FooBar must be lower_snake_case
+src/include_child.sv:3:3: [warning] decl.unused.var: unused var include_child.unused_signal
+```
+`Location.file` が設定されている場合（例: include 先）でも同じ形式で出力されます。
+
 ## 2. ステージ別の着目点
 - **raw_text**: UTF-8 + LF 正規化済みの元ソース。コメント・マクロを含むため、行長・ASCII 制約・ヘッダー確認に最適。
 - **pp_text**: `sv-parser` 前処理後のテキスト。`defines` 展開結果を見たい場合はこちらを利用。
