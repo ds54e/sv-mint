@@ -16,3 +16,14 @@
 - **Remediation**: Break long expressions, introduce temporaries, or wrap comments to stay within 100 columns.
 - **Notes**: Threshold is fixed in code; tweak severity via `ruleset.override` if needed.
 - **LowRISC Reference**: The style guide caps SystemVerilog lines at 100 characters, including doc comments.
+- **Good**:
+
+```systemverilog
+assign addr_aligned = {addr_i[31:4], 4'b0};  // stays well under 100 columns
+```
+
+- **Bad**:
+
+```systemverilog
+assign addr_aligned = {addr_i[31:4], 4'b0};  // this comment keeps going and going without wrapping so it easily exceeds the 100-column limit enforced by sv-mint
+```

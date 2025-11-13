@@ -37,3 +37,22 @@
 - **Remediation**: Publish constants via `parameter` or `localparam` instead of macros.
 - **LowRISC Reference**: Packages should expose types and parameters, not macros.
 - **Additional Tips**: Transition legacy macros to `localparam` and consume them through `import foo_pkg::*;`.
+- **Good**:
+
+```systemverilog
+package foo_pkg;
+  parameter int DataWidth = 32;
+endpackage : foo_pkg
+```
+
+- **Bad**:
+
+```systemverilog
+package foo_pkg;
+  parameter int DataWidth = 32;
+endpackage : bar_pkg  // mismatched end label and missing second package guard
+
+package extra_pkg;  // multiple packages per file
+  `define ENABLE_FOO 1  // macro defined inside package
+endpackage
+```

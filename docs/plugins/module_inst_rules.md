@@ -12,7 +12,7 @@
 ## Rule Details
 
 ### `module.no_port_wildcard`
-- **Trigger**: Regex `\.*` catches wildcard port hookups.
+- **Trigger**: Regex `\\.\*` catches wildcard port hookups exactly as implemented in `plugins/module_inst_rules.py`.
 - **Message**: `` avoid .* wildcard in module instantiations ``
 - **Remediation**: Expand to explicit named ports to prevent silent autowiring.
 - **LowRISC Reference**: Wildcards are prohibited; list every port.
@@ -22,3 +22,20 @@
 - **Message**: `` use named port connections instead of positional arguments ``
 - **Remediation**: Rewrite as `.clk(clk)` style to remove ordering hazards.
 - **Notes**: Formatting tools such as `verible-verilog-format --named-port-formatting` help during migrations.
+- **Good**:
+
+```systemverilog
+foo u_foo (
+  .clk_i(clk_i),
+  .rst_ni(rst_ni),
+  .req_i(req_i),
+  .gnt_o(gnt_o)
+);
+```
+
+- **Bad**:
+
+```systemverilog
+foo u_foo (clk_i, rst_ni, req_i, gnt_o);  // positional arguments
+bar u_bar (.*);  // wildcard ports
+```

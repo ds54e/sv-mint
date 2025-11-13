@@ -16,3 +16,16 @@
 - **Remediation**: Add widths (`8'h`, `4'd`, etc.) to every base literal.
 - **LowRISC Reference**: Unsized base literals are forbidden; always spell out widths.
 - **Additional Tips**: Use underscores for readability (`32'hDEAD_BEEF`) and move constants into `localparam` for reuse.
+- **Good**:
+
+```systemverilog
+assign mask_o = 8'hFF;
+localparam logic [31:0] MagicValue = 32'hDEAD_BEEF;
+```
+
+- **Bad**:
+
+```systemverilog
+assign mask_o = 'hFF;      // missing width
+localparam MagicValue = 'd10;  // unsized decimal literal
+```

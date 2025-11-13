@@ -24,3 +24,30 @@
 - **Remediation**: Append `_t`, e.g., `data_t`.
 - **LowRISC Reference**: Structs, packed arrays, and other types end in `_t`.
 - **Additional Tips**: When exporting typedefs from packages, keep the `_t` suffix for downstream consistency.
+- **Good**:
+
+```systemverilog
+typedef enum logic [1:0] {
+  IDLE,
+  BUSY
+} state_e;
+
+typedef struct packed {
+  logic valid;
+  logic [31:0] data;
+} payload_t;
+```
+
+- **Bad**:
+
+```systemverilog
+typedef enum logic [1:0] {
+  IDLE,
+  BUSY
+} state;
+
+typedef struct packed {
+  logic valid;
+  logic [31:0] data;
+} payload;
+```

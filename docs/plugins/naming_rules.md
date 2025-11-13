@@ -30,8 +30,8 @@
 - **Fix**: Use meaningful suffixes (`_a/_b`, `_q1/_q2`) and merge `_n` with direction (`rst_ni`).
 
 ### Clock and Reset Rules (`naming.clk_prefix`, `naming.rst_active_low`, `naming.clk_order`, `naming.rst_before_clk`)
-- **Trigger**: Ensures clock names begin with `clk`, resets end with `_n` plus direction, and port lists order `clk` before `rst` before everything else.
-- **Fix**: Rename to `clk_core_i`, `rst_ni`, and reorder the port declarations accordingly.
+- **Trigger**: Ensures clock names begin with `clk`, resets end with `_n` plus direction, forbids reset ports from appearing before the first clock, and prevents clocks from reappearing after reset ports start.
+- **Fix**: Rename to `clk_core_i`, `rst_ni`, and keep the port list grouped as `clk*` first, followed by `rst*`, then everything else.
 
 ### Differential Pairs (`naming.differential_pair`)
 - **Trigger**: Finds `_p` ports lacking a matching `_n` with the same base name.
@@ -44,3 +44,33 @@
 ### Parameters (`naming.parameter_upper`)
 - **Trigger**: Flags `parameter` names that are not UpperCamelCase.
 - **Fix**: Rename to `DataWidth`, `NumAlerts`, etc., leaving ALLCAPS for `localparam` only.
+- **Good**:
+
+```systemverilog
+module entropy_ctrl (
+  input  logic clk_core_i,
+  input  logic rst_ni,
+  input  logic req_i,
+  output logic gnt_o
+);
+
+parameter int DataWidth = 32;
+logic state_q, state_d;
+logic data_q1, data_q2;
+logic tx_p_o, tx_n_o;
+```
+
+- **Bad**:
+
+```systemverilog
+module EntropyCtrl (
+  input logic rst_i,
+  input logic clk_extra_i,  // reset before clock
+  output logic DATA42
+);
+
+parameter int data_width = 32;
+logic debugSignal_1;
+logic tx_p_o;  // missing twin
+logic data_q3;  // skips q2
+```

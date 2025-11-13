@@ -26,3 +26,23 @@
 - **Trigger**: Checks lines containing `\` and warns when characters follow the backslash.
 - **Message**: `` line continuation \ must be last character ``
 - **Remediation**: Ensure the backslash is the final character—move comments to the next line.
+- **Good**:
+
+```systemverilog
+module foo;
+  `define FOO(value) \
+    value + 1
+end
+```
+
+- **Bad**:
+
+```systemverilog
+module foo;
+   logic  data_q;   // odd indentation
+  `ifdef FOO        // directive not in column 1
+  assign result = a + \  // characters after backslash
+    b;
+  `endif
+endmodule
+```

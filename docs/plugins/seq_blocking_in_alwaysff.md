@@ -15,3 +15,19 @@
 - **Message**: `` blocking '=' inside always_ff ``
 - **Remediation**: Use non-blocking `<=` for sequential logic or refactor the assignment into combinational logic.
 - **Notes**: Falls back to text scanning when token data is unavailable.
+- **Good**:
+
+```systemverilog
+always_ff @(posedge clk_i or negedge rst_ni) begin
+  if (!rst_ni) data_q <= '0;
+  else data_q <= data_d;
+end
+```
+
+- **Bad**:
+
+```systemverilog
+always_ff @(posedge clk_i) begin
+  data_q = data_d;  // blocking assignment inside always_ff
+end
+```

@@ -10,11 +10,10 @@
 
 ## Rule Details
 
-### `format.case_begin_required`
-- **Trigger**: For each `CaseStatement`, checks the first non-comment token after the `colon`. If it is not `begin`, the rule fires.
+- **Trigger**: For each `CaseStatement`, checks the first non-comment token after the `colon`. If it is not `begin`, the rule fires (even for single statements).
 - **Message**: `` case item should wrap statements in begin/end ``
-- **Remediation**: Add `begin ... end` blocks to each case item that holds multiple statements (and consider doing so even for single statements for future-proofing).
-- **Notes**: Single statements that already start with `begin` are skipped; the policy applies equally to `unique case` and `case inside`.
+- **Remediation**: Add `begin ... end` blocks to every case item so the first token after `:` is always `begin`.
+- **Notes**: Single statements that already start with `begin` are skipped; the policy applies equally to `unique case` and `case inside`. The implementation does not count statements inside the item—any label without an immediate `begin` fails the rule.
 - **Good**:
 
 ```systemverilog
