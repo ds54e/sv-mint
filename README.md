@@ -55,6 +55,7 @@ sv-mint --config ./sv-mint.toml path/to/file.sv
 | [README.md](README.md) | すべて | ツール概要とリンク集 |
 | [docs/user_guide.md](docs/user_guide.md) | 一般ユーザー | 実行方法、`sv-mint.toml` 設定、ログ解析、FAQ |
 | [docs/rule_reference.md](docs/rule_reference.md) | ルール利用者 | ルール一覧、ID/ステージ/検出条件、典型メッセージ |
+| [docs/rule_detail_user.md](docs/rule_detail_user.md) | 一般ユーザー | ルールごとの背景・Severity・修正方針をまとめた対処ガイド |
 | [docs/plugin_author.md](docs/plugin_author.md) | プラグイン作者 | I/O 仕様、Violation 構造、デバッグ・テスト方法 |
 | [docs/internal_spec.md](docs/internal_spec.md) | 開発者 | コア構造、データ契約、エラー分類、拡張指針 |
 
