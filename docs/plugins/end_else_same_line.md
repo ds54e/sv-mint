@@ -1,22 +1,22 @@
 # end_else_same_line.py
 
-- **対応スクリプト**: `plugins/end_else_same_line.py`
-- **使用ステージ**: `pp_text`
-- **主な入力フィールド**: プリプロ整形済み `text`
-- **提供ルール**:
-  | Rule ID | Severity | 動作概要 |
+- **Script**: `plugins/end_else_same_line.py`
+- **Stage**: `pp_text`
+- **Key Inputs**: Preprocessed `text`
+- **Rule**:
+  | Rule ID | Severity | Summary |
   | --- | --- | --- |
-  | `format.end_else_inline` | warning | `end` の直後で改行される `else` を禁止し、同一行に揃える |
+  | `format.end_else_inline` | warning | Require `else` to share the same line as the preceding `end` |
 
-## ルール詳細
+## Rule Details
 
 ### `format.end_else_inline`
-- **検出条件**: `end` の後で空白→改行→空白のパターンを検出し、その直後に `else` が開始している場合に `else` 側の位置で警告します。
-- **代表メッセージ**: `` else must be on the same line as the preceding end ``
-- **主な対処**: `end else` の行を 1 行にまとめるか、`end` に接続する `end else begin` などの書式に統一してください。
-- **補足**: コメントで行が分断されている場合は検出対象外です。スタイルガイド上、`end else` ブロックの視認性を重視しています。
-- **LowRISC 参照**: lowRISC スタイルガイドも `else` を前の `end` と同一行に置くことを推奨しており、`end` と `else` の間に空行を入れない明文化されたスタイルです。
-- **良い例**:
+- **Trigger**: Detects the pattern `end` + whitespace + newline + whitespace + `else` and reports the `else` location.
+- **Message**: `` else must be on the same line as the preceding end ``
+- **Remediation**: Join `end else` onto a single line or adopt `end else begin` formatting consistently.
+- **Notes**: Lines split by comments are ignored. The goal is to keep `end/else` visually paired.
+- **LowRISC Reference**: The guide explicitly keeps `else` on the same line as `end` and disallows blank lines between them.
+- **Good**:
 
 ```systemverilog
 if (req_i) begin
@@ -26,7 +26,7 @@ end else begin
 end
 ```
 
-- **悪い例**:
+- **Bad**:
 
 ```systemverilog
 if (req_i) begin
@@ -37,4 +37,4 @@ else begin
 end
 ```
 
-- **追加のポイント**: `end` 行末コメント（`end // state latch` 等）がある場合は `end else` の間に 2 つ目のスペースを確保し、`end // state latch else ...` のようにコメントが干渉しないよう整形してください。`pp_text` をそのまま解析するため、`ifdef` で `else` を分けていると検出から外れるケースがあります。
+- **Additional Tips**: When `end` has a trailing comment (`end // state latch`), leave enough spacing so `end // state latch else ...` reads clearly. Because the rule scans `pp_text`, `else` guarded by `ifdef` blocks may be skipped if not present after preprocessing.

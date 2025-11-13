@@ -1,27 +1,27 @@
-# リポジトリガイドライン
+# Repository Guidelines
 
-## エージェント向け指示
-- ユーザーからの説明依頼や質問には、常に日本語で回答すること。
-- コードを変更する際は、新しいコメントを追加したり既存コメントを変更しないこと。
+## Instructions for Agents
+- When users ask questions or request explanations, respond in Japanese.
+- Do not add new comments or modify existing ones when editing code.
 
-## プロジェクト構成とモジュール整理
-`src/lib.rs` が Rust コアを結線し、`src/bin/sv-mint.rs` が CLI を公開します。パイプラインのロジックは `src/core/`（型、サイズガード、linemap）に、診断とロギングは `src/diag/` に、SystemVerilog 解析アーティファクトは `src/sv/` に置かれています。IO ヘルパー（設定解析、出力整形）は `src/io/`、Python プラグインは `plugins/`、共通ヘルパーは `plugins/lib/` 配下です。デフォルト設定は `sv-mint.toml`、言語レベルのフォーマット設定は `rustfmt.toml` にあります。
+## Project Layout
+`src/lib.rs` wires the Rust core, while `src/bin/sv-mint.rs` exposes the CLI. Pipeline logic lives under `src/core/` (types, size guards, line maps); diagnostics and logging under `src/diag/`; SystemVerilog artifacts under `src/sv/`. IO helpers (config parsing, output formatting) live in `src/io/`; Python plugins under `plugins/`; shared helpers under `plugins/lib/`. Defaults are in `sv-mint.toml`, and Rust formatting is configured via `rustfmt.toml`.
 
-## ビルド・テスト・開発コマンド
-- `cargo build --release`: 配布用に `target/release/sv-mint` を生成。
-- `cargo check`: 反復開発中の高速な正当性確認。
-- `cargo fmt --all`: レビュー前に Rust の整形を徹底。
-- `cargo clippy --all-targets --all-features`: 典型的なミスを検出するリンタ（警告はブロッカー扱い）。
-- `sv-mint --config ./sv-mint.toml path/to/file.sv`: サンプルファイルに対して CLI を実行し、必要に応じて `sv-mint.toml` 内のプラグインスクリプトを調整。
+## Build, Test, and Development Commands
+- `cargo build --release`: produce `target/release/sv-mint` for distribution.
+- `cargo check`: fast validation during development.
+- `cargo fmt --all`: enforce Rust formatting before review.
+- `cargo clippy --all-targets --all-features`: lint for common mistakes (treat warnings as blockers).
+- `sv-mint --config ./sv-mint.toml path/to/file.sv`: run the CLI on sample files and adjust plugin scripts in `sv-mint.toml` as needed.
 
-## コーディングスタイルと命名規約
-Rust コードは 4 スペースインデント、snake_case モジュール、UpperCamelCase 型、簡潔なドキュメントコメントを採用します。関数は短く保ち、アドホックなタプルよりも明示的な enum/struct を好んでください。Python プラグインは PEP 8 に準拠し、小文字モジュール名と説明的なヘルパー名を使います。コミット前に `cargo fmt` を実行し、Python の import を整列させ、長い JSON リテラルは読みやすく折り返してください。
+## Coding Style and Naming
+Rust code uses 4-space indent, snake_case modules, UpperCamelCase types, and concise doc comments. Keep functions short and favor explicit enums/structs over ad-hoc tuples. Python plugins follow PEP 8 with lowercase module names and descriptive helpers. Run `cargo fmt` before committing, align Python imports, and wrap long JSON literals for readability.
 
-## テストガイドライン
-専用のテストスイートはまだありませんが、対象モジュールの近くにユニットテストを追加します（例: `src/core/pipeline.rs` → `tests/pipeline.rs` またはインラインの `#[cfg(test)]` ブロック）。Rust ロジックには `cargo test --lib`、`plugins/lib/` に追加した Python ユーティリティには孤立した `pytest` 実行を使います。`handles_inlined_cst_payload` のような説明的なテスト名を選び、サイズガードしきい値やプラグインのタイムアウトなどのエッジケースを記録します。SV の失敗フィクスチャを作成した場合は `fixtures/` で共有してください。
+## Testing Guidelines
+There is no dedicated suite yet; add unit tests near their modules (e.g., `src/core/pipeline.rs` → `tests/pipeline.rs` or inline `#[cfg(test)]`). Use `cargo test --lib` for Rust logic and standalone `pytest` for utilities under `plugins/lib/`. Pick descriptive names such as `handles_inlined_cst_payload`, and document edge cases like size-guard thresholds or plugin timeouts. Share failing SV fixtures under `fixtures/`.
 
-## コミットとプルリクエストのガイドライン
-これまでの履歴は短い命令形コミット（`Add inline CST IR`）を好みます。そのスタイルを踏襲し、各コミットを単一の関心事に絞り、パーサーインターフェースに触れる際は根拠を含めてください。プルリクエストでは動作への影響を要約し、影響を受けるステージ/プラグインを列挙し、設定変更を指摘し、関連 issue へリンクします。再現コマンド（`cargo run -- …`）を添え、UI/ログ出力が変わる場合はレビューア向けに stderr のサンプルを記載してください。
+## Commit and PR Guidelines
+History favors short imperative commits (`Add inline CST IR`). Keep that style, scope each commit to a single concern, and provide rationale when touching parser interfaces. PRs should summarize behavioral impact, list affected stages/plugins, mention config changes, and link related issues. Include reproduction commands (`cargo run -- …`) and, when UI/log output changes, attach stderr samples for reviewers.
 
-## セキュリティと設定の注意事項
-`core/size_guard.rs` に組み込まれたサイズガードしきい値を尊重し、変更した場合は PR 説明に記録します。プラグインを追加する際は入力パスを検証し、シェル展開を避けてください。`sv-mint.toml` をローカルで上書きすることで、機微なインクルードパスや define はリポジトリ外に保管します。
+## Security and Configuration Notes
+Respect the thresholds baked into `core/size_guard.rs` and document any changes in the PR description. Validate input paths when adding plugins and avoid shell interpolation. Override `sv-mint.toml` locally to keep sensitive include paths or defines outside the repo.

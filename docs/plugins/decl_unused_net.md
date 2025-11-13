@@ -1,35 +1,35 @@
 # decl_unused_net.py
 
-- **対応スクリプト**: `plugins/decl_unused_net.py`
-- **使用ステージ**: `ast`
-- **主な入力フィールド**: `symbols`（`class == net` の参照情報）
-- **提供ルール**:
-  | Rule ID | Severity | 動作概要 |
+- **Script**: `plugins/decl_unused_net.py`
+- **Stage**: `ast`
+- **Key Inputs**: `symbols` entries with `class == net`
+- **Rule**:
+  | Rule ID | Severity | Summary |
   | --- | --- | --- |
-  | `decl.unused.net` | warning | 宣言したネットが読み書きゼロ回のまま残っている場合に警告 |
+  | `decl.unused.net` | warning | Warn when declared nets are never read or written |
 
-## ルール詳細
+## Rule Details
 
 ### `decl.unused.net`
-- **検出条件**: `symbols` の `class` が `net` で、`read_count` / `write_count` がともに 0 のものを抽出し、宣言位置で違反を生成します。
-- **代表メッセージ**: `` unused net <module>.<name> ``
-- **主な対処**: 未使用ネットを削除するか、将来利用予定のシンボルは `_unused` など黙認される名前へ変更します。
-- **補足**: `sv-mint` の AST 集計はインクルード後の実体で動くため、条件付きコンパイルでのみ使用されるネットは `ignore_include` 設定に注意してください。
-- **LowRISC 参照**: lowRISC SystemVerilog スタイルガイドでは「取り残された信号は読みにくさと誤解を生む」ため、未使用宣言を禁止しています。本ルールはその指針に従って不要ネットを排除します。
-- **良い例**:
+- **Trigger**: Selects `symbols` with `class="net"` where both `read_count` and `write_count` are zero, reporting the declaration location.
+- **Message**: `` unused net <module>.<name> ``
+- **Remediation**: Delete unused nets or rename future placeholders to something whitelisted such as `_unused`.
+- **Notes**: AST data reflects the post-include source, so nets referenced only under conditional compilation may appear unused if `ignore_include` is enabled.
+- **LowRISC Reference**: The style guide bans stray signals because they add confusion; this rule enforces that cleanup.
+- **Good**:
 
 ```systemverilog
 logic req_i;
 logic ack_o;
-logic busy;  // 実際に読み書きされている
+logic busy;  // actively used
 ```
 
-- **悪い例**:
+- **Bad**:
 
 ```systemverilog
 logic req_i;
 logic ack_o;
-logic debug_tap;  // どこからも参照されない
+logic debug_tap;  // no references
 ```
 
-- **追加のポイント**: 自動生成コードで仮のネットを挿入している場合は、`/* unused */` などのコメントでは抑制できません。`sv-mint.toml` の `[[ruleset.allowlist]]` にパターンを追加するか、生成元で `unused_net_` のような命名規則へ寄せることで、後工程で一括除外できます。
+- **Additional Tips**: Comments like `/* unused */` do not suppress the warning. Either add patterns to `[[ruleset.allowlist]]` or have generators emit names such as `unused_net_*` so you can ignore them later.

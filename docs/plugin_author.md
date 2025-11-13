@@ -1,19 +1,19 @@
-# プラグイン作者ガイド
+# Plugin Author Guide
 
-## 0. 想定読者
-sv-mint の Python ルールを新規に作成・改修するエンジニアを対象とします。Rust コアには手を入れず、`plugins/` 配下のスクリプトを追加・変更するケースを想定しています。
+## 0. Audience
+For engineers who write or modify sv-mint Python rules under `plugins/` without touching the Rust core.
 
-## 1. 実行モデルの概要
+## 1. Execution Model
 ```
 Rust Pipeline --NDJSON--> plugins/lib/rule_host.py --Python import--> scripts/*.py
 ```
-- Rust 側は 1 プロセスの Python ホストを起動し、`ruleset.scripts` に記載したファイルを import。
-- 各ステージごとに `{"kind":"run_stage","stage":"ast","path":"...","payload":{...}}` を 1 行の JSON として送信。
-- ホストは読み込んだ順に `module.check(req)` を呼び、返却された Violations を結合して Rust へ返す。
-- Rust 終了時に `{"kind":"shutdown"}` を送信し、ホストは自身を停止。
+- Rust launches a single Python host process and imports all `ruleset.scripts` entries.
+- Each stage request is a single JSON line such as `{"kind":"run_stage","stage":"ast","path":"...","payload":{...}}`.
+- The host calls `module.check(req)` in load order, concatenates all returned violations, and streams them back to Rust.
+- When Rust finishes it sends `{"kind":"shutdown"}`, prompting the host to exit.
 
-## 2. `check(req)` の I/O 契約
-### 2.1 リクエスト構造
+## 2. `check(req)` Contract
+### 2.1 Request Structure
 ```python
 req = {
     "kind": "run_stage",
@@ -22,34 +22,34 @@ req = {
     "payload": <StagePayload>,
 }
 ```
-`payload` はステージごとに以下の型を取ります。
+`payload` depends on the stage:
 
-| ステージ | 内容 |
+| Stage | Contents |
 | --- | --- |
-| `raw_text` | `{ "text": "..." }`（LF 正規化済みソース全文） |
+| `raw_text` | `{ "text": "..." }` (LF-normalized source) |
 | `pp_text` | `{ "text": "...", "defines": [{"name","value"}] }` |
-| `cst` | `{ "mode": "inline", "cst_ir": {...} }` または `{ "mode": "none", "has_cst": bool }` |
-| `ast` | `AstSummary`（`decls`, `refs`, `symbols`, `assigns`, `ports`, `pp_text` など） |
+| `cst` | `{ "mode": "inline", "cst_ir": {...} }` or `{ "mode": "none", "has_cst": bool }` |
+| `ast` | `AstSummary` with `decls`, `refs`, `symbols`, `assigns`, `ports`, `pp_text`, etc. |
 
-`AstSummary` や `cst_ir` の構造は [docs/internal_spec.md](internal_spec.md) を参照してください。
+See [docs/internal_spec.md](internal_spec.md) for `AstSummary` and `cst_ir` schemas.
 
-### 2.2 応答構造
-`check` は Violation 辞書の配列を返します。返却値が `None` / 空リストの場合は「違反なし」と判定されます。
+### 2.2 Response Structure
+`check` returns an array of violation dictionaries. `None` or an empty list means no findings.
 
 ```python
 return [{
     "rule_id": "format.line_length",
-    "severity": "warning", # error / warning / info
+    "severity": "warning",  # error / warning / info
     "message": "line exceeds 120 columns (134)",
     "location": {"line": 10, "col": 121, "end_line": 10, "end_col": 135}
 }]
 ```
-location の項目は 1-based、`end_*` は inclusive でも exclusive でも構いません（sv-mint 側でそのまま表示）。
+Locations are 1-based; `end_*` can be inclusive or exclusive because sv-mint prints the values verbatim.
 
-### 2.3 例外処理
-`check` から未処理例外を投げるとホストは `{ "type":"error" }` を Rust へ返し、そのステージ全体が失敗します。想定外ケースは例外ではなく Violation（`sys.rule.internal` など）として返すか、`try/except` で握りつぶしてください。
+### 2.3 Exceptions
+Unhandled exceptions bubble up as `{ "type": "error" }` responses and fail the entire stage. Prefer returning a violation such as `sys.rule.internal` or shield risky sections with `try/except`.
 
-## 3. スケルトン例
+## 3. Skeleton Example
 ```python
 from typing import Any, Dict, List
 
@@ -73,20 +73,20 @@ def check(req: Dict[str, Any]) -> List[Dict[str, Any]]:
             })
     return violations
 ```
-`plugins/debug_ping.py` も最小限のテンプレートとして参照できます。
+`plugins/debug_ping.py` is another minimal template.
 
-## 4. デバッグ手法
-- `sv-mint --config ... path` を実行し、`logging.show_plugin_events = true` にしておくと `PluginInvoke` / `PluginDone` のログでステージ時間を確認できます。
-- ユニットテストは任意ですが、`pytest` 等で `check` を直接呼び出し JSON モックを与える方法が推奨されます。
-- 一時的に print したい場合は stderr に出力し、`logging.stderr_snippet_bytes` を十分大きく設定すると CLI から確認できます。
+## 4. Debugging Tips
+- Run `sv-mint --config ... path` with `logging.show_plugin_events = true` to see `PluginInvoke` / `PluginDone` entries and stage timings.
+- Optional unit tests can call `check` directly via `pytest`, feeding JSON fixtures.
+- Temporary prints should go to stderr; bump `logging.stderr_snippet_bytes` so the CLI captures them.
 
-## 5. 品質と運用のヒント
-- ルール ID は `カテゴリ.名前` の形式に統一し、README/ユーザーガイドで検索しやすくします。
-- 重い処理は極力 AST/CST をフィルタリングしてから行い、payload 全体を毎回コピーしないように注意してください。
-- プロジェクト固有ルールを追加する場合は `plugins/` の下にサブフォルダを作り、`sv-mint.toml` の `ruleset.scripts` で絶対/相対パスを指定できます。仕様は `docs/plugins/<script_name>.md` へ追加し、利用者向けの情報を最新に保ってください。
+## 5. Quality and Operations
+- Use `category.name` style rule IDs so users can search the README or user guide easily.
+- Filter the AST/CST before heavy processing and avoid copying entire payloads.
+- For custom project rules, create subdirectories under `plugins/` and reference absolute or relative paths from `ruleset.scripts`. Document every rule under `docs/plugins/<script_name>.md`.
 
-## 6. 既知のサイズ/時間制約
-- リクエスト JSON が 16 MB を超えるとステージが強制停止（required stage はエラー）。大型 payload を扱うルールでは、不要フィールドの削除やレポートのサマリ化を検討してください。
-- `timeout_ms_per_file` は 1 ファイル全ステージの合計タイムアウトなので、単一ルールで時間を独占しないように設計します。
+## 6. Known Size and Time Limits
+- Request JSON larger than 16 MB stops the stage (required stages error out). When handling large payloads, trim unused fields or summarize reports.
+- `timeout_ms_per_file` covers all stages for the file, so no single rule should monopolize the budget.
 
-内部アーキテクチャ（Pipeline・サイズガード・イベントシステムなど）は [docs/internal_spec.md](internal_spec.md) を併せて参照してください。
+Consult [docs/internal_spec.md](internal_spec.md) for pipeline, size-guard, and event-system details.

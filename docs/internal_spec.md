@@ -1,36 +1,36 @@
-# 内部仕様書
+# Internal Specification
 
-## 0. 想定読者
-sv-mint の開発者、設計管理者、あるいは将来的にコアを拡張したいエンジニアを対象とします。Rust コードベースのモジュール構成、データ契約、エラー分類、拡張時の留意点をまとめています。
+## 0. Audience
+This document targets sv-mint developers, design leads, or engineers planning to extend the core. It describes the Rust module layout, data contracts, error taxonomy, and extension caveats.
 
-## 1. モジュール構成
-| ディレクトリ | 役割 |
+## 1. Module Layout
+| Directory | Role |
 | --- | --- |
-| `src/lib.rs` | エントリーポイント。`core/`, `sv/`, `io/`, `plugin/` などの公開モジュールを束ねる。 |
-| `src/bin/sv-mint.rs` | CLI (`clap`) 定義と `Pipeline` 起動。終了コードの割り当てを担当。 |
-| `src/core/` | パイプライン制御、payload 構築、サイズガード、診断型など。 |
-| `src/io/` | 設定ロード、テキストユーティリティ、CLI 出力整形。 |
-| `src/sv/` | `sv-parser` 連携、CST/AST 構築、ラインマップ管理。 |
-| `src/plugin/` | Python ホストとの IPC クライアント（tokio runtime）。 |
-| `plugins/` | ルール実装と `rule_host.py`。 |
-| `fixtures/` / `tests/` | CLI 向け統合テストと SystemVerilog サンプル。 |
+| `src/lib.rs` | Entry point that wires public modules such as `core/`, `sv/`, `io/`, and `plugin/`. |
+| `src/bin/sv-mint.rs` | CLI (`clap`) definition and `Pipeline` launcher that maps exit codes. |
+| `src/core/` | Pipeline orchestration, payload builders, size guards, diagnostic types. |
+| `src/io/` | Config loading, text helpers, CLI output formatting. |
+| `src/sv/` | `sv-parser` bridge, CST/AST builders, line-map management. |
+| `src/plugin/` | IPC client that talks to the Python host via a tokio runtime. |
+| `plugins/` | Rule implementations plus `rule_host.py`. |
+| `fixtures/` / `tests/` | CLI integration tests and SystemVerilog samples. |
 
-## 2. パイプライン詳細
+## 2. Pipeline Details
 ```
 Pipeline::run_files -> run_file_batch/run_files_parallel -> run_file_with_host
 ```
-1. `io::config::read_input` が UTF-8 読込 + BOM 除去 + LF 正規化を行い、元テキストと正規化済みテキストを返す。
-2. `sv::driver::SvDriver` が `sv-parser` で `ParseArtifacts` を生成。raw_text/pp_text/CST/AST/defines を束ねる。include 先の LineMap は `sv::source::SourceCache` で管理し、Violation へ正しい `Location.file` を埋め込む。
-3. `core::payload::StagePayload` がステージごとの JSON を構築。シリアライズ前に `core::size_guard::enforce_request_size` が 12/16 MB の閾値をチェック。
-4. `plugin::client::PythonHost` が `tokio` ランタイム内で `python3` プロセスを起動し、`rule_host.py` と NDJSON で通信。タイムアウト時は `start_kill` でプロセスを停止し、`PluginTimeout` イベントを送出。
-5. プラグイン応答は `Violation` ベクタとして集約され、CLI へ整形表示。`logging.stderr_snippet_bytes` を超える stderr は末尾のみがログに記録される。
+1. `io::config::read_input` loads UTF-8 text, strips BOM, and normalizes line endings while returning both the original and normalized text.
+2. `sv::driver::SvDriver` invokes `sv-parser` to create `ParseArtifacts`, bundling raw_text / pp_text / CST / AST / defines. `sv::source::SourceCache` tracks line maps for includes so violations get the correct `Location.file`.
+3. `core::payload::StagePayload` builds JSON payloads per stage. Before serialization, `core::size_guard::enforce_request_size` checks the 12/16 MB thresholds.
+4. `plugin::client::PythonHost` starts `python3` within a `tokio` runtime and speaks NDJSON with `rule_host.py`. On timeout it uses `start_kill`, emitting a `PluginTimeout` event.
+5. Plugin responses merge into a `Vec<Violation>` for CLI display. stderr beyond `logging.stderr_snippet_bytes` keeps only the tail in logs.
 
-## 3. データ契約
+## 3. Data Contracts
 ### 3.1 `StagePayload`
-- `raw_text`: `InputText.normalized` をそのまま格納。
-- `pp_text`: 前処理済みテキスト + `DefineInfo` の一覧。
-- `cst`: `cst_ir`（`CstIr` 構造体）か `has_cst` フラグ。`sv-parser` が CST を返さない場合に備えて `mode: "none"` を送信。
-- `ast`: `AstSummary`。`decls`/`refs`/`symbols`/`assigns`/`ports`/`pp_text` などを含む。シリアライズ対象に `line_map` を含めない点に注意。
+- `raw_text`: direct copy of `InputText.normalized`.
+- `pp_text`: preprocessed text plus the list of `DefineInfo`.
+- `cst`: `cst_ir` (`CstIr`) or a `has_cst` flag. Send `mode: "none"` when `sv-parser` does not return a CST.
+- `ast`: `AstSummary` with `decls` / `refs` / `symbols` / `assigns` / `ports` / `pp_text`, etc. Note that `line_map` is intentionally omitted from serialization.
 
 ### 3.2 `Violation`
 ```rust
@@ -42,46 +42,46 @@ pub struct Location {
     pub file: Option<String>,
 }
 ```
-CLI 出力は `location.file.unwrap_or(input_path)` を使用する。include ファイル対応のため、`SourceCache` が `file` を適切に設定することが重要。
+CLI output uses `location.file.unwrap_or(input_path)`. `SourceCache` must populate `file` for include support.
 
-### 3.3 エラー種別
-| 型 | 用途 |
+### 3.3 Error Types
+| Type | Purpose |
 | --- | --- |
-| `ConfigError` | 設定ファイルの読込・値検証・IO 失敗 |
-| `ParseError` | sv-parser 前処理/解析/CST 取得失敗 |
-| `PluginError` | Python ホスト起動・IO・JSON・タイムアウト |
-| `OutputError` | CLI 表示用ファイル読み込み（主に `io::output` テスト用） |
+| `ConfigError` | Config parsing, validation, or IO failures |
+| `ParseError` | Failures during preprocessing, parsing, or CST extraction |
+| `PluginError` | Python host startup, IO, JSON decoding, or timeout issues |
+| `OutputError` | CLI output helpers (mainly for `io::output` tests) |
 
-## 4. ロギングとイベント
-- `diag::logging::init` が `LoggingConfig` の `format/level` に従って `tracing_subscriber` を構築。`extra` に未知キーがある場合は warn。
-- イベントは `Event` enum で型安全に管理され、`Ev` を通じて `log_event` へ渡す。`show_*_events` でカテゴリ別に抑制可能。
-- stderr スニペット (`PluginStderr`) は `logging.stderr_snippet_bytes` が 0 の場合は無効化される。
+## 4. Logging and Events
+- `diag::logging::init` builds a `tracing_subscriber` according to `LoggingConfig.format` / `level`. Unknown keys under `extra` trigger warnings.
+- Events are modeled by the `Event` enum and funneled through `Ev::log_event`. `show_*_events` lets users suppress categories.
+- `PluginStderr` snippets are disabled when `logging.stderr_snippet_bytes` is 0.
 
-## 5. 並列実行
-- `Pipeline::run_files_parallel` は `std::thread::scope` + `available_parallelism` を用いてワーカースレッドを生成。各ワーカーが独自に `PythonHost` を持つため、プラグイン側は並列実行を想定して再入可能にしておく必要がある。
-- ファイル数 < 論理 CPU の場合は入力数に合わせてスレッド数を縮小。
+## 5. Parallel Execution
+- `Pipeline::run_files_parallel` uses `std::thread::scope` and `available_parallelism` to spawn workers. Each worker owns its own `PythonHost`, so plugins must be reentrant.
+- When the number of files is smaller than logical CPUs, the thread count shrinks accordingly.
 
-## 6. サイズガードとレスポンス制限
-- 定数 `MAX_REQ_BYTES = 16_000_000`、`WARN_REQ_BYTES = 12_000_000`。required stage (`raw_text`, `pp_text`) で上限超過した場合は `Severity::Error` の `sys.stage.skipped.size` を返し、処理を打ち切る。
-- レスポンス (`enforce_response_size`) も 16 MB 上限を持つ。超過時は `sys.stage.output.too_large` でステージ失敗。
+## 6. Size Guards and Response Limits
+- Constants: `MAX_REQ_BYTES = 16_000_000`, `WARN_REQ_BYTES = 12_000_000`. Required stages (`raw_text`, `pp_text`) over the limit emit `Severity::Error` with `sys.stage.skipped.size` and abort processing.
+- Responses also check the 16 MB limit via `enforce_response_size`. Violations raise `sys.stage.output.too_large`.
 
-## 7. エラー伝播と診断
-- `sv::driver::parse_text` で parse 失敗した場合、`sys.parse.failed` を生成しつつ CLI へ即時出力。`summary.had_error` を立てて終了コード 3 を返す。
-- プラグイン例外は `PluginError::ProtocolError` として報告され、ログにも `PluginExitNonzero` イベントが出力される。
+## 7. Error Propagation and Diagnostics
+- When `sv::driver::parse_text` fails, it reports `sys.parse.failed`, streams the diagnostic immediately, sets `summary.had_error`, and returns exit code 3.
+- Plugin exceptions surface as `PluginError::ProtocolError` while logs capture a `PluginExitNonzero` event.
 
-## 8. 拡張指針
-- ステージ追加を検討する場合は `types::Stage` と `StagePayload`、Toml の `stages.enabled` すべてに変更を施す必要がある。
-- ルール作者に新規 payload を公開する際は、`docs/plugin_author.md` と `docs/plugins/<script_name>.md` を同時に更新して情報の一貫性を保つ。
-- サイズガードのしきい値を可変にする際は TOML での検証ロジックと `SizePolicy` 生成処理をセットで変更する。
+## 8. Extension Guidelines
+- Adding a stage requires updates to `types::Stage`, `StagePayload`, and the TOML `stages.enabled` parsing.
+- When exposing new payload fields to rule authors, update `docs/plugin_author.md` and the relevant `docs/plugins/<script>.md` entry in lockstep.
+- If size guard thresholds become configurable, modify both the TOML validation logic and the `SizePolicy` constructor.
 
-## 9. テスト戦略
-- `tests/cli_smoke.rs` は主要ルールの E2E 確認。新規ルールを追加したら関連フィクスチャを作り、ここへ追記する。
-- Rust 単体テストは未整備のため、機能追加時は必要に応じて `#[cfg(test)]` などで補完する。
-- Python ルールは独立した `pytest` などでテストするか、CLI テストのフィクスチャに組み込む。
+## 9. Testing Strategy
+- `tests/cli_smoke.rs` performs E2E coverage for major rules. Add fixtures and entries here when introducing new rules.
+- Rust unit tests are sparse; add `#[cfg(test)]` blocks as needed when modifying subsystems.
+- Test Python rules via standalone `pytest` runs or by wiring fixtures into the CLI tests.
 
-## 10. 将来拡張候補
-- サイズガード閾値の設定化
-- パイプライン結果サマリの JSON 出力
-- Python ホストを gRPC 等へ置き換える検討
+## 10. Future Ideas
+- Configurable size-guard thresholds
+- JSON summaries of pipeline results
+- Alternative transports (e.g., replacing the Python host with gRPC)
 
-上記を踏まえて改修を行う際は、README および docs 配下のガイドを合わせて更新し、利用者と開発者双方のドキュメント整合性を保ってください。
+Keep README and the docs directory updated whenever you make core changes so users and contributors stay aligned.

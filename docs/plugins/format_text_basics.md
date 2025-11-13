@@ -1,82 +1,82 @@
 # format_text_basics.py
 
-- **対応スクリプト**: `plugins/format_text_basics.py`
-- **使用ステージ**: `raw_text`
-- **主な入力フィールド**: `text`
-- **提供ルール**:
-  | Rule ID | Severity | 動作概要 |
+- **Script**: `plugins/format_text_basics.py`
+- **Stage**: `raw_text`
+- **Key Inputs**: `text`
+- **Rules**:
+  | Rule ID | Severity | Summary |
   | --- | --- | --- |
-  | `format.ascii_only` | warning | 非 ASCII 文字を禁止 |
-  | `format.no_tabs` | warning | タブ文字を禁止 |
-  | `format.no_trailing_whitespace` | warning | 行末の空白を検出 |
-  | `format.final_newline` | warning | EOF に LF が無い場合に警告 |
+  | `format.ascii_only` | warning | Reject non-ASCII characters |
+  | `format.no_tabs` | warning | Reject tab characters |
+  | `format.no_trailing_whitespace` | warning | Flag trailing whitespace |
+  | `format.final_newline` | warning | Require a trailing newline |
 
-## ルール詳細
+## Rule Details
 
 ### `format.ascii_only`
-- **検出条件**: `ord(ch) > 127` の文字を見つけ次第、位置を報告します。
-- **代表メッセージ**: `` non-ASCII character detected ``
-- **主な対処**: コメントを含め ASCII 以外の文字を削除するか、UTF-8 許容ポリシーに合わせてルールをオフにします。
-- **LowRISC 参照**: lowRISC のテキスト規約は SV ファイルを ASCII のみで構成するよう求めています。多言語コメントが必要な場合は `docs/` に切り出す運用です。
-- **良い例**:
+- **Trigger**: Reports every character whose `ord(ch) > 127`.
+- **Message**: `` non-ASCII character detected ``
+- **Remediation**: Remove non-ASCII glyphs (comments included) or disable the rule if UTF-8 text is unavoidable.
+- **LowRISC Reference**: The lowRISC text spec requires SystemVerilog sources to be ASCII-only. Put multilingual docs under `docs/` instead of inline comments.
+- **Good**:
 
 ```systemverilog
 // state machine controls DMA start
 ```
 
-- **悪い例**:
+- **Bad**:
 
 ```systemverilog
-// 状態機械開始  ← 非 ASCII の全角文字が混入
+// Δ-state start  ← contains non-ASCII character
 ```
 
-- **追加のポイント**: 自動生成コメントに日本語が入るケースでは `format_text_basics` を一時的に無効化できますが、翻訳済み資料を `docs/` 側に置く方が低リスクです。
+- **Notes**: Temporarily disable `format_text_basics` for auto-generated comments that must include non-ASCII text, but storing translations in `docs/` remains safer.
 
 ### `format.no_tabs`
-- **検出条件**: タブ文字 `	` が現れるたびに違反を生成します。
-- **代表メッセージ**: `` tab character detected ``
-- **主な対処**: タブをスペースへ置換し、`format_indent_rules` で定義された幅に従います。
-- **LowRISC 参照**: lowRISC スタイルガイドは「タブ禁止」を明確に掲げ、ツール間の表示差異を排除しています。
-- **良い例**:
+- **Trigger**: Emits a violation for every tab (`\t`) encountered.
+- **Message**: `` tab character detected ``
+- **Remediation**: Replace tabs with spaces and follow the widths enforced by `format_indent_rules`.
+- **LowRISC Reference**: The style guide bans tabs to avoid tooling inconsistencies.
+- **Good**:
 
 ```systemverilog
 logic ready;
 ```
 
-- **悪い例**:
+- **Bad**:
 
 ```systemverilog
 	logic ready;
 ```
 
-- 行頭にタブが含まれているためツール間で表示位置がずれます。
+- Tabs at the start of the line shift alignment between tools.
 
-- **追加のポイント**: `.editorconfig` の `indent_style = space` を併用すると自動保存時にタブが発生しません。`tab` を許容したいテストデータは `allowlist` にピン留めしてください。
+- **Notes**: Pair this with `.editorconfig` `indent_style = space`. Add test fixtures requiring tabs to an allowlist instead of disabling the rule globally.
 
 ### `format.no_trailing_whitespace`
-- **検出条件**: 各行の末尾から逆走査し、空白/タブで終わっている場合に列位置を報告します。
-- **代表メッセージ**: `` trailing whitespace at line end ``
-- **主な対処**: 保存時にトリムするか、エディタフックで自動除去します。
-- **LowRISC 参照**: lowRISC では行末空白を禁止し、`git diff --check` を常用することが推奨されています。
-- **良い例**:
+- **Trigger**: Reverse scans each line and flags trailing spaces or tabs.
+- **Message**: `` trailing whitespace at line end ``
+- **Remediation**: Trim on save or rely on editor hooks.
+- **LowRISC Reference**: The guide recommends banning trailing whitespace and running `git diff --check`.
+- **Good**:
 
 ```systemverilog
 assign ready_o = valid_i;
 ```
 
-- **悪い例**:
+- **Bad**:
 
 ```systemverilog
 assign ready_o = valid_i;␠
 ```
 
-- **追加のポイント**: `sv-mint` は LF 正規化後のデータを解析するため、CRLF 混在でも問題無く列情報を返します。`pre-commit` で `trailing-whitespace` フックを入れると CI 前に捕捉できます。
+- **Notes**: sv-mint analyzes LF-normalized text, so CRLF mixes still produce correct columns. Consider the `trailing-whitespace` pre-commit hook to catch violations before CI.
 
 ### `format.final_newline`
-- **検出条件**: ファイル末尾が `\n` で終わらない場合に警告します。
-- **代表メッセージ**: `` file must end with newline ``
-- **主な対処**: 最終行の後に改行を追加します。
-- **LowRISC 参照**: lowRISC も POSIX 準拠のため EOF に LF を置くことを求めています。
-- **良い例**: `endmodule` の後に空行を 1 つ置いてファイルを終える。
-- **悪い例**: `endmodule` でファイルが終わっており、最終行に LF が無い状態。
-- **追加のポイント**: `git` は最終行が改行で閉じられていないと差分末尾に `\ No newline at end of file` を出力します。CI でノイズが出る前に `format.final_newline` で検知できます。
+- **Trigger**: Warns when the file does not end with `\n`.
+- **Message**: `` file must end with newline ``
+- **Remediation**: Insert a newline after the last line.
+- **LowRISC Reference**: POSIX compliance requires LF at EOF.
+- **Good**: End the file with one blank line after `endmodule`.
+- **Bad**: File ends immediately after `endmodule` without LF.
+- **Notes**: Git adds `\ No newline at end of file` to diffs; this rule catches the issue before CI noise appears.

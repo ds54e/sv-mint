@@ -1,22 +1,22 @@
 # decl_unused_param.py
 
-- **対応スクリプト**: `plugins/decl_unused_param.py`
-- **使用ステージ**: `ast`
-- **主な入力フィールド**: `symbols`（`class == param` の参照情報）
-- **提供ルール**:
-  | Rule ID | Severity | 動作概要 |
+- **Script**: `plugins/decl_unused_param.py`
+- **Stage**: `ast`
+- **Key Inputs**: `symbols` entries with `class == param`
+- **Rule**:
+  | Rule ID | Severity | Summary |
   | --- | --- | --- |
-  | `decl.unused.param` | warning | 参照カウントが 0 のパラメータを検出 |
+  | `decl.unused.param` | warning | Detect parameters whose reference count stays at zero |
 
-## ルール詳細
+## Rule Details
 
 ### `decl.unused.param`
-- **検出条件**: `symbols` から `class == param` を選び、`ref_count`（無ければ `read_count`）が 0 のものを違反化します。
-- **代表メッセージ**: `` unused param <module>.<name> ``
-- **主な対処**: 未使用パラメータを削除、もしくは上位から渡される構成値であればモジュール内から参照されるように配線します。
-- **補足**: 自動生成コードでダミーパラメータが許容されている場合は `ruleset.override` で Severity を下げる運用も可能です。
-- **LowRISC 参照**: lowRISC スタイルガイドはパラメータを「モジュールの構成要素を明示する手段」と位置付けており、未使用パラメータは削除すべきと記載されています。
-- **良い例**:
+- **Trigger**: Filters `symbols` for `class == param` and flags entries with `ref_count` (or `read_count`) equal to zero.
+- **Message**: `` unused param <module>.<name> ``
+- **Remediation**: Remove unused parameters or ensure top-level configuration knobs are actually referenced inside the module.
+- **Notes**: Auto-generated code that allows dummy parameters can downgrade severity via `ruleset.override`.
+- **LowRISC Reference**: Parameters should document module configurability; unused ones must be deleted.
+- **Good**:
 
 ```systemverilog
 module fifo #(parameter int Depth = 16) (
@@ -25,14 +25,14 @@ module fifo #(parameter int Depth = 16) (
 );
 ```
 
-- **悪い例**:
+- **Bad**:
 
 ```systemverilog
 module fifo #(parameter int Depth = 16,
               parameter bit EnableDbg = 0) (
   input logic req_i
 );
-// EnableDbg がどこからも参照されていない
+// EnableDbg is never referenced
 ```
 
-- **追加のポイント**: マクロで展開した `localparam` が条件付きでしか現れない場合、`ref_count` が 0 になりやすいので、`ifdef` 内でのみ宣言するか `(* keep = "true" *)` のような属性で合成器側へ意図を伝えてください。それでも未使用になるときは `ruleset.allowlist.pattern = "EnableDbg"` のように名称例外を付ける手もあります。
+- **Additional Tips**: `localparam` emitted by macros under conditionals often end up unused; keep the declaration inside the `ifdef` or tag it with attributes like `(* keep = "true" *)`. If the symbol still needs to exist, add a pattern such as `EnableDbg` to `ruleset.allowlist`.

@@ -1,113 +1,113 @@
 # sv-mint
 
-Rust 製の SystemVerilog lint パイプラインです。`sv-parser` が生成する raw_text / pp_text / cst / ast の各ステージ payload を Python プラグインへ渡し、並列実行・サイズガード・タイムアウトなどの運用機構を備えています。
+sv-mint is a Rust-based SystemVerilog lint pipeline. It streams the raw_text / pp_text / CST / AST payloads produced by `sv-parser` into Python plugins, while providing operational features such as parallel execution, size guards, and per-stage timeouts.
 
-## 目次
-- [1. 概要](#1-概要)
-- [2. ロール別クイックリンク](#2-ロール別クイックリンク)
-- [3. クイックスタート](#3-クイックスタート)
-- [4. 処理フロー](#4-処理フロー)
-- [5. 開発・検証リソース](#5-開発検証リソース)
-- [6. ログとサイズガード](#6-ログとサイズガード)
-- [7. 出力と運用メモ](#7-出力と運用メモ)
-- [8. 生成情報とライセンス](#8-生成情報とライセンス)
+## Table of Contents
+- [1. Overview](#1-overview)
+- [2. Role-Based Quick Links](#2-role-based-quick-links)
+- [3. Quick Start](#3-quick-start)
+- [4. Processing Flow](#4-processing-flow)
+- [5. Development Resources](#5-development-resources)
+- [6. Logging and Size Guards](#6-logging-and-size-guards)
+- [7. Output and Operations Notes](#7-output-and-operations-notes)
+- [8. Provenance and License](#8-provenance-and-license)
 
-## 1. 概要
-sv-mint は設計/検証チームが統一ルールで SystemVerilog を検証するための lint ツールです。
+## 1. Overview
+sv-mint lets design and verification teams enforce a unified SystemVerilog rule set.
 
-主な特徴:
-- raw_text / pp_text / CST / AST を段階的にプラグインへ渡す多段パイプライン
-- `ruleset.scripts` で列挙した Python ルールを常駐ホストが並列実行
-- 16 MB の request/response サイズガードとステージ別タイムアウト
-- `tracing` ベースの構造化/テキストログ、および stderr スニペット収集
-- Windows / macOS / Linux で同一挙動（UTF-8、CRLF/LF 吸収）
+Highlights:
+- Multi-stage pipeline that dispatches raw_text / pp_text / CST / AST payloads to plugins
+- Resident Python host parallelizes the `ruleset.scripts` rules
+- 16 MB request/response size guards and per-stage timeouts
+- Structured and plain-text logs via `tracing`, plus stderr snippet capture
+- Identical behavior on Windows / macOS / Linux (UTF-8, CRLF/LF tolerant)
 
-## 2. ロール別クイックリンク
+## 2. Role-Based Quick Links
 
-| 読者 | 知りたいこと | ドキュメント |
+| Reader | Focus | Document |
 | --- | --- | --- |
-| 初めてのユーザー | 実行方法、`sv-mint.toml` 設定、FAQ | [docs/user_guide.md](docs/user_guide.md) |
-| ルール背景や仕様をまとめて調べたい人 | `rule_id` ごとのステージ・Severity・対処方法と検出条件 | [docs/plugins/](docs/plugins) |
-| プラグインを追加・改造したい人 | payload 仕様、Violation 形式、デバッグ方法 | [docs/plugin_author.md](docs/plugin_author.md) |
-| Rust コアを拡張したい人 | コア構造、データ契約、エラー分類 | [docs/internal_spec.md](docs/internal_spec.md) |
+| First-time users | CLI usage, `sv-mint.toml`, FAQ | [docs/user_guide.md](docs/user_guide.md) |
+| Anyone researching rule specs | Stage, severity, remediation, and detection logic per `rule_id` | [docs/plugins/](docs/plugins) |
+| Plugin developers | Payload schema, violation format, debugging tips | [docs/plugin_author.md](docs/plugin_author.md) |
+| Rust core contributors | Core structure, data contracts, error taxonomy | [docs/internal_spec.md](docs/internal_spec.md) |
 
-## 3. クイックスタート
+## 3. Quick Start
 
-### 3.1 必要環境
-- OS: Windows 10 以降 / Linux / macOS
+### 3.1 Requirements
+- OS: Windows 10+, Linux, or macOS
 - Rust: stable toolchain
-- Python: 3.x（`python3` が実行可能であること）
-- 文字コード: UTF-8（BOM 可）、改行は LF/CRLF どちらでも可
+- Python: 3.x (`python3` must be available)
+- Encoding: UTF-8 (BOM allowed), either LF or CRLF endings
 
-### 3.2 ビルド
+### 3.2 Build
 ```bash
 rustup default stable
 cargo build --release
 ```
-生成物は `target/release/sv-mint`（Windows は `.exe`）に配置されます。
+The binary is written to `target/release/sv-mint` (or `.exe` on Windows).
 
-### 3.3 実行
+### 3.3 Run
 ```bash
 sv-mint --config ./sv-mint.toml path/to/file.sv
 ```
-`--config` を省略するとカレントディレクトリの `sv-mint.toml` を読み込みます。
+If `--config` is omitted, the CLI loads `sv-mint.toml` from the working directory.
 
-### 3.4 終了コード
-| コード | 意味 |
-| ------ | ---- |
-| 0 | 診断なし |
-| 2 | 違反あり（warning/error 含む） |
-| 3 | 入力・設定・プラグイン・タイムアウト等の致命的エラー |
+### 3.4 Exit Codes
+| Code | Meaning |
+| ---- | ------- |
+| 0 | No diagnostics |
+| 2 | Violations detected (warnings or errors) |
+| 3 | Fatal issues such as invalid input, config, plugin crash, or timeout |
 
-## 4. 処理フロー
-1. 入力を UTF-8 に正規化し、`sv-parser` で前処理 (`pp_text`) と構文解析を実施。
-2. raw_text / pp_text / CST / AST の `StagePayload` を生成し、JSON サイズを検査。
-3. 常駐ホスト `plugins/lib/rule_host.py` へ NDJSON でリクエスト。`ruleset.scripts` の `check(req)` を順番に実行。
-4. 返却された Violation を集約し、CLI 表示と `tracing` イベントへ同時出力。
+## 4. Processing Flow
+1. Normalize the input to UTF-8 and run `sv-parser` preprocessing (`pp_text`) and parsing.
+2. Produce `StagePayload` objects for raw_text / pp_text / CST / AST and enforce JSON size limits.
+3. Send NDJSON requests to the resident host `plugins/lib/rule_host.py`, executing each `ruleset.scripts` entry via `check(req)`.
+4. Aggregate returned violations and emit them to the CLI output and `tracing` events simultaneously.
 
-payload 仕様やホストの詳細は [docs/plugin_author.md](docs/plugin_author.md) と [docs/internal_spec.md](docs/internal_spec.md) を参照してください。
+See [docs/plugin_author.md](docs/plugin_author.md) and [docs/internal_spec.md](docs/internal_spec.md) for payload and host details.
 
-## 5. 開発・検証リソース
-- `docs/user_guide.md#sv-minttoml-設定`: `sv-mint.toml` のテンプレートとオプション解説。
-- `docs/plugins/lang_construct_rules.md` など: CLI で出た `rule_id` の詳細や修正方針を確認するためのルール別ガイド。
-- `fixtures/`: CLI テストやルール検証に使える SystemVerilog サンプル。
-- `tests/cli_smoke.rs`: 代表的なルールを網羅する E2E テスト。
-- `plugins/`: 標準ルール実装。`rule_host.py` のホットリロードや `debug_ping.py` などのテンプレートを含みます。
+## 5. Development Resources
+- `docs/user_guide.md#3-sv-minttoml-configuration`: template and option breakdown for `sv-mint.toml`.
+- Files like `docs/plugins/lang_construct_rules.md`: deep dives into each `rule_id` reported by the CLI.
+- `fixtures/`: SystemVerilog samples for regression tests or rule experimentation.
+- `tests/cli_smoke.rs`: end-to-end coverage for representative rules.
+- `plugins/`: bundled rules, `rule_host.py` hot-reload helpers, and utilities such as `debug_ping.py`.
 
-質問や改善案は Issue / Pull Request で歓迎しています。
+Feedback is welcome via Issues or Pull Requests.
 
-## 6. ログとサイズガード
+## 6. Logging and Size Guards
 
-### 6.1 ロギング
-- `logging.level` は `tracing` のフィルタに転送され、`sv-mint::event`（イベント）、`sv-mint::stage`（ステージ結果）、`sv-mint::logging`（設定警告）が発火します。
-- `logging.format = "json"` を指定すると構造化ログを出力。未知オプションは警告ログで通知。
-- `show_stage_events` や `show_plugin_stderr` を使ってデバッグ出力を制御できます。
+### 6.1 Logging
+- `logging.level` feeds into the `tracing` filter, emitting `sv-mint::event` (pipeline events), `sv-mint::stage` (stage results), and `sv-mint::logging` (config warnings).
+- `logging.format = "json"` enables structured logs; unsupported options trigger warning logs.
+- Flags like `show_stage_events` and `show_plugin_stderr` control debug verbosity.
 
-### 6.2 サポート済みルール例
-- 行長・ASCII 制約・タブ禁止・プリプロ整形などのテキストフォーマット
-- モジュール/信号/ポート命名（`clk/rst` 順序、差動ペア、パイプライン `_q2`）、`typedef` `_e/_t`、`parameter` UpperCamelCase
-- `always_comb` 推奨、`always_ff` の非同期リセット、`always_latch` / `always @*` 禁止、`case` の `default`・`unique` 推奨、複数ノンブロッキング代入検知
-- `package` 内 `` `define`` や複数 `package` 宣言、`module` インスタンスの `.*` / 位置指定ポート、SPDX ヘッダー、グローバル `` `define`` などのガバナンス
+### 6.2 Supported Rule Examples
+- Text formatting such as line length, ASCII restriction, tab bans, and preprocessing hygiene
+- Naming: module/signal/port conventions (`clk/rst` ordering, diff pairs, pipeline `_q2`), `typedef` `_e/_t`, UpperCamelCase parameters
+- Behavioral guidance: prefer `always_comb`, enforce async resets in `always_ff`, forbid `always_latch` / `always @*`, require `case` `default`/`unique`, detect multiple non-blocking assignments
+- Governance checks: `` `define`` inside `package`, multiple `package` declarations, module instance `.*` / positional ports, SPDX headers, global `` `define`` policies
 
-### 6.3 今後の拡張アイデア
-- 多ビット信号のブール使用禁止や幅推論などのビット幅解析
-- `unique/priority case` の網羅率検証、`casez/casex`、`X` 伝播解析
-- `package` 依存グラフの循環検知、`parameter/localparam` の高度な整合性チェック
-- コメント整列や詳細なフォーマット細則など、より厳密なスタイルルール
+### 6.3 Possible Future Work
+- Bit-width analysis (preventing boolean use of multi-bit signals, inferring widths)
+- Coverage for `unique/priority case`, handling `casez/casex`, tracing `X` propagation
+- Detecting `package` dependency cycles and advanced `parameter/localparam` validation
+- Stricter formatting such as aligned comments and detailed style rules
 
-## 7. 出力と運用メモ
+## 7. Output and Operations Notes
 
-### 7.1 バイトコード抑止
-- CLI 実行時に `-B` を付与（既定 args を参照）。
-- `PYTHONDONTWRITEBYTECODE=1` を設定。
-- `.gitignore` に `__pycache__/` と `*.pyc` を登録済み。
+### 7.1 Preventing Bytecode
+- Pass `-B` to Python hosts (see default args).
+- Export `PYTHONDONTWRITEBYTECODE=1`.
+- `.gitignore` already lists `__pycache__/` and `*.pyc`.
 
-### 7.2 診断出力形式
+### 7.2 Diagnostic Format
 ```
 <path>:<line>:<col>: [<severity>] <rule_id>: <message>
 ```
-違反が 1 件でも発生すると終了コード 2 を返します。複数ファイルをまとめて検証する場合は `cargo run -- fixtures/*.sv` のようにワイルドカードを渡してください。
+If any violation is reported, the CLI exits with status 2. To lint multiple files, pass a glob such as `cargo run -- fixtures/*.sv`.
 
-## 8. 生成情報とライセンス
-- 本ソフトウェアおよび本ドキュメントは ChatGPT により作成されています。
-- 依存する Rust クレートは MIT または Apache-2.0 ライセンスです。詳細は Cargo.toml を参照してください。
+## 8. Provenance and License
+- This software and its documentation were produced with ChatGPT.
+- Dependencies are MIT or Apache-2.0 licensed; see Cargo.toml for details.

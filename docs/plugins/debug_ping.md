@@ -1,22 +1,22 @@
 # debug_ping.py
 
-- **対応スクリプト**: `plugins/debug_ping.py`
-- **使用ステージ**: 任意（呼び出し時の `stage` をそのまま表示）
-- **主な入力フィールド**: `payload.ast` / `payload.symbols` など AST 由来の統計
-- **提供ルール**:
-  | Rule ID | Severity | 動作概要 |
+- **Script**: `plugins/debug_ping.py`
+- **Stage**: Any (reports whichever `stage` the host passes)
+- **Key Inputs**: `payload.ast`, `payload.symbols`, and related stats
+- **Rule**:
+  | Rule ID | Severity | Summary |
   | --- | --- | --- |
-  | `debug.ping` | warning | 受け取ったステージ名とシンボル数をエコーバックし、パイプライン疎通を確認 |
+  | `debug.ping` | warning | Echoes the stage name and symbol count to confirm end-to-end wiring |
 
-## ルール詳細
+## Rule Details
 
 ### `debug.ping`
-- **検出条件**: 常に 1 件の違反を生成し、`payload` 内で見つかった `symbols`（もしくは `ast.symbols`）の件数をメッセージに含めます。
-- **代表メッセージ**: `` debug ping: stage=ast, symbols=42 ``
-- **主な対処**: デバッグ専用なので本番ルールセットでは `sv-mint.toml` の `[ruleset.scripts]` から削除します。
-- **補足**: ルール拡張時にデータが想定どおり届いているかを素早く確認する用途を想定しています。Severity は `to_viol` 呼び出し時に上書き可能です。
-- **LowRISC 参照**: lowRISC のスタイルガイドに直接対応する規定はありませんが、デバッグ用コードやルールはリリースビルドに混入させないという一般原則に沿う形で利用します。
-- **良い例**（開発中のみ有効化）:
+- **Trigger**: Always emits one violation showing the current stage and the number of `symbols` (or `ast.symbols`) available.
+- **Message**: `` debug ping: stage=ast, symbols=42 ``
+- **Remediation**: Remove this script from production `sv-mint.toml` configurations.
+- **Notes**: Useful when extending payloads to ensure the data arrives as expected. Override severity via `to_viol` if necessary.
+- **LowRISC Reference**: Not directly tied to the guide; treat it like any debug artifact and exclude it from release flows.
+- **Good** (development only):
 
 ```toml
 [ruleset.scripts]
@@ -26,12 +26,12 @@ debug_ping = { path = "plugins/debug_ping.py", stage = "ast", enabled = true }
 debug_ping = { enabled = false }
 ```
 
-- **悪い例**（本番設定で ping を残したまま）:
+- **Bad** (left enabled in production):
 
 ```toml
 [ruleset.scripts]
 debug_ping = { path = "plugins/debug_ping.py", stage = "ast" }
-# release でも無効化せず、常時 warning を発生させてしまう
+# No release override, so warnings appear permanently
 ```
 
-- **追加のポイント**: CI で `debug.ping` が報告されると他の重要な診断が埋もれるため、PR 用ルールセットでは確実に外しておきます。別の統計値を見たい場合は `payload` から自由にメッセージへ追加できるため、拡張テスト時のログ計測に活用できます。
+- **Additional Tips**: If CI shows `debug.ping`, important diagnostics may be buried. Disable the rule in PR pipelines. Feel free to include other payload stats in the message while experimenting.

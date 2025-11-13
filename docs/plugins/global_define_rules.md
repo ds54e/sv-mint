@@ -1,22 +1,22 @@
 # global_define_rules.py
 
-- **対応スクリプト**: `plugins/global_define_rules.py`
-- **使用ステージ**: `raw_text`
-- **主な入力フィールド**: `text`
-- **提供ルール**:
-  | Rule ID | Severity | 動作概要 |
+- **Script**: `plugins/global_define_rules.py`
+- **Stage**: `raw_text`
+- **Key Inputs**: `text`
+- **Rules**:
+  | Rule ID | Severity | Summary |
   | --- | --- | --- |
-  | `global.local_define_undef` | warning | ローカル用途のマクロは定義と同じファイルで `undef` することを要求 |
-  | `global.prefer_parameters` | warning | 先頭が `_` 以外の `define` を禁止し、`parameter` 利用を推奨 |
+  | `global.local_define_undef` | warning | Require local macros to be undefined in the same file |
+  | `global.prefer_parameters` | warning | Discourage non-underscored `` `define`` macros in favor of parameters |
 
-## ルール詳細
+## Rule Details
 
 ### `global.local_define_undef`
-- **検出条件**: `_FOO` のようなローカルマクロが `undef` されずにファイル末尾まで残っている場合に指摘します。
-- **代表メッセージ**: `` local macro <name> must be undefined after use ``
-- **主な対処**: 定義と同じ翻訳単位で `` `undef <name>`` を追加するか、より狭いスコープへ移します。
-- **LowRISC 参照**: lowRISC のマクロ規約はローカルマクロに `_` 接頭辞を付け、翻訳単位の最後で確実に `undef` するよう求めています。
-- **良い例**:
+- **Trigger**: Flags macros such as `_FOO` that reach EOF without a matching `` `undef``.
+- **Message**: `` local macro <name> must be undefined after use ``
+- **Remediation**: Insert `` `undef <name>`` in the same translation unit or move the macro to a tighter scope.
+- **LowRISC Reference**: Local macros carry an underscore prefix and must be undefined before the file ends.
+- **Good**:
 
 ```systemverilog
 `define _FOO(ARG) (ARG + 1)
@@ -24,28 +24,28 @@ assign data_o = `_FOO(data_i);
 `undef _FOO
 ```
 
-- **悪い例**:
+- **Bad**:
 
 ```systemverilog
 `define _FOO(ARG) (ARG + 1)
 assign data_o = `_FOO(data_i);
-// `undef されず、他ファイルへリーク
+// no `undef, so the macro leaks
 ```
 
-- **追加のポイント**: `include` 先で `undef` する際はシンボル名の衝突を防ぐため、`ifdef _FOO` ガードを挟むと安全です。
+- **Additional Tips**: Wrap the undef with guards such as `` `ifdef _FOO`` to avoid symbol clashes across includes.
 
 ### `global.prefer_parameters`
-- **検出条件**: `_` で始まらない `define` を検出し、設計全体に影響するマクロ乱用を抑止します。
-- **代表メッセージ**: `` use parameters instead of global macro `FOO``
-- **主な対処**: モジュールパラメータや `localparam` へ置き換え、`ruleset.override` で重大度を下げたい場合はポリシーに合わせて調整します。
-- **LowRISC 参照**: lowRISC スタイルガイドは機能切り替えにグローバルマクロではなくパラメータを使うよう明示しており、必要最小限のトップレベルマクロしか許容しません。
-- **良い例**:
+- **Trigger**: Reports any `` `define`` that does not start with `_`, discouraging project-wide macro switches.
+- **Message**: `` use parameters instead of global macro `FOO``
+- **Remediation**: Replace macros with module parameters or `localparam`. Adjust severity via `ruleset.override` if policy allows.
+- **LowRISC Reference**: The guide favors parameters for configurability and limits global macros to a tiny curated set.
+- **Good**:
 
 ```systemverilog
 module foo #(parameter bit EnableParity = 1'b1) (...);
 ```
 
-- **悪い例**:
+- **Bad**:
 
 ```systemverilog
 `define ENABLE_PARITY 1
@@ -56,4 +56,4 @@ module foo (...);
 endmodule
 ```
 
-- **追加のポイント**: 既存の IP で多数の `define` が必要な場合は、`ruleset.allowlist` で `^OPENTITAN_` のような接頭辞のみ許可し、低リスクなマクロだけ通過させる運用が効果的です。
+- **Additional Tips**: When legacy IP needs macros, permit only certain prefixes via `ruleset.allowlist` (e.g., `^OPENTITAN_`).
