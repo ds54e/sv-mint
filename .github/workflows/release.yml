@@ -65,8 +65,20 @@ jobs:
       - name: cargo test
         run: cargo test --locked
 
-      - name: cargo build --release
+      - name: Install musl target (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: rustup target add x86_64-unknown-linux-musl
+
+      - name: Install musl tools (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: sudo apt-get update && sudo apt-get install -y musl-tools
+
+      - name: cargo build --release (target default)
         run: cargo build --release --locked
+
+      - name: cargo build --release (musl)
+        if: matrix.os == 'ubuntu-latest'
+        run: cargo build --release --locked --target x86_64-unknown-linux-musl
 
       - name: Package archive
         shell: bash
@@ -76,11 +88,15 @@ jobs:
           if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
             EXT=".exe"
           fi
+          TARGET_DIR="target/release"
           BIN="sv-mint${EXT}"
+          if [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then
+            TARGET_DIR="target/x86_64-unknown-linux-musl/release"
+          fi
           DIST="dist"
           rm -rf "${DIST}"
           mkdir -p "${DIST}"
-          cp "target/release/${BIN}" "${DIST}/${BIN}"
+          cp "${TARGET_DIR}/${BIN}" "${DIST}/${BIN}"
           cp -R docs "${DIST}/docs"
           cp -R plugins "${DIST}/plugins"
           cp sv-mint.toml "${DIST}/sv-mint.toml"
