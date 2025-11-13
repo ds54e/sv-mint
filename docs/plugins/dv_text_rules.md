@@ -8,6 +8,7 @@
   | --- | --- | --- |
   | `style.function_scope` | warning | Functions inside packages/modules/interfaces must be `automatic` or `static` |
   | `rand.dv_macro_required` | warning | Enforce `DV_CHECK_*RANDOMIZE*` macros instead of raw `randomize()` |
+  | `rand.dv_macro_with_required` | warning | Require the `_WITH` DV macros when constraints are present |
   | `log.uvm_arg_macro` | warning | `uvm_{info,error,fatal}` must use `` `gfn``/`` `gtn`` tags |
   | `log.no_uvm_warning` | warning | Ban `uvm_warning` in favor of `uvm_error`/`uvm_fatal` |
   | `log.no_uvm_report_api` | warning | Forbid `uvm_report_*` helpers and require the shorthand macros |
@@ -28,6 +29,7 @@
   | `lang.no_program_construct` | warning | Ban the `program` language construct |
   | `flow.no_fork_label` | warning | Forbid labeled `fork : label` syntax |
   | `flow.no_disable_fork_label` | warning | `disable fork_label` is not portable |
+  | `check.dv_macro_required` | warning | Comparison-based checks must use `DV_CHECK_*` macros |
 
 ## Rule Details
 
@@ -36,6 +38,9 @@ The DVCodingStyle guide requires package-level and other static functions to dec
 
 ### `rand.dv_macro_required`
 Randomization must go through `DV_CHECK_RANDOMIZE_FATAL`, `DV_CHECK_STD_RANDOMIZE_FATAL`, or `DV_CHECK_MEMBER_RANDOMIZE_FATAL`. Any direct `randomize()` or `std::randomize()` call produces a violation so DV code always benefits from the macro-provided error checks.
+
+### `rand.dv_macro_with_required`
+When constraints accompany `randomize()`, the `_WITH` family of DV macros must be used. The rule spots `randomize() with { ... }` snippets that aren’t already wrapped by a `DV_CHECK_*` macro and reminds authors to switch to `DV_CHECK_RANDOMIZE_WITH_FATAL`, `DV_CHECK_STD_RANDOMIZE_WITH_FATAL`, etc.
 
 ### Logging Rules (`log.*`)
 - `log.uvm_arg_macro` ensures the first argument to `uvm_info`, `uvm_error`, and `uvm_fatal` is either `` `gfn`` or `` `gtn``. This keeps logs searchable by hierarchy, as prescribed in the logging section of DVCodingStyle.
@@ -74,3 +79,7 @@ Scoreboards should print TLM FIFO state at end-of-test using `DV_EOT_PRINT_*` ma
 
 ### `lang.no_program_construct`
 `program` blocks are prohibited; they complicate reuse and are explicitly discouraged in the guide. A simple raw-text search keeps them out of the codebase.
+
+### `check.dv_macro_required`
+Manual `if (...) uvm_error(...)` comparisons scatter duplicated logging logic. DVCodingStyle mandates `DV_CHECK_*` helpers (such as `DV_CHECK_EQ`) for these cases. The rule looks for `if` statements with comparison operators that immediately invoke `uvm_info/error/fatal` and flags them when no `DV_CHECK_*` macro is present.
+  | `check.dv_macro_required` | warning | Comparison-based checks must use `DV_CHECK_*` macros |

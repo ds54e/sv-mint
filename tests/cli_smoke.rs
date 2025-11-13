@@ -176,6 +176,14 @@ fn detects_randomize_macros() {
 }
 
 #[test]
+fn detects_randomize_with_macros() {
+    run_fixture(
+        "fixtures/randomize_with_violation.sv",
+        "rand.dv_macro_with_required",
+    );
+}
+
+#[test]
 fn detects_logging_violations() {
     run_fixture_with_fragments(
         "fixtures/logging_violation.sv",
@@ -244,6 +252,11 @@ fn detects_scoreboard_eot_requirements() {
 #[test]
 fn detects_program_constructs() {
     run_fixture("fixtures/program_violation.sv", "lang.no_program_construct");
+}
+
+#[test]
+fn detects_comparison_checks() {
+    run_fixture("fixtures/comparison_violation.sv", "check.dv_macro_required");
 }
 
 #[test]

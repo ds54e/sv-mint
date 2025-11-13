@@ -311,6 +311,11 @@ script = "plugins/dv_text_rules.py"
 stage = "raw_text"
 
 [[rule]]
+id = "rand.dv_macro_with_required"
+script = "plugins/dv_text_rules.py"
+stage = "raw_text"
+
+[[rule]]
 id = "log.uvm_arg_macro"
 script = "plugins/dv_text_rules.py"
 stage = "raw_text"
@@ -407,6 +412,11 @@ stage = "raw_text"
 
 [[rule]]
 id = "flow.no_disable_fork_label"
+script = "plugins/dv_text_rules.py"
+stage = "raw_text"
+
+[[rule]]
+id = "check.dv_macro_required"
 script = "plugins/dv_text_rules.py"
 stage = "raw_text"
 

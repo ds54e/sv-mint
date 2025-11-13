@@ -2,6 +2,7 @@ import re
 
 FUNCTION_RE = re.compile(r"\bfunction\b", re.IGNORECASE)
 RANDOMIZE_RE = re.compile(r"\brandomize\s*\(", re.IGNORECASE)
+RANDOMIZE_WITH_RE = re.compile(r"\brandomize\s*\([^;]*?\)\s*with\s*\{", re.IGNORECASE)
 LOG_CALL_RE = re.compile(r"\buvm_(info|error|fatal)\s*\(", re.IGNORECASE)
 UVM_WARNING_RE = re.compile(r"\buvm_warning\s*\(", re.IGNORECASE)
 UVM_REPORT_RE = re.compile(r"\buvm_report_[A-Za-z_]+\s*\(", re.IGNORECASE)
@@ -18,6 +19,8 @@ UVM_DO_RE = re.compile(r"`uvm_do", re.IGNORECASE)
 IFNDEF_RE = re.compile(r"`ifndef\s+([A-Za-z_]\w*)")
 STD_RANDOMIZE_RE = re.compile(r"\bstd::randomize\s*\(", re.IGNORECASE)
 THIS_RANDOMIZE_RE = re.compile(r"\bthis\s*\.\s*randomize\s*\(", re.IGNORECASE)
+IF_COMPARE_RE = re.compile(r"\bif\s*\([^;]*?(==|!=|<=|>=|<|>)", re.IGNORECASE)
+UVM_REPORT_CALL_RE = re.compile(r"\buvm_(info|error|fatal)\s*\(", re.IGNORECASE)
 SCOREBOARD_CLASS_RE = re.compile(r"class\s+([A-Za-z_]\w*scoreboard)\b", re.IGNORECASE)
 DV_EOT_RE = re.compile(r"DV_EOT_PRINT_", re.IGNORECASE)
 PROGRAM_RE = re.compile(r"\bprogram\b", re.IGNORECASE)
@@ -44,6 +47,7 @@ def check(req):
     out.extend(_check_scoreboard(text))
     out.extend(_check_program(text))
     out.extend(_check_fork_labels(text))
+    out.extend(_check_comparison_macros(text))
     return out
 
 
@@ -114,19 +118,25 @@ def _check_randomize(text):
     out.extend(_randomize_matches(text, RANDOMIZE_RE))
     out.extend(_randomize_matches(text, STD_RANDOMIZE_RE))
     out.extend(_randomize_matches(text, THIS_RANDOMIZE_RE))
+    out.extend(_randomize_matches(
+        text,
+        RANDOMIZE_WITH_RE,
+        rule_id="rand.dv_macro_with_required",
+        message="use DV_CHECK_*_WITH macros when randomizing with constraints",
+    ))
     return out
 
 
-def _randomize_matches(text, pattern):
+def _randomize_matches(text, pattern, rule_id="rand.dv_macro_required", message="use DV_CHECK_* randomization macros instead of direct randomize()"):
     out = []
     for match in pattern.finditer(text):
         prefix = text[max(0, match.start() - 40):match.start()]
         if "DV_CHECK" in prefix:
             continue
         out.append({
-            "rule_id": "rand.dv_macro_required",
+            "rule_id": rule_id,
             "severity": "warning",
-            "message": "use DV_CHECK_* randomization macros instead of direct randomize()",
+            "message": message,
             "location": _loc(text, match.start()),
         })
     return out
@@ -356,5 +366,23 @@ def _check_fork_labels(text):
             "severity": "warning",
             "message": "use disable fork/thread inside isolation fork instead of disable fork_label",
             "location": _loc(text, match.start()),
+        })
+    return out
+
+
+def _check_comparison_macros(text):
+    out = []
+    for match in IF_COMPARE_RE.finditer(text):
+        start = match.start()
+        window = text[start: start + 200]
+        if "DV_CHECK" in window:
+            continue
+        if not UVM_REPORT_CALL_RE.search(window):
+            continue
+        out.append({
+            "rule_id": "check.dv_macro_required",
+            "severity": "warning",
+            "message": "use DV_CHECK_* comparison macros instead of manual if/uvm_* checks",
+            "location": _loc(text, start),
         })
     return out
