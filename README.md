@@ -72,7 +72,7 @@ See [docs/plugin_author.md](docs/plugin_author.md) and [docs/internal_spec.md](d
 - Files like `docs/plugins/lang_construct_rules.md`: deep dives into each `rule_id` reported by the CLI.
 - `fixtures/`: SystemVerilog samples for regression tests or rule experimentation.
 - `tests/cli_smoke.rs`: end-to-end coverage for representative rules.
-- `plugins/`: bundled rules, `rule_host.py` hot-reload helpers, and utilities such as `debug_ping.py`.
+- `plugins/`: bundled rules plus `rule_host.py` hot-reload helpers.
 
 Feedback is welcome via Issues or Pull Requests.
 

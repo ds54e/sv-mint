@@ -73,7 +73,7 @@ def check(req: Dict[str, Any]) -> List[Dict[str, Any]]:
             })
     return violations
 ```
-`plugins/debug_ping.py` is another minimal template.
+`plugins/template_raw_text_rule.py` is another minimal template.
 
 ## 4. Debugging Tips
 - Run `sv-mint --config ... path` with `logging.show_plugin_events = true` to see `PluginInvoke` / `PluginDone` entries and stage timings.
