@@ -84,11 +84,14 @@ jobs:
           fi
           export ARCHIVE_PATH
           python - <<'PY'
-import hashlib, os, pathlib
-path = pathlib.Path(os.environ["ARCHIVE_PATH"])
-digest = hashlib.sha256(path.read_bytes()).hexdigest()
-pathlib.Path("checksums.txt").write_text(f"{digest}  {path.name}\n")
-PY
+          import hashlib
+          import os
+          import pathlib
+
+          path = pathlib.Path(os.environ["ARCHIVE_PATH"])
+          digest = hashlib.sha256(path.read_bytes()).hexdigest()
+          pathlib.Path("checksums.txt").write_text(f"{digest}  {path.name}\n")
+          PY
           ls -al
 
       - name: Upload artifact
