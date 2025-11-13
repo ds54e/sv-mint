@@ -37,6 +37,15 @@ sv-mint is a SystemVerilog lint pipeline that combines a Rust core with Python p
 - Integration tests live in `tests/cli_smoke.rs` and rely on fixtures under `fixtures/`.
 - Structured logs (`logging.format = "json"`) expose `sv-mint::event`, `sv-mint::stage`, and `sv-mint::plugin.stderr` categories for observability platforms.
 
+## Comparison with svlint and Verible
+| Tool | Primary Focus | Rule Authoring Model | Extensibility | Notable Strengths |
+| --- | --- | --- | --- | --- |
+| sv-mint | Multi-stage pipeline with deterministic diagnostics | Python plugins loaded via `sv-mint.toml`, full access to raw/CST/AST payloads | Add custom scripts without recompiling; mix-and-match stages per rule | Tight size/time guards, reproducible ordering, Rust host guarantees |
+| svlint | Lightweight textual linting (https://github.com/dalance/svlint) | TOML-configured regex/pattern checks compiled into Rust binary | Extend by contributing Rust code or running external commands | Simple setup, good for enforcing style from a static ruleset |
+| Verible | Comprehensive formatting/lint suite (https://chipsalliance.github.io/verible) | C++ rules integrated with parser; configuration via flags and waiver files | Extend by hacking C++ passes; third-party plugins uncommon | Mature parser, auto-formatter, integrates with Bazel and IDE tooling |
+
+sv-mint complements these tools: use svlint for quick static checks, Verible for formatting and structural lint, and sv-mint when you need reproducible, Python-authored policies tied to specific pipeline stages.
+
 ## Future Ideas
 1. **Configurable size guards**: expose request/response thresholds via `sv-mint.toml`.
 2. **JSON run reports**: emit machine-readable summaries for CI dashboards.
