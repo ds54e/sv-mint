@@ -6,7 +6,7 @@ sv-mint is a SystemVerilog lint pipeline that combines a Rust core with Python p
 - **Multi-stage analysis**: raw text, preprocessed text, CST, and AST payloads flow through the pipeline so rules can attach at the right abstraction.
 - **Python rule host**: `plugins/lib/rule_host.py` runs once per worker thread and loads every script referenced by `[[rule]]` entries.
 - **Deterministic diagnostics**: violations are sorted by file/line, emitted as `path:line:col: [severity] rule_id: message`, and mirrored to `tracing` events for log aggregation.
-- **Operational safety**: 12/16 MB size guards, per-file timeouts, stderr snippet limits, and request accounting keep runaway rules in check.
+- **Operational safety**: configurable (default 12/16 MB) size guards, per-file timeouts, stderr snippet limits, and request accounting keep runaway rules in check.
 
 ## Getting Started
 1. Install Rust stable, Python 3.x, and a recent sv-parser-compatible toolchain.
@@ -24,6 +24,7 @@ sv-mint is a SystemVerilog lint pipeline that combines a Rust core with Python p
    - `[plugin]` selects the Python interpreter/arguments.
    - `[[rule]]` entries bind each `rule_id` to a script, stage, `enabled` flag, and optional severity override.
    - `[logging]` controls `level`, `format` (`text|json`), and event visibility.
+   - `[transport]` defines request/response byte limits, warning margins, and how strictly to treat size overruns; mark critical stages under `[stages.required]` to fail fast.
 5. Narrow or relax checks directly from the CLI when experimenting:
    - `sv-mint --only rule_x path/to/file.sv` runs only `rule_x`, temporarily disabling every other rule.
    - `sv-mint --disable rule_a,rule_b path/to/file.sv` disables just the listed rules; specify multiple IDs or repeat `--disable` as needed.
@@ -46,6 +47,9 @@ sv-mint is a SystemVerilog lint pipeline that combines a Rust core with Python p
 2. **JSON run reports**: emit machine-readable summaries for CI dashboards.
 3. **Alternative transports**: explore gRPC or IPC sockets instead of spawning Python hosts per worker.
 4. **Deeper semantic rules**: add bit-width analysis, dependency graphs, and state-machine coverage checks.
+
+## Versioning
+- Current release: **1.0.0**. Use semantic versioning going forward so downstream automation can pin to stable rule/transport behavior.
 
 ## Provenance and License
 - This repository and documentation were generated and are maintained with the help of ChatGPT.
