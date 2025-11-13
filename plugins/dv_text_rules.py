@@ -13,6 +13,9 @@ DEFINE_RE = re.compile(r"`define\s+([A-Za-z_]\w*)")
 UNDEF_RE = re.compile(r"`undef\s+([A-Za-z_]\w*)")
 WAIT_FORK_RE = re.compile(r"\bwait\s+fork\b", re.IGNORECASE)
 WAIT_STMT_RE = re.compile(r"\bwait\s*\(", re.IGNORECASE)
+WHILE_RE = re.compile(r"\bwhile\s*\(", re.IGNORECASE)
+UVM_DO_RE = re.compile(r"`uvm_do", re.IGNORECASE)
+IFNDEF_RE = re.compile(r"`ifndef\s+([A-Za-z_]\w*)")
 
 
 def check(req):
@@ -28,6 +31,7 @@ def check(req):
     out.extend(_check_dpi(text))
     out.extend(_check_macros(text, path))
     out.extend(_check_wait_usage(text))
+    out.extend(_check_uvm_do(text))
     return out
 
 
@@ -189,18 +193,36 @@ def _check_dpi(text):
 def _check_macros(text, path):
     out = []
     defs = []
+    guard_positions = {}
+    for match in IFNDEF_RE.finditer(text):
+        guard_positions.setdefault(match.group(1), []).append(match.start())
     for match in DEFINE_RE.finditer(text):
         defs.append((match.group(1), match.start(1)))
     undefs = {match.group(1) for match in UNDEF_RE.finditer(text)}
-    if not path.endswith("_macros.svh"):
-        for name, index in defs:
-            if name not in undefs:
-                out.append({
-                    "rule_id": "macro.missing_undef",
-                    "severity": "warning",
-                    "message": f"`define {name} must be undefined at end of file",
-                    "location": _loc(text, index),
-                })
+    macros_file = path.endswith("_macros.svh")
+    for name, index in defs:
+        if name not in undefs and not macros_file:
+            out.append({
+                "rule_id": "macro.missing_undef",
+                "severity": "warning",
+                "message": f"`define {name} must be undefined at end of file",
+                "location": _loc(text, index),
+            })
+        guarded = any(pos < index for pos in guard_positions.get(name, []))
+        if macros_file and not guarded:
+            out.append({
+                "rule_id": "macro.guard_required",
+                "severity": "warning",
+                "message": f"`define {name} in *_macros.svh must be wrapped with `ifndef {name}",
+                "location": _loc(text, index),
+            })
+        if not macros_file and guarded:
+            out.append({
+                "rule_id": "macro.no_local_guard",
+                "severity": "warning",
+                "message": f"local macro {name} must not use `ifndef guards",
+                "location": _loc(text, index),
+            })
     return out
 
 
@@ -218,6 +240,28 @@ def _check_wait_usage(text):
             "rule_id": "flow.wait_macro_required",
             "severity": "warning",
             "message": "use DV_WAIT macro instead of raw wait statements",
+            "location": _loc(text, match.start()),
+        })
+    for match in WHILE_RE.finditer(text):
+        prefix = text[max(0, match.start() - 20):match.start()]
+        if "DV_SPINWAIT" in prefix:
+            continue
+        out.append({
+            "rule_id": "flow.spinwait_macro_required",
+            "severity": "warning",
+            "message": "wrap while loops in DV_SPINWAIT to add watchdog timers",
+            "location": _loc(text, match.start()),
+        })
+    return out
+
+
+def _check_uvm_do(text):
+    out = []
+    for match in UVM_DO_RE.finditer(text):
+        out.append({
+            "rule_id": "seq.no_uvm_do",
+            "severity": "warning",
+            "message": "replace `uvm_do macros with start_item/finish_item flow",
             "location": _loc(text, match.start()),
         })
     return out

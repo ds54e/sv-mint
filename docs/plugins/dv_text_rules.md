@@ -16,8 +16,12 @@
   | `dpi.import_prefix` | warning | Imported DPI symbols must start with `c_dpi_` |
   | `dpi.export_prefix` | warning | Exported DPI handles must start with `sv_dpi_` |
   | `macro.missing_undef` | warning | Local `` `define`` entries must be `` `undef``’d in the same file |
+  | `macro.guard_required` | warning | Macros in global `_macros.svh` headers need `` `ifndef`` guards |
+  | `macro.no_local_guard` | warning | Local macros must not use `` `ifndef`` guards |
   | `flow.wait_fork_isolation` | warning | `wait fork` must be replaced with isolation fork helpers |
   | `flow.wait_macro_required` | warning | Raw `wait (cond)` usage must be replaced with `` `DV_WAIT`` |
+  | `flow.spinwait_macro_required` | warning | `while` polling loops must live inside `` `DV_SPINWAIT`` |
+  | `seq.no_uvm_do` | warning | Forbid legacy `` `uvm_do`` macros |
 
 ## Rule Details
 
@@ -40,6 +44,16 @@ Section “DPI and C Connections” requires imported functions to be prefixed w
 ### `macro.missing_undef`
 The macro section of the guide states that local macros must be undefined at the end of the file to avoid polluting downstream compilation units. This rule records each `` `define`` outside `_macros.svh` files and reports the ones that are never `` `undef``’d.
 
+### `macro.guard_required`
+Global macro headers (`*_macros.svh`) must wrap each definition in a `` `ifndef` guard so the macro can be safely included multiple times. Any guarded macro missing its matching `` `ifndef`` is flagged.
+
+### `macro.no_local_guard`
+Conversely, local macros (defined directly inside `.sv` or package sources) must *not* use `` `ifndef`` guards. Guards hide redefinition errors and were explicitly called out in the guide. This rule warns when a non-header source gate its macro with `` `ifndef`.
+
 ### Wait/Fork Rules (`flow.*`)
 - `flow.wait_fork_isolation` rejects `wait fork`, nudging engineers toward the isolation-fork pattern (`DV_SPINWAIT`) recommended by the spec.
 - `flow.wait_macro_required` warns on `wait (condition)` so that watchdog-backed `` `DV_WAIT`` helpers are used instead.
+- `flow.spinwait_macro_required` reports polling `while` loops that are not invoked through `` `DV_SPINWAIT``, ensuring watchdog timers accompany non-forever loops.
+
+### `seq.no_uvm_do`
+The macro section explicitly bans `` `uvm_do`` helpers; tests must call `start_item`, randomize, `finish_item`, and `get_response` manually. This rule catches any usage of the legacy macro family so authors migrate to the recommended flow.

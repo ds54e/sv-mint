@@ -351,12 +351,32 @@ script = "plugins/dv_text_rules.py"
 stage = "raw_text"
 
 [[rule]]
+id = "macro.guard_required"
+script = "plugins/dv_text_rules.py"
+stage = "raw_text"
+
+[[rule]]
+id = "macro.no_local_guard"
+script = "plugins/dv_text_rules.py"
+stage = "raw_text"
+
+[[rule]]
 id = "flow.wait_fork_isolation"
 script = "plugins/dv_text_rules.py"
 stage = "raw_text"
 
 [[rule]]
 id = "flow.wait_macro_required"
+script = "plugins/dv_text_rules.py"
+stage = "raw_text"
+
+[[rule]]
+id = "flow.spinwait_macro_required"
+script = "plugins/dv_text_rules.py"
+stage = "raw_text"
+
+[[rule]]
+id = "seq.no_uvm_do"
 script = "plugins/dv_text_rules.py"
 stage = "raw_text"
 

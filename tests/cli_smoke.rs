@@ -211,6 +211,26 @@ fn detects_wait_violations() {
 }
 
 #[test]
+fn detects_spinwait_violations() {
+    run_fixture("fixtures/spinwait_violation.sv", "flow.spinwait_macro_required");
+}
+
+#[test]
+fn detects_uvm_do_usage() {
+    run_fixture("fixtures/uvm_do_violation.sv", "seq.no_uvm_do");
+}
+
+#[test]
+fn detects_macro_guard_requirements() {
+    run_fixture("fixtures/global_macros.svh", "macro.guard_required");
+}
+
+#[test]
+fn detects_local_macro_guards() {
+    run_fixture("fixtures/local_macro_guard_violation.sv", "macro.no_local_guard");
+}
+
+#[test]
 fn reports_crlf_and_bom_locations() {
     run_fixture_with_fragments(
         "fixtures/bom_crlf_violation.sv",
