@@ -177,10 +177,7 @@ fn detects_randomize_macros() {
 
 #[test]
 fn detects_randomize_with_macros() {
-    run_fixture(
-        "fixtures/randomize_with_violation.sv",
-        "rand.dv_macro_with_required",
-    );
+    run_fixture("fixtures/randomize_with_violation.sv", "rand.dv_macro_with_required");
 }
 
 #[test]
@@ -200,10 +197,7 @@ fn detects_logging_violations() {
 
 #[test]
 fn detects_dpi_prefix_violations() {
-    run_fixture_with_fragments(
-        "fixtures/dpi_violation.sv",
-        &["dpi.import_prefix", "dpi.export_prefix"],
-    );
+    run_fixture_with_fragments("fixtures/dpi_violation.sv", &["dpi.import_prefix", "dpi.export_prefix"]);
 }
 
 #[test]
