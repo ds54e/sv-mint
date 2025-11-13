@@ -336,6 +336,11 @@ script = "plugins/dv_text_rules.py"
 stage = "raw_text"
 
 [[rule]]
+id = "log.allowed_verbosity"
+script = "plugins/dv_text_rules.py"
+stage = "raw_text"
+
+[[rule]]
 id = "dpi.import_prefix"
 script = "plugins/dv_text_rules.py"
 stage = "raw_text"
@@ -361,6 +366,11 @@ script = "plugins/dv_text_rules.py"
 stage = "raw_text"
 
 [[rule]]
+id = "macro.dv_prefix_header_only"
+script = "plugins/dv_text_rules.py"
+stage = "raw_text"
+
+[[rule]]
 id = "flow.wait_fork_isolation"
 script = "plugins/dv_text_rules.py"
 stage = "raw_text"
@@ -377,6 +387,26 @@ stage = "raw_text"
 
 [[rule]]
 id = "seq.no_uvm_do"
+script = "plugins/dv_text_rules.py"
+stage = "raw_text"
+
+[[rule]]
+id = "scoreboard.dv_eot_required"
+script = "plugins/dv_text_rules.py"
+stage = "raw_text"
+
+[[rule]]
+id = "lang.no_program_construct"
+script = "plugins/dv_text_rules.py"
+stage = "raw_text"
+
+[[rule]]
+id = "flow.no_fork_label"
+script = "plugins/dv_text_rules.py"
+stage = "raw_text"
+
+[[rule]]
+id = "flow.no_disable_fork_label"
 script = "plugins/dv_text_rules.py"
 stage = "raw_text"
 

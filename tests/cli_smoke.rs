@@ -185,6 +185,7 @@ fn detects_logging_violations() {
             "log.no_uvm_report_api",
             "log.no_display",
             "log.no_none_full",
+            "log.allowed_verbosity",
         ],
     );
 }
@@ -228,6 +229,29 @@ fn detects_macro_guard_requirements() {
 #[test]
 fn detects_local_macro_guards() {
     run_fixture("fixtures/local_macro_guard_violation.sv", "macro.no_local_guard");
+}
+
+#[test]
+fn detects_dv_macro_location() {
+    run_fixture("fixtures/local_dv_macro.sv", "macro.dv_prefix_header_only");
+}
+
+#[test]
+fn detects_scoreboard_eot_requirements() {
+    run_fixture("fixtures/scoreboard_violation.sv", "scoreboard.dv_eot_required");
+}
+
+#[test]
+fn detects_program_constructs() {
+    run_fixture("fixtures/program_violation.sv", "lang.no_program_construct");
+}
+
+#[test]
+fn detects_fork_label_usage() {
+    run_fixture_with_fragments(
+        "fixtures/fork_label_violation.sv",
+        &["flow.no_fork_label", "flow.no_disable_fork_label"],
+    );
 }
 
 #[test]

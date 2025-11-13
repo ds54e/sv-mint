@@ -13,15 +13,21 @@
   | `log.no_uvm_report_api` | warning | Forbid `uvm_report_*` helpers and require the shorthand macros |
   | `log.no_display` | warning | Forbid `$display` in DV code |
   | `log.no_none_full` | warning | Ban `UVM_NONE` and `UVM_FULL` verbosity levels |
+  | `log.allowed_verbosity` | warning | `uvm_*` macros must use UVM_LOW/MEDIUM/HIGH/DEBUG |
   | `dpi.import_prefix` | warning | Imported DPI symbols must start with `c_dpi_` |
   | `dpi.export_prefix` | warning | Exported DPI handles must start with `sv_dpi_` |
   | `macro.missing_undef` | warning | Local `` `define`` entries must be `` `undef``’d in the same file |
   | `macro.guard_required` | warning | Macros in global `_macros.svh` headers need `` `ifndef`` guards |
   | `macro.no_local_guard` | warning | Local macros must not use `` `ifndef`` guards |
+  | `macro.dv_prefix_header_only` | warning | `DV_*` macros belong only in shared `_macros.svh` headers |
   | `flow.wait_fork_isolation` | warning | `wait fork` must be replaced with isolation fork helpers |
   | `flow.wait_macro_required` | warning | Raw `wait (cond)` usage must be replaced with `` `DV_WAIT`` |
   | `flow.spinwait_macro_required` | warning | `while` polling loops must live inside `` `DV_SPINWAIT`` |
   | `seq.no_uvm_do` | warning | Forbid legacy `` `uvm_do`` macros |
+  | `scoreboard.dv_eot_required` | warning | Scoreboard classes must call `DV_EOT_PRINT_*` macros |
+  | `lang.no_program_construct` | warning | Ban the `program` language construct |
+  | `flow.no_fork_label` | warning | Forbid labeled `fork : label` syntax |
+  | `flow.no_disable_fork_label` | warning | `disable fork_label` is not portable |
 
 ## Rule Details
 
@@ -37,6 +43,7 @@ Randomization must go through `DV_CHECK_RANDOMIZE_FATAL`, `DV_CHECK_STD_RANDOMIZ
 - `log.no_uvm_report_api` blocks `uvm_report_*` usage so teams always rely on the concise shorthand macros.
 - `log.no_display` forbids `$display` and pushes users toward the UVM reporting macros.
 - `log.no_none_full` prevents `UVM_NONE` and `UVM_FULL` verbosity levels, matching the recommended verbosity banding.
+- `log.allowed_verbosity` warns when `uvm_*` macros use a custom numeric verbosity instead of the supported `UVM_LOW/MEDIUM/HIGH/DEBUG` constants.
 
 ### DPI Rules (`dpi.*`)
 Section “DPI and C Connections” requires imported functions to be prefixed with `c_dpi_` and exported handles with `sv_dpi_`. These rules look for `import "DPI"` / `export "DPI"` statements and flag any identifiers that break the prefix contract.
@@ -50,10 +57,20 @@ Global macro headers (`*_macros.svh`) must wrap each definition in a `` `ifndef`
 ### `macro.no_local_guard`
 Conversely, local macros (defined directly inside `.sv` or package sources) must *not* use `` `ifndef`` guards. Guards hide redefinition errors and were explicitly called out in the guide. This rule warns when a non-header source gate its macro with `` `ifndef`.
 
+### `macro.dv_prefix_header_only`
+The DVCodingStyle doc reserves the `DV_` prefix for shared helper macros. Any `` `define`` that starts with `DV_` must therefore reside in a `_macros.svh` header. This rule flags local files that introduce `DV_` macros so they can be moved.
+
 ### Wait/Fork Rules (`flow.*`)
 - `flow.wait_fork_isolation` rejects `wait fork`, nudging engineers toward the isolation-fork pattern (`DV_SPINWAIT`) recommended by the spec.
 - `flow.wait_macro_required` warns on `wait (condition)` so that watchdog-backed `` `DV_WAIT`` helpers are used instead.
 - `flow.spinwait_macro_required` reports polling `while` loops that are not invoked through `` `DV_SPINWAIT``, ensuring watchdog timers accompany non-forever loops.
+- `flow.no_fork_label` and `flow.no_disable_fork_label` discourage `fork : label` / `disable fork_label`, matching the spec’s guidance to rely on isolation forks for portability.
 
 ### `seq.no_uvm_do`
 The macro section explicitly bans `` `uvm_do`` helpers; tests must call `start_item`, randomize, `finish_item`, and `get_response` manually. This rule catches any usage of the legacy macro family so authors migrate to the recommended flow.
+
+### `scoreboard.dv_eot_required`
+Scoreboards should print TLM FIFO state at end-of-test using `DV_EOT_PRINT_*` macros. When a file declares a `*_scoreboard` class but never references the macro family, this rule reminds the author to add the recommended logging.
+
+### `lang.no_program_construct`
+`program` blocks are prohibited; they complicate reuse and are explicitly discouraged in the guide. A simple raw-text search keeps them out of the codebase.

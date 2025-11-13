@@ -16,6 +16,15 @@ WAIT_STMT_RE = re.compile(r"\bwait\s*\(", re.IGNORECASE)
 WHILE_RE = re.compile(r"\bwhile\s*\(", re.IGNORECASE)
 UVM_DO_RE = re.compile(r"`uvm_do", re.IGNORECASE)
 IFNDEF_RE = re.compile(r"`ifndef\s+([A-Za-z_]\w*)")
+STD_RANDOMIZE_RE = re.compile(r"\bstd::randomize\s*\(", re.IGNORECASE)
+THIS_RANDOMIZE_RE = re.compile(r"\bthis\s*\.\s*randomize\s*\(", re.IGNORECASE)
+SCOREBOARD_CLASS_RE = re.compile(r"class\s+([A-Za-z_]\w*scoreboard)\b", re.IGNORECASE)
+DV_EOT_RE = re.compile(r"DV_EOT_PRINT_", re.IGNORECASE)
+PROGRAM_RE = re.compile(r"\bprogram\b", re.IGNORECASE)
+FORK_LABEL_RE = re.compile(r"\bfork\s*:", re.IGNORECASE)
+DISABLE_FORK_LABEL_RE = re.compile(r"\bdisable\s+[A-Za-z_]\w*\s*;", re.IGNORECASE)
+DV_MACRO_RE = re.compile(r"`define\s+(DV_[A-Za-z_]\w*)")
+ALLOWED_VERBOSITY = {"UVM_LOW", "UVM_MEDIUM", "UVM_HIGH", "UVM_DEBUG"}
 
 
 def check(req):
@@ -32,6 +41,9 @@ def check(req):
     out.extend(_check_macros(text, path))
     out.extend(_check_wait_usage(text))
     out.extend(_check_uvm_do(text))
+    out.extend(_check_scoreboard(text))
+    out.extend(_check_program(text))
+    out.extend(_check_fork_labels(text))
     return out
 
 
@@ -99,7 +111,18 @@ def _pop_scope(scopes, kind):
 
 def _check_randomize(text):
     out = []
-    for match in RANDOMIZE_RE.finditer(text):
+    out.extend(_randomize_matches(text, RANDOMIZE_RE))
+    out.extend(_randomize_matches(text, STD_RANDOMIZE_RE))
+    out.extend(_randomize_matches(text, THIS_RANDOMIZE_RE))
+    return out
+
+
+def _randomize_matches(text, pattern):
+    out = []
+    for match in pattern.finditer(text):
+        prefix = text[max(0, match.start() - 40):match.start()]
+        if "DV_CHECK" in prefix:
+            continue
         out.append({
             "rule_id": "rand.dv_macro_required",
             "severity": "warning",
@@ -112,7 +135,13 @@ def _check_randomize(text):
 def _check_logging(text):
     out = []
     for match in LOG_CALL_RE.finditer(text):
-        arg = _first_arg(text, match.end())
+        prefix = text[max(0, match.start() - 20):match.start()].lower()
+        if "function" in prefix:
+            continue
+        args = _call_args(text, match.end())
+        if not args:
+            continue
+        arg = args[0]
         norm = arg.lstrip("`").strip()
         if norm not in ("gfn", "gtn"):
             out.append({
@@ -121,6 +150,15 @@ def _check_logging(text):
                 "message": "uvm report macros must use gfn/gtn as the message tag",
                 "location": _loc(text, match.start()),
             })
+        if len(args) >= 3:
+            verb = args[2].strip()
+            if verb not in ALLOWED_VERBOSITY:
+                out.append({
+                    "rule_id": "log.allowed_verbosity",
+                    "severity": "warning",
+                    "message": "uvm report macros must use UVM_LOW/MEDIUM/HIGH/DEBUG verbosity",
+                    "location": _loc(text, match.start()),
+                })
     for pattern, rule_id, message in (
         (UVM_WARNING_RE, "log.no_uvm_warning", "use uvm_error or uvm_fatal instead of uvm_warning"),
         (UVM_REPORT_RE, "log.no_uvm_report_api", "use uvm_{info,error,fatal} macros instead of uvm_report_*"),
@@ -143,28 +181,27 @@ def _check_logging(text):
     return out
 
 
-def _first_arg(text, index):
-    depth = 0
-    arg_start = None
+def _call_args(text, index):
+    depth = 1
+    start = index
+    args = []
     i = index
     while i < len(text):
         ch = text[i]
         if ch == "(":
             depth += 1
-            if depth == 1:
-                arg_start = i + 1
         elif ch == ")":
-            if depth == 1:
-                if arg_start is None:
-                    return ""
-                return text[arg_start:i].strip()
             depth -= 1
+            if depth == 0:
+                if start is not None:
+                    args.append(text[start:i].strip())
+                break
         elif ch == "," and depth == 1:
-            if arg_start is None:
-                return ""
-            return text[arg_start:i].strip()
+            if start is not None:
+                args.append(text[start:i].strip())
+                start = i + 1
         i += 1
-    return ""
+    return args
 
 
 def _check_dpi(text):
@@ -199,6 +236,7 @@ def _check_macros(text, path):
     for match in DEFINE_RE.finditer(text):
         defs.append((match.group(1), match.start(1)))
     undefs = {match.group(1) for match in UNDEF_RE.finditer(text)}
+    dv_macros = [match.group(1) for match in DV_MACRO_RE.finditer(text)]
     macros_file = path.endswith("_macros.svh")
     for name, index in defs:
         if name not in undefs and not macros_file:
@@ -223,6 +261,16 @@ def _check_macros(text, path):
                 "message": f"local macro {name} must not use `ifndef guards",
                 "location": _loc(text, index),
             })
+    for name in dv_macros:
+        if macros_file:
+            continue
+        loc = text.find(name)
+        out.append({
+            "rule_id": "macro.dv_prefix_header_only",
+            "severity": "warning",
+            "message": "DV_* macros must live in dedicated *_macros.svh headers",
+            "location": _loc(text, loc),
+        })
     return out
 
 
@@ -262,6 +310,51 @@ def _check_uvm_do(text):
             "rule_id": "seq.no_uvm_do",
             "severity": "warning",
             "message": "replace `uvm_do macros with start_item/finish_item flow",
+            "location": _loc(text, match.start()),
+        })
+    return out
+
+
+def _check_scoreboard(text):
+    out = []
+    if not DV_EOT_RE.search(text):
+        for match in SCOREBOARD_CLASS_RE.finditer(text):
+            out.append({
+                "rule_id": "scoreboard.dv_eot_required",
+                "severity": "warning",
+                "message": "scoreboard classes should call DV_EOT_PRINT_* macros in check_phase",
+                "location": _loc(text, match.start()),
+            })
+            break
+    return out
+
+
+def _check_program(text):
+    out = []
+    for match in PROGRAM_RE.finditer(text):
+        out.append({
+            "rule_id": "lang.no_program_construct",
+            "severity": "warning",
+            "message": "program blocks are disallowed; use module/interface alternatives",
+            "location": _loc(text, match.start()),
+        })
+    return out
+
+
+def _check_fork_labels(text):
+    out = []
+    for match in FORK_LABEL_RE.finditer(text):
+        out.append({
+            "rule_id": "flow.no_fork_label",
+            "severity": "warning",
+            "message": "avoid fork labels; use DV_SPINWAIT isolation blocks instead",
+            "location": _loc(text, match.start()),
+        })
+    for match in DISABLE_FORK_LABEL_RE.finditer(text):
+        out.append({
+            "rule_id": "flow.no_disable_fork_label",
+            "severity": "warning",
+            "message": "use disable fork/thread inside isolation fork instead of disable fork_label",
             "location": _loc(text, match.start()),
         })
     return out
