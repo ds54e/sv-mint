@@ -435,6 +435,11 @@ id = "lang.default_nettype_placement"
 script = "plugins/default_nettype_rule.py"
 stage = "raw_text"
 
+[[rule]]
+id = "lang.default_nettype_reset"
+script = "plugins/default_nettype_rule.py"
+stage = "raw_text"
+
 [logging]
 level = "info"
 stderr_snippet_bytes = 2000

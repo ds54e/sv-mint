@@ -271,7 +271,10 @@ fn detects_default_nettype_value() {
 
 #[test]
 fn detects_default_nettype_placement() {
-    run_fixture("fixtures/default_nettype_late.sv", "lang.default_nettype_placement");
+    run_fixture_with_fragments(
+        "fixtures/default_nettype_late.sv",
+        &["lang.default_nettype_placement", "lang.default_nettype_reset"],
+    );
 }
 
 #[test]

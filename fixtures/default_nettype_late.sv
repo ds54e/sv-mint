@@ -29,3 +29,5 @@ module default_nettype_late;
 endmodule
 
 `default_nettype none
+
+// forgot to reset to wire
