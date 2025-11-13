@@ -93,6 +93,39 @@ fn default_true() -> bool {
     true
 }
 
+pub fn apply_rule_overrides(
+    rules: &mut [RuleConfig],
+    only: &[String],
+    disable: &[String],
+) -> Result<(), ConfigError> {
+    if only.is_empty() && disable.is_empty() {
+        return Ok(());
+    }
+    let existing: HashSet<String> = rules.iter().map(|r| r.id.clone()).collect();
+    for id in only.iter().chain(disable.iter()) {
+        if !existing.contains(id) {
+            return Err(ConfigError::InvalidValue {
+                detail: format!("rule {} not found", id),
+            });
+        }
+    }
+    if !only.is_empty() {
+        let only_set: HashSet<&str> = only.iter().map(|s| s.as_str()).collect();
+        for rule in rules.iter_mut() {
+            rule.enabled = only_set.contains(rule.id.as_str());
+        }
+    }
+    if !disable.is_empty() {
+        let disable_set: HashSet<&str> = disable.iter().map(|s| s.as_str()).collect();
+        for rule in rules.iter_mut() {
+            if disable_set.contains(rule.id.as_str()) {
+                rule.enabled = false;
+            }
+        }
+    }
+    Ok(())
+}
+
 pub fn resolve_path(opt: Option<PathBuf>) -> Result<PathBuf, ConfigError> {
     match opt {
         Some(p) if p.exists() => Ok(p),
@@ -188,4 +221,79 @@ pub fn validate_config(cfg: &Config) -> Result<(), ConfigError> {
         }
     }
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::types::Stage;
+
+    fn make_rules() -> Vec<RuleConfig> {
+        vec![
+            RuleConfig {
+                id: "a".to_string(),
+                script: "a.py".to_string(),
+                stage: Stage::RawText,
+                enabled: true,
+                severity: None,
+            },
+            RuleConfig {
+                id: "b".to_string(),
+                script: "b.py".to_string(),
+                stage: Stage::RawText,
+                enabled: true,
+                severity: None,
+            },
+            RuleConfig {
+                id: "c".to_string(),
+                script: "c.py".to_string(),
+                stage: Stage::RawText,
+                enabled: true,
+                severity: None,
+            },
+        ]
+    }
+
+    fn is_enabled(rules: &[RuleConfig], id: &str) -> bool {
+        rules.iter().find(|r| r.id == id).unwrap().enabled
+    }
+
+    #[test]
+    fn disable_rules() {
+        let mut rules = make_rules();
+        let disable = vec!["b".to_string()];
+        apply_rule_overrides(&mut rules, &[], &disable).unwrap();
+        assert!(is_enabled(&rules, "a"));
+        assert!(!is_enabled(&rules, "b"));
+        assert!(is_enabled(&rules, "c"));
+    }
+
+    #[test]
+    fn only_rules() {
+        let mut rules = make_rules();
+        let only = vec!["c".to_string()];
+        apply_rule_overrides(&mut rules, &only, &[]).unwrap();
+        assert!(!is_enabled(&rules, "a"));
+        assert!(!is_enabled(&rules, "b"));
+        assert!(is_enabled(&rules, "c"));
+    }
+
+    #[test]
+    fn combined_only_and_disable() {
+        let mut rules = make_rules();
+        let only = vec!["a".to_string(), "b".to_string()];
+        let disable = vec!["b".to_string()];
+        apply_rule_overrides(&mut rules, &only, &disable).unwrap();
+        assert!(is_enabled(&rules, "a"));
+        assert!(!is_enabled(&rules, "b"));
+        assert!(!is_enabled(&rules, "c"));
+    }
+
+    #[test]
+    fn invalid_rule_name_errors() {
+        let mut rules = make_rules();
+        let only = vec!["missing".to_string()];
+        let err = apply_rule_overrides(&mut rules, &only, &[]);
+        assert!(matches!(err, Err(ConfigError::InvalidValue { .. })));
+    }
 }
