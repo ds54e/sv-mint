@@ -7,7 +7,7 @@ use crate::plugin_scripts::{collect_script_specs, resolve_script_path, ScriptSpe
 use crate::types::{Severity, Stage, Violation};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use std::collections::HashMap;
+use std::collections::{BTreeMap, HashMap};
 use std::path::Path;
 use std::process::Stdio;
 use std::sync::{Arc, Mutex};
@@ -35,6 +35,7 @@ pub struct PythonHost {
 struct ScriptInit<'a> {
     path: &'a str,
     stages: &'a [String],
+    stage_rules: &'a BTreeMap<String, Vec<String>>,
 }
 
 #[derive(Serialize)]
@@ -66,6 +67,11 @@ enum HostResponse {
     Ready,
     Violations { violations: Vec<Violation> },
     Error { detail: Option<String> },
+}
+
+pub struct StageRunResult {
+    pub violations: Vec<Violation>,
+    pub response_bytes: usize,
 }
 
 impl PythonHost {
@@ -122,7 +128,7 @@ impl PythonHost {
         input_path: &Path,
         payload: StagePayload<'_>,
         rules: RuleDispatch<'_>,
-    ) -> Result<Vec<Violation>, PluginError> {
+    ) -> Result<StageRunResult, PluginError> {
         let path_s = input_path.to_string_lossy().into_owned();
         let stage_name = stage.as_str();
         log_event(Ev::new(Event::PluginInvoke, &path_s).with_stage(stage_name));
@@ -147,8 +153,19 @@ impl PythonHost {
                 );
                 return Err(e);
             }
+            Err(e @ PluginError::ExitCode { code }) => {
+                let elapsed = t0.elapsed().as_millis();
+                log_event(
+                    Ev::new(Event::PluginExitNonzero, &path_s)
+                        .with_stage(stage_name)
+                        .with_duration_ms(elapsed)
+                        .with_exit_code(code),
+                );
+                return Err(e);
+            }
             Err(e) => return Err(e),
         };
+        let (resp, response_bytes) = resp;
         let violations = match resp {
             HostResponse::Violations { violations } => violations,
             HostResponse::Error { detail } => {
@@ -169,7 +186,10 @@ impl PythonHost {
                 .with_stage(stage_name)
                 .with_duration_ms(elapsed),
         );
-        Ok(adjusted)
+        Ok(StageRunResult {
+            violations: adjusted,
+            response_bytes,
+        })
     }
 
     fn init(&mut self, scripts: &[ScriptSpec]) -> Result<(), PluginError> {
@@ -178,18 +198,17 @@ impl PythonHost {
             .map(|spec| ScriptInit {
                 path: spec.path.as_str(),
                 stages: spec.stages.as_slice(),
+                stage_rules: &spec.stage_rules,
             })
             .collect();
-        let req = HostRequest::Init {
-            scripts: &payload,
-        };
+        let req = HostRequest::Init { scripts: &payload };
         self.send(&req)?;
         match self.recv()? {
-            HostResponse::Ready => Ok(()),
-            HostResponse::Error { detail } => Err(PluginError::ProtocolError {
+            (HostResponse::Ready, _) => Ok(()),
+            (HostResponse::Error { detail }, _) => Err(PluginError::ProtocolError {
                 detail: detail.unwrap_or_else(|| "init failed".to_string()),
             }),
-            HostResponse::Violations { .. } => Err(PluginError::ProtocolError {
+            (HostResponse::Violations { .. }, _) => Err(PluginError::ProtocolError {
                 detail: "unexpected violations response during init".to_string(),
             }),
         }
@@ -207,18 +226,26 @@ impl PythonHost {
             .map_err(|e| PluginError::IoFailed { detail: e.to_string() })
     }
 
-    fn recv(&mut self) -> Result<HostResponse, PluginError> {
+    fn recv(&mut self) -> Result<(HostResponse, usize), PluginError> {
         let timeout = self.timeout;
         let stdout_rx = &mut self.stdout_rx;
         let child = &mut self.child;
         self.runtime.block_on(async {
             match time::timeout(timeout, stdout_rx.recv()).await {
                 Ok(Some(line)) => {
-                    serde_json::from_str(&line).map_err(|e| PluginError::BadJson { detail: e.to_string() })
+                    let len = line.len();
+                    serde_json::from_str(&line)
+                        .map(|resp| (resp, len))
+                        .map_err(|e| PluginError::BadJson { detail: e.to_string() })
                 }
-                Ok(None) => Err(PluginError::ProtocolError {
-                    detail: "host closed stdout".to_string(),
-                }),
+                Ok(None) => {
+                    let status = child
+                        .wait()
+                        .await
+                        .map_err(|e| PluginError::IoFailed { detail: e.to_string() })?;
+                    let code = status.code().unwrap_or(-1);
+                    Err(PluginError::ExitCode { code })
+                }
                 Err(_) => {
                     let _ = child.start_kill();
                     let _ = child.wait().await;

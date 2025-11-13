@@ -1,23 +1,21 @@
-use crate::config::{read_input, Config};
+use crate::config::{read_input, Config, TransportOnExceed};
 use crate::core::payload::{payload_for, StagePayload};
-use crate::core::size_guard::{enforce_request_size, OnExceed, SizePolicy, StageOutcome, StageStatus};
+use crate::core::size_guard::{
+    enforce_request_size, enforce_response_size, OnExceed, SizePolicy, StageOutcome, StageStatus,
+};
 use crate::diag::event::{Ev, Event};
 use crate::diag::logging::log_event;
 use crate::output::print_violations;
 use crate::plugin::client::{PythonHost, RuleDispatch};
 use crate::svparser::SvDriver;
 use crate::types::{Location, Severity, Stage, Violation};
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use serde::Serialize;
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::time::Instant;
 use tracing::{debug, error};
-
-const MAX_REQ_BYTES: usize = 16_000_000;
-const WARN_REQ_BYTES: usize = 12_000_000;
-const MAX_RESP_BYTES: usize = 16_000_000;
 
 pub struct RunSummary {
     pub violations: usize,
@@ -172,9 +170,9 @@ impl<'a> Pipeline<'a> {
                 all.extend(outcome.violations.iter().cloned());
                 record_outcome(&input_path, &outcome);
                 log_event(Ev::new(Event::StageDone, &input_path.to_string_lossy()).with_stage(stage.as_str()));
-                if matches!(outcome.status, StageStatus::Failed) {
+                if matches!(outcome.status, StageStatus::Failed) || outcome.fail_ci {
                     print_violations(&all, &input_path);
-                    return Ok(all.len());
+                    return Err(anyhow!(format!("stage {} aborted", stage.as_str())));
                 }
                 continue;
             }
@@ -183,14 +181,26 @@ impl<'a> Pipeline<'a> {
                 enabled: &rules_for_stage.enabled,
                 disabled: &rules_for_stage.disabled,
             };
-            let vs = host
+            let result = host
                 .run_stage(stage, &input_path, payload, run_rules)
                 .map_err(anyhow::Error::new)?;
+            if let Err(mut outcome) = enforce_response_size(stage.as_str(), result.response_bytes, &policy) {
+                all.extend(outcome.violations.iter().cloned());
+                outcome.duration_ms = t0.elapsed().as_millis() as u64;
+                record_outcome(&input_path, &outcome);
+                log_event(Ev::new(Event::StageDone, &input_path.to_string_lossy()).with_stage(stage.as_str()));
+                if matches!(outcome.status, StageStatus::Failed) || outcome.fail_ci {
+                    print_violations(&all, &input_path);
+                    return Err(anyhow!(format!("stage {} aborted", stage.as_str())));
+                }
+                continue;
+            }
             let outcome = StageOutcome {
                 stage: stage.as_str().to_string(),
                 status: StageStatus::Ran,
-                violations: vs,
+                violations: result.violations,
                 duration_ms: t0.elapsed().as_millis() as u64,
+                fail_ci: false,
             };
             all.extend(outcome.violations.iter().cloned());
             record_outcome(&input_path, &outcome);
@@ -202,8 +212,12 @@ impl<'a> Pipeline<'a> {
     }
 }
 
-fn is_required_stage(_cfg: &Config, stage: &Stage) -> bool {
-    matches!(stage, Stage::RawText | Stage::PpText)
+fn is_required_stage(cfg: &Config, stage: &Stage) -> bool {
+    if cfg.stages.required.is_empty() {
+        matches!(stage, Stage::RawText | Stage::PpText)
+    } else {
+        cfg.stages.required.contains(stage)
+    }
 }
 
 fn record_outcome(path: &Path, outcome: &StageOutcome) {
@@ -224,12 +238,24 @@ fn record_outcome(path: &Path, outcome: &StageOutcome) {
 
 fn size_policy_for_stage(cfg: &Config, stage: &Stage) -> SizePolicy {
     let required = is_required_stage(cfg, stage);
+    let warn_request_bytes = cfg
+        .transport
+        .max_request_bytes
+        .saturating_sub(cfg.transport.warn_margin_bytes);
+    let on_exceed = if required {
+        OnExceed::Error
+    } else {
+        match cfg.transport.on_exceed {
+            TransportOnExceed::Skip => OnExceed::Skip,
+            TransportOnExceed::Error => OnExceed::Error,
+        }
+    };
     SizePolicy {
-        max_request_bytes: MAX_REQ_BYTES,
-        warn_request_bytes: WARN_REQ_BYTES,
-        max_response_bytes: MAX_RESP_BYTES,
-        on_exceed: if required { OnExceed::Error } else { OnExceed::Skip },
-        fail_ci_on_skip: false,
+        max_request_bytes: cfg.transport.max_request_bytes,
+        warn_request_bytes,
+        max_response_bytes: cfg.transport.max_response_bytes,
+        on_exceed,
+        fail_ci_on_skip: cfg.transport.fail_ci_on_skip,
         is_required_stage: required,
     }
 }

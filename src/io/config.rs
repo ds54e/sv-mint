@@ -1,7 +1,7 @@
 use crate::errors::ConfigError;
 use crate::svparser::SvParserCfg;
-use crate::types::Stage;
 use crate::textutil::{normalize_lf, strip_bom};
+use crate::types::Stage;
 use serde::Deserialize;
 use std::collections::{HashMap, HashSet};
 use std::fs;
@@ -48,6 +48,47 @@ impl Default for LogFormat {
     }
 }
 
+#[derive(Deserialize, Clone, Copy)]
+#[serde(rename_all = "lowercase")]
+pub enum TransportOnExceed {
+    Skip,
+    Error,
+}
+
+impl Default for TransportOnExceed {
+    fn default() -> Self {
+        TransportOnExceed::Skip
+    }
+}
+
+fn default_warn_margin_bytes() -> usize {
+    1_048_576
+}
+
+#[derive(Deserialize, Clone)]
+pub struct TransportConfig {
+    pub max_request_bytes: usize,
+    #[serde(default = "default_warn_margin_bytes")]
+    pub warn_margin_bytes: usize,
+    pub max_response_bytes: usize,
+    #[serde(default)]
+    pub on_exceed: TransportOnExceed,
+    #[serde(default)]
+    pub fail_ci_on_skip: bool,
+}
+
+impl Default for TransportConfig {
+    fn default() -> Self {
+        Self {
+            max_request_bytes: 16_777_216,
+            warn_margin_bytes: default_warn_margin_bytes(),
+            max_response_bytes: 16_777_216,
+            on_exceed: TransportOnExceed::Skip,
+            fail_ci_on_skip: false,
+        }
+    }
+}
+
 #[derive(Deserialize)]
 pub struct Config {
     #[serde(default)]
@@ -59,6 +100,8 @@ pub struct Config {
     pub svparser: SvParserCfg,
     #[serde(default)]
     pub rule: Vec<RuleConfig>,
+    #[serde(default)]
+    pub transport: TransportConfig,
 }
 
 #[derive(Deserialize)]
@@ -76,6 +119,8 @@ pub struct Plugin {
 #[derive(Deserialize)]
 pub struct Stages {
     pub enabled: Vec<crate::types::Stage>,
+    #[serde(default)]
+    pub required: Vec<Stage>,
 }
 
 #[derive(Deserialize, Clone)]
@@ -93,11 +138,7 @@ fn default_true() -> bool {
     true
 }
 
-pub fn apply_rule_overrides(
-    rules: &mut [RuleConfig],
-    only: &[String],
-    disable: &[String],
-) -> Result<(), ConfigError> {
+pub fn apply_rule_overrides(rules: &mut [RuleConfig], only: &[String], disable: &[String]) -> Result<(), ConfigError> {
     if only.is_empty() && disable.is_empty() {
         return Ok(());
     }
@@ -213,12 +254,26 @@ pub fn validate_config(cfg: &Config) -> Result<(), ConfigError> {
         }
         if !cfg.stages.enabled.contains(&entry.stage) {
             return Err(ConfigError::InvalidValue {
-                detail: format!(
-                    "rule {} references disabled stage {:?}",
-                    entry.id, entry.stage
-                ),
+                detail: format!("rule {} references disabled stage {:?}", entry.id, entry.stage),
             });
         }
+    }
+    for stage in &cfg.stages.required {
+        if !cfg.stages.enabled.contains(stage) {
+            return Err(ConfigError::InvalidValue {
+                detail: format!("required stage {:?} must also be enabled", stage),
+            });
+        }
+    }
+    if cfg.transport.max_request_bytes == 0 || cfg.transport.max_response_bytes == 0 {
+        return Err(ConfigError::InvalidValue {
+            detail: "transport byte limits must be greater than zero".to_string(),
+        });
+    }
+    if cfg.transport.warn_margin_bytes > cfg.transport.max_request_bytes {
+        return Err(ConfigError::InvalidValue {
+            detail: "transport warn_margin_bytes exceeds max_request_bytes".to_string(),
+        });
     }
     Ok(())
 }

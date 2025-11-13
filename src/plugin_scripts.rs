@@ -1,6 +1,6 @@
 use crate::config::Config;
+use std::collections::{BTreeMap, BTreeSet, HashMap};
 use std::path::Path;
-use std::collections::{HashMap, BTreeSet};
 
 pub fn resolve_script_path(s: &str) -> String {
     let p = Path::new(s);
@@ -24,31 +24,47 @@ pub fn resolve_script_path(s: &str) -> String {
     s.to_string()
 }
 
+#[derive(Default)]
+struct ScriptSpecBuilder {
+    stages: BTreeSet<String>,
+    stage_rules: BTreeMap<String, Vec<String>>,
+}
+
 pub struct ScriptSpec {
     pub path: String,
     pub stages: Vec<String>,
+    pub stage_rules: BTreeMap<String, Vec<String>>,
 }
 
 pub fn collect_script_specs(cfg: &Config) -> Vec<ScriptSpec> {
     let mut order: Vec<String> = Vec::new();
-    let mut stages: HashMap<String, BTreeSet<String>> = HashMap::new();
+    let mut specs: HashMap<String, ScriptSpecBuilder> = HashMap::new();
     for rule in &cfg.rule {
         let path = resolve_script_path(&rule.script);
-        if !stages.contains_key(&path) {
+        let entry = specs.entry(path.clone()).or_insert_with(|| {
             order.push(path.clone());
-        }
-        stages
-            .entry(path)
-            .or_insert_with(BTreeSet::new)
-            .insert(rule.stage.as_str().to_string());
+            ScriptSpecBuilder::default()
+        });
+        entry.stages.insert(rule.stage.as_str().to_string());
+        entry
+            .stage_rules
+            .entry(rule.stage.as_str().to_string())
+            .or_insert_with(Vec::new)
+            .push(rule.id.clone());
     }
     order
         .into_iter()
         .map(|path| {
-            let stage_set = stages.remove(&path).unwrap_or_default();
+            let builder = specs.remove(&path).unwrap_or_default();
+            let mut stage_rules = BTreeMap::new();
+            for (stage, mut ids) in builder.stage_rules {
+                ids.sort();
+                stage_rules.insert(stage, ids);
+            }
             ScriptSpec {
                 path,
-                stages: stage_set.into_iter().collect(),
+                stages: builder.stages.into_iter().collect(),
+                stage_rules,
             }
         })
         .collect()

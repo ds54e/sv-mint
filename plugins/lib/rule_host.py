@@ -33,9 +33,16 @@ def main():
     for idx, script in enumerate(scripts):
         path = script.get("path")
         stages = script.get("stages") or []
+        stage_rules = script.get("stage_rules") or {}
         mod = load_module(Path(path), idx)
         modules.append(mod)
-        script_meta.append(set(stages))
+        rules_by_stage = {}
+        for stage_name, ids in stage_rules.items():
+            rules_by_stage[stage_name] = set(ids or [])
+        script_meta.append({
+            "stages": set(stages),
+            "rules": rules_by_stage,
+        })
     print(json.dumps({"type": "ready"}))
     sys.stdout.flush()
     for line in sys.stdin:
@@ -48,8 +55,14 @@ def main():
         results = []
         error = None
         stage_name = req.get("stage")
-        for module, allowed in zip(modules, script_meta):
-            if allowed and stage_name not in allowed:
+        rules_cfg = req.get("rules") or {}
+        enabled_rules = set(rules_cfg.get("enabled") or [])
+        for module, meta in zip(modules, script_meta):
+            stages = meta["stages"]
+            if stages and stage_name not in stages:
+                continue
+            stage_rules = meta["rules"].get(stage_name)
+            if stage_rules is not None and not (stage_rules & enabled_rules):
                 continue
             handler = getattr(module, "check", None)
             if handler is None:

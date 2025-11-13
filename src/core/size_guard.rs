@@ -32,6 +32,7 @@ pub struct StageOutcome {
     pub status: StageStatus,
     pub violations: Vec<Violation>,
     pub duration_ms: u64,
+    pub fail_ci: bool,
 }
 
 pub fn synth_violation_stage_skipped_size(stage: &str, severity: Severity, actual: usize, limit: usize) -> Violation {
@@ -72,6 +73,7 @@ pub fn enforce_request_size<T: Serialize>(stage: &str, req: &T, pol: &SizePolicy
                     },
                 }],
                 duration_ms: 0,
+                fail_ci: true,
             })
         }
     };
@@ -97,20 +99,20 @@ pub fn enforce_request_size<T: Serialize>(stage: &str, req: &T, pol: &SizePolicy
             status,
             violations: vec![v],
             duration_ms: 0,
+            fail_ci: is_err || pol.fail_ci_on_skip,
         });
     }
     Ok(bytes)
 }
 
-pub fn enforce_response_size(stage: &str, stdout: &[u8], pol: &SizePolicy) -> Result<(), StageOutcome> {
-    let n = stdout.len();
-    if n > pol.max_response_bytes {
+pub fn enforce_response_size(stage: &str, response_bytes: usize, pol: &SizePolicy) -> Result<(), StageOutcome> {
+    if response_bytes > pol.max_response_bytes {
         let v = Violation {
             rule_id: "sys.stage.output.too_large".to_string(),
             severity: Severity::Error,
             message: format!(
                 "Stage '{}' output {} bytes exceeds limit {} bytes.",
-                stage, n, pol.max_response_bytes
+                stage, response_bytes, pol.max_response_bytes
             ),
             location: Location {
                 line: 1,
@@ -125,6 +127,7 @@ pub fn enforce_response_size(stage: &str, stdout: &[u8], pol: &SizePolicy) -> Re
             status: StageStatus::Failed,
             violations: vec![v],
             duration_ms: 0,
+            fail_ci: true,
         });
     }
     Ok(())
