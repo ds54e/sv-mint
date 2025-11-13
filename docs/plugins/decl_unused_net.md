@@ -19,17 +19,19 @@
 - **Good**:
 
 ```systemverilog
-logic req_i;
-logic ack_o;
-logic busy;  // actively used
+wire req_i;
+wire ack_o;
+wire busy;
+
+assign busy = req_i & ack_o;  // net is driven and consumed
 ```
 
 - **Bad**:
 
 ```systemverilog
-logic req_i;
-logic ack_o;
-logic debug_tap;  // no references
+wire req_i;
+wire ack_o;
+wire debug_tap;  // declared but never read or written
 ```
 
 - **Additional Tips**: Comments like `/* unused */` do not suppress the warning. Either have generators emit names such as `unused_net_*` or disable the rule temporarily via its `[[rule]]` entry while migrating.
