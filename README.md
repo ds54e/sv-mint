@@ -50,6 +50,7 @@ sv-mint is a SystemVerilog lint pipeline that combines a Rust core with Python p
 
 ## Versioning
 - Current release: **1.0.0**. Use semantic versioning going forward so downstream automation can pin to stable rule/transport behavior.
+- Tags matching `v*` trigger `.github/workflows/release.yml`, which runs fmt/clippy/tests, builds release binaries for Linux/macOS/Windows, and uploads archives containing the binary plus `docs/`, `plugins/`, `sv-mint.toml`, `README.md`, `LICENSE`, and `CHANGELOG.md` (with accompanying SHA-256 checksums).
 
 ## Provenance and License
 - This repository and documentation were generated and are maintained with the help of ChatGPT.
