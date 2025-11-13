@@ -83,7 +83,7 @@ def check(req: Dict[str, Any]) -> List[Dict[str, Any]]:
 ## 5. 品質と運用のヒント
 - ルール ID は `カテゴリ.名前` の形式に統一し、README/ユーザーガイドで検索しやすくします。
 - 重い処理は極力 AST/CST をフィルタリングしてから行い、payload 全体を毎回コピーしないように注意してください。
-- プロジェクト固有ルールを追加する場合は `plugins/` の下にサブフォルダを作り、`sv-mint.toml` の `ruleset.scripts` で絶対/相対パスを指定できます。`docs/rule_reference.md` に登録するとユーザー側の混乱を防げます。
+- プロジェクト固有ルールを追加する場合は `plugins/` の下にサブフォルダを作り、`sv-mint.toml` の `ruleset.scripts` で絶対/相対パスを指定できます。仕様は `docs/plugins/<script_name>.md` へ追加し、利用者向けの情報を最新に保ってください。
 
 ## 6. 既知のサイズ/時間制約
 - リクエスト JSON が 16 MB を超えるとステージが強制停止（required stage はエラー）。大型 payload を扱うルールでは、不要フィールドの削除やレポートのサマリ化を検討してください。

@@ -71,7 +71,7 @@ CLI 出力は `location.file.unwrap_or(input_path)` を使用する。include �
 
 ## 8. 拡張指針
 - ステージ追加を検討する場合は `types::Stage` と `StagePayload`、Toml の `stages.enabled` すべてに変更を施す必要がある。
-- ルール作者に新規 payload を公開する際は、`docs/plugin_author.md` と `docs/rule_reference.md` を同時に更新して情報の一貫性を保つ。
+- ルール作者に新規 payload を公開する際は、`docs/plugin_author.md` と `docs/plugins/<script_name>.md` を同時に更新して情報の一貫性を保つ。
 - サイズガードのしきい値を可変にする際は TOML での検証ロジックと `SizePolicy` 生成処理をセットで変更する。
 
 ## 9. テスト戦略
