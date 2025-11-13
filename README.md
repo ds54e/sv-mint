@@ -24,6 +24,10 @@ sv-mint is a SystemVerilog lint pipeline that combines a Rust core with Python p
    - `[plugin]` selects the Python interpreter/arguments.
    - `[[rule]]` entries bind each `rule_id` to a script, stage, `enabled` flag, and optional severity override.
    - `[logging]` controls `level`, `format` (`text|json`), and event visibility.
+5. Narrow or relax checks directly from the CLI when experimenting:
+   - `sv-mint --only rule_x path/to/file.sv` は `rule_x` のみ実行し、他のルールを一時的に無効化します。
+   - `sv-mint --disable rule_a,rule_b path/to/file.sv` は列挙したルールだけを無効化します（複数指定や複数回の `--disable` も可）。
+   - `--only` 適用後に `--disable` を併用すると「実行対象にしたルール集合からさらに一部を OFF」という順序で評価され、存在しない `rule_id` を指定するとエラーになります。
 
 ## Anatomy of a Rule
 - Rules live under `plugins/` and expose a `check(req)` function.
