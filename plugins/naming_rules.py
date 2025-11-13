@@ -36,6 +36,7 @@ def check(req):
         out.extend(check_clock_reset(name, loc))
     out.extend(check_clock_reset_order(ports))
     out.extend(check_differential_pairs(ports))
+    out.extend(check_port_direction_suffixes(ports))
     out.extend(check_pipeline_suffixes(name_set))
     out.extend(check_parameter_naming(decls))
     return out
@@ -192,4 +193,31 @@ def check_parameter_naming(decls):
                 "location": decl.get("loc") or {"line": 1, "col": 1, "end_line": 1, "end_col": 1},
             })
     return issues
+
+
+def check_port_direction_suffixes(ports):
+    issues = []
+    suffixes = {
+        "input": ("_i", "_ni"),
+        "output": ("_o", "_no"),
+        "inout": ("_io", "_nio"),
+    }
+    for port in ports:
+        direction = (port.get("direction") or "").lower()
+        allowed = suffixes.get(direction)
+        if not allowed:
+            continue
+        name = port.get("name") or ""
+        if not name:
+            continue
+        loc = port.get("loc") or {"line": 1, "col": 1, "end_line": 1, "end_col": 1}
+        if any(name.endswith(sfx) for sfx in allowed):
+            continue
+        exp = " or ".join(allowed)
+        issues.append({
+            "rule_id": "naming.port_suffix",
+            "severity": "warning",
+            "message": f"{name} must end with {exp}",
+            "location": loc,
+        })
     return issues

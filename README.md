@@ -25,9 +25,9 @@ sv-mint is a SystemVerilog lint pipeline that combines a Rust core with Python p
    - `[[rule]]` entries bind each `rule_id` to a script, stage, `enabled` flag, and optional severity override.
    - `[logging]` controls `level`, `format` (`text|json`), and event visibility.
 5. Narrow or relax checks directly from the CLI when experimenting:
-   - `sv-mint --only rule_x path/to/file.sv` は `rule_x` のみ実行し、他のルールを一時的に無効化します。
-   - `sv-mint --disable rule_a,rule_b path/to/file.sv` は列挙したルールだけを無効化します（複数指定や複数回の `--disable` も可）。
-   - `--only` 適用後に `--disable` を併用すると「実行対象にしたルール集合からさらに一部を OFF」という順序で評価され、存在しない `rule_id` を指定するとエラーになります。
+   - `sv-mint --only rule_x path/to/file.sv` runs only `rule_x`, temporarily disabling every other rule.
+   - `sv-mint --disable rule_a,rule_b path/to/file.sv` disables just the listed rules; specify multiple IDs or repeat `--disable` as needed.
+   - When `--only` is present, any `--disable` that follows removes rules from that already-filtered set, and referencing a nonexistent `rule_id` raises an error.
 
 ## Anatomy of a Rule
 - Rules live under `plugins/` and expose a `check(req)` function.
@@ -40,13 +40,6 @@ sv-mint is a SystemVerilog lint pipeline that combines a Rust core with Python p
 - Use `logging.show_plugin_events = true` to measure per-rule latency.
 - Integration tests live in `tests/cli_smoke.rs` and rely on fixtures under `fixtures/`.
 - Structured logs (`logging.format = "json"`) expose `sv-mint::event`, `sv-mint::stage`, and `sv-mint::plugin.stderr` categories for observability platforms.
-
-## Comparison with svlint and Verible
-- **sv-mint**: Primary focus—multi-stage pipeline with deterministic diagnostics; Rule authoring—Python plugins loaded via `sv-mint.toml` with access to raw/CST/AST payloads; Extensibility—add custom scripts without recompiling and mix stages per rule; Notable strengths—tight size/time guards, reproducible ordering, Rust host guarantees.
-- **svlint**: Primary focus—lightweight textual linting (https://github.com/dalance/svlint); Rule authoring—TOML-configured regex/pattern checks compiled into the Rust binary; Extensibility—extend by contributing Rust code or running external commands; Notable strengths—simple setup that enforces static style rules.
-- **Verible**: Primary focus—comprehensive formatting/lint suite (https://chipsalliance.github.io/verible); Rule authoring—C++ rules integrated with the parser and configured via flags or waiver files; Extensibility—extend by modifying C++ passes (third-party plugins are uncommon); Notable strengths—mature parser, auto-formatter, and Bazel/IDE integrations.
-
-sv-mint complements these tools: use svlint for quick static checks, Verible for formatting and structural lint, and sv-mint when you need reproducible, Python-authored policies tied to specific pipeline stages.
 
 ## Future Ideas
 1. **Configurable size guards**: expose request/response thresholds via `sv-mint.toml`.

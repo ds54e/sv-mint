@@ -9,6 +9,7 @@
   | `naming.module_case` | warning | Modules must use lower_snake_case |
   | `naming.signal_case` | warning | Signals/variables must use lower_snake_case |
   | `naming.port_case` | warning | Ports follow lower_snake_case + direction suffix |
+  | `naming.port_suffix` | warning | `_i/_o/_io` suffixes must match port direction |
   | `naming.no_numeric_suffix` | warning | Ban trailing `_42` numeric suffixes |
   | `naming.suffix_order` | warning | Enforce `_ni/_no/_nio` suffix ordering |
   | `naming.clk_prefix` | warning | Clock names must start with `clk` |
@@ -24,6 +25,10 @@
 ### Lower-Snake Case (`naming.module_case`, `naming.signal_case`, `naming.port_case`)
 - **Trigger**: Reports declarations not matching `^[a-z0-9_]+$` with direction suffixes as needed.
 - **Fix**: Rename modules, signals, and ports to `lower_snake_case` (e.g., `dma_ctrl`, `req_i`).
+
+### Direction Suffixes (`naming.port_suffix`)
+- **Trigger**: Any `input`/`output`/`inout` port that does not end in `_i/_ni`, `_o/_no`, or `_io/_nio`.
+- **Fix**: Append the appropriate suffix so the signal direction remains obvious at call sites (`clk_i`, `ready_o`, `i2c_sda_io`). This mirrors the lowRISC DVCodingStyle guidance for module IO naming.
 
 ### Numeric and Suffix Rules (`naming.no_numeric_suffix`, `naming.suffix_order`)
 - **Trigger**: Detects names ending in `_\d+` or split suffixes like `_n_i`.

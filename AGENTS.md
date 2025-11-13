@@ -3,6 +3,7 @@
 ## Instructions for Agents
 - When users ask questions or request explanations, respond in Japanese.
 - Do not add new comments or modify existing ones when editing code.
+- Write any documentation updates in English.
 
 ## Project Layout
 `src/lib.rs` wires the Rust core, while `src/bin/sv-mint.rs` exposes the CLI. Pipeline logic lives under `src/core/` (types, size guards, line maps); diagnostics and logging under `src/diag/`; SystemVerilog artifacts under `src/sv/`. IO helpers (config parsing, output formatting) live in `src/io/`; Python plugins under `plugins/`; shared helpers under `plugins/lib/`. Defaults are in `sv-mint.toml`, and Rust formatting is configured via `rustfmt.toml`.
