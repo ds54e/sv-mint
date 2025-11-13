@@ -46,6 +46,19 @@ jobs:
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
 
+      - name: Ensure python3 alias (Windows)
+        if: matrix.os == 'windows-latest'
+        shell: pwsh
+        run: |
+          $python = (Get-Command python).Source
+          if (-not $python) {
+            throw "python not found on PATH"
+          }
+          $shim = "$env:RUNNER_TEMP\python-shim"
+          New-Item -ItemType Directory -Force -Path $shim | Out-Null
+          Copy-Item $python "$shim\python3.exe"
+          Add-Content -Path $env:GITHUB_PATH -Value $shim
+
       - name: Cache cargo builds
         uses: Swatinem/rust-cache@v2
 
