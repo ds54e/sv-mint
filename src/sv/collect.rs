@@ -9,6 +9,8 @@ use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 use sv_parser::{unwrap_node, Locate, NodeEvent, RefNode, SyntaxTree};
 
+type IdentifierLookup = Option<(String, Location, usize, Arc<SourceFile>)>;
+
 pub(crate) struct CollectResult {
     pub decls: Vec<Declaration>,
     pub refs: Vec<Reference>,
@@ -206,10 +208,7 @@ impl<'a> AstCollector<'a> {
         Ok(())
     }
 
-    fn lookup_identifier(
-        &mut self,
-        node: RefNode<'_>,
-    ) -> Result<Option<(String, Location, usize, Arc<SourceFile>)>, ParseError> {
+    fn lookup_identifier(&mut self, node: RefNode<'_>) -> Result<IdentifierLookup, ParseError> {
         let Some(idloc) = get_identifier(node) else {
             return Ok(None);
         };

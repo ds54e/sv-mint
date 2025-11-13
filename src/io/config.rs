@@ -35,30 +35,20 @@ impl Default for LoggingConfig {
     }
 }
 
-#[derive(Deserialize, Clone, Copy)]
+#[derive(Deserialize, Clone, Copy, Default)]
 #[serde(rename_all = "lowercase")]
 pub enum LogFormat {
+    #[default]
     Text,
     Json,
 }
 
-impl Default for LogFormat {
-    fn default() -> Self {
-        LogFormat::Text
-    }
-}
-
-#[derive(Deserialize, Clone, Copy)]
+#[derive(Deserialize, Clone, Copy, Default)]
 #[serde(rename_all = "lowercase")]
 pub enum TransportOnExceed {
+    #[default]
     Skip,
     Error,
-}
-
-impl Default for TransportOnExceed {
-    fn default() -> Self {
-        TransportOnExceed::Skip
-    }
 }
 
 fn default_warn_margin_bytes() -> usize {

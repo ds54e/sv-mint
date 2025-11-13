@@ -301,7 +301,7 @@ impl Drop for PythonHost {
     fn drop(&mut self) {
         let _ = self.send(&HostRequest::Shutdown);
         let child = &mut self.child;
-        let _ = self.runtime.block_on(async {
+        self.runtime.block_on(async {
             let _ = child.start_kill();
             let _ = child.wait().await;
         });

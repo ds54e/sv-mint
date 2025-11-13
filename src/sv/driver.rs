@@ -33,7 +33,7 @@ impl SvDriver {
 
         log_event(Ev::new(Event::ParsePreprocessStart, &path_s));
         let t0 = Instant::now();
-        let preprocess = self.inputs.preprocess(input_path, &raw_text);
+        let preprocess = self.inputs.preprocess(input_path, raw_text);
         let pp_text = preprocess.text.clone();
         let elapsed_pp = t0.elapsed().as_millis();
         log_event(Ev::new(Event::ParsePreprocessDone, &path_s).with_duration_ms(elapsed_pp));

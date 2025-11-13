@@ -49,7 +49,7 @@ pub fn collect_script_specs(cfg: &Config) -> Vec<ScriptSpec> {
         entry
             .stage_rules
             .entry(rule.stage.as_str().to_string())
-            .or_insert_with(Vec::new)
+            .or_default()
             .push(rule.id.clone());
     }
     order

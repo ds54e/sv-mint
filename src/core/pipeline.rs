@@ -286,10 +286,10 @@ fn build_stage_rule_map(cfg: &Config) -> HashMap<Stage, StageRuleSet> {
     let mut map: HashMap<Stage, StageRuleSet> = HashMap::new();
     const ALL_STAGES: [Stage; 4] = [Stage::RawText, Stage::PpText, Stage::Cst, Stage::Ast];
     for stage in ALL_STAGES {
-        map.entry(stage).or_insert_with(StageRuleSet::default);
+        map.entry(stage).or_default();
     }
     for rule in &cfg.rule {
-        let entry = map.entry(rule.stage).or_insert_with(StageRuleSet::default);
+        let entry = map.entry(rule.stage).or_default();
         if rule.enabled {
             entry.enabled.push(rule.id.clone());
         } else {
