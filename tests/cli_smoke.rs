@@ -245,6 +245,11 @@ fn detects_dv_macro_location() {
 }
 
 #[test]
+fn detects_module_macro_prefix() {
+    run_fixture("fixtures/module_macro_violation.sv", "macro.module_prefix");
+}
+
+#[test]
 fn detects_scoreboard_eot_requirements() {
     run_fixture("fixtures/scoreboard_violation.sv", "scoreboard.dv_eot_required");
 }

@@ -21,6 +21,7 @@
   | `macro.guard_required` | warning | Macros in global `_macros.svh` headers need `` `ifndef`` guards |
   | `macro.no_local_guard` | warning | Local macros must not use `` `ifndef`` guards |
   | `macro.dv_prefix_header_only` | warning | `DV_*` macros belong only in shared `_macros.svh` headers |
+  | `macro.module_prefix` | warning | Module-local macros must be prefixed with the module name |
   | `flow.wait_fork_isolation` | warning | `wait fork` must be replaced with isolation fork helpers |
   | `flow.wait_macro_required` | warning | Raw `wait (cond)` usage must be replaced with `` `DV_WAIT`` |
   | `flow.spinwait_macro_required` | warning | `while` polling loops must live inside `` `DV_SPINWAIT`` |
@@ -64,6 +65,9 @@ Conversely, local macros (defined directly inside `.sv` or package sources) must
 
 ### `macro.dv_prefix_header_only`
 The DVCodingStyle doc reserves the `DV_` prefix for shared helper macros. Any `` `define`` that starts with `DV_` must therefore reside in a `_macros.svh` header. This rule flags local files that introduce `DV_` macros so they can be moved.
+
+### `macro.module_prefix`
+Macros declared inside a `module ... endmodule` block must be namespaced with that module’s name (converted to uppercase). This prevents collisions when multiple modules are compiled together. The rule reports `` `define MY_MACRO`` inside `module foo` unless the macro name starts with `FOO_`.
 
 ### Wait/Fork Rules (`flow.*`)
 - `flow.wait_fork_isolation` rejects `wait fork`, nudging engineers toward the isolation-fork pattern (`DV_SPINWAIT`) recommended by the spec.

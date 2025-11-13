@@ -376,6 +376,11 @@ script = "plugins/dv_text_rules.py"
 stage = "raw_text"
 
 [[rule]]
+id = "macro.module_prefix"
+script = "plugins/dv_text_rules.py"
+stage = "raw_text"
+
+[[rule]]
 id = "flow.wait_fork_isolation"
 script = "plugins/dv_text_rules.py"
 stage = "raw_text"

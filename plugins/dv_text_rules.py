@@ -21,6 +21,7 @@ STD_RANDOMIZE_RE = re.compile(r"\bstd::randomize\s*\(", re.IGNORECASE)
 THIS_RANDOMIZE_RE = re.compile(r"\bthis\s*\.\s*randomize\s*\(", re.IGNORECASE)
 IF_COMPARE_RE = re.compile(r"\bif\s*\([^;]*?(==|!=|<=|>=|<|>)", re.IGNORECASE)
 UVM_REPORT_CALL_RE = re.compile(r"\buvm_(info|error|fatal)\s*\(", re.IGNORECASE)
+MODULE_RE = re.compile(r"\bmodule\s+([A-Za-z_]\w*)", re.IGNORECASE)
 SCOREBOARD_CLASS_RE = re.compile(r"class\s+([A-Za-z_]\w*scoreboard)\b", re.IGNORECASE)
 DV_EOT_RE = re.compile(r"DV_EOT_PRINT_", re.IGNORECASE)
 PROGRAM_RE = re.compile(r"\bprogram\b", re.IGNORECASE)
@@ -48,6 +49,7 @@ def check(req):
     out.extend(_check_program(text))
     out.extend(_check_fork_labels(text))
     out.extend(_check_comparison_macros(text))
+    out.extend(_check_module_macro_prefix(text))
     return out
 
 
@@ -386,3 +388,49 @@ def _check_comparison_macros(text):
             "location": _loc(text, start),
         })
     return out
+
+
+def _check_module_macro_prefix(text):
+    out = []
+    for start, end, name in _module_ranges(text):
+        upper = name.upper()
+        prefix = f"{upper}_"
+        block = text[start:end]
+        offset = start
+        for m in re.finditer(r"`define\s+([A-Za-z_]\w*)", block):
+            macro = m.group(1)
+            if macro.upper().startswith(prefix):
+                continue
+            loc = _loc(text, offset + m.start(1))
+            out.append({
+                "rule_id": "macro.module_prefix",
+                "severity": "warning",
+                "message": f"`define {macro} inside module {name} must be prefixed with {prefix}",
+                "location": loc,
+            })
+    return out
+
+
+def _module_ranges(text):
+    ranges = []
+    for match in MODULE_RE.finditer(text):
+        name = match.group(1)
+        start = match.end()
+        end = _find_matching_end(text, start)
+        if end is not None:
+            ranges.append((start, end, name))
+    return ranges
+
+
+def _find_matching_end(text, start):
+    depth = 1
+    idx = start
+    while idx < len(text):
+        if text.startswith("module", idx):
+            depth += 1
+        elif text.startswith("endmodule", idx):
+            depth -= 1
+            if depth == 0:
+                return idx
+        idx += 1
+    return None
