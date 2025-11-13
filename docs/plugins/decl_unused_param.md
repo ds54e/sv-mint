@@ -30,9 +30,11 @@ module fifo #(parameter int Depth = 16) (
 ```systemverilog
 module fifo #(parameter int Depth = 16,
               parameter bit EnableDbg = 0) (
-  input logic req_i
+  input  logic [$clog2(Depth)-1:0] addr_i
 );
-// EnableDbg is never referenced
+
+logic [Depth-1:0] mem_q;
+// ... implementation never looks at EnableDbg
 ```
 
 - **Additional Tips**: `localparam` emitted by macros under conditionals often end up unused; keep the declaration inside the `ifdef` or tag it with attributes like `(* keep = "true" *)`. If the symbol still needs to exist, disable the rule temporarily via its `[[rule]]` entry or rename the symbol to an obvious `_unused` placeholder.
