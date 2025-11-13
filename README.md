@@ -26,7 +26,7 @@ Highlights:
 
 | Reader | Focus | Document |
 | --- | --- | --- |
-| First-time users | CLI usage, `sv-mint.toml`, FAQ | [docs/user_guide.md](docs/user_guide.md) |
+| First-time users | CLI usage, `sv-mint.toml`, FAQ | [This README](#3-quick-start) |
 | Anyone researching rule specs | Stage, severity, remediation, and detection logic per `rule_id` | [docs/plugins/](docs/plugins) |
 | Plugin developers | Payload schema, violation format, debugging tips | [docs/plugin_author.md](docs/plugin_author.md) |
 | Rust core contributors | Core structure, data contracts, error taxonomy | [docs/internal_spec.md](docs/internal_spec.md) |
@@ -68,7 +68,7 @@ If `--config` is omitted, the CLI loads `sv-mint.toml` from the working director
 See [docs/plugin_author.md](docs/plugin_author.md) and [docs/internal_spec.md](docs/internal_spec.md) for payload and host details.
 
 ## 5. Development Resources
-- `docs/user_guide.md#3-sv-minttoml-configuration`: template and option breakdown for `sv-mint.toml`.
+- CLI usage references: see inline examples in this README and config comments inside `sv-mint.toml`.
 - Files like `docs/plugins/lang_construct_rules.md`: deep dives into each `rule_id` reported by the CLI.
 - `fixtures/`: SystemVerilog samples for regression tests or rule experimentation.
 - `tests/cli_smoke.rs`: end-to-end coverage for representative rules.
