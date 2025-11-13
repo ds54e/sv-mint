@@ -80,6 +80,16 @@ fn detects_parameter_violations() {
 }
 
 #[test]
+fn detects_port_suffix_violations() {
+    run_fixture("fixtures/port_suffix_violation.sv", "naming.port_suffix");
+}
+
+#[test]
+fn detects_enum_prefix_violations() {
+    run_fixture("fixtures/typedef_violation.sv", "typedef.enum_value_prefix");
+}
+
+#[test]
 fn detects_language_violations() {
     run_fixture("fixtures/lang_violations.sv", "lang.prefer_always_comb");
 }
@@ -153,6 +163,51 @@ fn detects_indent_violations() {
 #[test]
 fn detects_always_ff_violations() {
     run_fixture("fixtures/always_ff_violation.sv", "lang.always_ff_reset");
+}
+
+#[test]
+fn detects_function_scope_violations() {
+    run_fixture("fixtures/function_scope_violation.sv", "style.function_scope");
+}
+
+#[test]
+fn detects_randomize_macros() {
+    run_fixture("fixtures/randomize_violation.sv", "rand.dv_macro_required");
+}
+
+#[test]
+fn detects_logging_violations() {
+    run_fixture_with_fragments(
+        "fixtures/logging_violation.sv",
+        &[
+            "log.uvm_arg_macro",
+            "log.no_uvm_warning",
+            "log.no_uvm_report_api",
+            "log.no_display",
+            "log.no_none_full",
+        ],
+    );
+}
+
+#[test]
+fn detects_dpi_prefix_violations() {
+    run_fixture_with_fragments(
+        "fixtures/dpi_violation.sv",
+        &["dpi.import_prefix", "dpi.export_prefix"],
+    );
+}
+
+#[test]
+fn detects_macro_undef_violations() {
+    run_fixture("fixtures/macro_violation.sv", "macro.missing_undef");
+}
+
+#[test]
+fn detects_wait_violations() {
+    run_fixture_with_fragments(
+        "fixtures/wait_violation.sv",
+        &["flow.wait_macro_required", "flow.wait_fork_isolation"],
+    );
 }
 
 #[test]

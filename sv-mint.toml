@@ -111,6 +111,11 @@ script = "plugins/naming_rules.py"
 stage = "ast"
 
 [[rule]]
+id = "naming.port_suffix"
+script = "plugins/naming_rules.py"
+stage = "ast"
+
+[[rule]]
 id = "naming.no_numeric_suffix"
 script = "plugins/naming_rules.py"
 stage = "ast"
@@ -241,6 +246,21 @@ script = "plugins/typedef_naming_rules.py"
 stage = "raw_text"
 
 [[rule]]
+id = "typedef.enum_lower_snake"
+script = "plugins/typedef_naming_rules.py"
+stage = "raw_text"
+
+[[rule]]
+id = "typedef.enum_value_case"
+script = "plugins/typedef_naming_rules.py"
+stage = "raw_text"
+
+[[rule]]
+id = "typedef.enum_value_prefix"
+script = "plugins/typedef_naming_rules.py"
+stage = "raw_text"
+
+[[rule]]
 id = "typedef.type_suffix"
 script = "plugins/typedef_naming_rules.py"
 stage = "raw_text"
@@ -278,6 +298,66 @@ stage = "cst"
 [[rule]]
 id = "template.raw_text_marker"
 script = "plugins/template_raw_text_rule.py"
+stage = "raw_text"
+
+[[rule]]
+id = "style.function_scope"
+script = "plugins/dv_text_rules.py"
+stage = "raw_text"
+
+[[rule]]
+id = "rand.dv_macro_required"
+script = "plugins/dv_text_rules.py"
+stage = "raw_text"
+
+[[rule]]
+id = "log.uvm_arg_macro"
+script = "plugins/dv_text_rules.py"
+stage = "raw_text"
+
+[[rule]]
+id = "log.no_uvm_warning"
+script = "plugins/dv_text_rules.py"
+stage = "raw_text"
+
+[[rule]]
+id = "log.no_uvm_report_api"
+script = "plugins/dv_text_rules.py"
+stage = "raw_text"
+
+[[rule]]
+id = "log.no_display"
+script = "plugins/dv_text_rules.py"
+stage = "raw_text"
+
+[[rule]]
+id = "log.no_none_full"
+script = "plugins/dv_text_rules.py"
+stage = "raw_text"
+
+[[rule]]
+id = "dpi.import_prefix"
+script = "plugins/dv_text_rules.py"
+stage = "raw_text"
+
+[[rule]]
+id = "dpi.export_prefix"
+script = "plugins/dv_text_rules.py"
+stage = "raw_text"
+
+[[rule]]
+id = "macro.missing_undef"
+script = "plugins/dv_text_rules.py"
+stage = "raw_text"
+
+[[rule]]
+id = "flow.wait_fork_isolation"
+script = "plugins/dv_text_rules.py"
+stage = "raw_text"
+
+[[rule]]
+id = "flow.wait_macro_required"
+script = "plugins/dv_text_rules.py"
 stage = "raw_text"
 
 [logging]
