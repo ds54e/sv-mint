@@ -260,6 +260,21 @@ fn detects_comparison_checks() {
 }
 
 #[test]
+fn detects_missing_default_nettype() {
+    run_fixture("fixtures/default_nettype_missing.sv", "lang.default_nettype_missing");
+}
+
+#[test]
+fn detects_default_nettype_value() {
+    run_fixture("fixtures/default_nettype_wire.sv", "lang.default_nettype_none");
+}
+
+#[test]
+fn detects_default_nettype_placement() {
+    run_fixture("fixtures/default_nettype_late.sv", "lang.default_nettype_placement");
+}
+
+#[test]
 fn detects_fork_label_usage() {
     run_fixture_with_fragments(
         "fixtures/fork_label_violation.sv",
