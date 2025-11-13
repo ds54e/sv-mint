@@ -49,6 +49,18 @@ Locations are 1-based; `end_*` can be inclusive or exclusive because sv-mint pri
 ### 2.3 Exceptions
 Unhandled exceptions bubble up as `{ "type": "error" }` responses and fail the entire stage. Prefer returning a violation such as `sys.rule.internal` or shield risky sections with `try/except`.
 
+### 2.4 Stage Payload Reference
+Each stage has a predictable JSON layout. Prefer `.get()` accessors so your rule keeps working when upstream fields evolve.
+
+| Stage | Key Fields | Notes |
+| --- | --- | --- |
+| `raw_text` | `text`, `bytes_len`, `line_ending` | `text` is LF-normalized, but `bytes_len` lets you reference the original file size for metrics. |
+| `pp_text` | `text`, `defines[]`, `include_stack[]` | Reflects the preprocessor output; macro bodies and conditional paths are fully expanded. |
+| `cst` | `mode`, `cst_ir.tokens`, `cst_ir.nodes`, `tok_kind_table`, `line_starts` | `mode: "none"` appears when parsing stops early; handle this by skipping the rule gracefully. |
+| `ast` | `decls`, `refs`, `symbols`, `assigns`, `ports`, `pp_text`, `defines` | Collections include `loc` objects with `file` info so you can report includes accurately. |
+
+`sv-mint` ships a developer-only flag `--dump-payload <stage>` (guarded behind `cfg(debug_assertions)`). When unavailable, add temporary logging inside `plugins/lib/rule_host.py` to inspect incoming payloads.
+
 ## 3. Skeleton Example
 ```python
 from typing import Any, Dict, List
@@ -75,18 +87,59 @@ def check(req: Dict[str, Any]) -> List[Dict[str, Any]]:
 ```
 `plugins/template_raw_text_rule.py` is another minimal template.
 
+### 3.1 Location Helper
+When synthesizing locations, mirror sv-mint’s format to keep `git diff` noise low:
+
+```python
+def make_loc(line, col, end_line=None, end_col=None, file=None):
+    return {
+        "line": line,
+        "col": col,
+        "end_line": end_line or line,
+        "end_col": end_col or col + 1,
+        "file": file,
+    }
+```
+
+Prefer the parser-provided `loc` objects whenever available to avoid off-by-one errors with multibyte characters.
+
 ## 4. Debugging Tips
 - Run `sv-mint --config ... path` with `logging.show_plugin_events = true` to see `PluginInvoke` / `PluginDone` entries and stage timings.
 - Optional unit tests can call `check` directly via `pytest`, feeding JSON fixtures.
 - Temporary prints should go to stderr; bump `logging.stderr_snippet_bytes` so the CLI captures them.
+
+### 4.1 Local Reproduction Checklist
+1. Add your script to `[ruleset.scripts]` in `sv-mint.toml`.
+2. Create a failing SystemVerilog sample under `fixtures/`.
+3. Run `cargo run -- --config sv-mint.toml fixtures/sample.sv`.
+4. Set `logging.show_plugin_events = true` to inspect per-rule timings.
+5. Review `target/tmp/<ts>/plugin-stderr.log` if the rule crashes.
+6. Capture reference output (and plug it into `tests/cli_smoke.rs` if the rule is part of the default bundle).
 
 ## 5. Quality and Operations
 - Use `category.name` style rule IDs so users can search the README or user guide easily.
 - Filter the AST/CST before heavy processing and avoid copying entire payloads.
 - For custom project rules, create subdirectories under `plugins/` and reference absolute or relative paths from `ruleset.scripts`. Document every rule under `docs/plugins/<script_name>.md`.
 
+### 5.1 Configuration Hooks
+- `ruleset.scripts.<name>.path`: absolute or repo-relative path to the plugin.
+- `ruleset.scripts.<name>.stage`: `raw_text`, `pp_text`, `cst`, or `ast`. Defaults to `ast`.
+- `ruleset.scripts.<name>.enabled`: feature-flag a rule without removing it from the config.
+- `[ruleset.override]`: change severity per `rule_id`.
+- `[[ruleset.allowlist]]`: suppress findings by `rule_id`, globbed `path`, or regex.
+
+Document any non-default toggles inside the corresponding `docs/plugins/*.md` entry.
+
 ## 6. Known Size and Time Limits
 - Request JSON larger than 16 MB stops the stage (required stages error out). When handling large payloads, trim unused fields or summarize reports.
 - `timeout_ms_per_file` covers all stages for the file, so no single rule should monopolize the budget.
+
+## 7. Testing and Release Checklist
+- **Unit tests**: use `pytest` with recorded payload snippets.
+- **Golden diagnostics**: check fixtures into `fixtures/` and wire them into `tests/cli_smoke.rs`.
+- **Performance**: ensure the rule completes in <10 ms/file for typical inputs; paginate work for very large AST sets.
+- **Determinism**: sort AST collections before iterating so output remains stable across Python versions.
+- **User guidance**: craft actionable `message` strings (naming templates, fix hints, doc links).
+- **Telemetry**: include counters (e.g., number of offending symbols) in `message` to help triage.
 
 Consult [docs/internal_spec.md](internal_spec.md) for pipeline, size-guard, and event-system details.

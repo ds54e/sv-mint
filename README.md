@@ -1,113 +1,49 @@
 # sv-mint
 
-sv-mint is a Rust-based SystemVerilog lint pipeline. It streams the raw_text / pp_text / CST / AST payloads produced by `sv-parser` into Python plugins, while providing operational features such as parallel execution, size guards, and per-stage timeouts.
+sv-mint is a SystemVerilog lint pipeline that combines a Rust core with Python plugins. It focuses on reproducible diagnostics, predictable resource usage, and easy rule authoring.
 
-## Table of Contents
-- [1. Overview](#1-overview)
-- [2. Role-Based Quick Links](#2-role-based-quick-links)
-- [3. Quick Start](#3-quick-start)
-- [4. Processing Flow](#4-processing-flow)
-- [5. Development Resources](#5-development-resources)
-- [6. Logging and Size Guards](#6-logging-and-size-guards)
-- [7. Output and Operations Notes](#7-output-and-operations-notes)
-- [8. Provenance and License](#8-provenance-and-license)
+## Overview
+- **Multi-stage analysis**: raw text, preprocessed text, CST, and AST payloads flow through the pipeline so rules can attach at the right abstraction.
+- **Python rule host**: `plugins/lib/rule_host.py` runs once per worker thread and loads every script listed under `[ruleset.scripts]`.
+- **Deterministic diagnostics**: violations are sorted by file/line, emitted as `path:line:col: [severity] rule_id: message`, and mirrored to `tracing` events for log aggregation.
+- **Operational safety**: 12/16 MB size guards, per-file timeouts, stderr snippet limits, and request accounting keep runaway rules in check.
 
-## 1. Overview
-sv-mint lets design and verification teams enforce a unified SystemVerilog rule set.
+## Getting Started
+1. Install Rust stable, Python 3.x, and a recent sv-parser-compatible toolchain.
+2. Build the project:
+   ```bash
+   rustup default stable
+   cargo build --release
+   ```
+3. Run the CLI against your sources:
+   ```bash
+   target/release/sv-mint --config ./sv-mint.toml path/to/files/*.sv
+   ```
+4. Tailor rules by editing `sv-mint.toml`:
+   - `[defaults]` sets `timeout_ms_per_file` and stage toggles.
+   - `[plugin]` selects the Python interpreter/arguments.
+   - `[ruleset]` lists scripts, severity overrides, and allowlists.
+   - `[logging]` controls `level`, `format` (`text|json`), and event visibility.
 
-Highlights:
-- Multi-stage pipeline that dispatches raw_text / pp_text / CST / AST payloads to plugins
-- Resident Python host parallelizes the `ruleset.scripts` rules
-- 16 MB request/response size guards and per-stage timeouts
-- Structured and plain-text logs via `tracing`, plus stderr snippet capture
-- Identical behavior on Windows / macOS / Linux (UTF-8, CRLF/LF tolerant)
+## Anatomy of a Rule
+- Rules live under `plugins/` and expose a `check(req)` function.
+- `req.stage` decides which payload type (`raw_text`, `pp_text`, `cst`, `ast`) is available.
+- Return a list of `Violation` dictionaries with `rule_id`, `severity`, `message`, and `location`.
+- Document every bundled rule in `docs/plugins/<script>.md` so users know how to remediate findings.
+- For project-specific rules, add subdirectories inside `plugins/` and point `sv-mint.toml` at the new scripts.
 
-## 2. Role-Based Quick Links
+## Diagnostics and Tooling
+- Use `logging.show_plugin_events = true` to measure per-rule latency.
+- Integration tests live in `tests/cli_smoke.rs` and rely on fixtures under `fixtures/`.
+- Structured logs (`logging.format = "json"`) expose `sv-mint::event`, `sv-mint::stage`, and `sv-mint::plugin.stderr` categories for observability platforms.
 
-| Reader | Focus | Document |
-| --- | --- | --- |
-| First-time users | CLI usage, `sv-mint.toml`, FAQ | [This README](#3-quick-start) |
-| Anyone researching rule specs | Stage, severity, remediation, and detection logic per `rule_id` | [docs/plugins/](docs/plugins) |
-| Plugin developers | Payload schema, violation format, debugging tips | [docs/plugin_author.md](docs/plugin_author.md) |
-| Rust core contributors | Core structure, data contracts, error taxonomy | [docs/internal_spec.md](docs/internal_spec.md) |
+## Future Ideas
+1. **Configurable size guards**: expose request/response thresholds via `sv-mint.toml`.
+2. **JSON run reports**: emit machine-readable summaries for CI dashboards.
+3. **Alternative transports**: explore gRPC or IPC sockets instead of spawning Python hosts per worker.
+4. **Deeper semantic rules**: add bit-width analysis, dependency graphs, and state-machine coverage checks.
 
-## 3. Quick Start
-
-### 3.1 Requirements
-- OS: Windows 10+, Linux, or macOS
-- Rust: stable toolchain
-- Python: 3.x (`python3` must be available)
-- Encoding: UTF-8 (BOM allowed), either LF or CRLF endings
-
-### 3.2 Build
-```bash
-rustup default stable
-cargo build --release
-```
-The binary is written to `target/release/sv-mint` (or `.exe` on Windows).
-
-### 3.3 Run
-```bash
-sv-mint --config ./sv-mint.toml path/to/file.sv
-```
-If `--config` is omitted, the CLI loads `sv-mint.toml` from the working directory.
-
-### 3.4 Exit Codes
-| Code | Meaning |
-| ---- | ------- |
-| 0 | No diagnostics |
-| 2 | Violations detected (warnings or errors) |
-| 3 | Fatal issues such as invalid input, config, plugin crash, or timeout |
-
-## 4. Processing Flow
-1. Normalize the input to UTF-8 and run `sv-parser` preprocessing (`pp_text`) and parsing.
-2. Produce `StagePayload` objects for raw_text / pp_text / CST / AST and enforce JSON size limits.
-3. Send NDJSON requests to the resident host `plugins/lib/rule_host.py`, executing each `ruleset.scripts` entry via `check(req)`.
-4. Aggregate returned violations and emit them to the CLI output and `tracing` events simultaneously.
-
-See [docs/plugin_author.md](docs/plugin_author.md) and [docs/internal_spec.md](docs/internal_spec.md) for payload and host details.
-
-## 5. Development Resources
-- CLI usage references: see inline examples in this README and config comments inside `sv-mint.toml`.
-- Files like `docs/plugins/lang_construct_rules.md`: deep dives into each `rule_id` reported by the CLI.
-- `fixtures/`: SystemVerilog samples for regression tests or rule experimentation.
-- `tests/cli_smoke.rs`: end-to-end coverage for representative rules.
-- `plugins/`: bundled rules plus `rule_host.py` hot-reload helpers.
-
-Feedback is welcome via Issues or Pull Requests.
-
-## 6. Logging and Size Guards
-
-### 6.1 Logging
-- `logging.level` feeds into the `tracing` filter, emitting `sv-mint::event` (pipeline events), `sv-mint::stage` (stage results), and `sv-mint::logging` (config warnings).
-- `logging.format = "json"` enables structured logs; unsupported options trigger warning logs.
-- Flags like `show_stage_events` and `show_plugin_stderr` control debug verbosity.
-
-### 6.2 Supported Rule Examples
-- Text formatting such as line length, ASCII restriction, tab bans, and preprocessing hygiene
-- Naming: module/signal/port conventions (`clk/rst` ordering, diff pairs, pipeline `_q2`), `typedef` `_e/_t`, UpperCamelCase parameters
-- Behavioral guidance: prefer `always_comb`, enforce async resets in `always_ff`, forbid `always_latch` / `always @*`, require `case` `default`/`unique`, detect multiple non-blocking assignments
-- Governance checks: `` `define`` inside `package`, multiple `package` declarations, module instance `.*` / positional ports, SPDX headers, global `` `define`` policies
-
-### 6.3 Possible Future Work
-- Bit-width analysis (preventing boolean use of multi-bit signals, inferring widths)
-- Coverage for `unique/priority case`, handling `casez/casex`, tracing `X` propagation
-- Detecting `package` dependency cycles and advanced `parameter/localparam` validation
-- Stricter formatting such as aligned comments and detailed style rules
-
-## 7. Output and Operations Notes
-
-### 7.1 Preventing Bytecode
-- Pass `-B` to Python hosts (see default args).
-- Export `PYTHONDONTWRITEBYTECODE=1`.
-- `.gitignore` already lists `__pycache__/` and `*.pyc`.
-
-### 7.2 Diagnostic Format
-```
-<path>:<line>:<col>: [<severity>] <rule_id>: <message>
-```
-If any violation is reported, the CLI exits with status 2. To lint multiple files, pass a glob such as `cargo run -- fixtures/*.sv`.
-
-## 8. Provenance and License
-- This software and its documentation were produced with ChatGPT.
-- Dependencies are MIT or Apache-2.0 licensed; see Cargo.toml for details.
+## Provenance and License
+- This repository and documentation were generated and are maintained with the help of ChatGPT.
+- Rust dependencies follow MIT or Apache-2.0 licenses as declared in `Cargo.toml`.
+- sv-mint itself is distributed under the same terms as the repository license (see `LICENSE`).
