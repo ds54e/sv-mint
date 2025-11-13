@@ -1,9 +1,12 @@
-use crate::core::linemap::{LineMap, SpanBytes};
+use crate::core::errors::ParseError;
+use crate::core::linemap::SpanBytes;
 use crate::sv::model::{
     AssignOp, Assignment, DeclKind, Declaration, PortInfo, Reference, ReferenceKind, SymbolClass, SymbolUsage,
 };
+use crate::sv::source::{SourceCache, SourceFile};
 use crate::types::Location;
 use std::collections::{HashMap, HashSet};
+use std::sync::Arc;
 use sv_parser::{unwrap_node, Locate, NodeEvent, RefNode, SyntaxTree};
 
 pub(crate) struct CollectResult {
@@ -14,23 +17,24 @@ pub(crate) struct CollectResult {
 }
 
 pub(crate) trait SyntaxVisitor {
-    fn enter(&mut self, node: RefNode<'_>);
-    fn leave(&mut self, node: RefNode<'_>);
+    fn enter(&mut self, node: RefNode<'_>) -> Result<(), ParseError>;
+    fn leave(&mut self, node: RefNode<'_>) -> Result<(), ParseError>;
 }
 
-pub(crate) fn walk_syntax(tree: &SyntaxTree, visitor: &mut impl SyntaxVisitor) {
+pub(crate) fn walk_syntax(tree: &SyntaxTree, visitor: &mut impl SyntaxVisitor) -> Result<(), ParseError> {
     for event in tree.into_iter().event() {
         match event {
-            NodeEvent::Enter(node) => visitor.enter(node),
-            NodeEvent::Leave(node) => visitor.leave(node),
+            NodeEvent::Enter(node) => visitor.enter(node)?,
+            NodeEvent::Leave(node) => visitor.leave(node)?,
         }
     }
+    Ok(())
 }
 
-pub(crate) fn collect_all(syntax_tree: &SyntaxTree, line_map: &LineMap, raw_text: &str) -> CollectResult {
-    let mut collector = AstCollector::new(line_map, raw_text, syntax_tree);
-    walk_syntax(syntax_tree, &mut collector);
-    collector.finish()
+pub(crate) fn collect_all(syntax_tree: &SyntaxTree, sources: &mut SourceCache) -> Result<CollectResult, ParseError> {
+    let mut collector = AstCollector::new(sources, syntax_tree);
+    walk_syntax(syntax_tree, &mut collector)?;
+    Ok(collector.finish())
 }
 
 pub(crate) fn analyze_symbols(decls: &[Declaration], refs: &[Reference]) -> Vec<SymbolUsage> {
@@ -79,8 +83,7 @@ pub(crate) fn analyze_symbols(decls: &[Declaration], refs: &[Reference]) -> Vec<
 }
 
 struct AstCollector<'a> {
-    line_map: &'a LineMap,
-    raw_text: &'a str,
+    sources: &'a mut SourceCache,
     syntax_tree: &'a SyntaxTree,
     scopes: Vec<String>,
     decls: Vec<Declaration>,
@@ -93,10 +96,9 @@ struct AstCollector<'a> {
 }
 
 impl<'a> AstCollector<'a> {
-    fn new(line_map: &'a LineMap, raw_text: &'a str, syntax_tree: &'a SyntaxTree) -> Self {
+    fn new(sources: &'a mut SourceCache, syntax_tree: &'a SyntaxTree) -> Self {
         Self {
-            line_map,
-            raw_text,
+            sources,
             syntax_tree,
             scopes: Vec::new(),
             decls: Vec::new(),
@@ -118,21 +120,21 @@ impl<'a> AstCollector<'a> {
         }
     }
 
-    fn module_info(&self, node: RefNode<'_>) -> Option<(String, Location)> {
+    fn module_info(&mut self, node: RefNode<'_>) -> Result<Option<(String, Location)>, ParseError> {
         if let Some(id) = unwrap_node!(node, ModuleIdentifier) {
             if let Some(idloc) = get_identifier(id) {
                 if let Some(name) = self.syntax_tree.get_str(&idloc) {
-                    if let Some((loc, _)) = self.locate(&idloc) {
-                        return Some((name.to_string(), loc));
+                    if let Some((loc, _, _)) = self.locate(&idloc)? {
+                        return Ok(Some((name.to_string(), loc)));
                     }
                 }
             }
         }
-        None
+        Ok(None)
     }
 
-    fn record_decl(&mut self, node: RefNode<'_>, kind: DeclKind) {
-        if let Some((ident, loc, origin)) = self.lookup_identifier(node) {
+    fn record_decl(&mut self, node: RefNode<'_>, kind: DeclKind) -> Result<(), ParseError> {
+        if let Some((ident, loc, origin, _)) = self.lookup_identifier(node)? {
             let module = self.scopes.last().cloned();
             self.decls.push(Declaration {
                 kind,
@@ -142,10 +144,11 @@ impl<'a> AstCollector<'a> {
             });
             self.decl_offsets.insert(origin);
         }
+        Ok(())
     }
 
-    fn record_write(&mut self, node: RefNode<'_>) {
-        if let Some((ident, loc, origin)) = self.lookup_identifier(node) {
+    fn record_write(&mut self, node: RefNode<'_>) -> Result<(), ParseError> {
+        if let Some((ident, loc, origin, source)) = self.lookup_identifier(node)? {
             let module = self.scopes.last().cloned();
             self.refs.push(Reference {
                 name: ident.clone(),
@@ -154,8 +157,8 @@ impl<'a> AstCollector<'a> {
                 loc,
             });
             self.write_offsets.insert(origin);
-            if let Some((op, lhs, rhs, start, end)) = scan_assignment_at(self.raw_text, origin) {
-                let loc = self.span_location(start, end);
+            if let Some((op, lhs, rhs, start, end)) = scan_assignment_at(&source.text, origin) {
+                let loc = self.location_from_source(source.as_ref(), start, end);
                 self.assigns.push(Assignment {
                     module,
                     op,
@@ -165,12 +168,13 @@ impl<'a> AstCollector<'a> {
                 });
             }
         }
+        Ok(())
     }
 
-    fn record_read(&mut self, node: RefNode<'_>) {
-        if let Some((ident, loc, origin)) = self.lookup_identifier(node) {
+    fn record_read(&mut self, node: RefNode<'_>) -> Result<(), ParseError> {
+        if let Some((ident, loc, origin, _)) = self.lookup_identifier(node)? {
             if self.write_offsets.contains(&origin) || self.decl_offsets.contains(&origin) {
-                return;
+                return Ok(());
             }
             let module = self.scopes.last().cloned();
             self.refs.push(Reference {
@@ -180,6 +184,7 @@ impl<'a> AstCollector<'a> {
                 loc,
             });
         }
+        Ok(())
     }
 
     fn record_port(&mut self, name: String, loc: Location, direction: &str) {
@@ -192,82 +197,59 @@ impl<'a> AstCollector<'a> {
         });
     }
 
-    fn record_port_identifier(&mut self, node: RefNode<'_>) {
+    fn record_port_identifier(&mut self, node: RefNode<'_>) -> Result<(), ParseError> {
         if let Some(dir) = self.port_dir_stack.last().copied() {
-            if let Some((name, loc, _)) = self.lookup_identifier(node) {
+            if let Some((name, loc, _origin, _)) = self.lookup_identifier(node)? {
                 self.record_port(name, loc, dir);
             }
         }
+        Ok(())
     }
 
-    fn lookup_identifier(&self, node: RefNode<'_>) -> Option<(String, Location, usize)> {
-        let idloc = get_identifier(node)?;
-        let name = self.syntax_tree.get_str(&idloc)?.to_string();
-        let (loc, origin) = self.locate(&idloc)?;
-        Some((name, loc, origin))
+    fn lookup_identifier(
+        &mut self,
+        node: RefNode<'_>,
+    ) -> Result<Option<(String, Location, usize, Arc<SourceFile>)>, ParseError> {
+        let Some(idloc) = get_identifier(node) else {
+            return Ok(None);
+        };
+        let Some(name) = self.syntax_tree.get_str(&idloc) else {
+            return Ok(None);
+        };
+        let Some((loc, origin, source)) = self.locate(&idloc)? else {
+            return Ok(None);
+        };
+        Ok(Some((name.to_string(), loc, origin, source)))
     }
 
-    fn handle_ansi_port_net(&mut self, port: &sv_parser::AnsiPortDeclarationNet) {
-        if let Some((name, loc, _)) = self.lookup_identifier(RefNode::from(&port.nodes.1)) {
-            let direction = net_header_direction(port.nodes.0.as_ref());
-            self.record_port(name, loc, direction);
+    fn locate(&mut self, idloc: &Locate) -> Result<Option<(Location, usize, Arc<SourceFile>)>, ParseError> {
+        if let Some((path, start)) = self.syntax_tree.get_origin(idloc) {
+            let source = self.sources.get_or_load(path)?;
+            let end = start + idloc.len;
+            let loc = self.location_from_source(source.as_ref(), start, end);
+            return Ok(Some((loc, start, source)));
         }
+        Ok(None)
     }
 
-    fn handle_ansi_port_var(&mut self, port: &sv_parser::AnsiPortDeclarationVariable) {
-        if let Some((name, loc, _)) = self.lookup_identifier(RefNode::from(&port.nodes.1)) {
-            let direction = variable_header_direction(port.nodes.0.as_ref());
-            self.record_port(name, loc, direction);
-        }
-    }
-
-    fn handle_ansi_port_paren(&mut self, port: &sv_parser::AnsiPortDeclarationParen) {
-        if let Some((name, loc, _)) = self.lookup_identifier(RefNode::from(&port.nodes.2)) {
-            let direction = port
-                .nodes
-                .0
-                .as_ref()
-                .map(port_direction_to_str)
-                .unwrap_or("unspecified");
-            self.record_port(name, loc, direction);
-        }
-    }
-
-    fn locate(&self, idloc: &Locate) -> Option<(Location, usize)> {
-        if let Some((_path, start)) = self.syntax_tree.get_origin(idloc) {
-            if let Some(text) = self.syntax_tree.get_str(idloc) {
-                let end = start + text.len();
-                let span = SpanBytes::new(start, end);
-                let lines = self.line_map.to_lines(span);
-                let loc = Location {
-                    line: lines.line,
-                    col: lines.col,
-                    end_line: lines.end_line,
-                    end_col: lines.end_col,
-                };
-                return Some((loc, start));
-            }
-        }
-        None
-    }
-
-    fn span_location(&self, start: usize, end: usize) -> Location {
+    fn location_from_source(&self, source: &SourceFile, start: usize, end: usize) -> Location {
         let span = SpanBytes::new(start, end);
-        let lines = self.line_map.to_lines(span);
+        let lines = source.line_map.to_lines(span);
         Location {
             line: lines.line,
             col: lines.col,
             end_line: lines.end_line,
             end_col: lines.end_col,
+            file: Some(source.display.clone()),
         }
     }
 }
 
 impl<'a> SyntaxVisitor for AstCollector<'a> {
-    fn enter(&mut self, node: RefNode<'_>) {
+    fn enter(&mut self, node: RefNode<'_>) -> Result<(), ParseError> {
         match node {
             RefNode::ModuleDeclarationAnsi(x) => {
-                if let Some((name, loc)) = self.module_info(RefNode::ModuleDeclarationAnsi(x)) {
+                if let Some((name, loc)) = self.module_info(RefNode::ModuleDeclarationAnsi(x))? {
                     self.decls.push(Declaration {
                         kind: DeclKind::Module,
                         name: name.clone(),
@@ -278,7 +260,7 @@ impl<'a> SyntaxVisitor for AstCollector<'a> {
                 }
             }
             RefNode::ModuleDeclarationNonansi(x) => {
-                if let Some((name, loc)) = self.module_info(RefNode::ModuleDeclarationNonansi(x)) {
+                if let Some((name, loc)) = self.module_info(RefNode::ModuleDeclarationNonansi(x))? {
                     self.decls.push(Declaration {
                         kind: DeclKind::Module,
                         name: name.clone(),
@@ -289,13 +271,13 @@ impl<'a> SyntaxVisitor for AstCollector<'a> {
                 }
             }
             RefNode::ParamAssignment(x) => {
-                self.record_decl(RefNode::from(x), DeclKind::Param);
+                self.record_decl(RefNode::from(x), DeclKind::Param)?;
             }
             RefNode::NetDeclAssignment(x) => {
-                self.record_decl(RefNode::from(x), DeclKind::Net);
+                self.record_decl(RefNode::from(x), DeclKind::Net)?;
             }
             RefNode::VariableDeclAssignment(x) => {
-                self.record_decl(RefNode::from(x), DeclKind::Var);
+                self.record_decl(RefNode::from(x), DeclKind::Var)?;
             }
             RefNode::PortDeclarationInput(_) => self.port_dir_stack.push("input"),
             RefNode::PortDeclarationOutput(_) => self.port_dir_stack.push("output"),
@@ -303,34 +285,35 @@ impl<'a> SyntaxVisitor for AstCollector<'a> {
             RefNode::PortDeclarationRef(_) => self.port_dir_stack.push("ref"),
             RefNode::PortDeclarationInterface(_) => self.port_dir_stack.push("interface"),
             RefNode::AnsiPortDeclarationNet(x) => {
-                self.handle_ansi_port_net(x);
+                self.handle_ansi_port_net(x)?;
             }
             RefNode::AnsiPortDeclarationVariable(x) => {
-                self.handle_ansi_port_var(x);
+                self.handle_ansi_port_var(x)?;
             }
             RefNode::AnsiPortDeclarationParen(x) => {
-                self.handle_ansi_port_paren(x);
+                self.handle_ansi_port_paren(x)?;
             }
             RefNode::PortIdentifier(x) => {
-                self.record_port_identifier(RefNode::PortIdentifier(x));
+                self.record_port_identifier(RefNode::PortIdentifier(x))?;
             }
             RefNode::NetLvalue(x) => {
-                self.record_write(RefNode::from(x));
+                self.record_write(RefNode::from(x))?;
             }
             RefNode::VariableLvalue(x) => {
-                self.record_write(RefNode::from(x));
+                self.record_write(RefNode::from(x))?;
             }
             RefNode::HierarchicalIdentifier(x) => {
-                self.record_read(RefNode::from(x));
+                self.record_read(RefNode::from(x))?;
             }
             RefNode::SimpleIdentifier(x) => {
-                self.record_read(RefNode::from(x));
+                self.record_read(RefNode::from(x))?;
             }
             _ => {}
         }
+        Ok(())
     }
 
-    fn leave(&mut self, node: RefNode<'_>) {
+    fn leave(&mut self, node: RefNode<'_>) -> Result<(), ParseError> {
         match node {
             RefNode::ModuleDeclarationAnsi(_) | RefNode::ModuleDeclarationNonansi(_) => {
                 self.scopes.pop();
@@ -344,6 +327,38 @@ impl<'a> SyntaxVisitor for AstCollector<'a> {
             }
             _ => {}
         }
+        Ok(())
+    }
+}
+
+impl<'a> AstCollector<'a> {
+    fn handle_ansi_port_net(&mut self, port: &sv_parser::AnsiPortDeclarationNet) -> Result<(), ParseError> {
+        if let Some((name, loc, _origin, _)) = self.lookup_identifier(RefNode::from(&port.nodes.1))? {
+            let direction = net_header_direction(port.nodes.0.as_ref());
+            self.record_port(name, loc, direction);
+        }
+        Ok(())
+    }
+
+    fn handle_ansi_port_var(&mut self, port: &sv_parser::AnsiPortDeclarationVariable) -> Result<(), ParseError> {
+        if let Some((name, loc, _origin, _)) = self.lookup_identifier(RefNode::from(&port.nodes.1))? {
+            let direction = variable_header_direction(port.nodes.0.as_ref());
+            self.record_port(name, loc, direction);
+        }
+        Ok(())
+    }
+
+    fn handle_ansi_port_paren(&mut self, port: &sv_parser::AnsiPortDeclarationParen) -> Result<(), ParseError> {
+        if let Some((name, loc, _origin, _)) = self.lookup_identifier(RefNode::from(&port.nodes.2))? {
+            let direction = port
+                .nodes
+                .0
+                .as_ref()
+                .map(port_direction_to_str)
+                .unwrap_or("unspecified");
+            self.record_port(name, loc, direction);
+        }
+        Ok(())
     }
 }
 

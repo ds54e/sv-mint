@@ -24,6 +24,26 @@ fn run_temp_source(content: &str, expected: &[&str]) {
     path.close().expect("cleanup");
 }
 
+fn run_fixture_with_fragments(path: &str, expected: &[&str]) {
+    let mut cmd = Command::new(assert_cmd::cargo::cargo_bin!("sv-mint"));
+    cmd.arg(path);
+    let mut pred = contains(expected[0]).boxed();
+    for frag in &expected[1..] {
+        pred = pred.and(contains(*frag)).boxed();
+    }
+    cmd.assert().failure().stdout(pred);
+}
+
+fn run_with_config(path: &str, config: &str, expected: &[&str]) {
+    let mut cmd = Command::new(assert_cmd::cargo::cargo_bin!("sv-mint"));
+    cmd.arg("--config").arg(config).arg(path);
+    let mut pred = contains(expected[0]).boxed();
+    for frag in &expected[1..] {
+        pred = pred.and(contains(*frag)).boxed();
+    }
+    cmd.assert().failure().stdout(pred);
+}
+
 #[test]
 fn detects_line_length_violation() {
     run_fixture("fixtures/format_line_length_violation.sv", "format.line_length");
@@ -133,4 +153,21 @@ fn detects_indent_violations() {
 #[test]
 fn detects_always_ff_violations() {
     run_fixture("fixtures/always_ff_violation.sv", "lang.always_ff_reset");
+}
+
+#[test]
+fn reports_crlf_and_bom_locations() {
+    run_fixture_with_fragments(
+        "fixtures/bom_crlf_violation.sv",
+        &["bom_crlf_violation.sv:3:", "format.line_length"],
+    );
+}
+
+#[test]
+fn reports_include_file_path() {
+    run_with_config(
+        "fixtures/include_top.sv",
+        "tests/include_config.toml",
+        &["include_child.sv", "decl.unused.var"],
+    );
 }

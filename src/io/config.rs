@@ -119,23 +119,22 @@ pub fn load_from_path(opt: Option<PathBuf>) -> Result<(Config, PathBuf), ConfigE
     Ok((cfg, path))
 }
 
-pub fn read_input(path: &Path) -> Result<(String, PathBuf), ConfigError> {
-    let raw = fs::read(path).map_err(|_| ConfigError::NotFound {
+#[derive(Clone)]
+pub struct InputText {
+    pub raw: String,
+    pub normalized: String,
+}
+
+pub fn read_input(path: &Path) -> Result<(InputText, PathBuf), ConfigError> {
+    let bytes = fs::read(path).map_err(|_| ConfigError::NotFound {
         path: path.display().to_string(),
     })?;
-    if std::str::from_utf8(&raw).is_err() {
-        return Err(ConfigError::InvalidUtf8 {
-            path: path.display().to_string(),
-            source: None,
-        });
-    }
-    let text = normalize_lf(strip_bom(String::from_utf8(raw).map_err(|_| {
-        ConfigError::InvalidUtf8 {
-            path: path.display().to_string(),
-            source: None,
-        }
-    })?));
-    Ok((text, path.to_path_buf()))
+    let raw = String::from_utf8(bytes).map_err(|_| ConfigError::InvalidUtf8 {
+        path: path.display().to_string(),
+        source: None,
+    })?;
+    let normalized = normalize_lf(strip_bom(raw.clone()));
+    Ok((InputText { raw, normalized }, path.to_path_buf()))
 }
 
 pub fn validate_config(cfg: &Config) -> Result<(), ConfigError> {

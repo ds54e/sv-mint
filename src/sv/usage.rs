@@ -22,7 +22,13 @@ fn byte_to_line_col(text: &str, byte_idx: usize) -> (u32, u32) {
 fn make_loc(file: &str, text: &str, start: usize, end: usize) -> Location {
     let (line, col) = byte_to_line_col(text, start);
     let (end_line, end_col) = byte_to_line_col(text, end);
-    Location { file: file.to_string(), line, col, end_line, end_col }
+    Location {
+        line,
+        col,
+        end_line,
+        end_col,
+        file: Some(file.to_string()),
+    }
 }
 
 fn split_names(s: &str) -> Vec<String> {

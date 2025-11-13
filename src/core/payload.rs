@@ -18,7 +18,7 @@ pub enum StagePayload<'a> {
 
 pub fn payload_for<'a>(stage: &Stage, artifacts: &'a ParseArtifacts) -> StagePayload<'a> {
     match stage {
-        Stage::RawText => StagePayload::RawText(&artifacts.raw_text),
+        Stage::RawText => StagePayload::RawText(&artifacts.normalized_text),
         Stage::PpText => StagePayload::PpText {
             text: &artifacts.pp_text,
             defines: &artifacts.defines,

@@ -6,6 +6,8 @@ pub struct Location {
     pub col: u32,
     pub end_line: u32,
     pub end_col: u32,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub file: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]

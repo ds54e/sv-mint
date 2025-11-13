@@ -1,4 +1,3 @@
-use crate::core::linemap::LineMap;
 use crate::sv::cst_ir::CstIr;
 use crate::types::Location;
 use serde::{Deserialize, Serialize};
@@ -157,12 +156,11 @@ impl Default for AstSummary {
 #[derive(Clone, Debug, Serialize)]
 pub struct ParseArtifacts {
     pub raw_text: String,
+    pub normalized_text: String,
     pub pp_text: String,
     pub defines: Vec<DefineInfo>,
     pub has_cst: bool,
     pub ast: AstSummary,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub cst_ir: Option<CstIr>,
-    #[serde(skip_serializing)]
-    pub line_map: LineMap,
 }

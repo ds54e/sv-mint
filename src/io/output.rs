@@ -1,5 +1,6 @@
 use crate::errors::OutputError;
 use crate::types::{Severity, Violation};
+use std::borrow::Cow;
 use std::fs;
 use std::path::Path;
 
@@ -16,6 +17,7 @@ pub fn read_file_to_string(path: &Path) -> Result<String, OutputError> {
 }
 
 pub fn print_violations(violations: &[Violation], input_path: &Path) {
+    let fallback_path = input_path.display().to_string();
     for v in violations {
         let sev = match v.severity {
             Severity::Error => "error",
@@ -24,14 +26,12 @@ pub fn print_violations(violations: &[Violation], input_path: &Path) {
         };
         let line = v.location.line.max(1);
         let col = v.location.col.max(1);
-        println!(
-            "{}:{}:{}: [{}] {}: {}",
-            input_path.display(),
-            line,
-            col,
-            sev,
-            v.rule_id,
-            v.message
-        );
+        let path = v
+            .location
+            .file
+            .as_deref()
+            .map(Cow::from)
+            .unwrap_or_else(|| Cow::Borrowed(fallback_path.as_str()));
+        println!("{}:{}:{}: [{}] {}: {}", path, line, col, sev, v.rule_id, v.message);
     }
 }

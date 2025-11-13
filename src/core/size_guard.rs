@@ -47,6 +47,7 @@ pub fn synth_violation_stage_skipped_size(stage: &str, severity: Severity, actua
             col: 1,
             end_line: 1,
             end_col: 1,
+            file: None,
         },
     }
 }
@@ -67,6 +68,7 @@ pub fn enforce_request_size<T: Serialize>(stage: &str, req: &T, pol: &SizePolicy
                         col: 1,
                         end_line: 1,
                         end_col: 1,
+                        file: None,
                     },
                 }],
                 duration_ms: 0,
@@ -115,6 +117,7 @@ pub fn enforce_response_size(stage: &str, stdout: &[u8], pol: &SizePolicy) -> Re
                 col: 1,
                 end_line: 1,
                 end_col: 1,
+                file: None,
             },
         };
         return Err(StageOutcome {

@@ -1,5 +1,4 @@
 use crate::core::errors::ParseError;
-use crate::core::linemap::LineMap;
 use crate::diag::event::{Ev, Event};
 use crate::diag::logging::log_event;
 use crate::sv::collect::{analyze_symbols, collect_all};
@@ -7,6 +6,7 @@ use crate::sv::cst_ir::build_cst_ir;
 pub use crate::sv::model::SvParserCfg;
 use crate::sv::model::{AstSummary, DefineInfo, ParseArtifacts};
 use crate::sv::preprocess::ParserInputs;
+use crate::sv::source::SourceCache;
 use std::path::Path;
 use std::time::Instant;
 
@@ -21,10 +21,15 @@ impl SvDriver {
         }
     }
 
-    pub fn parse_text(&self, text: &str, input_path: &Path) -> Result<ParseArtifacts, ParseError> {
+    pub fn parse_text(
+        &self,
+        raw_text: &str,
+        normalized_text: &str,
+        input_path: &Path,
+    ) -> Result<ParseArtifacts, ParseError> {
         let path_s = input_path.to_string_lossy().into_owned();
-        let raw_text = text.to_owned();
-        let line_map = LineMap::new(&raw_text);
+        let raw_owned = raw_text.to_owned();
+        let mut sources = SourceCache::new(input_path, raw_owned.clone());
 
         log_event(Ev::new(Event::ParsePreprocessStart, &path_s));
         let t0 = Instant::now();
@@ -42,7 +47,7 @@ impl SvDriver {
         let tree = parse_out.syntax_tree.as_ref().ok_or_else(|| ParseError::ParseFailed {
             detail: format!("{}: parser produced no syntax tree", path_s),
         })?;
-        let collect = collect_all(tree, &line_map, &raw_text);
+        let collect = collect_all(tree, &mut sources)?;
         let has_cst = parse_out.has_cst;
         log_event(Ev::new(Event::ParseAstCollectDone, &path_s));
 
@@ -66,13 +71,13 @@ impl SvDriver {
         };
 
         Ok(ParseArtifacts {
-            raw_text,
+            raw_text: raw_owned,
+            normalized_text: normalized_text.to_owned(),
             pp_text,
             defines,
             has_cst,
             ast,
             cst_ir,
-            line_map,
         })
     }
 }

@@ -127,9 +127,9 @@ impl<'a> Pipeline<'a> {
     }
 
     fn run_file_with_host(&self, input: &Path, host: &mut PythonHost) -> Result<usize> {
-        let (normalized_text, input_path) = read_input(input)?;
+        let (input_text, input_path) = read_input(input)?;
         let driver = SvDriver::new(&self.cfg.svparser);
-        let artifacts = match driver.parse_text(&normalized_text, &input_path) {
+        let artifacts = match driver.parse_text(&input_text.raw, &input_text.normalized, &input_path) {
             Ok(a) => a,
             Err(e) => {
                 let violation = Violation {
@@ -141,6 +141,7 @@ impl<'a> Pipeline<'a> {
                         col: 1,
                         end_line: 1,
                         end_col: 1,
+                        file: Some(input_path.to_string_lossy().into_owned()),
                     },
                 };
                 print_violations(&[violation], &input_path);
