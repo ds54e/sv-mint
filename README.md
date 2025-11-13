@@ -4,7 +4,7 @@ sv-mint is a SystemVerilog lint pipeline that combines a Rust core with Python p
 
 ## Overview
 - **Multi-stage analysis**: raw text, preprocessed text, CST, and AST payloads flow through the pipeline so rules can attach at the right abstraction.
-- **Python rule host**: `plugins/lib/rule_host.py` runs once per worker thread and loads every script listed under `[ruleset.scripts]`.
+- **Python rule host**: `plugins/lib/rule_host.py` runs once per worker thread and loads every script referenced by `[[rule]]` entries.
 - **Deterministic diagnostics**: violations are sorted by file/line, emitted as `path:line:col: [severity] rule_id: message`, and mirrored to `tracing` events for log aggregation.
 - **Operational safety**: 12/16 MB size guards, per-file timeouts, stderr snippet limits, and request accounting keep runaway rules in check.
 
@@ -22,7 +22,7 @@ sv-mint is a SystemVerilog lint pipeline that combines a Rust core with Python p
 4. Tailor rules by editing `sv-mint.toml`:
    - `[defaults]` sets `timeout_ms_per_file` and stage toggles.
    - `[plugin]` selects the Python interpreter/arguments.
-   - `[ruleset]` lists scripts, severity overrides, and allowlists.
+   - `[[rule]]` entries bind each `rule_id` to a script, stage, `enabled` flag, and optional severity override.
    - `[logging]` controls `level`, `format` (`text|json`), and event visibility.
 
 ## Anatomy of a Rule

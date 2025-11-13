@@ -1,6 +1,5 @@
 import re
 
-WILDCARD_RE = re.compile(r"\.\*")
 POS_ARG_RE = re.compile(r"(?m)^\s*[A-Za-z_]\w*\s+[A-Za-z_]\w*\s*\((?!\s*\.)")
 
 
@@ -22,13 +21,6 @@ def check(req):
     payload = req.get("payload") or {}
     text = payload.get("text") or ""
     out = []
-    for match in WILDCARD_RE.finditer(text):
-        out.append({
-            "rule_id": "module.no_port_wildcard",
-            "severity": "warning",
-            "message": "avoid .* wildcard in module instantiations",
-            "location": locate(text, match.start()),
-        })
     for match in POS_ARG_RE.finditer(text):
         out.append({
             "rule_id": "module.named_ports_required",

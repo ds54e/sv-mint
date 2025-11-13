@@ -1,9 +1,9 @@
 use crate::errors::ConfigError;
 use crate::svparser::SvParserCfg;
+use crate::types::Stage;
 use crate::textutil::{normalize_lf, strip_bom};
 use serde::Deserialize;
-use serde_json::Value;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::fs;
 use std::path::{Path, PathBuf};
 use toml::Value as TomlValue;
@@ -58,9 +58,7 @@ pub struct Config {
     #[serde(default)]
     pub svparser: SvParserCfg,
     #[serde(default)]
-    pub rules: Value,
-    #[serde(default)]
-    pub ruleset: Ruleset,
+    pub rule: Vec<RuleConfig>,
 }
 
 #[derive(Deserialize)]
@@ -80,11 +78,19 @@ pub struct Stages {
     pub enabled: Vec<crate::types::Stage>,
 }
 
-#[derive(Deserialize, Clone, Default)]
-pub struct Ruleset {
-    pub scripts: Vec<String>,
-    #[serde(default, rename = "override")]
-    pub severity_override: std::collections::HashMap<String, String>,
+#[derive(Deserialize, Clone)]
+pub struct RuleConfig {
+    pub id: String,
+    pub script: String,
+    pub stage: Stage,
+    #[serde(default = "default_true")]
+    pub enabled: bool,
+    #[serde(default)]
+    pub severity: Option<String>,
+}
+
+fn default_true() -> bool {
+    true
 }
 
 pub fn resolve_path(opt: Option<PathBuf>) -> Result<PathBuf, ConfigError> {
@@ -154,6 +160,32 @@ pub fn validate_config(cfg: &Config) -> Result<(), ConfigError> {
         return Err(ConfigError::InvalidValue {
             detail: "stages.enabled empty".to_string(),
         });
+    }
+    if cfg.rule.is_empty() {
+        return Err(ConfigError::InvalidValue {
+            detail: "no [[rule]] entries configured".to_string(),
+        });
+    }
+    let mut seen = HashSet::new();
+    for entry in &cfg.rule {
+        if entry.id.trim().is_empty() {
+            return Err(ConfigError::InvalidValue {
+                detail: "rule id cannot be empty".to_string(),
+            });
+        }
+        if !seen.insert(entry.id.clone()) {
+            return Err(ConfigError::InvalidValue {
+                detail: format!("duplicate rule id {}", entry.id),
+            });
+        }
+        if !cfg.stages.enabled.contains(&entry.stage) {
+            return Err(ConfigError::InvalidValue {
+                detail: format!(
+                    "rule {} references disabled stage {:?}",
+                    entry.id, entry.stage
+                ),
+            });
+        }
     }
     Ok(())
 }

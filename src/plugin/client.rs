@@ -3,7 +3,7 @@ use crate::core::errors::PluginError;
 use crate::core::payload::StagePayload;
 use crate::diag::event::{Ev, Event};
 use crate::diag::logging::log_event;
-use crate::plugin_scripts::{resolve_script_path, resolve_scripts};
+use crate::plugin_scripts::{collect_script_specs, resolve_script_path, ScriptSpec};
 use crate::types::{Severity, Stage, Violation};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -28,18 +28,34 @@ pub struct PythonHost {
     timeout: Duration,
     snippet_limit: usize,
     severity_override: HashMap<String, Severity>,
+    rule_enabled: HashMap<String, bool>,
+}
+
+#[derive(Serialize)]
+struct ScriptInit<'a> {
+    path: &'a str,
+    stages: &'a [String],
+}
+
+#[derive(Serialize)]
+pub struct RuleDispatch<'a> {
+    #[serde(default)]
+    pub enabled: &'a [String],
+    #[serde(default)]
+    pub disabled: &'a [String],
 }
 
 #[derive(Serialize)]
 #[serde(tag = "kind", rename_all = "snake_case")]
 enum HostRequest<'a> {
     Init {
-        scripts: &'a [String],
+        scripts: &'a [ScriptInit<'a>],
     },
     RunStage {
         stage: &'a str,
         path: &'a Path,
         payload: Value,
+        rules: RuleDispatch<'a>,
     },
     Shutdown,
 }
@@ -54,12 +70,13 @@ enum HostResponse {
 
 impl PythonHost {
     pub fn start(cfg: &Config) -> Result<Self, PluginError> {
-        let scripts = resolve_scripts(cfg);
+        let script_specs = collect_script_specs(cfg);
         let host_path = resolve_script_path("plugins/lib/rule_host.py");
         let runtime = Runtime::new().map_err(|e| PluginError::SpawnFailed { detail: e.to_string() })?;
         let timeout = Duration::from_millis(cfg.defaults.timeout_ms_per_file);
         let snippet_limit = cfg.logging.stderr_snippet_bytes;
-        let severity_override = build_severity_override(&cfg.ruleset.severity_override);
+        let severity_override = build_severity_override(&cfg.rule);
+        let rule_enabled = build_rule_enabled(&cfg.rule);
         let (child, stdin, stdout, stderr) = runtime.block_on(async {
             let mut cmd = Command::new(&cfg.plugin.cmd);
             cmd.args(&cfg.plugin.args)
@@ -93,8 +110,9 @@ impl PythonHost {
             timeout,
             snippet_limit,
             severity_override,
+            rule_enabled,
         };
-        host.init(scripts)?;
+        host.init(&script_specs)?;
         Ok(host)
     }
 
@@ -103,6 +121,7 @@ impl PythonHost {
         stage: &Stage,
         input_path: &Path,
         payload: StagePayload<'_>,
+        rules: RuleDispatch<'_>,
     ) -> Result<Vec<Violation>, PluginError> {
         let path_s = input_path.to_string_lossy().into_owned();
         let stage_name = stage.as_str();
@@ -114,6 +133,7 @@ impl PythonHost {
             stage: stage_name,
             path: input_path,
             payload: payload_value,
+            rules,
         };
         self.send(&req)?;
         let resp = match self.recv() {
@@ -152,8 +172,17 @@ impl PythonHost {
         Ok(adjusted)
     }
 
-    fn init(&mut self, scripts: Vec<String>) -> Result<(), PluginError> {
-        let req = HostRequest::Init { scripts: &scripts };
+    fn init(&mut self, scripts: &[ScriptSpec]) -> Result<(), PluginError> {
+        let payload: Vec<_> = scripts
+            .iter()
+            .map(|spec| ScriptInit {
+                path: spec.path.as_str(),
+                stages: spec.stages.as_slice(),
+            })
+            .collect();
+        let req = HostRequest::Init {
+            scripts: &payload,
+        };
         self.send(&req)?;
         match self.recv()? {
             HostResponse::Ready => Ok(()),
@@ -201,13 +230,18 @@ impl PythonHost {
         })
     }
 
-    fn apply_overrides(&self, mut violations: Vec<Violation>) -> Vec<Violation> {
-        for v in &mut violations {
+    fn apply_overrides(&self, violations: Vec<Violation>) -> Vec<Violation> {
+        let mut out = Vec::with_capacity(violations.len());
+        for mut v in violations {
+            if matches!(self.rule_enabled.get(&v.rule_id), Some(false)) {
+                continue;
+            }
             if let Some(sev) = self.severity_override.get(&v.rule_id) {
                 v.severity = *sev;
             }
+            out.push(v);
         }
-        violations
+        out
     }
 
     fn log_stderr(&mut self, path: &str, stage: &str) {
@@ -298,12 +332,22 @@ async fn read_stderr(stderr: ChildStderr, dst: Arc<Mutex<Vec<u8>>>) {
     }
 }
 
-fn build_severity_override(raw: &HashMap<String, String>) -> HashMap<String, Severity> {
+fn build_severity_override(rules: &[crate::config::RuleConfig]) -> HashMap<String, Severity> {
     let mut map = HashMap::new();
-    for (k, v) in raw {
-        if let Some(sev) = parse_severity(v) {
-            map.insert(k.clone(), sev);
+    for rule in rules {
+        if let Some(sev_name) = &rule.severity {
+            if let Some(sev) = parse_severity(sev_name) {
+                map.insert(rule.id.clone(), sev);
+            }
         }
+    }
+    map
+}
+
+fn build_rule_enabled(rules: &[crate::config::RuleConfig]) -> HashMap<String, bool> {
+    let mut map = HashMap::new();
+    for rule in rules {
+        map.insert(rule.id.clone(), rule.enabled);
     }
     map
 }

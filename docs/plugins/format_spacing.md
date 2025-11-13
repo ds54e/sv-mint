@@ -18,7 +18,7 @@
 - **Trigger**: Regex `,(?!\s)` finds commas not followed by whitespace.
 - **Message**: `` missing space after comma ``
 - **Remediation**: Separate arguments and concatenations with `, ` for readability.
-- **Notes**: Applies to macro arguments as well. Add patterns to the allowlist if needed for packed literals.
+- **Notes**: Applies to macro arguments as well. If packed literals require different spacing, adjust the script locally or disable the rule via its `[[rule]]` entry.
 
 ### `format.call_spacing`
 - **Trigger**: Detects `foo (` in call sites (declarations like `function foo (` are ignored).

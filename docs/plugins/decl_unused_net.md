@@ -32,4 +32,4 @@ logic ack_o;
 logic debug_tap;  // no references
 ```
 
-- **Additional Tips**: Comments like `/* unused */` do not suppress the warning. Either add patterns to `[[ruleset.allowlist]]` or have generators emit names such as `unused_net_*` so you can ignore them later.
+- **Additional Tips**: Comments like `/* unused */` do not suppress the warning. Either have generators emit names such as `unused_net_*` or disable the rule temporarily via its `[[rule]]` entry while migrating.

@@ -4,11 +4,12 @@ use crate::core::size_guard::{enforce_request_size, OnExceed, SizePolicy, StageO
 use crate::diag::event::{Ev, Event};
 use crate::diag::logging::log_event;
 use crate::output::print_violations;
-use crate::plugin::client::PythonHost;
+use crate::plugin::client::{PythonHost, RuleDispatch};
 use crate::svparser::SvDriver;
 use crate::types::{Location, Severity, Stage, Violation};
 use anyhow::Result;
 use serde::Serialize;
+use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::time::Instant;
@@ -149,15 +150,22 @@ impl<'a> Pipeline<'a> {
             }
         };
         let mut all: Vec<Violation> = Vec::new();
+        let stage_rule_map = build_stage_rule_map(self.cfg);
 
         for stage in &self.cfg.stages.enabled {
             log_event(Ev::new(Event::StageStart, &input_path.to_string_lossy()).with_stage(stage.as_str()));
             let payload = payload_for(stage, &artifacts);
+            let rules_for_stage = stage_rule_map.get(stage).expect("stage rule map missing entry");
+            let request_rules = RuleDispatch {
+                enabled: &rules_for_stage.enabled,
+                disabled: &rules_for_stage.disabled,
+            };
             let invocation = StageRequest {
                 kind: "run_stage",
                 stage: stage.as_str(),
                 path: &input_path,
                 payload: &payload,
+                rules: request_rules,
             };
             let policy = self.size_policy(stage);
             if let Err(outcome) = enforce_request_size(stage.as_str(), &invocation, &policy) {
@@ -171,8 +179,12 @@ impl<'a> Pipeline<'a> {
                 continue;
             }
             let t0 = Instant::now();
+            let run_rules = RuleDispatch {
+                enabled: &rules_for_stage.enabled,
+                disabled: &rules_for_stage.disabled,
+            };
             let vs = host
-                .run_stage(stage, &input_path, payload)
+                .run_stage(stage, &input_path, payload, run_rules)
                 .map_err(anyhow::Error::new)?;
             let outcome = StageOutcome {
                 stage: stage.as_str().to_string(),
@@ -235,4 +247,28 @@ struct StageRequest<'a> {
     path: &'a Path,
     #[serde(borrow)]
     payload: &'a StagePayload<'a>,
+    rules: RuleDispatch<'a>,
+}
+
+#[derive(Default)]
+struct StageRuleSet {
+    enabled: Vec<String>,
+    disabled: Vec<String>,
+}
+
+fn build_stage_rule_map(cfg: &Config) -> HashMap<Stage, StageRuleSet> {
+    let mut map: HashMap<Stage, StageRuleSet> = HashMap::new();
+    const ALL_STAGES: [Stage; 4] = [Stage::RawText, Stage::PpText, Stage::Cst, Stage::Ast];
+    for stage in ALL_STAGES {
+        map.entry(stage).or_insert_with(StageRuleSet::default);
+    }
+    for rule in &cfg.rule {
+        let entry = map.entry(rule.stage).or_insert_with(StageRuleSet::default);
+        if rule.enabled {
+            entry.enabled.push(rule.id.clone());
+        } else {
+            entry.disabled.push(rule.id.clone());
+        }
+    }
+    map
 }

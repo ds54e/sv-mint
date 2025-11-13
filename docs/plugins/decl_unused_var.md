@@ -36,4 +36,4 @@ logic data_d;
 logic debug_shadow;  // never read or written
 ```
 
-- **Additional Tips**: Naming placeholders `*_unused` allows suppression via `allowlist.regex = ".*_unused$"`. To collect spare signals, declare a vector such as `logic [3:0] spare_signals = '0;` and tap bits explicitly when needed.
+- **Additional Tips**: Naming placeholders `*_unused` kept at zero makes intent obvious and avoids repeated config churn. To collect spare signals, declare a vector such as `logic [3:0] spare_signals = '0;` and tap bits explicitly when needed.

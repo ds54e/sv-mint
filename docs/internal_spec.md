@@ -101,7 +101,7 @@ Severity semantics:
 - The CLI accepts `--config <path>` (default `./sv-mint.toml`). Values cascade across:
   - `[defaults]`: timeouts, response limits, stage selection.
   - `[plugin]`: interpreter, args, environment overrides.
-  - `[ruleset]`: script list, severity overrides, allowlist entries.
+  - `[[rule]]`: per-rule metadata (id, script path, stage, `enabled`, `severity`, future allowlists).
   - `[logging]`: `level`, `format`, `show_*_events`, `stderr_snippet_bytes`.
 - Relative paths inside the config are resolved against the config directory.
 - Invalid keys surface via `LoggingConfig.extra` warnings so we fail fast when typos occur.

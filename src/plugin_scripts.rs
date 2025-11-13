@@ -1,5 +1,6 @@
 use crate::config::Config;
 use std::path::Path;
+use std::collections::{HashMap, BTreeSet};
 
 pub fn resolve_script_path(s: &str) -> String {
     let p = Path::new(s);
@@ -23,6 +24,32 @@ pub fn resolve_script_path(s: &str) -> String {
     s.to_string()
 }
 
-pub fn resolve_scripts(cfg: &Config) -> Vec<String> {
-    cfg.ruleset.scripts.iter().map(|s| resolve_script_path(s)).collect()
+pub struct ScriptSpec {
+    pub path: String,
+    pub stages: Vec<String>,
+}
+
+pub fn collect_script_specs(cfg: &Config) -> Vec<ScriptSpec> {
+    let mut order: Vec<String> = Vec::new();
+    let mut stages: HashMap<String, BTreeSet<String>> = HashMap::new();
+    for rule in &cfg.rule {
+        let path = resolve_script_path(&rule.script);
+        if !stages.contains_key(&path) {
+            order.push(path.clone());
+        }
+        stages
+            .entry(path)
+            .or_insert_with(BTreeSet::new)
+            .insert(rule.stage.as_str().to_string());
+    }
+    order
+        .into_iter()
+        .map(|path| {
+            let stage_set = stages.remove(&path).unwrap_or_default();
+            ScriptSpec {
+                path,
+                stages: stage_set.into_iter().collect(),
+            }
+        })
+        .collect()
 }

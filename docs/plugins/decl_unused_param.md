@@ -14,7 +14,7 @@
 - **Trigger**: Filters `symbols` for `class == param` and flags entries with `ref_count` (or `read_count`) equal to zero.
 - **Message**: `` unused param <module>.<name> ``
 - **Remediation**: Remove unused parameters or ensure top-level configuration knobs are actually referenced inside the module.
-- **Notes**: Auto-generated code that allows dummy parameters can downgrade severity via `ruleset.override`.
+- **Notes**: Auto-generated code that allows dummy parameters can downgrade severity by setting `severity = "info"` (or a lower level) in the matching `[[rule]]` entry.
 - **LowRISC Reference**: Parameters should document module configurability; unused ones must be deleted.
 - **Good**:
 
@@ -35,4 +35,4 @@ module fifo #(parameter int Depth = 16,
 // EnableDbg is never referenced
 ```
 
-- **Additional Tips**: `localparam` emitted by macros under conditionals often end up unused; keep the declaration inside the `ifdef` or tag it with attributes like `(* keep = "true" *)`. If the symbol still needs to exist, add a pattern such as `EnableDbg` to `ruleset.allowlist`.
+- **Additional Tips**: `localparam` emitted by macros under conditionals often end up unused; keep the declaration inside the `ifdef` or tag it with attributes like `(* keep = "true" *)`. If the symbol still needs to exist, disable the rule temporarily via its `[[rule]]` entry or rename the symbol to an obvious `_unused` placeholder.

@@ -37,7 +37,7 @@ assign data_o = `_FOO(data_i);
 ### `global.prefer_parameters`
 - **Trigger**: Reports any `` `define`` that does not start with `_`, discouraging project-wide macro switches.
 - **Message**: `` use parameters instead of global macro `FOO``
-- **Remediation**: Replace macros with module parameters or `localparam`. Adjust severity via `ruleset.override` if policy allows.
+- **Remediation**: Replace macros with module parameters or `localparam`. Lower the noise floor by setting `severity = "info"` in the corresponding `[[rule]]` entry when policy allows.
 - **LowRISC Reference**: The guide favors parameters for configurability and limits global macros to a tiny curated set.
 - **Good**:
 
@@ -56,4 +56,4 @@ module foo (...);
 endmodule
 ```
 
-- **Additional Tips**: When legacy IP needs macros, permit only certain prefixes via `ruleset.allowlist` (e.g., `^OPENTITAN_`).
+- **Additional Tips**: When legacy IP needs macros, either refactor emitters to use `_FOO`-style locals or temporarily disable the rule via its `[[rule]]` entry during migration.

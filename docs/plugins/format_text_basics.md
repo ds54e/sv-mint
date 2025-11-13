@@ -51,7 +51,7 @@ logic ready;
 
 - Tabs at the start of the line shift alignment between tools.
 
-- **Notes**: Pair this with `.editorconfig` `indent_style = space`. Add test fixtures requiring tabs to an allowlist instead of disabling the rule globally.
+- **Notes**: Pair this with `.editorconfig` `indent_style = space`. If you absolutely must allow tabs (e.g., when linting legacy IP), disable the rule via its `[[rule]]` entry and re-enable it once the migration is complete.
 
 ### `format.no_trailing_whitespace`
 - **Trigger**: Reverse scans each line and flags trailing spaces or tabs.

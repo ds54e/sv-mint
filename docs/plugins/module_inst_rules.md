@@ -6,16 +6,9 @@
 - **Rules**:
   | Rule ID | Severity | Summary |
   | --- | --- | --- |
-  | `module.no_port_wildcard` | warning | Ban `.*` wildcard port connections |
   | `module.named_ports_required` | warning | Require named `.port(signal)` connections |
 
 ## Rule Details
-
-### `module.no_port_wildcard`
-- **Trigger**: Regex `\\.\*` catches wildcard port hookups exactly as implemented in `plugins/module_inst_rules.py`.
-- **Message**: `` avoid .* wildcard in module instantiations ``
-- **Remediation**: Expand to explicit named ports to prevent silent autowiring.
-- **LowRISC Reference**: Wildcards are prohibited; list every port.
 
 ### `module.named_ports_required`
 - **Trigger**: Detects instantiations that begin with positional arguments (no `.` inside the port list).
@@ -37,5 +30,6 @@ foo u_foo (
 
 ```systemverilog
 foo u_foo (clk_i, rst_ni, req_i, gnt_o);  // positional arguments
-bar u_bar (.*);  // wildcard ports
 ```
+
+`module.no_port_wildcard` is now enforced exclusively by `plugins/no_port_wildcard.py` (CST stage) for precise diagnostics.

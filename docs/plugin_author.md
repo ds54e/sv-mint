@@ -7,7 +7,7 @@ For engineers who write or modify sv-mint Python rules under `plugins/` without 
 ```
 Rust Pipeline --NDJSON--> plugins/lib/rule_host.py --Python import--> scripts/*.py
 ```
-- Rust launches a single Python host process and imports all `ruleset.scripts` entries.
+- Rust launches a single Python host process and imports every script referenced by `[[rule]]` entries in `sv-mint.toml`.
 - Each stage request is a single JSON line such as `{"kind":"run_stage","stage":"ast","path":"...","payload":{...}}`.
 - The host calls `module.check(req)` in load order, concatenates all returned violations, and streams them back to Rust.
 - When Rust finishes it sends `{"kind":"shutdown"}`, prompting the host to exit.
@@ -109,7 +109,7 @@ Prefer the parser-provided `loc` objects whenever available to avoid off-by-one 
 - Temporary prints should go to stderr; bump `logging.stderr_snippet_bytes` so the CLI captures them.
 
 ### 4.1 Local Reproduction Checklist
-1. Add your script to `[ruleset.scripts]` in `sv-mint.toml`.
+1. Add a `[[rule]]` entry (or entries) to `sv-mint.toml`, pointing `script` at your plugin and declaring the target `stage`.
 2. Create a failing SystemVerilog sample under `fixtures/`.
 3. Run `cargo run -- --config sv-mint.toml fixtures/sample.sv`.
 4. Set `logging.show_plugin_events = true` to inspect per-rule timings.
@@ -119,14 +119,11 @@ Prefer the parser-provided `loc` objects whenever available to avoid off-by-one 
 ## 5. Quality and Operations
 - Use `category.name` style rule IDs so users can search the README or user guide easily.
 - Filter the AST/CST before heavy processing and avoid copying entire payloads.
-- For custom project rules, create subdirectories under `plugins/` and reference absolute or relative paths from `ruleset.scripts`. Document every rule under `docs/plugins/<script_name>.md`.
+- For custom project rules, create subdirectories under `plugins/` and reference absolute or relative paths from the `script` field inside each `[[rule]]`. Document every rule under `docs/plugins/<script_name>.md`.
 
 ### 5.1 Configuration Hooks
-- `ruleset.scripts.<name>.path`: absolute or repo-relative path to the plugin.
-- `ruleset.scripts.<name>.stage`: `raw_text`, `pp_text`, `cst`, or `ast`. Defaults to `ast`.
-- `ruleset.scripts.<name>.enabled`: feature-flag a rule without removing it from the config.
-- `[ruleset.override]`: change severity per `rule_id`.
-- `[[ruleset.allowlist]]`: suppress findings by `rule_id`, globbed `path`, or regex.
+- `[[rule]]`: declare one entry per `rule_id` with `id`, `script`, `stage`, `enabled`, and optional `severity` overrides.
+- Legacy `[ruleset.*]` options have been removed; migrate all configs to the `[[rule]]` schema.
 
 Document any non-default toggles inside the corresponding `docs/plugins/*.md` entry.
 

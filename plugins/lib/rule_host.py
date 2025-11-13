@@ -29,9 +29,13 @@ def main():
     init = json.loads(first)
     scripts = init.get("scripts") or []
     modules = []
+    script_meta = []
     for idx, script in enumerate(scripts):
-        mod = load_module(Path(script), idx)
+        path = script.get("path")
+        stages = script.get("stages") or []
+        mod = load_module(Path(path), idx)
         modules.append(mod)
+        script_meta.append(set(stages))
     print(json.dumps({"type": "ready"}))
     sys.stdout.flush()
     for line in sys.stdin:
@@ -43,7 +47,10 @@ def main():
             break
         results = []
         error = None
-        for module in modules:
+        stage_name = req.get("stage")
+        for module, allowed in zip(modules, script_meta):
+            if allowed and stage_name not in allowed:
+                continue
             handler = getattr(module, "check", None)
             if handler is None:
                 continue
