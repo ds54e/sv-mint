@@ -38,11 +38,9 @@ sv-mint is a SystemVerilog lint pipeline that combines a Rust core with Python p
 - Structured logs (`logging.format = "json"`) expose `sv-mint::event`, `sv-mint::stage`, and `sv-mint::plugin.stderr` categories for observability platforms.
 
 ## Comparison with svlint and Verible
-| Tool | Primary Focus | Rule Authoring Model | Extensibility | Notable Strengths |
-| --- | --- | --- | --- | --- |
-| sv-mint | Multi-stage pipeline with deterministic diagnostics | Python plugins loaded via `sv-mint.toml`, full access to raw/CST/AST payloads | Add custom scripts without recompiling; mix-and-match stages per rule | Tight size/time guards, reproducible ordering, Rust host guarantees |
-| svlint | Lightweight textual linting (https://github.com/dalance/svlint) | TOML-configured regex/pattern checks compiled into Rust binary | Extend by contributing Rust code or running external commands | Simple setup, good for enforcing style from a static ruleset |
-| Verible | Comprehensive formatting/lint suite (https://chipsalliance.github.io/verible) | C++ rules integrated with parser; configuration via flags and waiver files | Extend by hacking C++ passes; third-party plugins uncommon | Mature parser, auto-formatter, integrates with Bazel and IDE tooling |
+- **sv-mint**: Primary focus—multi-stage pipeline with deterministic diagnostics; Rule authoring—Python plugins loaded via `sv-mint.toml` with access to raw/CST/AST payloads; Extensibility—add custom scripts without recompiling and mix stages per rule; Notable strengths—tight size/time guards, reproducible ordering, Rust host guarantees.
+- **svlint**: Primary focus—lightweight textual linting (https://github.com/dalance/svlint); Rule authoring—TOML-configured regex/pattern checks compiled into the Rust binary; Extensibility—extend by contributing Rust code or running external commands; Notable strengths—simple setup that enforces static style rules.
+- **Verible**: Primary focus—comprehensive formatting/lint suite (https://chipsalliance.github.io/verible); Rule authoring—C++ rules integrated with the parser and configured via flags or waiver files; Extensibility—extend by modifying C++ passes (third-party plugins are uncommon); Notable strengths—mature parser, auto-formatter, and Bazel/IDE integrations.
 
 sv-mint complements these tools: use svlint for quick static checks, Verible for formatting and structural lint, and sv-mint when you need reproducible, Python-authored policies tied to specific pipeline stages.
 
