@@ -15,3 +15,23 @@
 - **代表メッセージ**: `` debug ping: stage=ast, symbols=42 ``
 - **主な対処**: デバッグ専用なので本番ルールセットでは `sv-mint.toml` の `[ruleset.scripts]` から削除します。
 - **補足**: ルール拡張時にデータが想定どおり届いているかを素早く確認する用途を想定しています。Severity は `to_viol` 呼び出し時に上書き可能です。
+- **LowRISC 参照**: lowRISC のスタイルガイドに直接対応する規定はありませんが、デバッグ用コードやルールはリリースビルドに混入させないという一般原則に沿う形で利用します。
+- **良い例**（開発中のみ有効化）:
+
+```toml
+[ruleset.scripts]
+debug_ping = { path = "plugins/debug_ping.py", stage = "ast", enabled = true }
+
+[profile.release.ruleset.scripts]
+debug_ping = { enabled = false }
+```
+
+- **悪い例**（本番設定で ping を残したまま）:
+
+```toml
+[ruleset.scripts]
+debug_ping = { path = "plugins/debug_ping.py", stage = "ast" }
+# release でも無効化せず、常時 warning を発生させてしまう
+```
+
+- **追加のポイント**: CI で `debug.ping` が報告されると他の重要な診断が埋もれるため、PR 用ルールセットでは確実に外しておきます。別の統計値を見たい場合は `payload` から自由にメッセージへ追加できるため、拡張テスト時のログ計測に活用できます。

@@ -15,3 +15,28 @@
 - **代表メッセージ**: `` case item should wrap statements in begin/end ``
 - **主な対処**: `case` の各ラベルに複数文が続く場合、`begin ... end` を追加してブロックを明示します。
 - **補足**: `begin` で始まる単文はスキップされます。`unique case` との併用時も同じポリシーです。
+- **LowRISC 参照**: lowRISC スタイルガイドは case アイテム内で複数行を記述する場合に `begin/end` を必須とし、単文であっても将来行が増えるなら先に `begin` を入れることを勧めています。
+- **良い例**:
+
+```systemverilog
+unique case (state_q)
+  IDLE: begin
+    ready_o = 1'b1;
+    state_d = START;
+  end
+  default: begin
+    ready_o = 1'b0;
+  end
+endcase
+```
+
+- **悪い例**:
+
+```systemverilog
+case (state_q)
+  START: ready_o = 1'b1;
+          state_d = RUN;  // begin/end なしで複文
+endcase
+```
+
+- **追加のポイント**: `case inside` でも同じルールが適用されます。`begin` を省略した箇所へ行コメントを差し込むと誤判定の原因になるため、`begin : label_name` のようにラベルを付けておくと解析が安定します。

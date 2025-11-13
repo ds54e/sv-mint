@@ -15,3 +15,22 @@
 - **代表メッセージ**: `` blocking '=' inside always_ff ``
 - **主な対処**: クロックドプロセス内の代入は `<=` を使うか、組み合わせロジックへ切り出します。
 - **補足**: `sv-parser` のバージョン差異に対応するため、トークン欠落時は正規表現によるバックアップ走査を行っています。
+- **LowRISC 参照**: lowRISC スタイルガイドは `always_ff` 内でのブロッキング代入を禁止し、すべて非ブロッキング `<=` に統一するよう求めています。
+- **良い例**:
+
+```systemverilog
+always_ff @(posedge clk_i or negedge rst_ni) begin
+  if (!rst_ni) data_q <= '0;
+  else         data_q <= data_d;
+end
+```
+
+- **悪い例**:
+
+```systemverilog
+always_ff @(posedge clk_i) begin
+  data_q = data_d;  // ブロッキング代入
+end
+```
+
+- **追加のポイント**: 代入演算子を変更するだけでなく、`data_d` を `always_comb` で計算しておくと設計意図が明確になります。`<=#0` のような遅延付き非ブロッキングは `lang.no_delays` と合わせて禁止されます。

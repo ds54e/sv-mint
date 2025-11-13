@@ -15,3 +15,17 @@
 - **代表メッセージ**: `` base literal must include explicit width (e.g. 8'hFF) ``
 - **主な対処**: すべての基数付きリテラルに `8'h`, `4'd` のようなビット幅を追加してください。
 - **補足**: ブール演算にマッチさせる追加の正規表現は現状コメントアウトされています。必要なら拡張を検討してください。
+- **LowRISC 参照**: lowRISC ではビット幅を常に明示することを規定しており、`'hFF` のような unsized リテラルは禁止です。
+- **良い例**:
+
+```systemverilog
+assign mask = 8'hFF;
+```
+
+- **悪い例**:
+
+```systemverilog
+assign mask = 'hFF;
+```
+
+- **追加のポイント**: `_` 区切りを併用して `32'hDEAD_BEEF` のように書くと可読性が上がります。定数定義は `localparam` へ移して再利用してください。

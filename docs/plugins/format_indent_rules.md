@@ -16,13 +16,73 @@
 - **検出条件**: 空白のみを取り除いた文字列の長さからインデント幅を算出し、奇数のスペース数だった行を報告します。
 - **代表メッセージ**: `` indentation should be multiples of 2 spaces ``
 - **主な対処**: `TAB` ではなくスペース 2 の倍数へ統一し、コードブロック内の揃え方を再確認してください。
+- **LowRISC 参照**: lowRISC スタイルガイドは SystemVerilog のインデント幅を 2 スペースに固定するよう定めています。
+- **良い例**:
+
+```systemverilog
+module foo;
+  logic req;
+  always_comb begin
+    if (req) data = '0;
+  end
+end
+```
+
+- **悪い例**:
+
+```systemverilog
+module foo;
+   logic req;   // 3 スペースでずれている
+    always_comb begin
+      if (req) data = '0;
+    end
+end
+```
+
+- **追加のポイント**: タブ混在を排除するため、エディタ側で `expandtab` を有効にし、`sv-mint` の診断をトリガーに `.editorconfig` を整備すると揃え漏れを防げます。
 
 ### `format.preproc_left_align`
-- **検出条件**: `	` を含まない状態で `	` もしくはスペースでインデントされたプリプロ命令行を検出し、列 1 に揃えるよう指示します。
+- **検出条件**: 行頭がスペースやタブで始まる `define/ifdef/ifndef/endif` などのプリプロ命令を検出し、列 1 に揃えるよう指示します。
 - **代表メッセージ**: `` preprocessor directives must be left aligned ``
-- **主な対処**: `	` やスペースを削除し、` `define/ifdef` などを行頭に配置します。
+- **主な対処**: タブやスペースを削除し、``define/ifdef`` などを行頭に配置します。
+- **LowRISC 参照**: lowRISC のプリプロセッサ規約でも、インデントを付けずに列頭へ配置することが明記されています。
+- **良い例**:
+
+```systemverilog
+`ifdef INCLUDE_DBG
+  assign dbg_o = dbg_i;
+`endif
+```
+
+- **悪い例**:
+
+```systemverilog
+  `ifdef INCLUDE_DBG
+    assign dbg_o = dbg_i;
+  `endif
+```
+
+- **追加のポイント**: ネストが深くても左端に置く方針は不変です。どうしても字下げしたい場合は `// DEBUG` のようなコメントを行末へ足して文脈を補足してください。
 
 ### `format.line_continuation_right`
 - **検出条件**: 行末に `\` を含むにもかかわらず末尾が空白で終わっている（`\` の右に文字がある）場合に警告します。
 - **代表メッセージ**: `` line continuation \ must be last character ``
 - **主な対処**: 継続が必要な行では `\` を最後の文字にし、コメントや空白を右側に残さないようにします。
+- **LowRISC 参照**: lowRISC ガイドでもマクロ継続記号を行末に置くことが推奨され、`\` の右に空白を残さない方針です。
+- **良い例**:
+
+```systemverilog
+`define BUS_FIELDS \
+  logic req;      \
+  logic gnt;
+```
+
+- **悪い例**:
+
+```systemverilog
+`define BUS_FIELDS \
+  logic req; \   // バックスラッシュの後に空白が残る
+  logic gnt;
+```
+
+- **追加のポイント**: 行末空白は `git diff --check` でも検出されますが、`sv-mint` の診断は `pp_text` ベースで発火するため、タブ混在があると実際の列位置とずれる点に注意してください。
