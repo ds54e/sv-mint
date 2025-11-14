@@ -52,6 +52,7 @@ fn should_emit(ev: Event) -> bool {
             | Event::PluginDone
             | Event::PluginTimeout
             | Event::PluginExitNonzero
+            | Event::PluginError
             | Event::PluginStderr => t.plugin,
             Event::ParsePreprocessStart
             | Event::ParsePreprocessDone

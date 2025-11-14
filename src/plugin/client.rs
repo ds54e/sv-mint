@@ -78,6 +78,7 @@ impl PythonHost {
     pub fn start(cfg: &Config) -> Result<Self, PluginError> {
         let script_specs = collect_script_specs(cfg);
         let host_path = resolve_script_path("plugins/lib/rule_host.py");
+        let cmd_preview = format_plugin_command(&cfg.plugin.cmd, &cfg.plugin.args, &host_path);
         let runtime = Runtime::new().map_err(|e| PluginError::SpawnFailed { detail: e.to_string() })?;
         let timeout = Duration::from_millis(cfg.defaults.timeout_ms_per_file);
         let snippet_limit = cfg.logging.stderr_snippet_bytes;
@@ -92,7 +93,9 @@ impl PythonHost {
                 .stderr(Stdio::piped());
             let mut child = cmd
                 .spawn()
-                .map_err(|e| PluginError::SpawnFailed { detail: e.to_string() })?;
+                .map_err(|e| PluginError::SpawnFailed {
+                    detail: format!("{cmd_preview}: {e}"),
+                })?;
             let stdin = child.stdin.take().ok_or_else(|| PluginError::IoFailed {
                 detail: "stdin unavailable".to_string(),
             })?;
@@ -151,6 +154,7 @@ impl PythonHost {
                         .with_stage(stage_name)
                         .with_duration_ms(elapsed),
                 );
+                self.log_stderr(&path_s, stage_name);
                 return Err(e);
             }
             Err(e @ PluginError::ExitCode { code }) => {
@@ -161,21 +165,45 @@ impl PythonHost {
                         .with_duration_ms(elapsed)
                         .with_exit_code(code),
                 );
+                self.log_stderr(&path_s, stage_name);
                 return Err(e);
             }
-            Err(e) => return Err(e),
+            Err(e) => {
+                let elapsed = t0.elapsed().as_millis();
+                let detail = e.to_string();
+                let mut ev = Ev::new(Event::PluginError, &path_s)
+                    .with_stage(stage_name)
+                    .with_duration_ms(elapsed);
+                ev = ev.with_message(&detail);
+                log_event(ev);
+                self.log_stderr(&path_s, stage_name);
+                return Err(e);
+            }
         };
         let (resp, response_bytes) = resp;
         let violations = match resp {
             HostResponse::Violations { violations } => violations,
             HostResponse::Error { detail } => {
                 let detail = detail.unwrap_or_else(|| "plugin error".to_string());
+                let elapsed = t0.elapsed().as_millis();
+                let mut ev = Ev::new(Event::PluginError, &path_s)
+                    .with_stage(stage_name)
+                    .with_duration_ms(elapsed);
+                ev = ev.with_message(&detail);
+                log_event(ev);
+                self.log_stderr(&path_s, stage_name);
                 return Err(PluginError::ProtocolError { detail });
             }
             HostResponse::Ready => {
-                return Err(PluginError::ProtocolError {
-                    detail: "unexpected ready response".to_string(),
-                })
+                let detail = "unexpected ready response".to_string();
+                let elapsed = t0.elapsed().as_millis();
+                let mut ev = Ev::new(Event::PluginError, &path_s)
+                    .with_stage(stage_name)
+                    .with_duration_ms(elapsed);
+                ev = ev.with_message(&detail);
+                log_event(ev);
+                self.log_stderr(&path_s, stage_name);
+                return Err(PluginError::ProtocolError { detail });
             }
         };
         let adjusted = self.apply_overrides(violations);
@@ -386,4 +414,23 @@ fn parse_severity(s: &str) -> Option<Severity> {
         "info" => Some(Severity::Info),
         _ => None,
     }
+}
+
+fn format_plugin_command(cmd: &str, args: &[String], host_path: &str) -> String {
+    let mut parts = Vec::with_capacity(args.len() + 2);
+    parts.push(cmd.to_string());
+    parts.extend(args.iter().cloned());
+    parts.push(host_path.to_string());
+    let mut out = String::new();
+    for (i, part) in parts.iter().enumerate() {
+        if i > 0 {
+            out.push(' ');
+        }
+        if part.chars().any(|c| c.is_whitespace()) {
+            out.push_str(&format!("{part:?}"));
+        } else {
+            out.push_str(part);
+        }
+    }
+    out
 }
