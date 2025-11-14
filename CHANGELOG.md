@@ -2,6 +2,14 @@
 
 All notable changes to this project are documented here, following [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) conventions and semantic versioning.
 
+## [1.1.2] - 2025-11-14
+### Fixed
+- `naming_rules` plugin now avoids Python 3.8-only syntax, restoring compatibility with Python 3.6 environments such as RHEL8.
+
+## [1.1.1] - 2025-11-14
+### Added
+- Plugin diagnostics now log the script path whenever a plugin errors, making it easier to identify failing plugins.
+
 ## [1.0.0] - 2025-11-14
 - Initial stable release of sv-mint.
 
@@ -12,5 +20,7 @@ All notable changes to this project are documented here, following [Keep a Chang
 - CLI gained `-f/--filelist` option to lint inputs described via svlint-style filelists.
 - Tests now include filelist-driven smoke coverage, and README documents the supported syntax in detail.
 
+[1.1.2]: https://github.com/foo/sv-mint/releases/tag/v1.1.2
+[1.1.1]: https://github.com/foo/sv-mint/releases/tag/v1.1.1
 [1.1.0]: https://github.com/foo/sv-mint/releases/tag/v1.1.0
 [1.0.0]: https://github.com/foo/sv-mint/releases/tag/v1.0.0
