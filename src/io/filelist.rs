@@ -55,9 +55,9 @@ impl FilelistLoader {
     }
 
     fn process(&mut self, path: &Path) -> Result<(), ConfigError> {
-        let canon = fs::canonicalize(path).map_err(|_| ConfigError::NotFound {
+        let canon = normalize_path(fs::canonicalize(path).map_err(|_| ConfigError::NotFound {
             path: path.display().to_string(),
-        })?;
+        })?);
         if self.processed.contains(&canon) {
             return Ok(());
         }
@@ -215,11 +215,11 @@ impl FilelistLoader {
 fn resolve_path(base: &Path, raw: &str) -> PathBuf {
     let path = PathBuf::from(raw);
     if path.is_absolute() {
-        path
+        normalize_path(path)
     } else if is_windows_absolute(raw) {
-        PathBuf::from(raw)
+        normalize_path(PathBuf::from(raw))
     } else {
-        base.join(path)
+        normalize_path(base.join(path))
     }
 }
 
@@ -229,6 +229,35 @@ fn is_windows_absolute(raw: &str) -> bool {
         return bytes[2] == b'\\' || bytes[2] == b'/';
     }
     raw.starts_with("\\\\")
+}
+
+#[cfg(windows)]
+fn normalize_path(path: PathBuf) -> PathBuf {
+    use std::ffi::OsString;
+    use std::os::windows::ffi::{OsStrExt, OsStringExt};
+
+    const VERBATIM_PREFIX: [u16; 4] = [b'\\' as u16, b'\\' as u16, b'?' as u16, b'\\' as u16];
+    const UNC_MARKER: [u16; 4] = [b'U' as u16, b'N' as u16, b'C' as u16, b'\\' as u16];
+    let wide: Vec<u16> = path.as_os_str().encode_wide().collect();
+    if wide.len() >= VERBATIM_PREFIX.len() && wide[..VERBATIM_PREFIX.len()] == VERBATIM_PREFIX {
+        let remainder = &wide[VERBATIM_PREFIX.len()..];
+        if remainder.len() >= UNC_MARKER.len() && remainder[..UNC_MARKER.len()] == UNC_MARKER {
+            let mut rebuilt = Vec::with_capacity(remainder.len() - UNC_MARKER.len() + 2);
+            rebuilt.extend_from_slice(&[b'\\' as u16, b'\\' as u16]);
+            rebuilt.extend_from_slice(&remainder[UNC_MARKER.len()..]);
+            return PathBuf::from(OsString::from_wide(&rebuilt));
+        }
+        if remainder.is_empty() {
+            return PathBuf::new();
+        }
+        return PathBuf::from(OsString::from_wide(remainder));
+    }
+    path
+}
+
+#[cfg(not(windows))]
+fn normalize_path(path: PathBuf) -> PathBuf {
+    path
 }
 
 fn preprocess_lines(text: &str, file: &Path) -> Result<Vec<(usize, String)>, ConfigError> {
