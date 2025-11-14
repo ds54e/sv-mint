@@ -9,6 +9,8 @@ pub struct FilelistLoad {
     pub files: Vec<PathBuf>,
     pub incdirs: Vec<PathBuf>,
     pub defines: Vec<String>,
+    pub lib_dirs: Vec<PathBuf>,
+    pub libexts: Vec<String>,
 }
 
 pub fn load_filelists(paths: &[PathBuf]) -> Result<FilelistLoad, ConfigError> {
@@ -23,6 +25,8 @@ struct FilelistLoader {
     files: Vec<PathBuf>,
     incdirs: Vec<PathBuf>,
     defines: Vec<String>,
+    lib_dirs: Vec<PathBuf>,
+    libexts: Vec<String>,
     processed: HashSet<PathBuf>,
     processing: HashSet<PathBuf>,
 }
@@ -33,6 +37,8 @@ impl FilelistLoader {
             files: Vec::new(),
             incdirs: Vec::new(),
             defines: Vec::new(),
+            lib_dirs: Vec::new(),
+            libexts: Vec::new(),
             processed: HashSet::new(),
             processing: HashSet::new(),
         }
@@ -43,6 +49,8 @@ impl FilelistLoader {
             files: self.files,
             incdirs: self.incdirs,
             defines: self.defines,
+            lib_dirs: self.lib_dirs,
+            libexts: self.libexts,
         }
     }
 
@@ -92,8 +100,7 @@ impl FilelistLoader {
             return Ok(());
         }
         if let Some(rest) = trimmed.strip_prefix("+libext+") {
-            // compatibility: accept but ignore contents for now
-            let _ = rest;
+            self.push_libexts(rest);
             return Ok(());
         }
         if trimmed.starts_with("-f") {
@@ -106,6 +113,7 @@ impl FilelistLoader {
             let dir = self.parse_flag_value(file, line_no, trimmed, "-y")?;
             let path = resolve_path(base, &dir);
             self.incdirs.push(path);
+            self.lib_dirs.push(resolve_path(base, &dir));
             return Ok(());
         }
         if trimmed.starts_with("+") {
@@ -146,6 +154,25 @@ impl FilelistLoader {
             }
             let token = strip_outer_quotes(val);
             self.defines.push(token);
+        }
+    }
+
+    fn push_libexts(&mut self, rest: &str) {
+        for entry in split_plus_entries(rest) {
+            let token = strip_outer_quotes(&entry);
+            if token.is_empty() {
+                continue;
+            }
+            let ext = token.trim();
+            if ext.is_empty() {
+                continue;
+            }
+            let normalized = if ext.starts_with('.') {
+                ext.to_string()
+            } else {
+                format!(".{}", ext)
+            };
+            self.libexts.push(normalized);
         }
     }
 

@@ -80,6 +80,8 @@ fn main() -> ExitCode {
 
 fn gather_inputs(cfg: &mut Config, direct: &[PathBuf], filelists: &[PathBuf]) -> Result<Vec<PathBuf>, ConfigError> {
     let mut inputs: Vec<PathBuf> = direct.to_vec();
+    let mut lib_dirs: Vec<PathBuf> = Vec::new();
+    let mut lib_exts: Vec<String> = Vec::new();
     if !filelists.is_empty() {
         let load = load_filelists(filelists)?;
         inputs.extend(load.files);
@@ -89,6 +91,12 @@ fn gather_inputs(cfg: &mut Config, direct: &[PathBuf], filelists: &[PathBuf]) ->
         for define in load.defines {
             cfg.svparser.defines.push(define);
         }
+        lib_dirs = load.lib_dirs;
+        lib_exts = load.libexts;
+    }
+    if !lib_dirs.is_empty() && !lib_exts.is_empty() {
+        let discovered = discover_lib_files(&lib_dirs, &lib_exts)?;
+        inputs.extend(discovered);
     }
     if inputs.is_empty() {
         return Err(ConfigError::InvalidValue {
@@ -96,4 +104,30 @@ fn gather_inputs(cfg: &mut Config, direct: &[PathBuf], filelists: &[PathBuf]) ->
         });
     }
     Ok(inputs)
+}
+
+fn discover_lib_files(lib_dirs: &[PathBuf], lib_exts: &[String]) -> Result<Vec<PathBuf>, ConfigError> {
+    use std::collections::HashSet;
+    let mut seen = HashSet::new();
+    let mut out = Vec::new();
+    for dir in lib_dirs {
+        let entries = std::fs::read_dir(dir).map_err(|_| ConfigError::NotFound {
+            path: dir.display().to_string(),
+        })?;
+        for entry in entries.flatten() {
+            let path = entry.path();
+            if !path.is_file() {
+                continue;
+            }
+            if let Some(ext) = path.extension().and_then(|e| e.to_str()) {
+                let dot_ext = format!(".{}", ext);
+                if lib_exts.iter().any(|needle| needle.eq_ignore_ascii_case(&dot_ext)) {
+                    if seen.insert(path.clone()) {
+                        out.push(path);
+                    }
+                }
+            }
+        }
+    }
+    Ok(out)
 }
