@@ -201,6 +201,20 @@ fn detects_dpi_prefix_violations() {
 }
 
 #[test]
+fn runs_with_filelist_and_env() {
+    let fixture = std::fs::canonicalize("fixtures/format_line_length_violation.sv").expect("fixture path");
+    std::env::set_var("SV_FILELIST_FIXTURE", fixture.to_string_lossy().to_string());
+    let mut filelist = NamedTempFile::new().expect("filelist");
+    writeln!(filelist, "-y \"fixtures\"").expect("write");
+    writeln!(filelist, "+libext+.sv").expect("write");
+    writeln!(filelist, "\"${{SV_FILELIST_FIXTURE}}\"").expect("write");
+    let mut cmd = Command::new(assert_cmd::cargo::cargo_bin!("sv-mint"));
+    cmd.arg("-f").arg(filelist.path());
+    cmd.assert().failure().stdout(contains("format.line_length"));
+    std::env::remove_var("SV_FILELIST_FIXTURE");
+}
+
+#[test]
 fn detects_macro_undef_violations() {
     run_fixture("fixtures/macro_violation.sv", "macro.missing_undef");
 }

@@ -35,11 +35,14 @@ sv-mint is a SystemVerilog lint pipeline that combines a Rust core with Python p
 
 `sv-mint -f path/to/files.f` consumes filelist entries using a small, svlint-like syntax:
 - `-f child.f` (or `-fchild.f`) recursively loads another list; cycles raise `invalid value` errors.
-- `+incdir+dir1+dir2` appends include directories to `svparser.include_paths` after resolving each path relative to the filelist; environment variables like `${IP_ROOT}` or `$(OUTDIR)` are expanded before resolution.
+- `-y libdir` (or `-ylibdir`) appends additional include/library directories, sharing the same resolution rules as `+incdir`.
+- `+incdir+dir1+dir2` appends include directories to `svparser.include_paths` after resolving each path relative to the filelist; environment variables like `${IP_ROOT}` or `$(OUTDIR)` are expanded before resolution, and paths may be quoted to preserve spaces (e.g., `+incdir+"path with spaces"`).
 - `+define+FOO=1+BAR` appends raw `name` or `name=value` strings to `svparser.defines`, matching the inline CLI format; multi-line entries can be continued with a trailing `\`.
+- `+libext+.sv+.svh` is accepted for svlint compatibility (the extensions are currently informational and not used to auto-discover files).
 - Any other non-empty, non-comment line is treated as an input file path and queued for linting.
 - Comments beginning with `//` or `#`, plus blank lines, are ignored.
 - Windows drive-letter (`C:\proj\foo.sv`) and UNC (`\\server\share\bar.sv`) paths are treated as absolute even on Unix hosts, so mixed-platform filelists work out of the box.
+- Wrap any argument in single or double quotes to keep embedded whitespace or `+` characters intact; quotes are stripped only when they enclose the entire token.
 
 ## Anatomy of a Rule
 - Rules live under `plugins/` and expose a `check(req)` function.

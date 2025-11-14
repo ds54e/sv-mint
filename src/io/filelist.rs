@@ -91,10 +91,21 @@ impl FilelistLoader {
             self.push_defines(rest);
             return Ok(());
         }
+        if let Some(rest) = trimmed.strip_prefix("+libext+") {
+            // compatibility: accept but ignore contents for now
+            let _ = rest;
+            return Ok(());
+        }
         if trimmed.starts_with("-f") {
             let include = self.parse_filelist_include(file, line_no, trimmed)?;
-            let path_buf = resolve_path(base, include);
+            let path_buf = resolve_path(base, &include);
             self.process(&path_buf)?;
+            return Ok(());
+        }
+        if trimmed.starts_with("-y") {
+            let dir = self.parse_flag_value(file, line_no, trimmed, "-y")?;
+            let path = resolve_path(base, &dir);
+            self.incdirs.push(path);
             return Ok(());
         }
         if trimmed.starts_with("+") {
@@ -107,68 +118,70 @@ impl FilelistLoader {
                 ),
             });
         }
-        let path = resolve_path(base, trimmed);
+        let token = strip_outer_quotes(trimmed);
+        let path = resolve_path(base, &token);
         self.files.push(path);
         Ok(())
     }
 
-    fn parse_filelist_include<'a>(
-        &self,
-        file: &Path,
-        line_no: usize,
-        trimmed: &'a str,
-    ) -> Result<&'a str, ConfigError> {
-        let mut parts = trimmed.split_whitespace();
-        let flag = parts.next().unwrap();
-        if flag == "-f" {
-            let target = parts.next().ok_or_else(|| ConfigError::InvalidValue {
-                detail: format!("filelist {}:{}: -f missing path", file.display(), line_no),
-            })?;
-            if parts.next().is_some() {
-                return Err(ConfigError::InvalidValue {
-                    detail: format!("filelist {}:{}: extra tokens after -f", file.display(), line_no),
-                });
-            }
-            return Ok(target);
-        }
-        if let Some(rest) = flag.strip_prefix("-f") {
-            if !rest.is_empty() {
-                if parts.next().is_some() {
-                    return Err(ConfigError::InvalidValue {
-                        detail: format!("filelist {}:{}: extra tokens after {}", file.display(), line_no, flag),
-                    });
-                }
-                return Ok(rest);
-            }
-        }
-        Err(ConfigError::InvalidValue {
-            detail: format!(
-                "filelist {}:{}: malformed -f directive {}",
-                file.display(),
-                line_no,
-                trimmed
-            ),
-        })
+    fn parse_filelist_include(&self, file: &Path, line_no: usize, trimmed: &str) -> Result<String, ConfigError> {
+        self.parse_flag_value(file, line_no, trimmed, "-f")
     }
 
     fn push_incdirs(&mut self, base: &Path, rest: &str) {
-        for entry in rest.split('+') {
-            let val = entry.trim();
-            if val.is_empty() {
+        for entry in split_plus_entries(rest) {
+            let token = strip_outer_quotes(&entry);
+            if token.is_empty() {
                 continue;
             }
-            self.incdirs.push(resolve_path(base, val));
+            self.incdirs.push(resolve_path(base, &token));
         }
     }
 
     fn push_defines(&mut self, rest: &str) {
-        for entry in rest.split('+') {
+        for entry in split_plus_entries(rest) {
             let val = entry.trim();
             if val.is_empty() {
                 continue;
             }
-            self.defines.push(val.to_string());
+            let token = strip_outer_quotes(val);
+            self.defines.push(token);
         }
+    }
+
+    fn parse_flag_value(&self, file: &Path, line_no: usize, trimmed: &str, flag: &str) -> Result<String, ConfigError> {
+        if !trimmed.starts_with(flag) {
+            return Err(ConfigError::InvalidValue {
+                detail: format!(
+                    "filelist {}:{}: malformed {} directive {}",
+                    file.display(),
+                    line_no,
+                    flag,
+                    trimmed
+                ),
+            });
+        }
+        let rest = &trimmed[flag.len()..];
+        if rest.is_empty() {
+            return Err(ConfigError::InvalidValue {
+                detail: format!("filelist {}:{}: {} missing path", file.display(), line_no, flag),
+            });
+        }
+        let trimmed_rest = rest.trim_start();
+        if trimmed_rest.is_empty() {
+            return Err(ConfigError::InvalidValue {
+                detail: format!("filelist {}:{}: {} missing path", file.display(), line_no, flag),
+            });
+        }
+        let (token, remainder) = take_token(trimmed_rest).map_err(|msg| ConfigError::InvalidValue {
+            detail: format!("filelist {}:{}: {}", file.display(), line_no, msg),
+        })?;
+        if !remainder.trim().is_empty() {
+            return Err(ConfigError::InvalidValue {
+                detail: format!("filelist {}:{}: extra tokens after {}", file.display(), line_no, flag),
+            });
+        }
+        Ok(strip_outer_quotes(token))
     }
 }
 
@@ -306,6 +319,73 @@ fn is_env_ident(ch: char) -> bool {
     ch.is_ascii_alphanumeric() || ch == '_'
 }
 
+fn strip_outer_quotes(token: &str) -> String {
+    let trimmed = token.trim();
+    if trimmed.len() >= 2 {
+        let bytes = trimmed.as_bytes();
+        let first = bytes[0];
+        let last = bytes[bytes.len() - 1];
+        if (first == last) && (first == b'"' || first == b'\'') {
+            return trimmed[1..trimmed.len() - 1].to_string();
+        }
+    }
+    trimmed.to_string()
+}
+
+fn split_plus_entries(rest: &str) -> Vec<String> {
+    let mut parts = Vec::new();
+    let mut current = String::new();
+    let mut quote: Option<char> = None;
+    for ch in rest.chars() {
+        if ch == '\'' || ch == '"' {
+            if let Some(q) = quote {
+                if q == ch {
+                    quote = None;
+                }
+            } else {
+                quote = Some(ch);
+            }
+            current.push(ch);
+            continue;
+        }
+        if ch == '+' && quote.is_none() {
+            parts.push(std::mem::take(&mut current));
+        } else {
+            current.push(ch);
+        }
+    }
+    parts.push(current);
+    parts
+}
+
+fn take_token(input: &str) -> Result<(&str, &str), &'static str> {
+    if input.is_empty() {
+        return Err("missing token");
+    }
+    let trimmed = input.trim_start();
+    if trimmed.is_empty() {
+        return Err("missing token");
+    }
+    let first = trimmed.as_bytes()[0] as char;
+    if first == '"' || first == '\'' {
+        if let Some(pos) = trimmed[1..].find(first) {
+            let end = 1 + pos;
+            let token = &trimmed[..=end];
+            let rest = &trimmed[end + 1..];
+            return Ok((token, rest));
+        } else {
+            return Err("unterminated quoted token");
+        }
+    }
+    if let Some(pos) = trimmed.find(char::is_whitespace) {
+        let token = &trimmed[..pos];
+        let rest = &trimmed[pos..];
+        Ok((token, rest))
+    } else {
+        Ok((trimmed, ""))
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -364,23 +444,28 @@ top.sv
         let list = dir.path().join("env.f");
         let inc = dir.path().join("incs");
         fs::create_dir_all(&inc).unwrap();
+        let inc_spaced = dir.path().join("inc spaced");
+        fs::create_dir_all(&inc_spaced).unwrap();
+        let libdir = dir.path().join("lib path");
+        fs::create_dir_all(&libdir).unwrap();
         std::env::set_var("TOP_FILE", target.to_string_lossy().to_string());
         std::env::set_var("INC_ROOT", inc.to_string_lossy().to_string());
         std::env::set_var("DEFVAL", "42");
         let body = "\
+-y \"lib path\"
++libext+.sv+.svh
 $TOP_FILE
 +incdir+${INC_ROOT}
++incdir+\"inc spaced\"
 +define+FOO=$DEFVAL\\
 +BAR=BAZ
 ";
         fs::write(&list, body).unwrap();
         let load = load_filelists(&[list.clone()]).unwrap();
         assert!(load.files.iter().any(|p| p == &target));
-        assert_eq!(load.incdirs.len(), 1);
-        assert!(load
-            .incdirs
-            .iter()
-            .any(|p| p.to_string_lossy() == inc.to_string_lossy()));
+        assert!(load.incdirs.iter().any(|p| p == &inc));
+        assert!(load.incdirs.iter().any(|p| p == &inc_spaced));
+        assert!(load.incdirs.iter().any(|p| p == &libdir));
         assert!(load.defines.contains(&"FOO=42".to_string()));
         assert!(load.defines.contains(&"BAR=BAZ".to_string()));
         std::env::remove_var("TOP_FILE");
