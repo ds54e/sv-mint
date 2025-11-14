@@ -1,5 +1,5 @@
 [defaults]
-timeout_ms_per_file = 3000
+timeout_ms_per_file = 6000
 
 [plugin]
 cmd = "python3"
