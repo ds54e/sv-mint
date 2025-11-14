@@ -55,8 +55,17 @@ impl FilelistLoader {
     }
 
     fn process(&mut self, path: &Path) -> Result<(), ConfigError> {
-        let canon = normalize_path(fs::canonicalize(path).map_err(|_| ConfigError::NotFound {
-            path: path.display().to_string(),
+        let abs_path = if path.is_absolute() {
+            path.to_path_buf()
+        } else {
+            env::current_dir()
+                .map_err(|_| ConfigError::InvalidValue {
+                    detail: "unable to determine current directory".to_string(),
+                })?
+                .join(path)
+        };
+        let canon = normalize_path(fs::canonicalize(&abs_path).map_err(|_| ConfigError::NotFound {
+            path: abs_path.display().to_string(),
         })?);
         if self.processed.contains(&canon) {
             return Ok(());
@@ -66,20 +75,20 @@ impl FilelistLoader {
                 detail: format!("filelist cycle detected at {}", canon.display()),
             });
         }
-        let bytes = fs::read(&canon).map_err(|_| ConfigError::NotFound {
-            path: canon.display().to_string(),
+        let bytes = fs::read(&abs_path).map_err(|_| ConfigError::NotFound {
+            path: abs_path.display().to_string(),
         })?;
         let text = String::from_utf8(bytes).map_err(|_| ConfigError::InvalidUtf8 {
-            path: canon.display().to_string(),
+            path: abs_path.display().to_string(),
             source: None,
         })?;
-        let base = canon
+        let base = abs_path
             .parent()
             .map(Path::to_path_buf)
             .unwrap_or_else(|| PathBuf::from("."));
-        let lines = preprocess_lines(&text, &canon)?;
+        let lines = preprocess_lines(&text, &abs_path)?;
         for (line_no, line) in lines {
-            self.handle_line(&canon, &base, &line, line_no)?;
+            self.handle_line(&abs_path, &base, &line, line_no)?;
         }
         self.processing.remove(&canon);
         self.processed.insert(canon);
