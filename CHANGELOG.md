@@ -5,4 +5,12 @@ All notable changes to this project are documented here, following [Keep a Chang
 ## [1.0.0] - 2025-11-14
 - Initial stable release of sv-mint.
 
+## [1.1.0] - 2025-11-14
+### Added
+- Filelist handling now supports `-f/--filelist`, `+incdir`, `+define`, `-y`, and `+libext` with nested includes, environment variable expansion, and quoting.
+- `-y` directories combined with `+libext` trigger recursive auto-discovery of matching files (symlinks skipped, 50k safety limit).
+- CLI gained `-f/--filelist` option to lint inputs described via svlint-style filelists.
+- Tests now include filelist-driven smoke coverage, and README documents the supported syntax in detail.
+
+[1.1.0]: https://github.com/foo/sv-mint/releases/tag/v1.1.0
 [1.0.0]: https://github.com/foo/sv-mint/releases/tag/v1.0.0
