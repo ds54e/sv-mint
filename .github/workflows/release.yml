@@ -5,8 +5,51 @@ on:
     tags:
       - "v*"
   workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "Tag to use for manual release runs"
+        required: true
 
 jobs:
+  release_meta:
+    name: Resolve release tag
+    runs-on: ubuntu-latest
+    outputs:
+      release_tag: ${{ steps.select.outputs.release_tag }}
+      publish_release: ${{ steps.select.outputs.publish_release }}
+    steps:
+      - name: Capture tag from push
+        if: github.ref_type == 'tag'
+        id: from_ref
+        run: echo "release_tag=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+
+      - name: Capture tag from workflow input
+        if: github.event_name == 'workflow_dispatch'
+        id: from_input
+        env:
+          INPUT_RELEASE_TAG: ${{ inputs.release_tag }}
+        run: |
+          if [ -z "$INPUT_RELEASE_TAG" ]; then
+            echo "::error::The release_tag input is required when manually dispatching this workflow."
+            exit 1
+          fi
+          echo "release_tag=$INPUT_RELEASE_TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Select release tag
+        id: select
+        run: |
+          set -euo pipefail
+          tag="${{ steps.from_ref.outputs.release_tag }}"
+          if [ -z "$tag" ]; then
+            tag="${{ steps.from_input.outputs.release_tag }}"
+          fi
+          if [ -z "$tag" ]; then
+            echo "::error::Unable to determine release tag for this run."
+            exit 1
+          fi
+          echo "release_tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "publish_release=true" >> "$GITHUB_OUTPUT"
+
   tests:
     name: Lint and test (Ubuntu)
     runs-on: ubuntu-latest
@@ -33,12 +76,16 @@ jobs:
 
   build:
     name: Build (${{ matrix.os }})
-    needs: tests
+    needs:
+      - tests
+      - release_meta
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
+    env:
+      RELEASE_TAG: ${{ needs.release_meta.outputs.release_tag }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -84,6 +131,10 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          if [[ -z "${RELEASE_TAG:-}" ]]; then
+            echo "RELEASE_TAG is not set"
+            exit 1
+          fi
           EXT=""
           if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
             EXT=".exe"
@@ -103,7 +154,7 @@ jobs:
           cp README.md "${DIST}/README.md"
           cp LICENSE "${DIST}/LICENSE"
           cp CHANGELOG.md "${DIST}/CHANGELOG.md"
-          ARCHIVE="sv-mint-${{ matrix.os }}-${{ github.ref_name }}"
+          ARCHIVE="sv-mint-${{ matrix.os }}-${RELEASE_TAG}"
           if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
             (cd "${DIST}" && 7z a "../${ARCHIVE}.zip" . >/dev/null)
             ARCHIVE_PATH="${ARCHIVE}.zip"
@@ -134,8 +185,10 @@ jobs:
 
   release:
     name: Publish GitHub Release
-    if: startsWith(github.ref, 'refs/tags/')
-    needs: build
+    needs:
+      - build
+      - release_meta
+    if: needs.release_meta.outputs.publish_release == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Download artifacts
@@ -147,6 +200,10 @@ jobs:
       - name: Create release
         uses: softprops/action-gh-release@v1
         with:
+          tag_name: ${{ needs.release_meta.outputs.release_tag }}
+          name: sv-mint ${{ needs.release_meta.outputs.release_tag }}
+          target_commitish: ${{ github.sha }}
           files: release/**
+          fail_on_unmatched_files: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
