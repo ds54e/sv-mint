@@ -10,6 +10,9 @@ on:
         description: "Tag to use for manual release runs"
         required: true
 
+permissions:
+  contents: write
+
 jobs:
   release_meta:
     name: Resolve release tag
