@@ -65,8 +65,13 @@ enum HostRequest<'a> {
 #[serde(tag = "type", rename_all = "lowercase")]
 enum HostResponse {
     Ready,
-    Violations { violations: Vec<Violation> },
-    Error { detail: Option<String> },
+    Violations {
+        violations: Vec<Violation>,
+    },
+    Error {
+        detail: Option<String>,
+        script: Option<String>,
+    },
 }
 
 pub struct StageRunResult {
@@ -91,11 +96,9 @@ impl PythonHost {
                 .stdin(Stdio::piped())
                 .stdout(Stdio::piped())
                 .stderr(Stdio::piped());
-            let mut child = cmd
-                .spawn()
-                .map_err(|e| PluginError::SpawnFailed {
-                    detail: format!("{cmd_preview}: {e}"),
-                })?;
+            let mut child = cmd.spawn().map_err(|e| PluginError::SpawnFailed {
+                detail: format!("{cmd_preview}: {e}"),
+            })?;
             let stdin = child.stdin.take().ok_or_else(|| PluginError::IoFailed {
                 detail: "stdin unavailable".to_string(),
             })?;
@@ -183,8 +186,11 @@ impl PythonHost {
         let (resp, response_bytes) = resp;
         let violations = match resp {
             HostResponse::Violations { violations } => violations,
-            HostResponse::Error { detail } => {
-                let detail = detail.unwrap_or_else(|| "plugin error".to_string());
+            HostResponse::Error { detail, script } => {
+                let mut detail = detail.unwrap_or_else(|| "plugin error".to_string());
+                if let Some(script_path) = script.as_deref() {
+                    detail.push_str(&format!(" (script {script_path})"));
+                }
                 let elapsed = t0.elapsed().as_millis();
                 let mut ev = Ev::new(Event::PluginError, &path_s)
                     .with_stage(stage_name)
@@ -233,7 +239,7 @@ impl PythonHost {
         self.send(&req)?;
         match self.recv()? {
             (HostResponse::Ready, _) => Ok(()),
-            (HostResponse::Error { detail }, _) => Err(PluginError::ProtocolError {
+            (HostResponse::Error { detail, .. }, _) => Err(PluginError::ProtocolError {
                 detail: detail.unwrap_or_else(|| "init failed".to_string()),
             }),
             (HostResponse::Violations { .. }, _) => Err(PluginError::ProtocolError {

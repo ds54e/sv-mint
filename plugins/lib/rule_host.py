@@ -42,6 +42,7 @@ def main():
         script_meta.append({
             "stages": set(stages),
             "rules": rules_by_stage,
+            "path": str(Path(path)),
         })
     print(json.dumps({"type": "ready"}))
     sys.stdout.flush()
@@ -70,7 +71,11 @@ def main():
             try:
                 out = handler(req)
             except Exception as exc:
-                error = {"type": "error", "detail": str(exc)}
+                error = {
+                    "type": "error",
+                    "detail": str(exc),
+                    "script": meta.get("path"),
+                }
                 break
             if out:
                 results.extend(out)
