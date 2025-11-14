@@ -1,5 +1,6 @@
 use crate::core::errors::ConfigError;
 use std::collections::HashSet;
+use std::env;
 use std::fs;
 use std::path::{Path, PathBuf};
 
@@ -68,8 +69,9 @@ impl FilelistLoader {
             .parent()
             .map(Path::to_path_buf)
             .unwrap_or_else(|| PathBuf::from("."));
-        for (idx, line) in text.lines().enumerate() {
-            self.handle_line(&canon, &base, line, idx + 1)?;
+        let lines = preprocess_lines(&text, &canon)?;
+        for (line_no, line) in lines {
+            self.handle_line(&canon, &base, &line, line_no)?;
         }
         self.processing.remove(&canon);
         self.processed.insert(canon);
@@ -174,9 +176,134 @@ fn resolve_path(base: &Path, raw: &str) -> PathBuf {
     let path = PathBuf::from(raw);
     if path.is_absolute() {
         path
+    } else if is_windows_absolute(raw) {
+        PathBuf::from(raw)
     } else {
         base.join(path)
     }
+}
+
+fn is_windows_absolute(raw: &str) -> bool {
+    let bytes = raw.as_bytes();
+    if bytes.len() >= 3 && bytes[1] == b':' && bytes[0].is_ascii_alphabetic() {
+        return bytes[2] == b'\\' || bytes[2] == b'/';
+    }
+    raw.starts_with("\\\\")
+}
+
+fn preprocess_lines(text: &str, file: &Path) -> Result<Vec<(usize, String)>, ConfigError> {
+    let mut out = Vec::new();
+    let mut buffer = String::new();
+    let mut start_line = 0;
+    for (idx, raw_line) in text.lines().enumerate() {
+        let line_no = idx + 1;
+        let trimmed_end = raw_line.trim_end_matches(['\r', '\n']);
+        let mut segment = trimmed_end.to_string();
+        let continued = segment.trim_end().ends_with('\\');
+        if continued {
+            let trimmed = segment.trim_end();
+            let without = trimmed[..trimmed.len() - 1].trim_end();
+            segment = without.to_string();
+        }
+        if buffer.is_empty() {
+            start_line = line_no;
+        }
+        buffer.push_str(&segment);
+        if continued {
+            continue;
+        }
+        let expanded = expand_env(&buffer, file, start_line)?;
+        out.push((start_line, expanded));
+        buffer.clear();
+    }
+    if !buffer.is_empty() {
+        return Err(ConfigError::InvalidValue {
+            detail: format!(
+                "filelist {}:{}: trailing line continuation without content",
+                file.display(),
+                start_line
+            ),
+        });
+    }
+    Ok(out)
+}
+
+fn expand_env(line: &str, file: &Path, line_no: usize) -> Result<String, ConfigError> {
+    let chars: Vec<char> = line.chars().collect();
+    let mut i = 0;
+    let mut out = String::with_capacity(line.len());
+    while i < chars.len() {
+        let ch = chars[i];
+        if ch != '$' {
+            out.push(ch);
+            i += 1;
+            continue;
+        }
+        if i + 1 >= chars.len() {
+            out.push('$');
+            i += 1;
+            continue;
+        }
+        let next = chars[i + 1];
+        if next == '$' {
+            out.push('$');
+            i += 2;
+            continue;
+        }
+        if next == '{' || next == '(' {
+            let closing = if next == '{' { '}' } else { ')' };
+            let mut j = i + 2;
+            let mut name = String::new();
+            while j < chars.len() && chars[j] != closing {
+                name.push(chars[j]);
+                j += 1;
+            }
+            if j == chars.len() {
+                return Err(ConfigError::InvalidValue {
+                    detail: format!(
+                        "filelist {}:{}: unterminated ${} variable",
+                        file.display(),
+                        line_no,
+                        next
+                    ),
+                });
+            }
+            let value = lookup_env(&name, file, line_no)?;
+            out.push_str(&value);
+            i = j + 1;
+            continue;
+        }
+        let mut j = i + 1;
+        let mut name = String::new();
+        while j < chars.len() && is_env_ident(chars[j]) {
+            name.push(chars[j]);
+            j += 1;
+        }
+        if name.is_empty() {
+            out.push('$');
+            i += 1;
+            continue;
+        }
+        let value = lookup_env(&name, file, line_no)?;
+        out.push_str(&value);
+        i = j;
+    }
+    Ok(out)
+}
+
+fn lookup_env(name: &str, file: &Path, line_no: usize) -> Result<String, ConfigError> {
+    env::var(name).map_err(|_| ConfigError::InvalidValue {
+        detail: format!(
+            "filelist {}:{}: environment variable ${} not set",
+            file.display(),
+            line_no,
+            name
+        ),
+    })
+}
+
+fn is_env_ident(ch: char) -> bool {
+    ch.is_ascii_alphanumeric() || ch == '_'
 }
 
 #[cfg(test)]
@@ -227,5 +354,46 @@ top.sv
             }
             _ => panic!("expected ConfigError::InvalidValue"),
         }
+    }
+
+    #[test]
+    fn expands_env_and_continuations() {
+        let dir = tempdir().unwrap();
+        let target = dir.path().join("foo.sv");
+        fs::write(&target, "").unwrap();
+        let list = dir.path().join("env.f");
+        let inc = dir.path().join("incs");
+        fs::create_dir_all(&inc).unwrap();
+        std::env::set_var("TOP_FILE", target.to_string_lossy().to_string());
+        std::env::set_var("INC_ROOT", inc.to_string_lossy().to_string());
+        std::env::set_var("DEFVAL", "42");
+        let body = "\
+$TOP_FILE
++incdir+${INC_ROOT}
++define+FOO=$DEFVAL\\
++BAR=BAZ
+";
+        fs::write(&list, body).unwrap();
+        let load = load_filelists(&[list.clone()]).unwrap();
+        assert!(load.files.iter().any(|p| p == &target));
+        assert_eq!(load.incdirs.len(), 1);
+        assert!(load
+            .incdirs
+            .iter()
+            .any(|p| p.to_string_lossy() == inc.to_string_lossy()));
+        assert!(load.defines.contains(&"FOO=42".to_string()));
+        assert!(load.defines.contains(&"BAR=BAZ".to_string()));
+        std::env::remove_var("TOP_FILE");
+        std::env::remove_var("INC_ROOT");
+        std::env::remove_var("DEFVAL");
+    }
+
+    #[test]
+    fn windows_absolute_paths() {
+        let base = Path::new("/tmp/project");
+        let p = resolve_path(base, "C:\\proj\\foo.sv");
+        assert_eq!(p.to_string_lossy(), "C:\\proj\\foo.sv");
+        let unc = resolve_path(base, "\\\\server\\share\\bar.sv");
+        assert_eq!(unc.to_string_lossy(), "\\\\server\\share\\bar.sv");
     }
 }
