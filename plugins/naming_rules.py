@@ -154,7 +154,8 @@ def check_pipeline_suffixes(names):
             continue
         if name.endswith("_q0"):
             continue
-        if re_match := _pipeline_match(name):
+        re_match = _pipeline_match(name)
+        if re_match:
             base, stage = re_match
             prev = base + ("_q" if stage == 2 else f"_q{stage-1}")
             if prev not in names:
