@@ -107,23 +107,55 @@ fn gather_inputs(cfg: &mut Config, direct: &[PathBuf], filelists: &[PathBuf]) ->
 }
 
 fn discover_lib_files(lib_dirs: &[PathBuf], lib_exts: &[String]) -> Result<Vec<PathBuf>, ConfigError> {
-    use std::collections::HashSet;
+    use std::collections::{HashSet, VecDeque};
+    const MAX_FILES: usize = 50_000;
     let mut seen = HashSet::new();
     let mut out = Vec::new();
+    let ext_set: Vec<String> = lib_exts
+        .iter()
+        .map(|ext| {
+            if ext.starts_with('.') {
+                ext.to_ascii_lowercase()
+            } else {
+                format!(".{}", ext).to_ascii_lowercase()
+            }
+        })
+        .collect();
     for dir in lib_dirs {
-        let entries = std::fs::read_dir(dir).map_err(|_| ConfigError::NotFound {
-            path: dir.display().to_string(),
-        })?;
-        for entry in entries.flatten() {
-            let path = entry.path();
-            if !path.is_file() {
+        let mut queue: VecDeque<PathBuf> = VecDeque::new();
+        queue.push_back(dir.clone());
+        while let Some(current) = queue.pop_front() {
+            let meta = std::fs::symlink_metadata(&current).map_err(|_| ConfigError::NotFound {
+                path: current.display().to_string(),
+            })?;
+            if meta.file_type().is_symlink() {
                 continue;
             }
-            if let Some(ext) = path.extension().and_then(|e| e.to_str()) {
-                let dot_ext = format!(".{}", ext);
-                if lib_exts.iter().any(|needle| needle.eq_ignore_ascii_case(&dot_ext)) {
-                    if seen.insert(path.clone()) {
-                        out.push(path);
+            if meta.is_dir() {
+                let entries = match std::fs::read_dir(&current) {
+                    Ok(iter) => iter,
+                    Err(_) => continue,
+                };
+                for entry in entries.flatten() {
+                    queue.push_back(entry.path());
+                }
+                continue;
+            }
+            if meta.is_file() {
+                if let Some(ext) = current.extension().and_then(|e| e.to_str()) {
+                    let dot_ext = format!(".{}", ext.to_ascii_lowercase());
+                    if ext_set.iter().any(|needle| needle == &dot_ext) {
+                        if seen.insert(current.clone()) {
+                            out.push(current.clone());
+                            if out.len() >= MAX_FILES {
+                                return Err(ConfigError::InvalidValue {
+                                    detail: format!(
+                                        "libext auto-discovery exceeded {} files; tighten -y/+libext scope",
+                                        MAX_FILES
+                                    ),
+                                });
+                            }
+                        }
                     }
                 }
             }

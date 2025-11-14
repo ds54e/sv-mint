@@ -206,6 +206,10 @@ fn runs_with_filelist_and_env() {
     std::env::set_var("SV_FILELIST_FIXTURE", fixture.to_string_lossy().to_string());
     let mut filelist = NamedTempFile::new().expect("filelist");
     let fixtures_dir = std::fs::canonicalize("fixtures").expect("fixtures dir");
+    let nested = fixtures_dir.join("nested");
+    std::fs::create_dir_all(&nested).expect("nested dir");
+    let nested_file = nested.join("format_line_length_violation.sv");
+    std::fs::copy(&fixture, &nested_file).expect("copy");
     writeln!(filelist, "-y \"{}\"", fixtures_dir.to_string_lossy()).expect("write");
     writeln!(filelist, "+libext+.sv").expect("write");
     writeln!(filelist, "\"${{SV_FILELIST_FIXTURE}}\"").expect("write");
