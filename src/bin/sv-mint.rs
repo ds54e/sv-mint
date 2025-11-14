@@ -144,9 +144,8 @@ fn discover_lib_files(lib_dirs: &[PathBuf], lib_exts: &[String]) -> Result<Vec<P
             if meta.is_file() {
                 if let Some(ext) = current.extension().and_then(|e| e.to_str()) {
                     let dot_ext = format!(".{}", ext.to_ascii_lowercase());
-                    if ext_set.iter().any(|needle| needle == &dot_ext)
-                        && seen.insert(current.clone())
-                    {
+                    let matches_ext = ext_set.iter().any(|needle| needle == &dot_ext);
+                    if matches_ext && seen.insert(current.clone()) {
                         out.push(current.clone());
                         if out.len() >= MAX_FILES {
                             return Err(ConfigError::InvalidValue {
