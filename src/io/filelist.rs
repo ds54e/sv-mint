@@ -438,7 +438,7 @@ top.sv
             nested_path.strip_prefix(dir.path()).unwrap().display()
         );
         fs::write(&root_path, root_body).unwrap();
-        let load = load_filelists(&[root_path.clone()]).unwrap();
+        let load = load_filelists(std::slice::from_ref(&root_path)).unwrap();
         assert_eq!(load.files.len(), 2);
         assert!(load.files.iter().any(|p| p.ends_with(Path::new("top.sv"))));
         assert!(load.files.iter().any(|p| p.ends_with(Path::new("leaf.sv"))));
@@ -488,7 +488,7 @@ $TOP_FILE
 +BAR=BAZ
 ";
         fs::write(&list, body).unwrap();
-        let load = load_filelists(&[list.clone()]).unwrap();
+        let load = load_filelists(std::slice::from_ref(&list)).unwrap();
         assert!(load.files.iter().any(|p| p == &target));
         assert!(load.incdirs.iter().any(|p| p == &inc));
         assert!(load.incdirs.iter().any(|p| p == &inc_spaced));
