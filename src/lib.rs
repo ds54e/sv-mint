@@ -4,6 +4,7 @@ pub use core::types;
 
 pub mod io;
 pub use io::config;
+pub use io::filelist;
 pub use io::output;
 pub use io::textutil;
 

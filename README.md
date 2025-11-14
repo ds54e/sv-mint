@@ -29,6 +29,7 @@ sv-mint is a SystemVerilog lint pipeline that combines a Rust core with Python p
    - `sv-mint --only rule_x path/to/file.sv` runs only `rule_x`, temporarily disabling every other rule.
    - `sv-mint --disable rule_a,rule_b path/to/file.sv` disables just the listed rules; specify multiple IDs or repeat `--disable` as needed.
    - When `--only` is present, any `--disable` that follows removes rules from that already-filtered set, and referencing a nonexistent `rule_id` raises an error.
+6. Feed filelists via `-f/--filelist`. Entries can nest other lists with `-f`, inject include paths with `+incdir+`, and add defines with `+define+`. Relative paths are resolved against the filelist location before being passed to `sv-parser`.
 
 ## Anatomy of a Rule
 - Rules live under `plugins/` and expose a `check(req)` function.
