@@ -1,6 +1,6 @@
 # Developer Guide
 
-This document targets contributors who build sv-mint from source, extend the Rust core, or publish releases. For user-facing configuration details, see `docs/configuration.md`.
+This document collects maintainer notes for building sv-mint from source, extending the Rust core, and publishing releases. For user-facing configuration details, see `docs/configuration.md`.
 
 ## Building From Source
 
@@ -28,7 +28,7 @@ The release workflow bundles `sv-mint`, `docs/`, `plugins/`, `sv-mint.toml`, `RE
 4. Commit the release prep, tag it (`git tag vX.Y.Z`), and push both the branch and tag.
 5. GitHub Actions builds the archives for Linux/macOS/Windows (Linux uses `x86_64-unknown-linux-musl` for broad compatibility).
 
-## Contributor Workflow
+## Maintenance Workflow
 
 - Keep README and docs in sync with code changes so plugin authors and users stay aligned.
 - When adding new stages or payload fields, update `docs/plugin_author.md` and relevant rule docs under `docs/plugins/`.

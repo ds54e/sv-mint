@@ -63,5 +63,4 @@ See [`docs/configuration.md`](docs/configuration.md) for every optional section,
 - This repository and documentation were generated and are maintained with the help of ChatGPT.
 - Rust dependencies follow MIT or Apache-2.0 licenses as declared in `Cargo.toml`.
 - sv-mint itself is distributed under the same terms as the repository license (see `LICENSE`).
-
-> **For contributors:** build instructions, release procedures, and testing guidance now live in `docs/development.md`.
+- Internal maintenance notes (builds, releases, tests) are tracked in `docs/development.md`.
