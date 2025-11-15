@@ -143,7 +143,7 @@ Set `logging.format = "json"` to integrate with structured log collectors (Splun
 
 ## 8. Extension Guidelines
 - Adding a stage requires updates to `types::Stage`, `StagePayload`, and the TOML `stages.enabled` parsing.
-- When exposing new payload fields to rule authors, update `docs/plugin_author.md` and the relevant `docs/plugins/<script>.md` entry in lockstep.
+- When exposing new payload fields to rule authors, update `docs/plugin_author.md` and the relevant `docs/plugins/<rule_id>.md` entry in lockstep.
 - If size guard thresholds become configurable, modify both the TOML validation logic and the `SizePolicy` constructor.
 - When touching the parser integration, add fixtures under `fixtures/` and cross-link them in docs so plugin authors understand the new shape of payloads.
 

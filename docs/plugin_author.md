@@ -119,7 +119,7 @@ Prefer the parser-provided `loc` objects whenever available to avoid off-by-one 
 ## 5. Quality and Operations
 - Use `category.name` style rule IDs so users can search the README or user guide easily.
 - Filter the AST/CST before heavy processing and avoid copying entire payloads.
-- For custom project rules, create subdirectories under `plugins/` and reference absolute or relative paths from the `script` field inside each `[[rule]]`. Document every rule under `docs/plugins/<script_name>.md`.
+- For custom project rules, create subdirectories under `plugins/` and reference absolute or relative paths from the `script` field inside each `[[rule]]`. Document every rule under `docs/plugins/<rule_id>.md`.
 
 ### 5.1 Configuration Hooks
 - `[[rule]]`: declare one entry per `rule_id` with `id`, `script` (optional when `[plugin].root` is set and the file matches `<rule_id>.<stage>.py`), `stage` (optional if `script` ends with `.raw/.pp/.cst/.ast.py`), `enabled`, and optional `severity` overrides.
