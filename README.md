@@ -71,7 +71,7 @@ stage = "cst"  # explicit stage still allowed when filenames do not follow the c
 - Rules live under `plugins/` and expose a `check(req)` function.
 - `req.stage` decides which payload type (`raw_text`, `pp_text`, `cst`, `ast`) is available.
 - Return a list of `Violation` dictionaries with `rule_id`, `severity`, `message`, and `location`.
-- Document every bundled rule in `docs/plugins/<script>.md` so users know how to remediate findings.
+- Document every bundled rule in `docs/plugins/<rule_id>.md` so users know how to remediate findings.
 - For project-specific rules, add subdirectories inside `plugins/` and point `sv-mint.toml` at the new scripts.
 
 ## Diagnostics and Tooling
