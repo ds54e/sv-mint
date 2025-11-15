@@ -4,21 +4,19 @@
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
 - **Shared Helpers**: `plugins/lib/package_ruleset.py`
-- **Rule**:
-  - ``package.missing_end`` (warning): Require `endpackage` when a package is declared
+- **Summary**: Require `endpackage` when a package is declared
 
-## Rule Details
+## Details
 
-### `package.missing_end`
-#### Trigger
+### Trigger
 Detects `package` without a matching `endpackage`.
-#### Message
+### Message
 `` package foo missing endpackage ``
-#### Remediation
+### Remediation
 Add `endpackage : foo`.
-#### Notes
+### Notes
 Do not wrap `endpackage` in conditionals; place `ifdef` blocks inside the package body.
-#### Good
+### Good
 
 ```systemverilog
 package foo_pkg;
@@ -26,7 +24,7 @@ package foo_pkg;
 endpackage : foo_pkg
 ```
 
-#### Bad
+### Bad
 
 ```systemverilog
 package foo_pkg;

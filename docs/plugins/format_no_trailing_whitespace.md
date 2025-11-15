@@ -4,29 +4,27 @@
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
 - **Shared Helpers**: `plugins/lib/format_text_ruleset.py`
-- **Rule**:
-  - ``format.no_trailing_whitespace`` (warning): Flag trailing whitespace
+- **Summary**: Flag trailing whitespace
 
-## Rule Details
+## Details
 
-### `format.no_trailing_whitespace`
-#### Trigger
+### Trigger
 Reverse scans each line and flags trailing spaces or tabs.
-#### Message
+### Message
 `` trailing whitespace at line end ``
-#### Remediation
+### Remediation
 Trim on save or rely on editor hooks.
-#### Good
+### Good
 
 ```systemverilog
 assign ready_o = valid_i;
 ```
 
-#### Bad
+### Bad
 
 ```systemverilog
 assign ready_o = valid_i;␠
 ```
 
-#### Notes
+### Notes
 sv-mint analyzes LF-normalized text, so CRLF mixes still produce correct columns. Consider the `trailing-whitespace` pre-commit hook to catch violations before CI.

@@ -4,27 +4,25 @@
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`, `cst_ir.pp_text`, `line_starts`
 - **Shared Helpers**: `plugins/lib/format_spacing_ruleset.py`
-- **Rule**:
-  - ``format.call_spacing`` (warning): Disallow spaces between function/task names and `(`
+- **Summary**: Disallow spaces between function/task names and `(`
 
-## Rule Details
+## Details
 
-### `format.call_spacing`
-#### Trigger
+### Trigger
 Detects `foo (` in call sites (declarations like `function foo (` are ignored).
-#### Message
+### Message
 `` function or task call must not have space before '(' ``
-#### Remediation
+### Remediation
 Use `foo(`.
-#### Notes
+### Notes
 For multiline argument lists, break right after `(` to avoid other spacing rules.
-#### Good
+### Good
 
 ```systemverilog
 foo(a, b);
 ```
 
-#### Bad
+### Bad
 
 ```systemverilog
 foo (a, b);

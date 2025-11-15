@@ -4,26 +4,24 @@
 - **Stage**: `ast`
 - **Key Inputs**: `decls`, `symbols`, `ports`
 - **Shared Helpers**: `plugins/lib/naming_ruleset.py`
-- **Rule**:
-  - ``naming.module_case`` (warning): Modules must use lower_snake_case
+- **Summary**: Modules must use lower_snake_case
 
-## Rule Details
+## Details
 
-### `naming.module_case`
-#### Trigger
+### Trigger
 Flags `module` declarations whose identifiers are not lower_snake_case.
-#### Message
+### Message
 `` module <name> must use lower_snake_case ``
-#### Remediation
+### Remediation
 Rename modules so they start with a lowercase letter and only use lowercase letters, digits, or underscores.
-#### Good
+### Good
 
 ```systemverilog
 module entropy_ctrl;
 endmodule
 ```
 
-#### Bad
+### Bad
 
 ```systemverilog
 module EntropyCtrl;

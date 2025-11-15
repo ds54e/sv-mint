@@ -4,26 +4,24 @@
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`, `path`
 - **Shared Helpers**: `plugins/lib/dv_text_ruleset.py`
-- **Rule**:
-  - ``lang.no_program_construct`` (warning): Ban the `program` language construct
+- **Summary**: Ban the `program` language construct
 
-## Rule Details
+## Details
 
-### `lang.no_program_construct`
-#### Trigger
+### Trigger
 Scans for the `program` keyword.
-#### Message
+### Message
 `` program blocks are forbidden in DV sources ``
-#### Remediation
+### Remediation
 Use `module`/`interface`/`class` constructs instead of `program`.
-#### Good
+### Good
 
 ```systemverilog
 module testbench;
 endmodule
 ```
 
-#### Bad
+### Bad
 
 ```systemverilog
 program automatic testbench;

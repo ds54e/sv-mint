@@ -4,19 +4,17 @@
 - **Stage**: `ast`
 - **Key Inputs**: `decls`, `symbols`, `ports`
 - **Shared Helpers**: `plugins/lib/naming_ruleset.py`
-- **Rule**:
-  - ``naming.pipeline_sequence`` (warning): `_q2`+ stages require preceding `_q<n-1>`
+- **Summary**: `_q2`+ stages require preceding `_q<n-1>`
 
-## Rule Details
+## Details
 
-### `naming.pipeline_sequence`
-#### Trigger
+### Trigger
 Ensures `_q2` and above have contiguous predecessor stages.
-#### Message
+### Message
 `` pipeline stage <name> missing previous stage `` 
-#### Remediation
+### Remediation
 Declare `_q`, `_q1`, `_q2`, etc., without skipping counts.
-#### Good
+### Good
 
 ```systemverilog
 logic state_q;
@@ -24,7 +22,7 @@ logic state_q1;
 logic state_q2;
 ```
 
-#### Bad
+### Bad
 
 ```systemverilog
 logic state_q;

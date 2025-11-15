@@ -4,26 +4,24 @@
 - **Stage**: `ast`
 - **Key Inputs**: `decls`, `symbols`, `ports`
 - **Shared Helpers**: `plugins/lib/naming_ruleset.py`
-- **Rule**:
-  - ``naming.port_case`` (warning): Ports follow lower_snake_case + direction suffix
+- **Summary**: Ports follow lower_snake_case + direction suffix
 
-## Rule Details
+## Details
 
-### `naming.port_case`
-#### Trigger
+### Trigger
 Verifies that port names follow lower_snake_case before suffixes are considered.
-#### Message
+### Message
 `` port <name> must use lower_snake_case ``
-#### Remediation
+### Remediation
 Rename ports to lowercase snake case and then apply direction suffix rules.
-#### Good
+### Good
 
 ```systemverilog
 input  logic req_i;
 output logic gnt_o;
 ```
 
-#### Bad
+### Bad
 
 ```systemverilog
 input logic Req;

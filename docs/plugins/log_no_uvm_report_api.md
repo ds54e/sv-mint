@@ -4,25 +4,23 @@
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`, `path`
 - **Shared Helpers**: `plugins/lib/dv_text_ruleset.py`
-- **Rule**:
-  - ``log.no_uvm_report_api`` (warning): Forbid `uvm_report_*` helpers and require the shorthand macros
+- **Summary**: Forbid `uvm_report_*` helpers and require the shorthand macros
 
-## Rule Details
+## Details
 
-### `log.no_uvm_report_api`
-#### Trigger
+### Trigger
 Searches for `uvm_report_*` calls.
-#### Message
+### Message
 `` use uvm_info/error/fatal instead of uvm_report_* APIs ``
-#### Remediation
+### Remediation
 Switch to the shorthand macros (`uvm_info`, etc.).
-#### Good
+### Good
 
 ```systemverilog
 uvm_info(`gfn, "Starting sequence", UVM_MEDIUM);
 ```
 
-#### Bad
+### Bad
 
 ```systemverilog
 uvm_report_info(`gfn, "Starting sequence", UVM_MEDIUM);

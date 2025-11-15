@@ -4,19 +4,17 @@
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
 - **Shared Helpers**: `plugins/lib/lang_construct_ruleset.py`
-- **Rule**:
-  - ``lang.prefer_always_comb`` (warning): Replace `always @*` with `always_comb`
+- **Summary**: Replace `always @*` with `always_comb`
 
-## Rule Details
+## Details
 
-### `lang.prefer_always_comb`
-#### Trigger
+### Trigger
 Detects `always @*`/`always @ (*)` and suggests `always_comb`.
-#### Message
+### Message
 `` use always_comb instead of always @* ``
-#### Remediation
+### Remediation
 Convert to `always_comb` blocks with explicit default assignments.
-#### Good
+### Good
 
 ```systemverilog
 always_comb begin
@@ -28,7 +26,7 @@ always_comb begin
 end
 ```
 
-#### Bad
+### Bad
 
 ```systemverilog
 always @* begin

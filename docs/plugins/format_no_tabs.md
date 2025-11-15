@@ -4,25 +4,23 @@
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
 - **Shared Helpers**: `plugins/lib/format_text_ruleset.py`
-- **Rule**:
-  - ``format.no_tabs`` (warning): Reject tab characters
+- **Summary**: Reject tab characters
 
-## Rule Details
+## Details
 
-### `format.no_tabs`
-#### Trigger
+### Trigger
 Emits a violation for every tab (`\t`) encountered.
-#### Message
+### Message
 `` tab character detected ``
-#### Remediation
+### Remediation
 Replace tabs with spaces and follow the widths enforced by `format_indent_rules`.
-#### Good
+### Good
 
 ```systemverilog
 logic ready;
 ```
 
-#### Bad
+### Bad
 
 ```systemverilog
 	logic ready;
@@ -30,5 +28,5 @@ logic ready;
 
 - Tabs at the start of the line shift alignment between tools.
 
-#### Notes
+### Notes
 Pair this with `.editorconfig` `indent_style = space`. If you absolutely must allow tabs (e.g., when linting legacy IP), disable the rule via its `[[rule]]` entry and re-enable it once the migration is complete.

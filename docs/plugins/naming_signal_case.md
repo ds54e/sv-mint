@@ -4,25 +4,23 @@
 - **Stage**: `ast`
 - **Key Inputs**: `decls`, `symbols`, `ports`
 - **Shared Helpers**: `plugins/lib/naming_ruleset.py`
-- **Rule**:
-  - ``naming.signal_case`` (warning): Signals/variables must use lower_snake_case
+- **Summary**: Signals/variables must use lower_snake_case
 
-## Rule Details
+## Details
 
-### `naming.signal_case`
-#### Trigger
+### Trigger
 Checks nets and variables for lower_snake_case identifiers.
-#### Message
+### Message
 `` signal <name> must use lower_snake_case ``
-#### Remediation
+### Remediation
 Rename `logic`/`wire`/`reg` identifiers to lowercase snake case.
-#### Good
+### Good
 
 ```systemverilog
 logic error_flag;
 ```
 
-#### Bad
+### Bad
 
 ```systemverilog
 logic errorFlag;

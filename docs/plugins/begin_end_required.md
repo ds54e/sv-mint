@@ -3,21 +3,19 @@
 - **Script**: `plugins/format.begin_required.pp.py`
 - **Stage**: `pp_text`
 - **Key Inputs**: Preprocessed `text`
-- **Rule**:
-  - ``format.begin_required`` (warning): Require multiline control bodies to use `begin ... end`
+- **Summary**: Require multiline control bodies to use `begin ... end`
 
-## Rule Details
+## Details
 
-### `format.begin_required`
-#### Trigger
+### Trigger
 Scans `if/for/foreach/while/repeat/forever` constructs. When their bodies span multiple lines but do not start with `begin`, the rule fires.
-#### Message
+### Message
 `` <keyword> body must start with begin when split across lines ``
-#### Remediation
+### Remediation
 Insert `begin` after the condition and add the matching `end`. For single statements, either keep them on one line or still wrap them for clarity.
-#### Notes
+### Notes
 `else if` chains are analyzed with awareness of `else`, so match both sides. Because the rule uses preprocessed text, macros must expand to include the `begin` keyword.
-#### Good
+### Good
 
 ```systemverilog
 if (req_i) begin
@@ -26,7 +24,7 @@ if (req_i) begin
 end
 ```
 
-#### Bad
+### Bad
 
 ```systemverilog
 if (req_i)

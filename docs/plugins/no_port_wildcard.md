@@ -3,21 +3,19 @@
 - **Script**: `plugins/module.no_port_wildcard.cst.py`
 - **Stage**: `cst` (`mode = inline`)
 - **Key Inputs**: `cst_ir.tokens`, `tok_kind_table`, `line_starts`
-- **Rule**:
-  - ``module.no_port_wildcard`` (warning): Catch `.*` port wildcards at the CST level
+- **Summary**: Catch `.*` port wildcards at the CST level
 
-## Rule Details
+## Details
 
-### `module.no_port_wildcard`
-#### Trigger
+### Trigger
 Reports every `conn_wildcard` token with precise file/line/col info.
-#### Message
+### Message
 `` named port connections must not use .* wildcard ``
-#### Remediation
+### Remediation
 Expand connections to `.port(signal)` or update generators accordingly.
-#### Notes
+### Notes
 Complements `module_inst_rules.py`; this variant survives preprocessing and macro expansion.
-#### Good
+### Good
 
 ```systemverilog
 foo u_foo (
@@ -27,7 +25,7 @@ foo u_foo (
 );
 ```
 
-#### Bad
+### Bad
 
 ```systemverilog
 foo u_foo (.*);  // wildcard connection

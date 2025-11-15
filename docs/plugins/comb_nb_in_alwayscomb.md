@@ -3,21 +3,19 @@
 - **Script**: `plugins/comb.nb_in_alwayscomb.cst.py`
 - **Stage**: `cst`
 - **Key Inputs**: `cst_ir.tokens`, `tok_kind_table`, `line_starts`, `pp_text`
-- **Rule**:
-  - ``comb.nb_in_alwayscomb`` (warning): Ban non-blocking assignments (`<=`) inside `always_comb`
+- **Summary**: Ban non-blocking assignments (`<=`) inside `always_comb`
 
-## Rule Details
+## Details
 
-### `comb.nb_in_alwayscomb`
-#### Trigger
+### Trigger
 Identifies `always_comb` nodes and flags any `op_le` (`<=`) tokens within the block. Falls back to text scanning when token info is missing.
-#### Message
+### Message
 `` nonblocking '<=' inside always_comb ``
-#### Remediation
+### Remediation
 Use blocking `=` inside combinational logic; if state is required, move the logic to `always_ff`.
-#### Notes
+### Notes
 When `sv-parser` updates token kinds, ensure `op_le` remains present in `tok_kind_table`.
-#### Good
+### Good
 
 ```systemverilog
 always_comb begin
@@ -25,7 +23,7 @@ always_comb begin
 end
 ```
 
-#### Bad
+### Bad
 
 ```systemverilog
 always_comb begin
@@ -33,5 +31,5 @@ always_comb begin
 end
 ```
 
-#### Additional Tips
+### Additional Tips
 Some tools infer flops when `<=` appears inside `always_comb`. Macros that hide the operator still trigger the rule after expansion, so provide separate helpers for blocking vs. non-blocking assignments.

@@ -4,25 +4,23 @@
 - **Stage**: `ast`
 - **Key Inputs**: `decls`, `symbols`, `ports`
 - **Shared Helpers**: `plugins/lib/naming_ruleset.py`
-- **Rule**:
-  - ``naming.no_numeric_suffix`` (warning): Ban trailing `_42` numeric suffixes
+- **Summary**: Ban trailing `_42` numeric suffixes
 
-## Rule Details
+## Details
 
-### `naming.no_numeric_suffix`
-#### Trigger
+### Trigger
 Detects identifiers ending in `_<digits>`.
-#### Message
+### Message
 `` <name> must not end with _<number> ``
-#### Remediation
+### Remediation
 Use meaningful suffixes such as `_a/_b` or `_stage1/_stage2`, not raw numbers.
-#### Good
+### Good
 
 ```systemverilog
 logic state_a, state_b;
 ```
 
-#### Bad
+### Bad
 
 ```systemverilog
 logic state_42;

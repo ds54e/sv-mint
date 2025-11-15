@@ -3,21 +3,19 @@
 - **Script**: `plugins/format.end_else_inline.pp.py`
 - **Stage**: `pp_text`
 - **Key Inputs**: Preprocessed `text`
-- **Rule**:
-  - ``format.end_else_inline`` (warning): Require `else` to share the same line as the preceding `end`
+- **Summary**: Require `else` to share the same line as the preceding `end`
 
-## Rule Details
+## Details
 
-### `format.end_else_inline`
-#### Trigger
+### Trigger
 Detects the pattern `end` + whitespace + newline + whitespace + `else` and reports the `else` location.
-#### Message
+### Message
 `` else must be on the same line as the preceding end ``
-#### Remediation
+### Remediation
 Join `end else` onto a single line or adopt `end else begin` formatting consistently.
-#### Notes
+### Notes
 Lines split by comments are ignored. The goal is to keep `end/else` visually paired.
-#### Good
+### Good
 
 ```systemverilog
 if (req_i) begin
@@ -27,7 +25,7 @@ end else begin
 end
 ```
 
-#### Bad
+### Bad
 
 ```systemverilog
 if (req_i) begin
@@ -38,5 +36,5 @@ else begin
 end
 ```
 
-#### Additional Tips
+### Additional Tips
 When `end` has a trailing comment (`end // state latch`), leave enough spacing so `end // state latch else ...` reads clearly. Because the rule scans `pp_text`, `else` guarded by `ifdef` blocks may be skipped if not present after preprocessing.

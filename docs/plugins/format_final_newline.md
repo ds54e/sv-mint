@@ -4,19 +4,17 @@
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
 - **Shared Helpers**: `plugins/lib/format_text_ruleset.py`
-- **Rule**:
-  - ``format.final_newline`` (warning): Require a trailing newline
+- **Summary**: Require a trailing newline
 
-## Rule Details
+## Details
 
-### `format.final_newline`
-#### Trigger
+### Trigger
 Warns when the file does not end with `\n`.
-#### Message
+### Message
 `` file must end with newline ``
-#### Remediation
+### Remediation
 Insert a newline after the last line.
-#### Good
+### Good
 
 ```systemverilog
 module foo;
@@ -24,10 +22,10 @@ endmodule
 
 ```
 
-#### Bad
+### Bad
 
 ```systemverilog
 module foo;
 endmodule```
-#### Notes
+### Notes
 Git adds `\ No newline at end of file` to diffs; this rule catches the issue before CI noise appears.

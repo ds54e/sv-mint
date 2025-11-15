@@ -4,19 +4,17 @@
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
 - **Shared Helpers**: `plugins/lib/format_indent_ruleset.py`
-- **Rule**:
-  - ``format.indent_multiple_of_two`` (warning): Enforce indentation in multiples of two spaces
+- **Summary**: Enforce indentation in multiples of two spaces
 
-## Rule Details
+## Details
 
-### `format.indent_multiple_of_two`
-#### Trigger
+### Trigger
 Computes indentation width after stripping tabs; flags lines with an odd number of spaces.
-#### Message
+### Message
 `` indentation should be multiples of 2 spaces ``
-#### Remediation
+### Remediation
 Replace tabs with spaces and keep indentation at two-space steps.
-#### Good
+### Good
 
 ```systemverilog
 module foo;
@@ -24,7 +22,7 @@ module foo;
 endmodule
 ```
 
-#### Bad
+### Bad
 
 ```systemverilog
 module foo;

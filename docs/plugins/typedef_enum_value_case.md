@@ -4,17 +4,15 @@
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
 - **Shared Helpers**: `plugins/lib/typedef_naming_ruleset.py`
-- **Rule**:
-  - ``typedef.enum_value_case`` (warning): Enum members must be UpperCamelCase
+- **Summary**: Enum members must be UpperCamelCase
 
-## Rule Details
+## Details
 
-### `typedef.enum_value_case`
-#### Trigger
+### Trigger
 Enum members that are not `UpperCamelCase`.
-#### Remediation
+### Remediation
 Capitalize each word (`UartInterruptFrameErr`) to match the doc's readability requirement.
-#### Good
+### Good
 
 ```systemverilog
 typedef enum logic [1:0] {
@@ -23,7 +21,7 @@ typedef enum logic [1:0] {
 } uart_mode_e;
 ```
 
-#### Bad
+### Bad
 
 ```systemverilog
 typedef enum logic [1:0] {

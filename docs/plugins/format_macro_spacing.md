@@ -4,25 +4,23 @@
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`, `cst_ir.pp_text`, `line_starts`
 - **Shared Helpers**: `plugins/lib/format_spacing_ruleset.py`
-- **Rule**:
-  - ``format.macro_spacing`` (warning): Disallow spaces between macro names and `(`
+- **Summary**: Disallow spaces between macro names and `(`
 
-## Rule Details
+## Details
 
-### `format.macro_spacing`
-#### Trigger
+### Trigger
 Flags macro invocations with spaces before `(`.
-#### Message
+### Message
 `` macro invocation must not have space before '(' ``
-#### Remediation
+### Remediation
 Use `` `MY_MACRO(`` syntax consistently.
-#### Good
+### Good
 
 ```systemverilog
 `MY_MACRO(a, b)
 ```
 
-#### Bad
+### Bad
 
 ```systemverilog
 `MY_MACRO (a, b)

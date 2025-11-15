@@ -3,21 +3,18 @@
 - **Script**: `plugins/flow.multiple_nonblocking.ast.py`
 - **Stage**: `ast`
 - **Key Inputs**: `assigns` (each entry includes `module`, `lhs`, `op`, and locations)
-- **Rules**:
-  - ``flow.multiple_nonblocking`` (warning): Report multiple non-blocking assignments to the same LHS within a module
+- **Summary**: Report multiple non-blocking assignments to the same LHS within a module
 
-## Rule Details
-
-### `flow.multiple_nonblocking`
-#### Trigger
+## Details
+### Trigger
 Groups AST `assigns` with `op == nonblocking` by `(module, lhs)` and reports the second and later assignments.
-#### Message
+### Message
 `` multiple nonblocking assignments to <lhs> ``
-#### Remediation
+### Remediation
 Ensure only one `<=` drives a flop per clock domain. If you intentionally assign the same flop in multiple blocks, refactor so one side writes `state_d` (or uses `=`) and keep a single `<=`.
-#### Notes
+### Notes
 The rule inspects the AST, so it catches repeated `<=` even when they live in plain `always @(posedge clk)` blocks or macro-expanded logic. Unless disabled in `sv-mint.toml`, it also aggregates across hierarchical generates as long as the module/LHS pair matches, so double-check emitted code.
-#### Good
+### Good
 
 ```systemverilog
 always_comb begin
@@ -33,7 +30,7 @@ always_ff @(posedge clk_i or negedge rst_ni) begin
 end
 ```
 
-#### Bad
+### Bad
 
 ```systemverilog
 always_ff @(posedge clk_i) begin
@@ -47,5 +44,5 @@ always_ff @(posedge clk_i) begin
 end
 ```
 
-#### Additional Tips
+### Additional Tips
 Tracking also happens inside `generate` blocks, so repeated `genvar` instances still conflict. Prefer computing `state_d` via `unique case` and issuing a single `<=` at the end to avoid false positives.

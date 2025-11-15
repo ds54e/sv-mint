@@ -3,21 +3,18 @@
 - **Script**: `plugins/module.named_ports_required.raw.py`
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
-- **Rules**:
-  - ``module.named_ports_required`` (warning): Require named `.port(signal)` connections
+- **Summary**: Require named `.port(signal)` connections
 
-## Rule Details
-
-### `module.named_ports_required`
-#### Trigger
+## Details
+### Trigger
 Detects instantiations that begin with positional arguments (no `.` inside the port list).
-#### Message
+### Message
 `` use named port connections instead of positional arguments ``
-#### Remediation
+### Remediation
 Rewrite as `.clk(clk)` style to remove ordering hazards.
-#### Notes
+### Notes
 Formatting tools such as `verible-verilog-format --named-port-formatting` help during migrations.
-#### Good
+### Good
 
 ```systemverilog
 foo u_foo (
@@ -28,7 +25,7 @@ foo u_foo (
 );
 ```
 
-#### Bad
+### Bad
 
 ```systemverilog
 foo u_foo (clk_i, rst_ni, req_i, gnt_o);  // positional arguments

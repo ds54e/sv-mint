@@ -3,20 +3,19 @@
 - **Script**: `plugins/format.case_begin_required.cst.py`
 - **Stage**: `cst` (`mode = inline`)
 - **Key Inputs**: `cst_ir.tokens`, `tok_kind_table`, `line_starts`
-- **Rule**:
-  - ``format.case_begin_required`` (warning): Require each `case` item to wrap statements in `begin/end`
+- **Summary**: Require each `case` item to wrap statements in `begin/end`
 
-## Rule Details
+## Details
 
-#### Trigger
+### Trigger
 For each `CaseStatement`, checks the first non-comment token after the `colon`. If it is not `begin`, the rule fires (even for single statements).
-#### Message
+### Message
 `` case item should wrap statements in begin/end ``
-#### Remediation
+### Remediation
 Add `begin ... end` blocks to every case item so the first token after `:` is always `begin`.
-#### Notes
+### Notes
 Single statements that already start with `begin` are skipped; the policy applies equally to `unique case` and `case inside`. The implementation does not count statements inside the item—any label without an immediate `begin` fails the rule.
-#### Good
+### Good
 
 ```systemverilog
 unique case (state_q)
@@ -30,7 +29,7 @@ unique case (state_q)
 endcase
 ```
 
-#### Bad
+### Bad
 
 ```systemverilog
 case (state_q)
@@ -39,5 +38,5 @@ case (state_q)
 endcase
 ```
 
-#### Additional Tips
+### Additional Tips
 Adding labels like `begin : start_state` helps readability and avoids confusion when inserting inline comments.

@@ -4,30 +4,28 @@
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
 - **Shared Helpers**: `plugins/lib/header_comment_ruleset.py`
-- **Rule**:
-  - ``header.missing_comment`` (warning): Require a header comment within the first five lines
+- **Summary**: Require a header comment within the first five lines
 
-## Rule Details
+## Details
 
-### `header.missing_comment`
-#### Trigger
+### Trigger
 If the first five lines contain no `//` comment, the rule fires.
-#### Message
+### Message
 `` file header should include descriptive comment ``
-#### Remediation
+### Remediation
 Summarize module purpose, contacts, or key context at the top of the file.
-#### Good
+### Good
 
 ```systemverilog
 // Control logic for entropy distribution network.
 module entropy_ctrl (...);
 ```
 
-#### Bad
+### Bad
 
 ```systemverilog
 module entropy_ctrl (...);
 ```
 
-#### Additional Tips
+### Additional Tips
 Mention module names, roles, and dependency URLs when useful. Generators should emit these comments automatically.

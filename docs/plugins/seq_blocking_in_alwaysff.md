@@ -3,21 +3,19 @@
 - **Script**: `plugins/seq.blocking_in_alwaysff.cst.py`
 - **Stage**: `cst`
 - **Key Inputs**: `cst_ir.tokens`, `tok_kind_table`, `line_starts`, `pp_text`
-- **Rule**:
-  - ``seq.blocking_in_alwaysff`` (warning): Ban blocking `=` assignments inside `always_ff`
+- **Summary**: Ban blocking `=` assignments inside `always_ff`
 
-## Rule Details
+## Details
 
-### `seq.blocking_in_alwaysff`
-#### Trigger
+### Trigger
 Identifies `always_ff` regions and warns whenever an `op_eq` (or fallback regex `=`) token appears inside.
-#### Message
+### Message
 `` blocking '=' inside always_ff ``
-#### Remediation
+### Remediation
 Use non-blocking `<=` for sequential logic or refactor the assignment into combinational logic.
-#### Notes
+### Notes
 Falls back to text scanning when token data is unavailable.
-#### Good
+### Good
 
 ```systemverilog
 always_ff @(posedge clk_i or negedge rst_ni) begin
@@ -26,7 +24,7 @@ always_ff @(posedge clk_i or negedge rst_ni) begin
 end
 ```
 
-#### Bad
+### Bad
 
 ```systemverilog
 always_ff @(posedge clk_i) begin

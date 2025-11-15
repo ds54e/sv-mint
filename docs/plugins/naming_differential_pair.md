@@ -4,26 +4,24 @@
 - **Stage**: `ast`
 - **Key Inputs**: `decls`, `symbols`, `ports`
 - **Shared Helpers**: `plugins/lib/naming_ruleset.py`
-- **Rule**:
-  - ``naming.differential_pair`` (warning): `_p` ports require matching `_n` ports
+- **Summary**: `_p` ports require matching `_n` ports
 
-## Rule Details
+## Details
 
-### `naming.differential_pair`
-#### Trigger
+### Trigger
 Looks for `_p` ports without a matching `_n` sharing the same base name.
-#### Message
+### Message
 `` differential pair missing companion <base>_n ``
-#### Remediation
+### Remediation
 Declare both halves or rename the signal if it is not differential.
-#### Good
+### Good
 
 ```systemverilog
 output logic tx_p_o;
 output logic tx_n_o;
 ```
 
-#### Bad
+### Bad
 
 ```systemverilog
 output logic tx_p_o;

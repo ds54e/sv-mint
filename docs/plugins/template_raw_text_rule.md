@@ -3,32 +3,30 @@
 - **Script**: `plugins/template.raw_text_marker.raw.py`
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
-- **Rule**:
-  - ``template.raw_text_marker`` (info): Report placeholder markers left in templates
+- **Summary**: Report placeholder markers left in templates
 
-## Rule Details
+## Details
 
-### `template.raw_text_marker`
-#### Trigger
+### Trigger
 Searches for `__SV_MINT_TEMPLATE__` and reports the first occurrence as an informational violation.
-#### Message
+### Message
 `` template marker detected ``
-#### Remediation
+### Remediation
 Remove the marker after copying templates into production code.
-#### Notes
+### Notes
 Only one location per file is reported. Split template files if you need multiple markers.
-#### Good
+### Good
 
 ```systemverilog
 // SPDX-License-Identifier: Apache-2.0
 // DMA channel template instantiation (marker removed)
 ```
 
-#### Bad
+### Bad
 
 ```systemverilog
 // __SV_MINT_TEMPLATE__ keep/remove?
 ```
 
-#### Additional Tips
+### Additional Tips
 Blocking template markers in CI prevents unfinished scaffolding from landing in commits. Update generators (e.g., `scripts/new_module.sh`) to strip or replace the marker automatically.

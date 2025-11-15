@@ -4,14 +4,12 @@
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
 - **Shared Helpers**: `plugins/lib/default_nettype_ruleset.py`
-- **Rule**:
-  - ``lang.default_nettype_missing`` (warning): Require `` `default_nettype none`` in every file
+- **Summary**: Require `` `default_nettype none`` in every file
 
-## Rule Details
+## Details
 
-### `lang.default_nettype_missing`
 Flags files that never declare `` `default_nettype``. The DVCodingStyle guidance (and most RTL style guides) expects `` `default_nettype none`` so that misspelled nets do not silently become implicit wires.
-#### Good
+### Good
 
 ```systemverilog
 `default_nettype none
@@ -22,7 +20,7 @@ endmodule
 `default_nettype wire
 ```
 
-#### Bad
+### Bad
 
 ```systemverilog
 module foo;

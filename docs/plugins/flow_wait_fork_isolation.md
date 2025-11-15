@@ -4,25 +4,23 @@
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`, `path`
 - **Shared Helpers**: `plugins/lib/dv_text_ruleset.py`
-- **Rule**:
-  - ``flow.wait_fork_isolation`` (warning): `wait fork` must be replaced with isolation fork helpers
+- **Summary**: `wait fork` must be replaced with isolation fork helpers
 
-## Rule Details
+## Details
 
-### `flow.wait_fork_isolation`
-#### Trigger
+### Trigger
 Reports `wait fork`.
-#### Message
+### Message
 `` wait fork is banned; use isolation helpers ``
-#### Remediation
+### Remediation
 Use watchdog-backed isolation helpers such as `DV_SPINWAIT`.
-#### Good
+### Good
 
 ```systemverilog
 `DV_SPINWAIT(wait_done);
 ```
 
-#### Bad
+### Bad
 
 ```systemverilog
 wait fork;  // blocked until all child processes finish

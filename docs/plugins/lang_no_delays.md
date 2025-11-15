@@ -4,19 +4,17 @@
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
 - **Shared Helpers**: `plugins/lib/lang_construct_ruleset.py`
-- **Rule**:
-  - ``lang.no_delays`` (warning): Ban `#5`-style delays in RTL
+- **Summary**: Ban `#5`-style delays in RTL
 
-## Rule Details
+## Details
 
-### `lang.no_delays`
-#### Trigger
+### Trigger
 Finds standalone `#` delay operators (excluding parameterized `#(...)` clauses).
-#### Message
+### Message
 `` delay (#) constructs are not permitted ``
-#### Remediation
+### Remediation
 Move timing behavior to testbenches or constraints; keep RTL delay-free.
-#### Good
+### Good
 
 ```systemverilog
 always_ff @(posedge clk_i or negedge rst_ni) begin
@@ -25,7 +23,7 @@ always_ff @(posedge clk_i or negedge rst_ni) begin
 end
 ```
 
-#### Bad
+### Bad
 
 ```systemverilog
 always_ff @(posedge clk_i) begin

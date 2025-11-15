@@ -4,21 +4,19 @@
 - **Stage**: `cst`
 - **Key Inputs**: `text`, `cst_ir.pp_text`, `line_starts`
 - **Shared Helpers**: `plugins/lib/format_spacing_ruleset.py`
-- **Rule**:
-  - ``format.case_colon_spacing`` (warning): Forbid whitespace before `:` in case labels
+- **Summary**: Forbid whitespace before `:` in case labels
 
-## Rule Details
+## Details
 
-### `format.case_colon_spacing`
-#### Trigger
+### Trigger
 In CST mode, inspect `CaseItem` tokens and flag any whitespace that appears before `:`.
-#### Message
+### Message
 `` case item must not have whitespace before ':' ``
-#### Remediation
+### Remediation
 Format labels as `LABEL:` so the colon touches the label; follow-on spacing is handled by `format.case_colon_after`.
-#### Notes
+### Notes
 Only case labels are analyzed (not enums or `localparam`). When adding comments, keep `LABEL: // comment` ordering so stray spaces do not sneak in front of the colon.
-#### Good
+### Good
 
 ```systemverilog
 unique case (state_q)
@@ -28,7 +26,7 @@ unique case (state_q)
 endcase
 ```
 
-#### Bad
+### Bad
 
 ```systemverilog
 unique case (state_q)

@@ -4,25 +4,23 @@
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
 - **Shared Helpers**: `plugins/lib/format_text_ruleset.py`
-- **Rule**:
-  - ``format.ascii_only`` (warning): Reject non-ASCII characters
+- **Summary**: Reject non-ASCII characters
 
-## Rule Details
+## Details
 
-### `format.ascii_only`
-#### Trigger
+### Trigger
 Reports every character whose `ord(ch) > 127`.
-#### Message
+### Message
 `` non-ASCII character detected ``
-#### Remediation
+### Remediation
 Remove non-ASCII glyphs (comments included) or disable the rule if UTF-8 text is unavoidable.
-#### Good
+### Good
 
 ```systemverilog
 // state machine controls DMA start
 ```
 
-#### Bad
+### Bad
 
 ```systemverilog
 // Δ-state start  ← contains non-ASCII character

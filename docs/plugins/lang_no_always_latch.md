@@ -4,19 +4,17 @@
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
 - **Shared Helpers**: `plugins/lib/lang_construct_ruleset.py`
-- **Rule**:
-  - ``lang.no_always_latch`` (warning): Discourage `always_latch`
+- **Summary**: Discourage `always_latch`
 
-## Rule Details
+## Details
 
-### `lang.no_always_latch`
-#### Trigger
+### Trigger
 Reports any `always_latch` keyword.
-#### Message
+### Message
 `` always_latch is discouraged; prefer flip-flops ``
-#### Remediation
+### Remediation
 Re-architect the logic with `always_ff` or justify the latch and disable the rule locally.
-#### Good
+### Good
 
 ```systemverilog
 always_ff @(posedge clk_i or negedge rst_ni) begin
@@ -25,7 +23,7 @@ always_ff @(posedge clk_i or negedge rst_ni) begin
 end
 ```
 
-#### Bad
+### Bad
 
 ```systemverilog
 always_latch begin

@@ -4,25 +4,23 @@
 - **Stage**: `ast`
 - **Key Inputs**: `decls`, `symbols`, `ports`
 - **Shared Helpers**: `plugins/lib/naming_ruleset.py`
-- **Rule**:
-  - ``naming.clk_prefix`` (warning): Clock names must start with `clk`
+- **Summary**: Clock names must start with `clk`
 
-## Rule Details
+## Details
 
-### `naming.clk_prefix`
-#### Trigger
+### Trigger
 Requires clock ports to start with `clk`.
-#### Message
+### Message
 `` clock port <name> must start with 'clk' ``
-#### Remediation
+### Remediation
 Rename to `clk_<domain>_<suffix>`.
-#### Good
+### Good
 
 ```systemverilog
 input logic clk_core_i;
 ```
 
-#### Bad
+### Bad
 
 ```systemverilog
 input logic core_clk_i;

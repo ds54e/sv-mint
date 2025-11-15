@@ -4,26 +4,24 @@
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
 - **Shared Helpers**: `plugins/lib/package_ruleset.py`
-- **Rule**:
-  - ``package.multiple`` (warning): Limit each file to a single `package`
+- **Summary**: Limit each file to a single `package`
 
-## Rule Details
+## Details
 
-### `package.multiple`
-#### Trigger
+### Trigger
 Counts `package` keywords; if more than one appears, the rule reports the first occurrence.
-#### Message
+### Message
 `` multiple package declarations in single file (pkg_name) ``
-#### Remediation
+### Remediation
 Split packages into separate files or rename them.
-#### Good
+### Good
 
 ```systemverilog
 package foo_pkg;
 endpackage : foo_pkg
 ```
 
-#### Bad
+### Bad
 
 ```systemverilog
 package foo_pkg;

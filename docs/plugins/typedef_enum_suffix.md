@@ -4,21 +4,19 @@
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
 - **Shared Helpers**: `plugins/lib/typedef_naming_ruleset.py`
-- **Rule**:
-  - ``typedef.enum_suffix`` (warning): Require `typedef enum` names to end with `_e`
+- **Summary**: Require `typedef enum` names to end with `_e`
 
-## Rule Details
+## Details
 
-### `typedef.enum_suffix`
-#### Trigger
+### Trigger
 Matches `typedef enum { ... } name;` constructs whose `name` does not end with `_e`.
-#### Message
+### Message
 `` enum types should end with _e: state ``
-#### Remediation
+### Remediation
 Rename to `state_e`, etc.
-#### Additional Tips
+### Additional Tips
 Do not use `_t` for enums; that conflicts with the struct rule below.
-#### Good
+### Good
 
 ```systemverilog
 typedef enum logic [1:0] {
@@ -27,7 +25,7 @@ typedef enum logic [1:0] {
 } state_e;
 ```
 
-#### Bad
+### Bad
 
 ```systemverilog
 typedef enum logic [1:0] {

@@ -4,19 +4,17 @@
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
 - **Shared Helpers**: `plugins/lib/format_indent_ruleset.py`
-- **Rule**:
-  - ``format.preproc_left_align`` (warning): Left-align preprocessor directives
+- **Summary**: Left-align preprocessor directives
 
-## Rule Details
+## Details
 
-### `format.preproc_left_align`
-#### Trigger
+### Trigger
 Finds `define/ifdef/ifndef/endif` directives that start with whitespace.
-#### Message
+### Message
 `` preprocessor directives must be left aligned ``
-#### Remediation
+### Remediation
 Remove leading whitespace so directives start in column 1, regardless of nesting depth.
-#### Good
+### Good
 
 ```systemverilog
 `ifdef FOO
@@ -24,7 +22,7 @@ logic bar;
 `endif
 ```
 
-#### Bad
+### Bad
 
 ```systemverilog
   `ifdef FOO  // directive indented

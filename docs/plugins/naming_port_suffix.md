@@ -4,19 +4,17 @@
 - **Stage**: `ast`
 - **Key Inputs**: `decls`, `symbols`, `ports`
 - **Shared Helpers**: `plugins/lib/naming_ruleset.py`
-- **Rule**:
-  - ``naming.port_suffix`` (warning): `_i/_o/_io` suffixes must match port direction
+- **Summary**: `_i/_o/_io` suffixes must match port direction
 
-## Rule Details
+## Details
 
-### `naming.port_suffix`
-#### Trigger
+### Trigger
 Ensures `_i/_ni`, `_o/_no`, or `_io/_nio` suffixes match the declared port direction.
-#### Message
+### Message
 `` port <name> must use suffix matching its direction ``
-#### Remediation
+### Remediation
 Append `_i`, `_o`, or `_io` (with `_n` for active-low signals) so direction is obvious at call sites.
-#### Good
+### Good
 
 ```systemverilog
 input  logic req_i;
@@ -24,7 +22,7 @@ input  logic rst_ni;
 output logic data_o;
 ```
 
-#### Bad
+### Bad
 
 ```systemverilog
 input  logic req;

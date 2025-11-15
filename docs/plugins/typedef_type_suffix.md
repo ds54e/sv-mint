@@ -4,21 +4,19 @@
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
 - **Shared Helpers**: `plugins/lib/typedef_naming_ruleset.py`
-- **Rule**:
-  - ``typedef.type_suffix`` (warning): Require other typedef names to end with `_t`
+- **Summary**: Require other typedef names to end with `_t`
 
-## Rule Details
+## Details
 
-### `typedef.type_suffix`
-#### Trigger
+### Trigger
 Non-enum typedef names lacking `_t`.
-#### Message
+### Message
 `` typedef names should end with _t: data ``
-#### Remediation
+### Remediation
 Append `_t`, e.g., `data_t`.
-#### Additional Tips
+### Additional Tips
 When exporting typedefs from packages, keep the `_t` suffix for downstream consistency.
-#### Good
+### Good
 
 ```systemverilog
 typedef struct packed {
@@ -27,7 +25,7 @@ typedef struct packed {
 } payload_t;
 ```
 
-#### Bad
+### Bad
 
 ```systemverilog
 typedef struct packed {

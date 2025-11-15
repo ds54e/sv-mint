@@ -4,19 +4,17 @@
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
 - **Shared Helpers**: `plugins/lib/lang_construct_ruleset.py`
-- **Rule**:
-  - ``lang.always_comb_at`` (warning): Forbid sensitivity lists on `always_comb`
+- **Summary**: Forbid sensitivity lists on `always_comb`
 
-## Rule Details
+## Details
 
-### `lang.always_comb_at`
-#### Trigger
+### Trigger
 Flags `always_comb` followed by `@`.
-#### Message
+### Message
 `` always_comb must not have sensitivity list ``
-#### Remediation
+### Remediation
 Remove the explicit sensitivity list; `always_comb` already infers it.
-#### Good
+### Good
 
 ```systemverilog
 always_comb begin
@@ -24,7 +22,7 @@ always_comb begin
 end
 ```
 
-#### Bad
+### Bad
 
 ```systemverilog
 always_comb @(posedge clk_i) begin

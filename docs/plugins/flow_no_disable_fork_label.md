@@ -4,25 +4,23 @@
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`, `path`
 - **Shared Helpers**: `plugins/lib/dv_text_ruleset.py`
-- **Rule**:
-  - ``flow.no_disable_fork_label`` (warning): `disable fork_label` is not portable
+- **Summary**: `disable fork_label` is not portable
 
-## Rule Details
+## Details
 
-### `flow.no_disable_fork_label`
-#### Trigger
+### Trigger
 Warns when `disable` targets a fork label.
-#### Message
+### Message
 `` disable fork_label is not portable; use disable fork ``
-#### Remediation
+### Remediation
 Call `disable fork;` or rely on DV isolation helpers instead.
-#### Good
+### Good
 
 ```systemverilog
 disable fork;
 ```
 
-#### Bad
+### Bad
 
 ```systemverilog
 disable worker_threads;

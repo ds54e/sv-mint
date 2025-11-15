@@ -4,25 +4,23 @@
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`, `path`
 - **Shared Helpers**: `plugins/lib/dv_text_ruleset.py`
-- **Rule**:
-  - ``log.no_none_full`` (warning): Ban `UVM_NONE` and `UVM_FULL` verbosity levels
+- **Summary**: Ban `UVM_NONE` and `UVM_FULL` verbosity levels
 
-## Rule Details
+## Details
 
-### `log.no_none_full`
-#### Trigger
+### Trigger
 Flags verbosity arguments equal to `UVM_NONE` or `UVM_FULL`.
-#### Message
+### Message
 `` use UVM_LOW/MEDIUM/HIGH/DEBUG verbosity levels ``
-#### Remediation
+### Remediation
 Choose one of the supported verbosity constants.
-#### Good
+### Good
 
 ```systemverilog
 uvm_info(`gfn, "Ping", UVM_LOW);
 ```
 
-#### Bad
+### Bad
 
 ```systemverilog
 uvm_info(`gfn, "Ping", UVM_NONE);

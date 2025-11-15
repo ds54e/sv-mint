@@ -4,19 +4,17 @@
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`, `path`
 - **Shared Helpers**: `plugins/lib/dv_text_ruleset.py`
-- **Rule**:
-  - ``macro.missing_undef`` (warning): Local `` `define`` entries must be `` `undef``’d in the same file
+- **Summary**: Local `` `define`` entries must be `` `undef``’d in the same file
 
-## Rule Details
+## Details
 
-### `macro.missing_undef`
-#### Trigger
+### Trigger
 Finds local `` `define`` statements that never see an `` `undef`` in the same file.
-#### Message
+### Message
 `` local macro <name> must be undefined before EOF ``
-#### Remediation
+### Remediation
 Add `` `undef`` once the macro is no longer needed.
-#### Good
+### Good
 
 ```systemverilog
 `define _INC(x) ((x)+1)
@@ -24,7 +22,7 @@ assign data_o = `_INC(data_i);
 `undef _INC
 ```
 
-#### Bad
+### Bad
 
 ```systemverilog
 `define _INC(x) ((x)+1)

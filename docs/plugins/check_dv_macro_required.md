@@ -4,25 +4,23 @@
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`, `path`
 - **Shared Helpers**: `plugins/lib/dv_text_ruleset.py`
-- **Rule**:
-  - ``check.dv_macro_required`` (warning): Comparison-based checks must use `DV_CHECK_*` macros
+- **Summary**: Comparison-based checks must use `DV_CHECK_*` macros
 
-## Rule Details
+## Details
 
-### `check.dv_macro_required`
-#### Trigger
+### Trigger
 Finds `if (lhs != rhs) uvm_error(...)` style comparisons that omit `DV_CHECK_*`.
-#### Message
+### Message
 `` use DV_CHECK_* macros for comparison-based checks ``
-#### Remediation
+### Remediation
 Replace manual comparisons with `DV_CHECK_EQ`, `DV_CHECK_NE`, etc.
-#### Good
+### Good
 
 ```systemverilog
 `DV_CHECK_EQ(exp_data, act_data)
 ```
 
-#### Bad
+### Bad
 
 ```systemverilog
 if (exp_data != act_data) begin

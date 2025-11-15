@@ -4,21 +4,19 @@
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
 - **Shared Helpers**: `plugins/lib/package_ruleset.py`
-- **Rule**:
-  - ``package.define_in_package`` (warning): Forbid `` `define`` inside packages
+- **Summary**: Forbid `` `define`` inside packages
 
-## Rule Details
+## Details
 
-### `package.define_in_package`
-#### Trigger
+### Trigger
 Searches the package body for `` `define`` tokens that do not start with `_`.
-#### Message
+### Message
 `` prefer parameters over `define NAME inside package ``
-#### Remediation
+### Remediation
 Publish constants via `parameter` or `localparam` instead of macros.
-#### Additional Tips
+### Additional Tips
 Transition legacy macros to `localparam` and consume them through `import foo_pkg::*;`.
-#### Good
+### Good
 
 ```systemverilog
 package foo_pkg;
@@ -26,7 +24,7 @@ package foo_pkg;
 endpackage
 ```
 
-#### Bad
+### Bad
 
 ```systemverilog
 package foo_pkg;

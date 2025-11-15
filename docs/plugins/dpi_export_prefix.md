@@ -4,25 +4,23 @@
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`, `path`
 - **Shared Helpers**: `plugins/lib/dv_text_ruleset.py`
-- **Rule**:
-  - ``dpi.export_prefix`` (warning): Exported DPI handles must start with `sv_dpi_`
+- **Summary**: Exported DPI handles must start with `sv_dpi_`
 
-## Rule Details
+## Details
 
-### `dpi.export_prefix`
-#### Trigger
+### Trigger
 Checks DPI export declarations for the `sv_dpi_` prefix.
-#### Message
+### Message
 `` exported DPI symbol must start with sv_dpi_ ``
-#### Remediation
+### Remediation
 Rename exported tasks/functions accordingly.
-#### Good
+### Good
 
 ```systemverilog
 export "DPI-C" task sv_dpi_alert;
 ```
 
-#### Bad
+### Bad
 
 ```systemverilog
 export "DPI-C" task alert_task;

@@ -4,19 +4,17 @@
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`, `path`
 - **Shared Helpers**: `plugins/lib/dv_text_ruleset.py`
-- **Rule**:
-  - ``macro.no_local_guard`` (warning): Local macros must not use `` `ifndef`` guards
+- **Summary**: Local macros must not use `` `ifndef`` guards
 
-## Rule Details
+## Details
 
-### `macro.no_local_guard`
-#### Trigger
+### Trigger
 Warns when source files (non-header) wrap local macros inside `` `ifndef``.
-#### Message
+### Message
 `` local macros must not use `ifndef guards ``
-#### Remediation
+### Remediation
 Remove the guard so redefinition errors surface immediately.
-#### Good
+### Good
 
 ```systemverilog
 `define _LOCAL_DEBUG(msg) \
@@ -24,7 +22,7 @@ Remove the guard so redefinition errors surface immediately.
 `undef _LOCAL_DEBUG
 ```
 
-#### Bad
+### Bad
 
 ```systemverilog
 `ifndef _LOCAL_DEBUG

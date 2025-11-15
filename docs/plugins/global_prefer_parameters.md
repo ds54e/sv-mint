@@ -4,25 +4,23 @@
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
 - **Shared Helpers**: `plugins/lib/global_define_ruleset.py`
-- **Rule**:
-  - ``global.prefer_parameters`` (warning): Discourage non-underscored `` `define`` macros in favor of parameters
+- **Summary**: Discourage non-underscored `` `define`` macros in favor of parameters
 
-## Rule Details
+## Details
 
-### `global.prefer_parameters`
-#### Trigger
+### Trigger
 Reports any `` `define`` that does not start with `_`, discouraging project-wide macro switches.
-#### Message
+### Message
 `` use parameters instead of global macro `FOO``
-#### Remediation
+### Remediation
 Replace macros with module parameters or `localparam`. Lower the noise floor by setting `severity = "info"` in the corresponding `[[rule]]` entry when policy allows.
-#### Good
+### Good
 
 ```systemverilog
 module foo #(parameter bit EnableParity = 1'b1) (...);
 ```
 
-#### Bad
+### Bad
 
 ```systemverilog
 `define ENABLE_PARITY 1
@@ -33,5 +31,5 @@ module foo (...);
 endmodule
 ```
 
-#### Additional Tips
+### Additional Tips
 When legacy IP needs macros, either refactor emitters to use `_FOO`-style locals or temporarily disable the rule via its `[[rule]]` entry during migration.

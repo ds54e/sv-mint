@@ -3,21 +3,19 @@
 - **Script**: `plugins/lang.case_requires_unique.cst.py`
 - **Stage**: `cst` (`mode = inline`)
 - **Key Inputs**: `cst_ir.tokens`, `tok_kind_table`, `line_starts`
-- **Rule**:
-  - ``lang.case_requires_unique`` (warning): Recommend adding `unique` or `priority` to `case` statements
+- **Summary**: Recommend adding `unique` or `priority` to `case` statements
 
-## Rule Details
+## Details
 
-### `lang.case_requires_unique`
-#### Trigger
+### Trigger
 Parses each `CaseStatement` token stream; if `unique` or `priority` does not appear immediately before `case`, the rule fires.
-#### Message
+### Message
 `` case statements should use unique or priority ``
-#### Remediation
+### Remediation
 Use `unique case` for completeness or `priority case` when priority matters. Disable the rule if your spec intentionally omits modifiers.
-#### Notes
+### Notes
 For constructs like `case inside`, only the first `case` is checked; add modifiers individually if needed.
-#### Good
+### Good
 
 ```systemverilog
 unique case (opcode_i)
@@ -27,7 +25,7 @@ unique case (opcode_i)
 endcase
 ```
 
-#### Bad
+### Bad
 
 ```systemverilog
 case (opcode_i)
@@ -37,5 +35,5 @@ case (opcode_i)
 endcase  // missing unique/priority, coverage unclear
 ```
 
-#### Additional Tips
+### Additional Tips
 `priority case` still benefits from a `default` branch in the lowRISC flow. Consider `priority if` when it better communicates intent.

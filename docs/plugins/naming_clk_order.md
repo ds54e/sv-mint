@@ -4,19 +4,17 @@
 - **Stage**: `ast`
 - **Key Inputs**: `decls`, `symbols`, `ports`
 - **Shared Helpers**: `plugins/lib/naming_ruleset.py`
-- **Rule**:
-  - ``naming.clk_order`` (warning): Ports must list clocks first
+- **Summary**: Ports must list clocks first
 
-## Rule Details
+## Details
 
-### `naming.clk_order`
-#### Trigger
+### Trigger
 Checks that port lists declare all clocks before resets and data ports.
-#### Message
+### Message
 `` clk ports must appear before other ports ``
-#### Remediation
+### Remediation
 Group `clk*` ports at the top of the port list.
-#### Good
+### Good
 
 ```systemverilog
 module dma_ctrl (
@@ -27,7 +25,7 @@ module dma_ctrl (
 );
 ```
 
-#### Bad
+### Bad
 
 ```systemverilog
 module dma_ctrl (

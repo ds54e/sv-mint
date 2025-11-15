@@ -4,19 +4,17 @@
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`, `path`
 - **Shared Helpers**: `plugins/lib/dv_text_ruleset.py`
-- **Rule**:
-  - ``flow.no_fork_label`` (warning): Forbid labeled `fork : label` syntax
+- **Summary**: Forbid labeled `fork : label` syntax
 
-## Rule Details
+## Details
 
-### `flow.no_fork_label`
-#### Trigger
+### Trigger
 Looks for `fork : label` syntax.
-#### Message
+### Message
 `` fork blocks must not be labeled ``
-#### Remediation
+### Remediation
 Use unlabeled `fork ... join` blocks or isolation helpers.
-#### Good
+### Good
 
 ```systemverilog
 fork
@@ -24,7 +22,7 @@ fork
 join_none
 ```
 
-#### Bad
+### Bad
 
 ```systemverilog
 fork : worker_threads

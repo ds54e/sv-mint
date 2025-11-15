@@ -4,19 +4,17 @@
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
 - **Shared Helpers**: `plugins/lib/global_define_ruleset.py`
-- **Rule**:
-  - ``global.local_define_undef`` (warning): Require local macros to be undefined in the same file
+- **Summary**: Require local macros to be undefined in the same file
 
-## Rule Details
+## Details
 
-### `global.local_define_undef`
-#### Trigger
+### Trigger
 Flags macros such as `_FOO` that reach EOF without a matching `` `undef``.
-#### Message
+### Message
 `` local macro <name> must be undefined after use ``
-#### Remediation
+### Remediation
 Insert `` `undef <name>`` in the same translation unit or move the macro to a tighter scope.
-#### Good
+### Good
 
 ```systemverilog
 `define _FOO(ARG) (ARG + 1)
@@ -24,7 +22,7 @@ assign data_o = `_FOO(data_i);
 `undef _FOO
 ```
 
-#### Bad
+### Bad
 
 ```systemverilog
 `define _FOO(ARG) (ARG + 1)
@@ -32,5 +30,5 @@ assign data_o = `_FOO(data_i);
 // no `undef, so the macro leaks
 ```
 
-#### Additional Tips
+### Additional Tips
 Wrap the undef with guards such as `` `ifdef _FOO`` to avoid symbol clashes across includes.

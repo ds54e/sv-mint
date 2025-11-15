@@ -4,19 +4,17 @@
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`, `path`
 - **Shared Helpers**: `plugins/lib/dv_text_ruleset.py`
-- **Rule**:
-  - ``scoreboard.dv_eot_required`` (warning): Scoreboard classes must call `DV_EOT_PRINT_*` macros
+- **Summary**: Scoreboard classes must call `DV_EOT_PRINT_*` macros
 
-## Rule Details
+## Details
 
-### `scoreboard.dv_eot_required`
-#### Trigger
+### Trigger
 Looks for classes ending with `_scoreboard` that never invoke `DV_EOT_PRINT_*`.
-#### Message
+### Message
 `` scoreboard must call DV_EOT_PRINT_* macros ``
-#### Remediation
+### Remediation
 Insert the macro in `report_phase` or `phase_ready_to_end`.
-#### Good
+### Good
 
 ```systemverilog
 class my_scoreboard extends uvm_component;
@@ -26,7 +24,7 @@ class my_scoreboard extends uvm_component;
 endclass
 ```
 
-#### Bad
+### Bad
 
 ```systemverilog
 class my_scoreboard extends uvm_component;

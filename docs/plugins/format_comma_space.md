@@ -4,27 +4,25 @@
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`, `cst_ir.pp_text`, `line_starts`
 - **Shared Helpers**: `plugins/lib/format_spacing_ruleset.py`
-- **Rule**:
-  - ``format.comma_space`` (warning): Require a space after commas
+- **Summary**: Require a space after commas
 
-## Rule Details
+## Details
 
-### `format.comma_space`
-#### Trigger
+### Trigger
 Regex `,(?!\s)` finds commas not followed by whitespace.
-#### Message
+### Message
 `` missing space after comma ``
-#### Remediation
+### Remediation
 Separate arguments and concatenations with `, ` for readability.
-#### Notes
+### Notes
 Applies to macro arguments as well. If packed literals require different spacing, adjust the script locally or disable the rule via its `[[rule]]` entry.
-#### Good
+### Good
 
 ```systemverilog
 foo(a, b, c);
 ```
 
-#### Bad
+### Bad
 
 ```systemverilog
 foo(a,b,c);

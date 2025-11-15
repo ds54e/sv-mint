@@ -4,19 +4,17 @@
 - **Stage**: `ast`
 - **Key Inputs**: `decls`, `symbols`, `ports`
 - **Shared Helpers**: `plugins/lib/naming_ruleset.py`
-- **Rule**:
-  - ``naming.rst_before_clk`` (warning): Resets must directly follow clocks
+- **Summary**: Resets must directly follow clocks
 
-## Rule Details
+## Details
 
-### `naming.rst_before_clk`
-#### Trigger
+### Trigger
 Warns when resets are listed before any clock ports or when other ports intervene between the clock and reset groups.
-#### Message
+### Message
 `` rst ports must follow clock ports without other signals in between ``
-#### Remediation
+### Remediation
 Place all resets immediately after the final clock entry.
-#### Good
+### Good
 
 ```systemverilog
 module dma_ctrl (
@@ -28,7 +26,7 @@ module dma_ctrl (
 );
 ```
 
-#### Bad
+### Bad
 
 ```systemverilog
 module dma_ctrl (

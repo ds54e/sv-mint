@@ -4,30 +4,28 @@
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
 - **Shared Helpers**: `plugins/lib/header_comment_ruleset.py`
-- **Rule**:
-  - ``header.missing_spdx`` (warning): Require an SPDX identifier near the top of the file
+- **Summary**: Require an SPDX identifier near the top of the file
 
-## Rule Details
+## Details
 
-### `header.missing_spdx`
-#### Trigger
+### Trigger
 Scans the first 200 characters for `SPDX-License-Identifier`; reports the file start when absent.
-#### Message
+### Message
 `` file should include SPDX-License-Identifier header ``
-#### Remediation
+### Remediation
 Add lines such as `// SPDX-License-Identifier: Apache-2.0` near the top.
-#### Good
+### Good
 
 ```systemverilog
 // SPDX-License-Identifier: Apache-2.0
 // DMA channel control logic
 ```
 
-#### Bad
+### Bad
 
 ```systemverilog
 // DMA channel control logic  // missing SPDX
 ```
 
-#### Additional Tips
+### Additional Tips
 Embed the SPDX line in generator templates so emitted files stay compliant.

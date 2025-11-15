@@ -4,25 +4,23 @@
 - **Stage**: `ast`
 - **Key Inputs**: `decls`, `symbols`, `ports`
 - **Shared Helpers**: `plugins/lib/naming_ruleset.py`
-- **Rule**:
-  - ``naming.rst_active_low`` (warning): Reset names must end with `_n` (or `_ni/_no/_nio`)
+- **Summary**: Reset names must end with `_n` (or `_ni/_no/_nio`)
 
-## Rule Details
+## Details
 
-### `naming.rst_active_low`
-#### Trigger
+### Trigger
 Ensures reset names end in `_n`, `_ni`, `_no`, or `_nio`.
-#### Message
+### Message
 `` reset <name> must use active-low suffix `_n` ``
-#### Remediation
+### Remediation
 Rename resets to `rst_ni`, `rst_no`, etc.
-#### Good
+### Good
 
 ```systemverilog
 input logic rst_ni;
 ```
 
-#### Bad
+### Bad
 
 ```systemverilog
 input logic rst_i;

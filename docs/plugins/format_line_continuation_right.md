@@ -4,26 +4,24 @@
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
 - **Shared Helpers**: `plugins/lib/format_indent_ruleset.py`
-- **Rule**:
-  - ``format.line_continuation_right`` (warning): Require `\` line continuations to be the last character
+- **Summary**: Require `\` line continuations to be the last character
 
-## Rule Details
+## Details
 
-### `format.line_continuation_right`
-#### Trigger
+### Trigger
 Checks lines containing `\` and warns when characters follow the backslash.
-#### Message
+### Message
 `` line continuation \ must be last character ``
-#### Remediation
+### Remediation
 Ensure the backslash is the final character—move comments to the next line.
-#### Good
+### Good
 
 ```systemverilog
 `define INCR(value) \
   (value + 1)
 ```
 
-#### Bad
+### Bad
 
 ```systemverilog
 `define INCR(value) \ // comment after backslash

@@ -4,25 +4,23 @@
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`, `path`
 - **Shared Helpers**: `plugins/lib/dv_text_ruleset.py`
-- **Rule**:
-  - ``log.no_display`` (warning): Forbid `$display` in DV code
+- **Summary**: Forbid `$display` in DV code
 
-## Rule Details
+## Details
 
-### `log.no_display`
-#### Trigger
+### Trigger
 Looks for `$display` within DV sources.
-#### Message
+### Message
 `` use uvm_* logging macros instead of $display ``
-#### Remediation
+### Remediation
 Replace `$display` with `uvm_info` and friends.
-#### Good
+### Good
 
 ```systemverilog
 uvm_info(`gfn, $sformatf("value=%0d", value_q), UVM_LOW);
 ```
 
-#### Bad
+### Bad
 
 ```systemverilog
 $display("value=%0d", value_q);

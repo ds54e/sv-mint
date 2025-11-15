@@ -4,25 +4,23 @@
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`, `path`
 - **Shared Helpers**: `plugins/lib/dv_text_ruleset.py`
-- **Rule**:
-  - ``flow.spinwait_macro_required`` (warning): `while` polling loops must live inside `` `DV_SPINWAIT``
+- **Summary**: `while` polling loops must live inside `` `DV_SPINWAIT``
 
-## Rule Details
+## Details
 
-### `flow.spinwait_macro_required`
-#### Trigger
+### Trigger
 Flags `while` polling loops outside of `` `DV_SPINWAIT``.
-#### Message
+### Message
 `` polling loops must use `DV_SPINWAIT``
-#### Remediation
+### Remediation
 Wrap loops with the macro or move them into `DV_SPINWAIT`.
-#### Good
+### Good
 
 ```systemverilog
 `DV_SPINWAIT(req_done)
 ```
 
-#### Bad
+### Bad
 
 ```systemverilog
 while (!req_done) begin
