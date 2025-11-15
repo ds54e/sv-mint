@@ -6,86 +6,36 @@ cmd = "python3"
 args = ["-u", "-B"]
 root = "plugins"
 
-[[rule]]
-id = "flow.multiple_nonblocking"
+[logging]
+level = "info"
+stderr_snippet_bytes = 2000
+show_stage_events = false
+show_plugin_events = false
+show_parse_events = false
 
-[[rule]]
-id = "format.begin_required"
+[svparser]
+include_paths = []
+defines = []
+strip_comments = true
+ignore_include = true
+allow_incomplete = true
+
+[stages]
+enabled = ["raw_text", "pp_text", "cst", "ast"]
+required = ["raw_text", "pp_text"]
+
+[transport]
+max_request_bytes = 16777216
+warn_margin_bytes = 1048576
+max_response_bytes = 16777216
+on_exceed = "skip"
+fail_ci_on_skip = false
 
 [[rule]]
 id = "case.missing_default"
 
 [[rule]]
-id = "lang.case_requires_unique"
-
-[[rule]]
-id = "comb.nb_in_alwayscomb"
-
-[[rule]]
-id = "decl.unused_net"
-
-[[rule]]
-id = "decl.unused_param"
-
-[[rule]]
-id = "decl.unused_var"
-
-[[rule]]
-id = "lang.default_nettype_missing"
-
-[[rule]]
-id = "lang.default_nettype_none"
-
-[[rule]]
-id = "lang.default_nettype_placement"
-
-[[rule]]
-id = "lang.default_nettype_reset"
-
-[[rule]]
 id = "check.dv_macro_required"
-
-[[rule]]
-id = "dpi.export_prefix"
-
-[[rule]]
-id = "dpi.import_prefix"
-
-[[rule]]
-id = "flow.no_disable_fork_label"
-
-[[rule]]
-id = "flow.no_fork_label"
-
-[[rule]]
-id = "flow.spinwait_macro_required"
-
-[[rule]]
-id = "flow.wait_fork_isolation"
-
-[[rule]]
-id = "flow.wait_macro_required"
-
-[[rule]]
-id = "lang.no_program_construct"
-
-[[rule]]
-id = "log.allowed_verbosity"
-
-[[rule]]
-id = "log.no_display"
-
-[[rule]]
-id = "log.no_none_full"
-
-[[rule]]
-id = "log.no_uvm_report_api"
-
-[[rule]]
-id = "log.no_uvm_warning"
-
-[[rule]]
-id = "log.uvm_arg_macro"
 
 [[rule]]
 id = "macro.dv_prefix_header_only"
@@ -103,94 +53,10 @@ id = "macro.module_prefix"
 id = "macro.no_local_guard"
 
 [[rule]]
-id = "rand.dv_macro_required"
-
-[[rule]]
-id = "rand.dv_macro_with_required"
-
-[[rule]]
-id = "scoreboard.dv_eot_required"
-
-[[rule]]
-id = "seq.no_uvm_do"
-
-[[rule]]
-id = "style.function_scope"
-
-[[rule]]
-id = "format.end_else_inline"
-
-[[rule]]
-id = "format.case_begin_required"
-
-[[rule]]
-id = "format.indent_multiple_of_two"
-
-[[rule]]
-id = "format.line_continuation_right"
-
-[[rule]]
-id = "format.preproc_left_align"
-
-[[rule]]
-id = "format.line_length"
-
-[[rule]]
-id = "format.call_spacing"
-
-[[rule]]
-id = "format.case_colon_after"
-
-[[rule]]
-id = "format.case_colon_spacing"
-
-[[rule]]
-id = "format.comma_space"
-
-[[rule]]
-id = "format.macro_spacing"
-
-[[rule]]
-id = "format.ascii_only"
-
-[[rule]]
-id = "format.final_newline"
-
-[[rule]]
-id = "format.no_tabs"
-
-[[rule]]
-id = "format.no_trailing_whitespace"
-
-[[rule]]
-id = "global.local_define_undef"
-
-[[rule]]
-id = "global.prefer_parameters"
-
-[[rule]]
-id = "header.missing_comment"
-
-[[rule]]
-id = "header.missing_spdx"
-
-[[rule]]
-id = "lang.always_comb_at"
-
-[[rule]]
-id = "lang.always_ff_reset"
-
-[[rule]]
-id = "lang.no_always_latch"
-
-[[rule]]
-id = "lang.no_delays"
-
-[[rule]]
-id = "lang.prefer_always_comb"
-
-[[rule]]
 id = "module.named_ports_required"
+
+[[rule]]
+id = "module.no_port_wildcard"
 
 [[rule]]
 id = "naming.clk_order"
@@ -232,9 +98,6 @@ id = "naming.signal_case"
 id = "naming.suffix_order"
 
 [[rule]]
-id = "module.no_port_wildcard"
-
-[[rule]]
 id = "package.define_in_package"
 
 [[rule]]
@@ -247,7 +110,22 @@ id = "package.missing_end"
 id = "package.multiple"
 
 [[rule]]
+id = "rand.dv_macro_required"
+
+[[rule]]
+id = "rand.dv_macro_with_required"
+
+[[rule]]
+id = "scoreboard.dv_eot_required"
+
+[[rule]]
 id = "seq.blocking_in_alwaysff"
+
+[[rule]]
+id = "seq.no_uvm_do"
+
+[[rule]]
+id = "style.function_scope"
 
 [[rule]]
 id = "template.raw_text_marker"
@@ -269,28 +147,3 @@ id = "typedef.type_suffix"
 
 [[rule]]
 id = "width.unsized_base_literal"
-
-[logging]
-level = "info"
-stderr_snippet_bytes = 2000
-show_stage_events = false
-show_plugin_events = false
-show_parse_events = false
-
-[svparser]
-include_paths = []
-defines = []
-strip_comments = true
-ignore_include = true
-allow_incomplete = true
-
-[stages]
-enabled = ["raw_text", "pp_text", "cst", "ast"]
-required = ["raw_text", "pp_text"]
-
-[transport]
-max_request_bytes = 16777216
-warn_margin_bytes = 1048576
-max_response_bytes = 16777216
-on_exceed = "skip"
-fail_ci_on_skip = false
