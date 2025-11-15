@@ -57,20 +57,11 @@ See [`docs/configuration.md`](docs/configuration.md) for every optional section,
 
 ## Diagnostics and Tooling
 - Use `logging.show_plugin_events = true` to measure per-rule latency.
-- Integration tests live in `tests/cli_smoke.rs` and rely on fixtures under `fixtures/`.
 - Structured logs (`logging.format = "json"`) expose `sv-mint::event`, `sv-mint::stage`, and `sv-mint::plugin.stderr` categories for observability platforms.
-
-## Future Ideas
-1. **Configurable size guards**: expose request/response thresholds via `sv-mint.toml`.
-2. **JSON run reports**: emit machine-readable summaries for CI dashboards.
-3. **Alternative transports**: explore gRPC or IPC sockets instead of spawning Python hosts per worker.
-4. **Deeper semantic rules**: add bit-width analysis, dependency graphs, and state-machine coverage checks.
-
-## Versioning
-- Tags matching `v*` trigger `.github/workflows/release.yml`, which runs fmt/clippy/tests, builds release binaries for Linux/macOS/Windows, and uploads archives containing the binary plus `docs/`, `plugins/`, `sv-mint.toml`, `README.md`, `LICENSE`, and `CHANGELOG.md` (with accompanying SHA-256 checksums).
-- Linux artifacts are built with `x86_64-unknown-linux-musl`, so they run on glibc-2.28 era distributions (e.g., RHEL8) without additional dependencies.
 
 ## Provenance and License
 - This repository and documentation were generated and are maintained with the help of ChatGPT.
 - Rust dependencies follow MIT or Apache-2.0 licenses as declared in `Cargo.toml`.
 - sv-mint itself is distributed under the same terms as the repository license (see `LICENSE`).
+
+> **For contributors:** build instructions, release procedures, and testing guidance now live in `docs/development.md`.
