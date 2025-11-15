@@ -2,6 +2,20 @@
 
 All notable changes to this project are documented here, following [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) conventions and semantic versioning.
 
+## [1.3.0] - 2025-11-15
+### Added
+- Introduced `docs/configuration.md`, a consolidated reference for every `sv-mint.toml` section, defaults, and script resolution rules.
+
+### Changed
+- Config loader now auto-populates defaults when `[defaults]`, `[plugin]`, `[logging]`, `[stages]`, `[svparser]`, or `[transport]` are omitted, so users can focus solely on `[[rule]]` entries.
+- When rules omit `script`, the loader falls back to `./plugins/<rule>.<stage>.py` relative to the config file; pipeline stages without enabled rules are skipped and logged instead of invoking Python.
+- README’s config sample was simplified to the minimal `[[rule]]` form and now links to the new configuration guide.
+
+## [1.2.0] - 2025-11-15
+### Changed
+- Alphabetized the bundled `sv-mint.toml` rule list and renamed stale rule identifiers so script references remain accurate.
+- Reworked plugin rule documentation: every rule now has its own file named after the script ID, the rule inventory index was removed, and README is aligned with the per-rule docs (including dropping redundant Japanese text).
+
 ## [1.1.3] - 2025-11-15
 ### Changed
 - Pluginドキュメントを全面的に整形し、Rule表を箇条書きへ統一、Trigger/Remediationなどを見出し化、各ルールにGood/Bad例を追加して読みやすさを向上しました。
@@ -25,6 +39,8 @@ All notable changes to this project are documented here, following [Keep a Chang
 - CLI gained `-f/--filelist` option to lint inputs described via svlint-style filelists.
 - Tests now include filelist-driven smoke coverage, and README documents the supported syntax in detail.
 
+[1.3.0]: https://github.com/foo/sv-mint/releases/tag/v1.3.0
+[1.2.0]: https://github.com/foo/sv-mint/releases/tag/v1.2.0
 [1.1.3]: https://github.com/foo/sv-mint/releases/tag/v1.1.3
 [1.1.2]: https://github.com/foo/sv-mint/releases/tag/v1.1.2
 [1.1.1]: https://github.com/foo/sv-mint/releases/tag/v1.1.1

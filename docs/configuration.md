@@ -19,7 +19,7 @@ Controls the Python worker that hosts rule scripts.
 | `root` | Base directory used to resolve relative `script` paths. | _unset_ |
 | `search_paths` | Additional directories searched for every rule script. | `[]` |
 
-When `root` and `search_paths` are not provided, sv-mint looks under `./plugins`. If a rule omits `script`, the loader searches these directories for `<rule_id>.<stage>.py`.
+When `root` and `search_paths` are not provided, sv-mint looks under `./plugins` relative to the directory that holds `sv-mint.toml`. If a rule omits `script`, the loader searches these directories for `<rule_id>.<stage>.py`.
 
 ## `[logging]`
 
