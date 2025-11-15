@@ -1,37 +1,3 @@
-[defaults]
-timeout_ms_per_file = 6000
-
-[plugin]
-cmd = "python3"
-args = ["-u", "-B"]
-root = "plugins"
-
-[logging]
-level = "info"
-stderr_snippet_bytes = 2000
-show_stage_events = false
-show_plugin_events = false
-show_parse_events = false
-
-[svparser]
-include_paths = []
-defines = []
-strip_comments = true
-ignore_include = true
-allow_incomplete = true
-
-[stages]
-enabled = ["raw_text", "pp_text", "cst", "ast"]
-required = ["raw_text", "pp_text"]
-
-[transport]
-max_request_bytes = 16777216
-warn_margin_bytes = 1048576
-max_response_bytes = 16777216
-on_exceed = "skip"
-fail_ci_on_skip = false
-
-
 [[rule]]
 id = "case.missing_default"
 

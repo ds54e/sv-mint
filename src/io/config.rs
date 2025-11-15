@@ -83,8 +83,11 @@ impl Default for TransportConfig {
 pub struct Config {
     #[serde(default)]
     pub logging: LoggingConfig,
+    #[serde(default)]
     pub defaults: Defaults,
+    #[serde(default)]
     pub plugin: Plugin,
+    #[serde(default)]
     pub stages: Stages,
     #[serde(default)]
     pub svparser: SvParserCfg,
@@ -96,13 +99,23 @@ pub struct Config {
 
 #[derive(Deserialize)]
 pub struct Defaults {
+    #[serde(default = "default_timeout_ms")]
     pub timeout_ms_per_file: u64,
+}
+
+impl Default for Defaults {
+    fn default() -> Self {
+        Self {
+            timeout_ms_per_file: default_timeout_ms(),
+        }
+    }
 }
 
 #[derive(Deserialize)]
 pub struct Plugin {
+    #[serde(default = "default_plugin_cmd")]
     pub cmd: String,
-    #[serde(default)]
+    #[serde(default = "default_plugin_args")]
     pub args: Vec<String>,
     #[serde(default)]
     pub root: Option<String>,
@@ -114,11 +127,34 @@ pub struct Plugin {
     pub normalized_search_paths: Vec<PathBuf>,
 }
 
+impl Default for Plugin {
+    fn default() -> Self {
+        Self {
+            cmd: default_plugin_cmd(),
+            args: default_plugin_args(),
+            root: None,
+            search_paths: Vec::new(),
+            normalized_root: None,
+            normalized_search_paths: Vec::new(),
+        }
+    }
+}
+
 #[derive(Deserialize)]
 pub struct Stages {
+    #[serde(default = "default_enabled_stages")]
     pub enabled: Vec<crate::types::Stage>,
-    #[serde(default)]
+    #[serde(default = "default_required_stages")]
     pub required: Vec<Stage>,
+}
+
+impl Default for Stages {
+    fn default() -> Self {
+        Self {
+            enabled: default_enabled_stages(),
+            required: default_required_stages(),
+        }
+    }
 }
 
 #[derive(Deserialize, Clone)]
@@ -142,6 +178,26 @@ impl RuleConfig {
 
 fn default_true() -> bool {
     true
+}
+
+fn default_timeout_ms() -> u64 {
+    6000
+}
+
+fn default_plugin_cmd() -> String {
+    "python3".to_string()
+}
+
+fn default_plugin_args() -> Vec<String> {
+    vec!["-u".to_string(), "-B".to_string()]
+}
+
+fn default_enabled_stages() -> Vec<Stage> {
+    vec![Stage::RawText, Stage::PpText, Stage::Cst, Stage::Ast]
+}
+
+fn default_required_stages() -> Vec<Stage> {
+    vec![Stage::RawText, Stage::PpText]
 }
 
 pub fn apply_rule_overrides(rules: &mut [RuleConfig], only: &[String], disable: &[String]) -> Result<(), ConfigError> {
@@ -218,13 +274,23 @@ fn normalize_rule_scripts(cfg: &mut Config, base_dir: &Path) -> Result<(), Confi
     if let Some(root) = cfg.plugin.normalized_root.clone() {
         search_roots.push(root);
     }
-    search_roots.extend(cfg.plugin.normalized_search_paths.clone());
-    let has_plugin_root = !search_roots.is_empty();
+    if !cfg.plugin.normalized_search_paths.is_empty() {
+        search_roots.extend(cfg.plugin.normalized_search_paths.clone());
+    }
+    let has_user_roots = !search_roots.is_empty();
+    let fallback_root = base_dir.join("plugins");
+    if !has_user_roots {
+        search_roots.push(fallback_root.clone());
+    }
     for entry in &mut cfg.rule {
         if entry.script.trim().is_empty() {
             entry.script = derive_script_from_id(entry, &search_roots)?;
+            if !has_user_roots {
+                let absolute = fallback_root.join(entry.script.as_str());
+                entry.script = absolute.to_string_lossy().into_owned();
+            }
         }
-        if has_plugin_root {
+        if has_user_roots {
             continue;
         }
         let script_path = Path::new(&entry.script);
@@ -377,11 +443,6 @@ pub fn validate_config(cfg: &Config) -> Result<(), ConfigError> {
             detail: "stages.enabled empty".to_string(),
         });
     }
-    if cfg.rule.is_empty() {
-        return Err(ConfigError::InvalidValue {
-            detail: "no [[rule]] entries configured".to_string(),
-        });
-    }
     let mut seen = HashSet::new();
     for entry in &cfg.rule {
         if entry.id.trim().is_empty() {
@@ -425,6 +486,9 @@ pub fn validate_config(cfg: &Config) -> Result<(), ConfigError> {
 mod tests {
     use super::*;
     use crate::types::Stage;
+    use std::fs;
+    use std::path::Path;
+    use tempfile::tempdir;
 
     fn make_rules() -> Vec<RuleConfig> {
         vec![
@@ -519,5 +583,47 @@ mod tests {
         }];
         let err = infer_rule_stages(&mut rules);
         assert!(matches!(err, Err(ConfigError::InvalidValue { .. })));
+    }
+
+    #[test]
+    fn config_sections_use_defaults() {
+        let cfg = load(
+            r#"
+[[rule]]
+id = "format.no_tabs"
+script = "format.no_tabs.raw.py"
+stage = "raw_text"
+"#,
+        )
+        .expect("load defaults");
+        assert_eq!(cfg.defaults.timeout_ms_per_file, 6000);
+        assert_eq!(cfg.plugin.cmd, "python3");
+        assert_eq!(cfg.plugin.args, vec!["-u", "-B"]);
+        assert_eq!(
+            cfg.stages.enabled,
+            vec![Stage::RawText, Stage::PpText, Stage::Cst, Stage::Ast]
+        );
+        assert_eq!(cfg.stages.required, vec![Stage::RawText, Stage::PpText]);
+    }
+
+    #[test]
+    fn derives_scripts_without_plugin_root() {
+        let tmp_dir = tempdir().expect("tempdir");
+        let plugins = tmp_dir.path().join("plugins");
+        fs::create_dir_all(&plugins).expect("plugins dir");
+        let script_path = plugins.join("format.no_tabs.raw.py");
+        fs::write(&script_path, "print('ok')").expect("script file");
+        let mut cfg = load(
+            r#"
+[[rule]]
+id = "format.no_tabs"
+"#,
+        )
+        .expect("load rule");
+        normalize_rule_scripts(&mut cfg, tmp_dir.path()).expect("normalize");
+        assert_eq!(cfg.rule.len(), 1);
+        let script = &cfg.rule[0].script;
+        assert!(Path::new(script).is_absolute());
+        assert!(script.ends_with("format.no_tabs.raw.py"));
     }
 }

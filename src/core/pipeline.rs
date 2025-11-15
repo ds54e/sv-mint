@@ -38,6 +38,9 @@ impl<'a> Pipeline<'a> {
                 had_error: false,
             });
         }
+        if !self.has_enabled_rules() {
+            return self.run_files_without_rules(inputs);
+        }
         if inputs.len() == 1 {
             return self.run_file_batch(inputs);
         }
@@ -45,6 +48,9 @@ impl<'a> Pipeline<'a> {
     }
 
     pub fn run_file(&self, input: &Path) -> Result<usize> {
+        if !self.has_enabled_rules() {
+            return self.run_file_without_rules(input);
+        }
         let mut host = PythonHost::start(self.cfg).map_err(anyhow::Error::new)?;
         self.run_file_with_host(input, &mut host)
     }
@@ -149,11 +155,28 @@ impl<'a> Pipeline<'a> {
         };
         let mut all: Vec<Violation> = Vec::new();
         let stage_rule_map = build_stage_rule_map(self.cfg);
+        let input_display = input_path.to_string_lossy().into_owned();
 
         for stage in &self.cfg.stages.enabled {
-            log_event(Ev::new(Event::StageStart, &input_path.to_string_lossy()).with_stage(stage.as_str()));
-            let payload = payload_for(stage, &artifacts);
+            log_event(Ev::new(Event::StageStart, &input_display).with_stage(stage.as_str()));
             let rules_for_stage = stage_rule_map.get(stage).expect("stage rule map missing entry");
+            if rules_for_stage.enabled.is_empty() {
+                let outcome = StageOutcome {
+                    stage: stage.as_str().to_string(),
+                    status: StageStatus::Skipped,
+                    violations: Vec::new(),
+                    duration_ms: 0,
+                    fail_ci: false,
+                };
+                record_outcome(&input_path, &outcome);
+                log_event(
+                    Ev::new(Event::StageDone, &input_display)
+                        .with_stage(stage.as_str())
+                        .with_message("no enabled rules"),
+                );
+                continue;
+            }
+            let payload = payload_for(stage, &artifacts);
             let request_rules = RuleDispatch {
                 enabled: &rules_for_stage.enabled,
                 disabled: &rules_for_stage.disabled,
@@ -169,7 +192,7 @@ impl<'a> Pipeline<'a> {
             if let Err(outcome) = enforce_request_size(stage.as_str(), &invocation, &policy) {
                 all.extend(outcome.violations.iter().cloned());
                 record_outcome(&input_path, &outcome);
-                log_event(Ev::new(Event::StageDone, &input_path.to_string_lossy()).with_stage(stage.as_str()));
+                log_event(Ev::new(Event::StageDone, &input_display).with_stage(stage.as_str()));
                 if matches!(outcome.status, StageStatus::Failed) || outcome.fail_ci {
                     print_violations(&all, &input_path);
                     return Err(anyhow!(format!("stage {} aborted", stage.as_str())));
@@ -188,7 +211,7 @@ impl<'a> Pipeline<'a> {
                 all.extend(outcome.violations.iter().cloned());
                 outcome.duration_ms = t0.elapsed().as_millis() as u64;
                 record_outcome(&input_path, &outcome);
-                log_event(Ev::new(Event::StageDone, &input_path.to_string_lossy()).with_stage(stage.as_str()));
+                log_event(Ev::new(Event::StageDone, &input_display).with_stage(stage.as_str()));
                 if matches!(outcome.status, StageStatus::Failed) || outcome.fail_ci {
                     print_violations(&all, &input_path);
                     return Err(anyhow!(format!("stage {} aborted", stage.as_str())));
@@ -204,11 +227,38 @@ impl<'a> Pipeline<'a> {
             };
             all.extend(outcome.violations.iter().cloned());
             record_outcome(&input_path, &outcome);
-            log_event(Ev::new(Event::StageDone, &input_path.to_string_lossy()).with_stage(stage.as_str()));
+            log_event(Ev::new(Event::StageDone, &input_display).with_stage(stage.as_str()));
         }
 
         print_violations(&all, &input_path);
         Ok(all.len())
+    }
+
+    fn has_enabled_rules(&self) -> bool {
+        self.cfg.rule.iter().any(|r| r.enabled)
+    }
+
+    fn run_files_without_rules(&self, inputs: &[PathBuf]) -> Result<RunSummary> {
+        let mut summary = RunSummary {
+            violations: 0,
+            had_error: false,
+        };
+        for path in inputs {
+            match self.run_file_without_rules(path) {
+                Ok(_) => {}
+                Err(e) => {
+                    summary.had_error = true;
+                    error!("{}: {}", path.display(), e);
+                }
+            }
+        }
+        Ok(summary)
+    }
+
+    fn run_file_without_rules(&self, input: &Path) -> Result<usize> {
+        let (_, input_path) = read_input(input).map_err(anyhow::Error::new)?;
+        print_violations(&[], &input_path);
+        Ok(0)
     }
 }
 
