@@ -9,10 +9,14 @@
 ## Rule Details
 
 ### `lang.case_requires_unique`
-- **Trigger**: Parses each `CaseStatement` token stream; if `unique` or `priority` does not appear immediately before `case`, the rule fires.
-- **Message**: `` case statements should use unique or priority ``
-- **Remediation**: Use `unique case` for completeness or `priority case` when priority matters. Disable the rule if your spec intentionally omits modifiers.
-- **Notes**: For constructs like `case inside`, only the first `case` is checked; add modifiers individually if needed.
+#### Trigger
+Parses each `CaseStatement` token stream; if `unique` or `priority` does not appear immediately before `case`, the rule fires.
+#### Message
+`` case statements should use unique or priority ``
+#### Remediation
+Use `unique case` for completeness or `priority case` when priority matters. Disable the rule if your spec intentionally omits modifiers.
+#### Notes
+For constructs like `case inside`, only the first `case` is checked; add modifiers individually if needed.
 #### Good
 
 ```systemverilog
@@ -33,4 +37,5 @@ case (opcode_i)
 endcase  // missing unique/priority, coverage unclear
 ```
 
-- **Additional Tips**: `priority case` still benefits from a `default` branch in the lowRISC flow. Consider `priority if` when it better communicates intent.
+#### Additional Tips
+`priority case` still benefits from a `default` branch in the lowRISC flow. Consider `priority if` when it better communicates intent.

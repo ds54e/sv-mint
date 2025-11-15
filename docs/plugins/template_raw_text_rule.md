@@ -9,10 +9,14 @@
 ## Rule Details
 
 ### `template.raw_text_marker`
-- **Trigger**: Searches for `__SV_MINT_TEMPLATE__` and reports the first occurrence as an informational violation.
-- **Message**: `` template marker detected ``
-- **Remediation**: Remove the marker after copying templates into production code.
-- **Notes**: Only one location per file is reported. Split template files if you need multiple markers.
+#### Trigger
+Searches for `__SV_MINT_TEMPLATE__` and reports the first occurrence as an informational violation.
+#### Message
+`` template marker detected ``
+#### Remediation
+Remove the marker after copying templates into production code.
+#### Notes
+Only one location per file is reported. Split template files if you need multiple markers.
 #### Good
 
 ```systemverilog
@@ -26,4 +30,5 @@
 // __SV_MINT_TEMPLATE__ keep/remove?
 ```
 
-- **Additional Tips**: Blocking template markers in CI prevents unfinished scaffolding from landing in commits. Update generators (e.g., `scripts/new_module.sh`) to strip or replace the marker automatically.
+#### Additional Tips
+Blocking template markers in CI prevents unfinished scaffolding from landing in commits. Update generators (e.g., `scripts/new_module.sh`) to strip or replace the marker automatically.

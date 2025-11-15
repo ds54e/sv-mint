@@ -9,10 +9,14 @@
 ## Rule Details
 
 ### `module.no_port_wildcard`
-- **Trigger**: Reports every `conn_wildcard` token with precise file/line/col info.
-- **Message**: `` named port connections must not use .* wildcard ``
-- **Remediation**: Expand connections to `.port(signal)` or update generators accordingly.
-- **Notes**: Complements `module_inst_rules.py`; this variant survives preprocessing and macro expansion.
+#### Trigger
+Reports every `conn_wildcard` token with precise file/line/col info.
+#### Message
+`` named port connections must not use .* wildcard ``
+#### Remediation
+Expand connections to `.port(signal)` or update generators accordingly.
+#### Notes
+Complements `module_inst_rules.py`; this variant survives preprocessing and macro expansion.
 #### Good
 
 ```systemverilog

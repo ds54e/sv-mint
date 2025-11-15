@@ -9,10 +9,14 @@
 ## Rule Details
 
 ### `comb.nb_in_alwayscomb`
-- **Trigger**: Identifies `always_comb` nodes and flags any `op_le` (`<=`) tokens within the block. Falls back to text scanning when token info is missing.
-- **Message**: `` nonblocking '<=' inside always_comb ``
-- **Remediation**: Use blocking `=` inside combinational logic; if state is required, move the logic to `always_ff`.
-- **Notes**: When `sv-parser` updates token kinds, ensure `op_le` remains present in `tok_kind_table`.
+#### Trigger
+Identifies `always_comb` nodes and flags any `op_le` (`<=`) tokens within the block. Falls back to text scanning when token info is missing.
+#### Message
+`` nonblocking '<=' inside always_comb ``
+#### Remediation
+Use blocking `=` inside combinational logic; if state is required, move the logic to `always_ff`.
+#### Notes
+When `sv-parser` updates token kinds, ensure `op_le` remains present in `tok_kind_table`.
 #### Good
 
 ```systemverilog
@@ -29,4 +33,5 @@ always_comb begin
 end
 ```
 
-- **Additional Tips**: Some tools infer flops when `<=` appears inside `always_comb`. Macros that hide the operator still trigger the rule after expansion, so provide separate helpers for blocking vs. non-blocking assignments.
+#### Additional Tips
+Some tools infer flops when `<=` appears inside `always_comb`. Macros that hide the operator still trigger the rule after expansion, so provide separate helpers for blocking vs. non-blocking assignments.

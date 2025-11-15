@@ -11,19 +11,28 @@
 ## Rule Details
 
 ### `format.indent_multiple_of_two`
-- **Trigger**: Computes indentation width after stripping tabs; flags lines with an odd number of spaces.
-- **Message**: `` indentation should be multiples of 2 spaces ``
-- **Remediation**: Replace tabs with spaces and keep indentation at two-space steps.
+#### Trigger
+Computes indentation width after stripping tabs; flags lines with an odd number of spaces.
+#### Message
+`` indentation should be multiples of 2 spaces ``
+#### Remediation
+Replace tabs with spaces and keep indentation at two-space steps.
 
 ### `format.preproc_left_align`
-- **Trigger**: Finds `define/ifdef/ifndef/endif` directives that start with whitespace.
-- **Message**: `` preprocessor directives must be left aligned ``
-- **Remediation**: Remove leading whitespace so directives start in column 1, regardless of nesting depth.
+#### Trigger
+Finds `define/ifdef/ifndef/endif` directives that start with whitespace.
+#### Message
+`` preprocessor directives must be left aligned ``
+#### Remediation
+Remove leading whitespace so directives start in column 1, regardless of nesting depth.
 
 ### `format.line_continuation_right`
-- **Trigger**: Checks lines containing `\` and warns when characters follow the backslash.
-- **Message**: `` line continuation \ must be last character ``
-- **Remediation**: Ensure the backslash is the final character—move comments to the next line.
+#### Trigger
+Checks lines containing `\` and warns when characters follow the backslash.
+#### Message
+`` line continuation \ must be last character ``
+#### Remediation
+Ensure the backslash is the final character—move comments to the next line.
 #### Good
 
 ```systemverilog

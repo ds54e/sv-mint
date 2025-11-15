@@ -9,10 +9,14 @@
 ## Rule Details
 
 ### `case.missing_default`
-- **Trigger**: Walks each CST `CaseStatement`; if no `default` token appears, the rule reports the first token location.
-- **Message**: `` case statement must include a default item ``
-- **Remediation**: Add a `default` branch unless you can prove completeness with `unique case`. Even for intentional fall-through, prefer `default: <noop>;`.
-- **Notes**: The pass inspects preprocessed `pp_text`, so macros that expand to `default` must emit the token after preprocessing.
+#### Trigger
+Walks each CST `CaseStatement`; if no `default` token appears, the rule reports the first token location.
+#### Message
+`` case statement must include a default item ``
+#### Remediation
+Add a `default` branch unless you can prove completeness with `unique case`. Even for intentional fall-through, prefer `default: <noop>;`.
+#### Notes
+The pass inspects preprocessed `pp_text`, so macros that expand to `default` must emit the token after preprocessing.
 #### Good
 
 ```systemverilog
@@ -32,4 +36,5 @@ case (opcode_i)
 endcase  // no default, unknown values pass silently
 ```
 
-- **Additional Tips**: When wrapping `default` in `begin/end`, keep the colon directly after the token. Align macro-generated `default` blocks with the surrounding case body to reduce review slips.
+#### Additional Tips
+When wrapping `default` in `begin/end`, keep the colon directly after the token. Align macro-generated `default` blocks with the surrounding case body to reduce review slips.

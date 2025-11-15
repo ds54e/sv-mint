@@ -10,9 +10,12 @@
 ## Rule Details
 
 ### `global.local_define_undef`
-- **Trigger**: Flags macros such as `_FOO` that reach EOF without a matching `` `undef``.
-- **Message**: `` local macro <name> must be undefined after use ``
-- **Remediation**: Insert `` `undef <name>`` in the same translation unit or move the macro to a tighter scope.
+#### Trigger
+Flags macros such as `_FOO` that reach EOF without a matching `` `undef``.
+#### Message
+`` local macro <name> must be undefined after use ``
+#### Remediation
+Insert `` `undef <name>`` in the same translation unit or move the macro to a tighter scope.
 #### Good
 
 ```systemverilog
@@ -29,12 +32,16 @@ assign data_o = `_FOO(data_i);
 // no `undef, so the macro leaks
 ```
 
-- **Additional Tips**: Wrap the undef with guards such as `` `ifdef _FOO`` to avoid symbol clashes across includes.
+#### Additional Tips
+Wrap the undef with guards such as `` `ifdef _FOO`` to avoid symbol clashes across includes.
 
 ### `global.prefer_parameters`
-- **Trigger**: Reports any `` `define`` that does not start with `_`, discouraging project-wide macro switches.
-- **Message**: `` use parameters instead of global macro `FOO``
-- **Remediation**: Replace macros with module parameters or `localparam`. Lower the noise floor by setting `severity = "info"` in the corresponding `[[rule]]` entry when policy allows.
+#### Trigger
+Reports any `` `define`` that does not start with `_`, discouraging project-wide macro switches.
+#### Message
+`` use parameters instead of global macro `FOO``
+#### Remediation
+Replace macros with module parameters or `localparam`. Lower the noise floor by setting `severity = "info"` in the corresponding `[[rule]]` entry when policy allows.
 #### Good
 
 ```systemverilog
@@ -52,4 +59,5 @@ module foo (...);
 endmodule
 ```
 
-- **Additional Tips**: When legacy IP needs macros, either refactor emitters to use `_FOO`-style locals or temporarily disable the rule via its `[[rule]]` entry during migration.
+#### Additional Tips
+When legacy IP needs macros, either refactor emitters to use `_FOO`-style locals or temporarily disable the rule via its `[[rule]]` entry during migration.

@@ -9,10 +9,14 @@
 ## Rule Details
 
 ### `seq.blocking_in_alwaysff`
-- **Trigger**: Identifies `always_ff` regions and warns whenever an `op_eq` (or fallback regex `=`) token appears inside.
-- **Message**: `` blocking '=' inside always_ff ``
-- **Remediation**: Use non-blocking `<=` for sequential logic or refactor the assignment into combinational logic.
-- **Notes**: Falls back to text scanning when token data is unavailable.
+#### Trigger
+Identifies `always_ff` regions and warns whenever an `op_eq` (or fallback regex `=`) token appears inside.
+#### Message
+`` blocking '=' inside always_ff ``
+#### Remediation
+Use non-blocking `<=` for sequential logic or refactor the assignment into combinational logic.
+#### Notes
+Falls back to text scanning when token data is unavailable.
 #### Good
 
 ```systemverilog

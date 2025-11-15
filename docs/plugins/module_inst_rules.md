@@ -9,10 +9,14 @@
 ## Rule Details
 
 ### `module.named_ports_required`
-- **Trigger**: Detects instantiations that begin with positional arguments (no `.` inside the port list).
-- **Message**: `` use named port connections instead of positional arguments ``
-- **Remediation**: Rewrite as `.clk(clk)` style to remove ordering hazards.
-- **Notes**: Formatting tools such as `verible-verilog-format --named-port-formatting` help during migrations.
+#### Trigger
+Detects instantiations that begin with positional arguments (no `.` inside the port list).
+#### Message
+`` use named port connections instead of positional arguments ``
+#### Remediation
+Rewrite as `.clk(clk)` style to remove ordering hazards.
+#### Notes
+Formatting tools such as `verible-verilog-format --named-port-formatting` help during migrations.
 #### Good
 
 ```systemverilog

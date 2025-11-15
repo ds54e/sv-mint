@@ -12,9 +12,12 @@
 ## Rule Details
 
 ### `format.ascii_only`
-- **Trigger**: Reports every character whose `ord(ch) > 127`.
-- **Message**: `` non-ASCII character detected ``
-- **Remediation**: Remove non-ASCII glyphs (comments included) or disable the rule if UTF-8 text is unavoidable.
+#### Trigger
+Reports every character whose `ord(ch) > 127`.
+#### Message
+`` non-ASCII character detected ``
+#### Remediation
+Remove non-ASCII glyphs (comments included) or disable the rule if UTF-8 text is unavoidable.
 #### Good
 
 ```systemverilog
@@ -29,9 +32,12 @@
 
 
 ### `format.no_tabs`
-- **Trigger**: Emits a violation for every tab (`\t`) encountered.
-- **Message**: `` tab character detected ``
-- **Remediation**: Replace tabs with spaces and follow the widths enforced by `format_indent_rules`.
+#### Trigger
+Emits a violation for every tab (`\t`) encountered.
+#### Message
+`` tab character detected ``
+#### Remediation
+Replace tabs with spaces and follow the widths enforced by `format_indent_rules`.
 #### Good
 
 ```systemverilog
@@ -46,12 +52,16 @@ logic ready;
 
 - Tabs at the start of the line shift alignment between tools.
 
-- **Notes**: Pair this with `.editorconfig` `indent_style = space`. If you absolutely must allow tabs (e.g., when linting legacy IP), disable the rule via its `[[rule]]` entry and re-enable it once the migration is complete.
+#### Notes
+Pair this with `.editorconfig` `indent_style = space`. If you absolutely must allow tabs (e.g., when linting legacy IP), disable the rule via its `[[rule]]` entry and re-enable it once the migration is complete.
 
 ### `format.no_trailing_whitespace`
-- **Trigger**: Reverse scans each line and flags trailing spaces or tabs.
-- **Message**: `` trailing whitespace at line end ``
-- **Remediation**: Trim on save or rely on editor hooks.
+#### Trigger
+Reverse scans each line and flags trailing spaces or tabs.
+#### Message
+`` trailing whitespace at line end ``
+#### Remediation
+Trim on save or rely on editor hooks.
 #### Good
 
 ```systemverilog
@@ -64,12 +74,17 @@ assign ready_o = valid_i;
 assign ready_o = valid_i;␠
 ```
 
-- **Notes**: sv-mint analyzes LF-normalized text, so CRLF mixes still produce correct columns. Consider the `trailing-whitespace` pre-commit hook to catch violations before CI.
+#### Notes
+sv-mint analyzes LF-normalized text, so CRLF mixes still produce correct columns. Consider the `trailing-whitespace` pre-commit hook to catch violations before CI.
 
 ### `format.final_newline`
-- **Trigger**: Warns when the file does not end with `\n`.
-- **Message**: `` file must end with newline ``
-- **Remediation**: Insert a newline after the last line.
+#### Trigger
+Warns when the file does not end with `\n`.
+#### Message
+`` file must end with newline ``
+#### Remediation
+Insert a newline after the last line.
 - **Good**: End the file with one blank line after `endmodule`.
 - **Bad**: File ends immediately after `endmodule` without LF.
-- **Notes**: Git adds `\ No newline at end of file` to diffs; this rule catches the issue before CI noise appears.
+#### Notes
+Git adds `\ No newline at end of file` to diffs; this rule catches the issue before CI noise appears.
