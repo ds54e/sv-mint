@@ -19,13 +19,7 @@ sv-mint is a SystemVerilog lint pipeline that combines a Rust core with Python p
    ```bash
    target/release/sv-mint --config ./sv-mint.toml path/to/files/*.sv
    ```
-4. Tailor rules by editing `sv-mint.toml`:
-   - `[defaults]` sets `timeout_ms_per_file` and stage toggles.
-  - `[plugin]` selects the Python interpreter/arguments. Setting `root = "plugins"` makes relative `script` entries resolve under that root, and `search_paths = ["../plugins"]` lists extra directories to search.
-   - `[[rule]]` entries bind each `rule_id` to a script, stage, `enabled` flag, and optional severity override. Scripts follow the `<rule_id>.<stage>.py` naming convention (`*.raw.py`, `*.pp.py`, `*.cst.py`, `*.ast.py`). When `stage` is omitted, sv-mint infers it from this suffix; specifying `stage` manually is still supported but no longer required for bundled rules. If `[plugin].root` (or `search_paths`) is set, `script` may be omitted entirely—the loader looks for `plugins/<rule_id>.<stage>.py` automatically.
-   - `[logging]` controls `level`, `format` (`text|json`), and event visibility.
-   - `[transport]` defines request/response byte limits, warning margins, and how strictly to treat size overruns; mark critical stages under `[stages.required]` to fail fast.
-   When these sections are left out, sv-mint falls back to internal defaults: per-file timeouts default to 6000 ms, the Python host command is `python3 -u -B`, every stage is enabled (with raw/pp marked as required), and scripts are resolved under `./plugins`. If no `[[rule]]` entries are configured the tool still validates the file inputs but skips invoking any Python rules.
+4. Tailor rules by editing `sv-mint.toml`. A section-by-section reference (including default values and stage behavior) lives in [`docs/configuration.md`](docs/configuration.md). The short version: declare your `[[rule]]` entries, point `[plugin]` at your Python interpreter, and let sv-mint’s built-in defaults cover everything else unless you need overrides.
 
 ### Sample `sv-mint.toml`
 
