@@ -108,6 +108,10 @@ pub struct Plugin {
     pub root: Option<String>,
     #[serde(default)]
     pub search_paths: Vec<String>,
+    #[serde(skip)]
+    pub normalized_root: Option<PathBuf>,
+    #[serde(skip)]
+    pub normalized_search_paths: Vec<PathBuf>,
 }
 
 #[derive(Deserialize)]
@@ -196,6 +200,13 @@ pub fn load_from_path(opt: Option<PathBuf>) -> Result<(Config, PathBuf), ConfigE
 }
 
 fn normalize_rule_scripts(cfg: &mut Config, base_dir: &Path) {
+    cfg.plugin.normalized_root = cfg.plugin.root.as_ref().map(|root| to_abs(base_dir, root));
+    cfg.plugin.normalized_search_paths = cfg
+        .plugin
+        .search_paths
+        .iter()
+        .map(|p| to_abs(base_dir, p))
+        .collect();
     for entry in &mut cfg.rule {
         let script = entry.script.trim();
         if script.is_empty() {
@@ -206,9 +217,16 @@ fn normalize_rule_scripts(cfg: &mut Config, base_dir: &Path) {
             continue;
         }
         let candidate = base_dir.join(script_path);
-        if candidate.exists() {
-            entry.script = candidate.to_string_lossy().into_owned();
-        }
+        entry.script = candidate.to_string_lossy().into_owned();
+    }
+}
+
+fn to_abs(base: &Path, rel: &str) -> PathBuf {
+    let p = Path::new(rel);
+    if p.is_absolute() {
+        p.to_path_buf()
+    } else {
+        base.join(p)
     }
 }
 

@@ -17,20 +17,18 @@ pub fn resolve_script_path(cfg: &Config, s: &str) -> String {
 
 fn iter_search_paths(cfg: &Config, rel: &str) -> Vec<PathBuf> {
     let mut out = Vec::new();
-    if let Some(root) = cfg.plugin.root.as_ref() {
-        out.push(Path::new(root).join(rel));
-    }
-    for extra in &cfg.plugin.search_paths {
-        out.push(Path::new(extra).join(rel));
+    if let Some(root) = cfg.plugin.normalized_root.as_ref() {
+        out.push(root.join(rel));
+        for extra in &cfg.plugin.normalized_search_paths {
+            out.push(extra.join(rel));
+        }
+        return out;
     }
     if let Ok(cwd) = std::env::current_dir() {
         out.push(cwd.join(rel));
     }
     if let Ok(exe) = std::env::current_exe() {
         if let Some(base) = exe.parent() {
-            out.push(base.join(rel));
-        }
-        if let Some(base) = exe.parent().and_then(|d| d.parent()) {
             out.push(base.join(rel));
         }
     }

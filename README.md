@@ -21,7 +21,7 @@ sv-mint is a SystemVerilog lint pipeline that combines a Rust core with Python p
    ```
 4. Tailor rules by editing `sv-mint.toml`:
    - `[defaults]` sets `timeout_ms_per_file` and stage toggles.
-   - `[plugin]` selects the Python interpreter/arguments.
+   - `[plugin]` selects the Python interpreter/arguments。`root = "plugins"` のように設定すると、相対パスの `script` はそのルート配下を基準に解決されます。追加のディレクトリを探したい場合は `search_paths = ["../plugins"]` のように列挙してください。
    - `[[rule]]` entries bind each `rule_id` to a script, stage, `enabled` flag, and optional severity override.
    - `[logging]` controls `level`, `format` (`text|json`), and event visibility.
    - `[transport]` defines request/response byte limits, warning margins, and how strictly to treat size overruns; mark critical stages under `[stages.required]` to fail fast.
