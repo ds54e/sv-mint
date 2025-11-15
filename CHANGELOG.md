@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented here, following [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) conventions and semantic versioning.
 
+## [1.1.3] - 2025-11-15
+### Changed
+- Pluginドキュメントを全面的に整形し、Rule表を箇条書きへ統一、Trigger/Remediationなどを見出し化、各ルールにGood/Bad例を追加して読みやすさを向上しました。
+- READMEの構成を整理し、ユーザーがリリースバイナリを入手してすぐ利用できるよう基本手順を簡潔に説明する内容へ更新しました。
+
 ## [1.1.2] - 2025-11-14
 ### Fixed
 - `naming_rules` plugin now avoids Python 3.8-only syntax, restoring compatibility with Python 3.6 environments such as RHEL8.
@@ -20,6 +25,7 @@ All notable changes to this project are documented here, following [Keep a Chang
 - CLI gained `-f/--filelist` option to lint inputs described via svlint-style filelists.
 - Tests now include filelist-driven smoke coverage, and README documents the supported syntax in detail.
 
+[1.1.3]: https://github.com/foo/sv-mint/releases/tag/v1.1.3
 [1.1.2]: https://github.com/foo/sv-mint/releases/tag/v1.1.2
 [1.1.1]: https://github.com/foo/sv-mint/releases/tag/v1.1.1
 [1.1.0]: https://github.com/foo/sv-mint/releases/tag/v1.1.0
