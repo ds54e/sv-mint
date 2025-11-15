@@ -1,4 +1,3 @@
-use crate::default_scripts;
 use crate::errors::ConfigError;
 use crate::svparser::SvParserCfg;
 use crate::textutil::{normalize_lf, strip_bom};
@@ -117,7 +116,6 @@ pub struct Stages {
 #[derive(Deserialize, Clone)]
 pub struct RuleConfig {
     pub id: String,
-    #[serde(default)]
     pub script: String,
     pub stage: Stage,
     #[serde(default = "default_true")]
@@ -186,12 +184,7 @@ pub fn load_from_path(opt: Option<PathBuf>) -> Result<(Config, PathBuf), ConfigE
     let cfg_text = fs::read_to_string(&path).map_err(|e| ConfigError::IoFailed {
         detail: format!("{} ({})", path.display(), e),
     })?;
-    let mut cfg = load(&cfg_text)?;
-    let base_dir = path
-        .parent()
-        .map(Path::to_path_buf)
-        .unwrap_or_else(|| PathBuf::from("."));
-    apply_rule_defaults(&mut cfg, &base_dir)?;
+    let cfg = load(&cfg_text)?;
     validate_config(&cfg)?;
     Ok((cfg, path))
 }
@@ -271,28 +264,6 @@ pub fn validate_config(cfg: &Config) -> Result<(), ConfigError> {
         return Err(ConfigError::InvalidValue {
             detail: "transport warn_margin_bytes exceeds max_request_bytes".to_string(),
         });
-    }
-    Ok(())
-}
-
-fn apply_rule_defaults(cfg: &mut Config, base_dir: &Path) -> Result<(), ConfigError> {
-    for entry in &mut cfg.rule {
-        if entry.script.trim().is_empty() {
-            if let Some(default_script) = default_scripts::lookup(&entry.id) {
-                entry.script = default_script.to_string();
-            } else {
-                return Err(ConfigError::InvalidValue {
-                    detail: format!("rule {} missing script path", entry.id),
-                });
-            }
-        }
-        let script_path = Path::new(&entry.script);
-        if !script_path.is_absolute() {
-            let candidate = base_dir.join(script_path);
-            if candidate.exists() {
-                entry.script = candidate.to_string_lossy().into_owned();
-            }
-        }
     }
     Ok(())
 }
