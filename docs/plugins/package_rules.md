@@ -4,12 +4,10 @@
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
 - **Rules**:
-  | Rule ID | Severity | Summary |
-  | --- | --- | --- |
-  | `package.multiple` | warning | Limit each file to a single `package` |
-  | `package.missing_end` | warning | Require `endpackage` when a package is declared |
-  | `package.end_mismatch` | warning | Ensure `endpackage : name` matches the package name |
-  | `package.define_in_package` | warning | Forbid `` `define`` inside packages |
+  - ``package.multiple`` (warning): Limit each file to a single `package`
+  - ``package.missing_end`` (warning): Require `endpackage` when a package is declared
+  - ``package.end_mismatch`` (warning): Ensure `endpackage : name` matches the package name
+  - ``package.define_in_package`` (warning): Forbid `` `define`` inside packages
 
 ## Rule Details
 

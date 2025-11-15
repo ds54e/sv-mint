@@ -4,9 +4,7 @@
 - **Stage**: `cst`
 - **Key Inputs**: `cst_ir.tokens`, `tok_kind_table`, `line_starts`, `pp_text`
 - **Rule**:
-  | Rule ID | Severity | Summary |
-  | --- | --- | --- |
-  | `seq.blocking_in_alwaysff` | warning | Ban blocking `=` assignments inside `always_ff` |
+  - ``seq.blocking_in_alwaysff`` (warning): Ban blocking `=` assignments inside `always_ff`
 
 ## Rule Details
 

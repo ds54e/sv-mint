@@ -4,9 +4,7 @@
 - **Stage**: `pp_text`
 - **Key Inputs**: Preprocessed `text`
 - **Rule**:
-  | Rule ID | Severity | Summary |
-  | --- | --- | --- |
-  | `format.begin_required` | warning | Require multiline control bodies to use `begin ... end` |
+  - ``format.begin_required`` (warning): Require multiline control bodies to use `begin ... end`
 
 ## Rule Details
 

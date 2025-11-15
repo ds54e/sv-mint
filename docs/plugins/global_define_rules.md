@@ -4,10 +4,8 @@
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
 - **Rules**:
-  | Rule ID | Severity | Summary |
-  | --- | --- | --- |
-  | `global.local_define_undef` | warning | Require local macros to be undefined in the same file |
-  | `global.prefer_parameters` | warning | Discourage non-underscored `` `define`` macros in favor of parameters |
+  - ``global.local_define_undef`` (warning): Require local macros to be undefined in the same file
+  - ``global.prefer_parameters`` (warning): Discourage non-underscored `` `define`` macros in favor of parameters
 
 ## Rule Details
 

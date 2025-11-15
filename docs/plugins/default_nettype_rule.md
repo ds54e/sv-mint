@@ -4,12 +4,10 @@
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
 - **Rules**:
-  | Rule ID | Severity | Summary |
-  | --- | --- | --- |
-  | `lang.default_nettype_missing` | warning | Require `` `default_nettype none`` in every file |
-  | `lang.default_nettype_none` | warning | The first `default_nettype` must set the value to `none` |
-  | `lang.default_nettype_placement` | warning | `default_nettype none` must appear near the file header |
-  | `lang.default_nettype_reset` | warning | Files must reset `default_nettype` back to `wire` near the end |
+  - ``lang.default_nettype_missing`` (warning): Require `` `default_nettype none`` in every file
+  - ``lang.default_nettype_none`` (warning): The first `default_nettype` must set the value to `none`
+  - ``lang.default_nettype_placement`` (warning): `default_nettype none` must appear near the file header
+  - ``lang.default_nettype_reset`` (warning): Files must reset `default_nettype` back to `wire` near the end
 
 ## Rule Details
 

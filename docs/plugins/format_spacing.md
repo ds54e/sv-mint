@@ -4,13 +4,11 @@
 - **Stages**: `raw_text` and `cst`
 - **Key Inputs**: `text`, `cst_ir.pp_text`, `line_starts`
 - **Rules**:
-  | Rule ID | Severity | Summary |
-  | --- | --- | --- |
-  | `format.comma_space` | warning | Require a space after commas |
-  | `format.call_spacing` | warning | Disallow spaces between function/task names and `(` |
-  | `format.macro_spacing` | warning | Disallow spaces between macro names and `(` |
-  | `format.case_colon_spacing` | warning | Forbid whitespace before `:` in case labels |
-  | `format.case_colon_after` | warning | Require whitespace after `:` in case labels |
+  - ``format.comma_space`` (warning): Require a space after commas
+  - ``format.call_spacing`` (warning): Disallow spaces between function/task names and `(`
+  - ``format.macro_spacing`` (warning): Disallow spaces between macro names and `(`
+  - ``format.case_colon_spacing`` (warning): Forbid whitespace before `:` in case labels
+  - ``format.case_colon_after`` (warning): Require whitespace after `:` in case labels
 
 ## Rule Details
 

@@ -4,9 +4,7 @@
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
 - **Rules**:
-  | Rule ID | Severity | Summary |
-  | --- | --- | --- |
-  | `module.named_ports_required` | warning | Require named `.port(signal)` connections |
+  - ``module.named_ports_required`` (warning): Require named `.port(signal)` connections
 
 ## Rule Details
 

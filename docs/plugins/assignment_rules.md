@@ -4,9 +4,7 @@
 - **Stage**: `ast`
 - **Key Inputs**: `assigns` (each entry includes `module`, `lhs`, `op`, and locations)
 - **Rules**:
-  | Rule ID | Severity | Summary |
-  | --- | --- | --- |
-  | `flow.multiple_nonblocking` | warning | Report multiple non-blocking assignments to the same LHS within a module |
+  - ``flow.multiple_nonblocking`` (warning): Report multiple non-blocking assignments to the same LHS within a module
 
 ## Rule Details
 

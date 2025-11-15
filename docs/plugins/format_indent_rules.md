@@ -4,11 +4,9 @@
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
 - **Rules**:
-  | Rule ID | Severity | Summary |
-  | --- | --- | --- |
-  | `format.indent_multiple_of_two` | warning | Enforce indentation in multiples of two spaces |
-  | `format.preproc_left_align` | warning | Left-align preprocessor directives |
-  | `format.line_continuation_right` | warning | Require `\` line continuations to be the last character |
+  - ``format.indent_multiple_of_two`` (warning): Enforce indentation in multiples of two spaces
+  - ``format.preproc_left_align`` (warning): Left-align preprocessor directives
+  - ``format.line_continuation_right`` (warning): Require `\` line continuations to be the last character
 
 ## Rule Details
 

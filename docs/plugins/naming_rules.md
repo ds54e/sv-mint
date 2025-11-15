@@ -4,21 +4,19 @@
 - **Stage**: `ast`
 - **Key Inputs**: `decls`, `symbols`, `ports`
 - **Rules**:
-  | Rule ID | Severity | Summary |
-  | --- | --- | --- |
-  | `naming.module_case` | warning | Modules must use lower_snake_case |
-  | `naming.signal_case` | warning | Signals/variables must use lower_snake_case |
-  | `naming.port_case` | warning | Ports follow lower_snake_case + direction suffix |
-  | `naming.port_suffix` | warning | `_i/_o/_io` suffixes must match port direction |
-  | `naming.no_numeric_suffix` | warning | Ban trailing `_42` numeric suffixes |
-  | `naming.suffix_order` | warning | Enforce `_ni/_no/_nio` suffix ordering |
-  | `naming.clk_prefix` | warning | Clock names must start with `clk` |
-  | `naming.rst_active_low` | warning | Reset names must end with `_n` (or `_ni/_no/_nio`) |
-  | `naming.clk_order` | warning | Ports must list clocks first |
-  | `naming.rst_before_clk` | warning | Resets must directly follow clocks |
-  | `naming.differential_pair` | warning | `_p` ports require matching `_n` ports |
-  | `naming.pipeline_sequence` | warning | `_q2`+ stages require preceding `_q<n-1>` |
-  | `naming.parameter_upper` | warning | Parameters must be UpperCamelCase |
+  - ``naming.module_case`` (warning): Modules must use lower_snake_case
+  - ``naming.signal_case`` (warning): Signals/variables must use lower_snake_case
+  - ``naming.port_case`` (warning): Ports follow lower_snake_case + direction suffix
+  - ``naming.port_suffix`` (warning): `_i/_o/_io` suffixes must match port direction
+  - ``naming.no_numeric_suffix`` (warning): Ban trailing `_42` numeric suffixes
+  - ``naming.suffix_order`` (warning): Enforce `_ni/_no/_nio` suffix ordering
+  - ``naming.clk_prefix`` (warning): Clock names must start with `clk`
+  - ``naming.rst_active_low`` (warning): Reset names must end with `_n` (or `_ni/_no/_nio`)
+  - ``naming.clk_order`` (warning): Ports must list clocks first
+  - ``naming.rst_before_clk`` (warning): Resets must directly follow clocks
+  - ``naming.differential_pair`` (warning): `_p` ports require matching `_n` ports
+  - ``naming.pipeline_sequence`` (warning): `_q2`+ stages require preceding `_q<n-1>`
+  - ``naming.parameter_upper`` (warning): Parameters must be UpperCamelCase
 
 ## Rule Highlights
 

@@ -4,9 +4,7 @@
 - **Stage**: `cst`
 - **Key Inputs**: `cst_ir.tokens`, `tok_kind_table`, `line_starts`, `pp_text`
 - **Rule**:
-  | Rule ID | Severity | Summary |
-  | --- | --- | --- |
-  | `comb.nb_in_alwayscomb` | warning | Ban non-blocking assignments (`<=`) inside `always_comb` |
+  - ``comb.nb_in_alwayscomb`` (warning): Ban non-blocking assignments (`<=`) inside `always_comb`
 
 ## Rule Details
 

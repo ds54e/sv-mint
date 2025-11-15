@@ -4,9 +4,7 @@
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
 - **Rule**:
-  | Rule ID | Severity | Summary |
-  | --- | --- | --- |
-  | `width.unsized_base_literal` | warning | Ban base literals without explicit widths |
+  - ``width.unsized_base_literal`` (warning): Ban base literals without explicit widths
 
 ## Rule Details
 

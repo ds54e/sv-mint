@@ -4,9 +4,7 @@
 - **Stage**: `ast`
 - **Key Inputs**: `symbols` entries with `class == net`
 - **Rule**:
-  | Rule ID | Severity | Summary |
-  | --- | --- | --- |
-  | `decl.unused.net` | warning | Warn when declared nets are never read or written |
+  - ``decl.unused.net`` (warning): Warn when declared nets are never read or written
 
 ## Rule Details
 

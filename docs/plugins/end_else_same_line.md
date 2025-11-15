@@ -4,9 +4,7 @@
 - **Stage**: `pp_text`
 - **Key Inputs**: Preprocessed `text`
 - **Rule**:
-  | Rule ID | Severity | Summary |
-  | --- | --- | --- |
-  | `format.end_else_inline` | warning | Require `else` to share the same line as the preceding `end` |
+  - ``format.end_else_inline`` (warning): Require `else` to share the same line as the preceding `end`
 
 ## Rule Details
 

@@ -4,13 +4,11 @@
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
 - **Rules**:
-  | Rule ID | Severity | Summary |
-  | --- | --- | --- |
-  | `lang.no_delays` | warning | Ban `#5`-style delays in RTL |
-  | `lang.prefer_always_comb` | warning | Replace `always @*` with `always_comb` |
-  | `lang.no_always_latch` | warning | Discourage `always_latch` |
-  | `lang.always_ff_reset` | warning | Require asynchronous reset in `always_ff` |
-  | `lang.always_comb_at` | warning | Forbid sensitivity lists on `always_comb` |
+  - ``lang.no_delays`` (warning): Ban `#5`-style delays in RTL
+  - ``lang.prefer_always_comb`` (warning): Replace `always @*` with `always_comb`
+  - ``lang.no_always_latch`` (warning): Discourage `always_latch`
+  - ``lang.always_ff_reset`` (warning): Require asynchronous reset in `always_ff`
+  - ``lang.always_comb_at`` (warning): Forbid sensitivity lists on `always_comb`
 
 ## Rule Details
 

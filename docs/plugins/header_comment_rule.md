@@ -4,10 +4,8 @@
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
 - **Rules**:
-  | Rule ID | Severity | Summary |
-  | --- | --- | --- |
-  | `header.missing_spdx` | warning | Require an SPDX identifier near the top of the file |
-  | `header.missing_comment` | warning | Require a header comment within the first five lines |
+  - ``header.missing_spdx`` (warning): Require an SPDX identifier near the top of the file
+  - ``header.missing_comment`` (warning): Require a header comment within the first five lines
 
 ## Rule Details
 

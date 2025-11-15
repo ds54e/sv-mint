@@ -4,9 +4,7 @@
 - **Stage**: `ast`
 - **Key Inputs**: `symbols` entries with `class == param`
 - **Rule**:
-  | Rule ID | Severity | Summary |
-  | --- | --- | --- |
-  | `decl.unused.param` | warning | Detect parameters whose reference count stays at zero |
+  - ``decl.unused.param`` (warning): Detect parameters whose reference count stays at zero
 
 ## Rule Details
 

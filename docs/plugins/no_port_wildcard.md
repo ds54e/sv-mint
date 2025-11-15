@@ -4,9 +4,7 @@
 - **Stage**: `cst` (`mode = inline`)
 - **Key Inputs**: `cst_ir.tokens`, `tok_kind_table`, `line_starts`
 - **Rule**:
-  | Rule ID | Severity | Summary |
-  | --- | --- | --- |
-  | `module.no_port_wildcard` | warning | Catch `.*` port wildcards at the CST level |
+  - ``module.no_port_wildcard`` (warning): Catch `.*` port wildcards at the CST level
 
 ## Rule Details
 

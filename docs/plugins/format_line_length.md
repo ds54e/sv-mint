@@ -4,9 +4,7 @@
 - **Stage**: `raw_text`
 - **Key Inputs**: LF-normalized `text`
 - **Rule**:
-  | Rule ID | Severity | Summary |
-  | --- | --- | --- |
-  | `format.line_length` | warning | Flag lines longer than 100 columns |
+  - ``format.line_length`` (warning): Flag lines longer than 100 columns
 
 ## Rule Details
 

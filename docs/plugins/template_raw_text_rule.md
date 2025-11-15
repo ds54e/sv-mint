@@ -4,9 +4,7 @@
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
 - **Rule**:
-  | Rule ID | Severity | Summary |
-  | --- | --- | --- |
-  | `template.raw_text_marker` | info | Report placeholder markers left in templates |
+  - ``template.raw_text_marker`` (info): Report placeholder markers left in templates
 
 ## Rule Details
 

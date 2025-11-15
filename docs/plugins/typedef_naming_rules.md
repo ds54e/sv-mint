@@ -4,13 +4,11 @@
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
 - **Rules**:
-  | Rule ID | Severity | Summary |
-  | --- | --- | --- |
-  | `typedef.enum_suffix` | warning | Require `typedef enum` names to end with `_e` |
-  | `typedef.enum_lower_snake` | warning | Enum type names must use `lower_snake_case` |
-  | `typedef.enum_value_case` | warning | Enum members must be UpperCamelCase |
-  | `typedef.enum_value_prefix` | warning | Enum members must start with the enum's CamelCase prefix |
-  | `typedef.type_suffix` | warning | Require other typedef names to end with `_t` |
+  - ``typedef.enum_suffix`` (warning): Require `typedef enum` names to end with `_e`
+  - ``typedef.enum_lower_snake`` (warning): Enum type names must use `lower_snake_case`
+  - ``typedef.enum_value_case`` (warning): Enum members must be UpperCamelCase
+  - ``typedef.enum_value_prefix`` (warning): Enum members must start with the enum's CamelCase prefix
+  - ``typedef.type_suffix`` (warning): Require other typedef names to end with `_t`
 
 ## Rule Details
 

@@ -4,12 +4,10 @@
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
 - **Rules**:
-  | Rule ID | Severity | Summary |
-  | --- | --- | --- |
-  | `format.ascii_only` | warning | Reject non-ASCII characters |
-  | `format.no_tabs` | warning | Reject tab characters |
-  | `format.no_trailing_whitespace` | warning | Flag trailing whitespace |
-  | `format.final_newline` | warning | Require a trailing newline |
+  - ``format.ascii_only`` (warning): Reject non-ASCII characters
+  - ``format.no_tabs`` (warning): Reject tab characters
+  - ``format.no_trailing_whitespace`` (warning): Flag trailing whitespace
+  - ``format.final_newline`` (warning): Require a trailing newline
 
 ## Rule Details
 

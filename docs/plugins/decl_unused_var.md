@@ -4,9 +4,7 @@
 - **Stage**: `ast`
 - **Key Inputs**: `symbols` entries with `class == var`
 - **Rule**:
-  | Rule ID | Severity | Summary |
-  | --- | --- | --- |
-  | `decl.unused.var` | warning | Warn about variable declarations that are never referenced |
+  - ``decl.unused.var`` (warning): Warn about variable declarations that are never referenced
 
 ## Rule Details
 

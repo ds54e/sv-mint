@@ -4,9 +4,7 @@
 - **Stage**: `cst` (`mode = inline`)
 - **Key Inputs**: `cst_ir.tokens`, `tok_kind_table`, `line_starts`
 - **Rule**:
-  | Rule ID | Severity | Summary |
-  | --- | --- | --- |
-  | `format.case_begin_required` | warning | Require each `case` item to wrap statements in `begin/end` |
+  - ``format.case_begin_required`` (warning): Require each `case` item to wrap statements in `begin/end`
 
 ## Rule Details
 

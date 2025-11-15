@@ -4,9 +4,7 @@
 - **Stage**: `cst` (`mode = inline`)
 - **Key Inputs**: `cst_ir.tokens`, `line_starts`, `pp_text`
 - **Rule**:
-  | Rule ID | Severity | Summary |
-  | --- | --- | --- |
-  | `case.missing_default` | warning | Warn when a `case` statement lacks a `default` label |
+  - ``case.missing_default`` (warning): Warn when a `case` statement lacks a `default` label
 
 ## Rule Details
 

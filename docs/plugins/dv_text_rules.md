@@ -4,33 +4,31 @@
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`, `path`
 - **Rules**:
-  | Rule ID | Severity | Summary |
-  | --- | --- | --- |
-  | `style.function_scope` | warning | Functions inside packages/modules/interfaces must be `automatic` or `static` |
-  | `rand.dv_macro_required` | warning | Enforce `DV_CHECK_*RANDOMIZE*` macros instead of raw `randomize()` |
-  | `rand.dv_macro_with_required` | warning | Require the `_WITH` DV macros when constraints are present |
-  | `log.uvm_arg_macro` | warning | `uvm_{info,error,fatal}` must use `` `gfn``/`` `gtn`` tags |
-  | `log.no_uvm_warning` | warning | Ban `uvm_warning` in favor of `uvm_error`/`uvm_fatal` |
-  | `log.no_uvm_report_api` | warning | Forbid `uvm_report_*` helpers and require the shorthand macros |
-  | `log.no_display` | warning | Forbid `$display` in DV code |
-  | `log.no_none_full` | warning | Ban `UVM_NONE` and `UVM_FULL` verbosity levels |
-  | `log.allowed_verbosity` | warning | `uvm_*` macros must use UVM_LOW/MEDIUM/HIGH/DEBUG |
-  | `dpi.import_prefix` | warning | Imported DPI symbols must start with `c_dpi_` |
-  | `dpi.export_prefix` | warning | Exported DPI handles must start with `sv_dpi_` |
-  | `macro.missing_undef` | warning | Local `` `define`` entries must be `` `undef``’d in the same file |
-  | `macro.guard_required` | warning | Macros in global `_macros.svh` headers need `` `ifndef`` guards |
-  | `macro.no_local_guard` | warning | Local macros must not use `` `ifndef`` guards |
-  | `macro.dv_prefix_header_only` | warning | `DV_*` macros belong only in shared `_macros.svh` headers |
-  | `macro.module_prefix` | warning | Module-local macros must be prefixed with the module name |
-  | `flow.wait_fork_isolation` | warning | `wait fork` must be replaced with isolation fork helpers |
-  | `flow.wait_macro_required` | warning | Raw `wait (cond)` usage must be replaced with `` `DV_WAIT`` |
-  | `flow.spinwait_macro_required` | warning | `while` polling loops must live inside `` `DV_SPINWAIT`` |
-  | `seq.no_uvm_do` | warning | Forbid legacy `` `uvm_do`` macros |
-  | `scoreboard.dv_eot_required` | warning | Scoreboard classes must call `DV_EOT_PRINT_*` macros |
-  | `lang.no_program_construct` | warning | Ban the `program` language construct |
-  | `flow.no_fork_label` | warning | Forbid labeled `fork : label` syntax |
-  | `flow.no_disable_fork_label` | warning | `disable fork_label` is not portable |
-  | `check.dv_macro_required` | warning | Comparison-based checks must use `DV_CHECK_*` macros |
+  - ``style.function_scope`` (warning): Functions inside packages/modules/interfaces must be `automatic` or `static`
+  - ``rand.dv_macro_required`` (warning): Enforce `DV_CHECK_*RANDOMIZE*` macros instead of raw `randomize()`
+  - ``rand.dv_macro_with_required`` (warning): Require the `_WITH` DV macros when constraints are present
+  - ``log.uvm_arg_macro`` (warning): `uvm_{info,error,fatal}` must use `` `gfn``/`` `gtn`` tags
+  - ``log.no_uvm_warning`` (warning): Ban `uvm_warning` in favor of `uvm_error`/`uvm_fatal`
+  - ``log.no_uvm_report_api`` (warning): Forbid `uvm_report_*` helpers and require the shorthand macros
+  - ``log.no_display`` (warning): Forbid `$display` in DV code
+  - ``log.no_none_full`` (warning): Ban `UVM_NONE` and `UVM_FULL` verbosity levels
+  - ``log.allowed_verbosity`` (warning): `uvm_*` macros must use UVM_LOW/MEDIUM/HIGH/DEBUG
+  - ``dpi.import_prefix`` (warning): Imported DPI symbols must start with `c_dpi_`
+  - ``dpi.export_prefix`` (warning): Exported DPI handles must start with `sv_dpi_`
+  - ``macro.missing_undef`` (warning): Local `` `define`` entries must be `` `undef``’d in the same file
+  - ``macro.guard_required`` (warning): Macros in global `_macros.svh` headers need `` `ifndef`` guards
+  - ``macro.no_local_guard`` (warning): Local macros must not use `` `ifndef`` guards
+  - ``macro.dv_prefix_header_only`` (warning): `DV_*` macros belong only in shared `_macros.svh` headers
+  - ``macro.module_prefix`` (warning): Module-local macros must be prefixed with the module name
+  - ``flow.wait_fork_isolation`` (warning): `wait fork` must be replaced with isolation fork helpers
+  - ``flow.wait_macro_required`` (warning): Raw `wait (cond)` usage must be replaced with `` `DV_WAIT``
+  - ``flow.spinwait_macro_required`` (warning): `while` polling loops must live inside `` `DV_SPINWAIT``
+  - ``seq.no_uvm_do`` (warning): Forbid legacy `` `uvm_do`` macros
+  - ``scoreboard.dv_eot_required`` (warning): Scoreboard classes must call `DV_EOT_PRINT_*` macros
+  - ``lang.no_program_construct`` (warning): Ban the `program` language construct
+  - ``flow.no_fork_label`` (warning): Forbid labeled `fork : label` syntax
+  - ``flow.no_disable_fork_label`` (warning): `disable fork_label` is not portable
+  - ``check.dv_macro_required`` (warning): Comparison-based checks must use `DV_CHECK_*` macros
 
 ## Rule Details
 

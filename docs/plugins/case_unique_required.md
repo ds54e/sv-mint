@@ -4,9 +4,7 @@
 - **Stage**: `cst` (`mode = inline`)
 - **Key Inputs**: `cst_ir.tokens`, `tok_kind_table`, `line_starts`
 - **Rule**:
-  | Rule ID | Severity | Summary |
-  | --- | --- | --- |
-  | `lang.case_requires_unique` | warning | Recommend adding `unique` or `priority` to `case` statements |
+  - ``lang.case_requires_unique`` (warning): Recommend adding `unique` or `priority` to `case` statements
 
 ## Rule Details
 
