@@ -13,7 +13,7 @@
 ### `decl.unused.net`
 - **Trigger**: Selects `symbols` with `class="net"` where both `read_count` and `write_count` are zero, reporting the declaration location.
 - **Message**: `` unused net <module>.<name> ``
-- **Remediation**: Delete unused nets or annotate intentional placeholders with inline comments containing `unused` (e.g., `` wire debug_tap /* unused */; ``).
+- **Remediation**: Delete unused nets or annotate intentional placeholders with inline comments containing `unused` (e.g., `` wire debug_tap; // unused ``).
 - **Notes**: AST data reflects the post-include source, so nets referenced only under conditional compilation may appear unused if `ignore_include` is enabled.
 - **LowRISC Reference**: The style guide bans stray signals because they add confusion; this rule enforces that cleanup.
 - **Good**:
@@ -24,6 +24,10 @@ wire ack_o;
 wire busy;
 
 assign busy = req_i & ack_o;  // net is driven and consumed
+```
+
+```systemverilog
+wire debug_tap;  // unused  (explicit intent keeps lint quiet)
 ```
 
 - **Bad**:

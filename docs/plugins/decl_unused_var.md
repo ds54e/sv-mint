@@ -13,7 +13,7 @@
 ### `decl.unused.var`
 - **Trigger**: Looks for `var` symbols whose `read_count` and `write_count` both equal zero, reporting the declaration site.
 - **Message**: `` unused var <module>.<name> ``
-- **Remediation**: Delete the variable, wire it into surrounding logic, or annotate intentional placeholders with inline comments that include `unused` (e.g., `` logic debug_shadow /* unused */; ``).
+- **Remediation**: Delete the variable, wire it into surrounding logic, or annotate intentional placeholders with inline comments that include `unused` (e.g., `` logic debug_shadow; // unused ``).
 - **Notes**: Location data always comes from `sv-parser`, so when the declaration lives in an included file, inspect `Location.file`.
 - **LowRISC Reference**: The guide discourages unused variables unless they are explicitly marked as `_unused`.
 - **Good**:
@@ -26,6 +26,10 @@ logic data_q;
 always_ff @(posedge clk_i) begin
   if (enable) data_q <= data_d;
 end
+```
+
+```systemverilog
+logic debug_shadow;  // unused (documented placeholder)
 ```
 
 - **Bad**:

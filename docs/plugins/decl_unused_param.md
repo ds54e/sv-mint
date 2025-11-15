@@ -13,7 +13,7 @@
 ### `decl.unused.param`
 - **Trigger**: Filters `symbols` for `class == param` and flags entries with `ref_count` (or `read_count`) equal to zero.
 - **Message**: `` unused param <module>.<name> ``
-- **Remediation**: Remove unused parameters, ensure configuration knobs are referenced, or annotate intentional placeholders with inline comments containing `unused` (for example, `` parameter bit EnableDbg /* unused */ = 0 ``).
+- **Remediation**: Remove unused parameters, ensure configuration knobs are referenced, or annotate intentional placeholders with inline comments containing `unused` (for example, `` parameter bit EnableDbg = 0  // unused ``).
 - **Notes**: Auto-generated code that allows dummy parameters can downgrade severity by setting `severity = "info"` (or a lower level) in the matching `[[rule]]` entry.
 - **LowRISC Reference**: Parameters should document module configurability; unused ones must be deleted.
 - **Good**:
@@ -23,6 +23,13 @@ module fifo #(parameter int Depth = 16) (
   input  logic [$clog2(Depth):0] addr_i,
   ...
 );
+```
+
+```systemverilog
+module stub #(
+  parameter bit EnableDbg = 0  // unused (intentionally reserved knob)
+) ();
+endmodule
 ```
 
 - **Bad**:
