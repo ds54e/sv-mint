@@ -104,6 +104,10 @@ pub struct Plugin {
     pub cmd: String,
     #[serde(default)]
     pub args: Vec<String>,
+    #[serde(default)]
+    pub root: Option<String>,
+    #[serde(default)]
+    pub search_paths: Vec<String>,
 }
 
 #[derive(Deserialize)]

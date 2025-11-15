@@ -82,7 +82,7 @@ pub struct StageRunResult {
 impl PythonHost {
     pub fn start(cfg: &Config) -> Result<Self, PluginError> {
         let script_specs = collect_script_specs(cfg);
-        let host_path = resolve_script_path("plugins/lib/rule_host.py");
+        let host_path = resolve_script_path(cfg, "plugins/lib/rule_host.py");
         let cmd_preview = format_plugin_command(&cfg.plugin.cmd, &cfg.plugin.args, &host_path);
         let runtime = Runtime::new().map_err(|e| PluginError::SpawnFailed { detail: e.to_string() })?;
         let timeout = Duration::from_millis(cfg.defaults.timeout_ms_per_file);
