@@ -7,13 +7,10 @@ fn main() {
     let manifest = fs::read_to_string("sv-mint.toml").expect("failed to read sv-mint.toml");
     let value: toml::Value = manifest.parse().expect("invalid sv-mint.toml");
     let mut entries: Vec<(String, String)> = Vec::new();
-    if let Some(rules) = value.get("rule").and_then(|v| v.as_array()) {
-        for rule in rules {
-            if let (Some(id), Some(script)) = (
-                rule.get("id").and_then(|v| v.as_str()),
-                rule.get("script").and_then(|v| v.as_str()),
-            ) {
-                entries.push((id.to_string(), script.to_string()));
+    if let Some(defaults) = value.get("rule_defaults").and_then(|v| v.as_table()) {
+        for (id, script) in defaults {
+            if let Some(script_str) = script.as_str() {
+                entries.push((id.to_string(), script_str.to_string()));
             }
         }
     }
