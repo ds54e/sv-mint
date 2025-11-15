@@ -1,6 +1,11 @@
 # Typedef naming rules
 
-- **Scripts**: `plugins/typedef.*.raw.py`
+- **Scripts**:
+  - `plugins/typedef.enum_lower_snake.raw.py`
+  - `plugins/typedef.enum_suffix.raw.py`
+  - `plugins/typedef.enum_value_case.raw.py`
+  - `plugins/typedef.enum_value_prefix.raw.py`
+  - `plugins/typedef.type_suffix.raw.py`
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
 - **Shared Helpers**: `plugins/lib/typedef_naming_ruleset.py`

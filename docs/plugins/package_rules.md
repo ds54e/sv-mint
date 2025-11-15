@@ -1,6 +1,10 @@
 # Package rules
 
-- **Scripts**: `plugins/package.*.raw.py`
+- **Scripts**:
+  - `plugins/package.multiple.raw.py`
+  - `plugins/package.missing_end.raw.py`
+  - `plugins/package.end_mismatch.raw.py`
+  - `plugins/package.define_in_package.raw.py`
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
 - **Shared Helpers**: `plugins/lib/package_ruleset.py`

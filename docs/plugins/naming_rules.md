@@ -1,6 +1,19 @@
 # Naming rules
 
-- **Scripts**: `plugins/<rule_id>.ast.py` (one per rule)
+- **Scripts**:
+  - `plugins/naming.module_case.ast.py`
+  - `plugins/naming.signal_case.ast.py`
+  - `plugins/naming.port_case.ast.py`
+  - `plugins/naming.port_suffix.ast.py`
+  - `plugins/naming.no_numeric_suffix.ast.py`
+  - `plugins/naming.suffix_order.ast.py`
+  - `plugins/naming.clk_prefix.ast.py`
+  - `plugins/naming.rst_active_low.ast.py`
+  - `plugins/naming.clk_order.ast.py`
+  - `plugins/naming.rst_before_clk.ast.py`
+  - `plugins/naming.differential_pair.ast.py`
+  - `plugins/naming.pipeline_sequence.ast.py`
+  - `plugins/naming.parameter_upper.ast.py`
 - **Stage**: `ast`
 - **Key Inputs**: `decls`, `symbols`, `ports`
 - **Shared Helpers**: `plugins/lib/naming_ruleset.py`

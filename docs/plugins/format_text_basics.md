@@ -1,6 +1,10 @@
 # Format text basics
 
-- **Scripts**: `plugins/<rule_id>.raw.py`
+- **Scripts**:
+  - `plugins/format.ascii_only.raw.py`
+  - `plugins/format.no_tabs.raw.py`
+  - `plugins/format.no_trailing_whitespace.raw.py`
+  - `plugins/format.final_newline.raw.py`
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
 - **Shared Helpers**: `plugins/lib/format_text_ruleset.py`

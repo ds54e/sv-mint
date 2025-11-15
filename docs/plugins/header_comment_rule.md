@@ -1,6 +1,8 @@
 # Header comment rules
 
-- **Scripts**: `plugins/header.*.raw.py`
+- **Scripts**:
+  - `plugins/header.missing_spdx.raw.py`
+  - `plugins/header.missing_comment.raw.py`
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
 - **Shared Helpers**: `plugins/lib/header_comment_ruleset.py`

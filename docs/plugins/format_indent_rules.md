@@ -1,6 +1,9 @@
 # Format indent rules
 
-- **Scripts**: `plugins/format.*.raw.py`
+- **Scripts**:
+  - `plugins/format.indent_multiple_of_two.raw.py`
+  - `plugins/format.preproc_left_align.raw.py`
+  - `plugins/format.line_continuation_right.raw.py`
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
 - **Shared Helpers**: `plugins/lib/format_indent_ruleset.py`

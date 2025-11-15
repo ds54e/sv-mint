@@ -34,4 +34,4 @@ foo u_foo (
 foo u_foo (clk_i, rst_ni, req_i, gnt_o);  // positional arguments
 ```
 
-`module.no_port_wildcard` is now enforced exclusively by `plugins/no_port_wildcard.py` (CST stage) for precise diagnostics.
+`module.no_port_wildcard` is now enforced exclusively by `plugins/module.no_port_wildcard.cst.py` for precise diagnostics.

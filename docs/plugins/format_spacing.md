@@ -1,6 +1,11 @@
 # Format spacing rules
 
-- **Scripts**: `plugins/<rule_id>.(raw|cst).py`
+- **Scripts**:
+  - `plugins/format.comma_space.raw.py`
+  - `plugins/format.call_spacing.raw.py`
+  - `plugins/format.macro_spacing.raw.py`
+  - `plugins/format.case_colon_spacing.cst.py`
+  - `plugins/format.case_colon_after.cst.py`
 - **Stages**: `raw_text` (`format.comma_space`, `format.call_spacing`, `format.macro_spacing`), `cst` (`format.case_colon_*`)
 - **Key Inputs**: `text`, `cst_ir.pp_text`, `line_starts`
 - **Shared Helpers**: `plugins/lib/format_spacing_ruleset.py`

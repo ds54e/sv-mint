@@ -1,6 +1,10 @@
 # Default nettype rules
 
-- **Scripts**: `plugins/lang.default_nettype_*.raw.py`
+- **Scripts**:
+  - `plugins/lang.default_nettype_missing.raw.py`
+  - `plugins/lang.default_nettype_none.raw.py`
+  - `plugins/lang.default_nettype_placement.raw.py`
+  - `plugins/lang.default_nettype_reset.raw.py`
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
 - **Shared Helpers**: `plugins/lib/default_nettype_ruleset.py`

@@ -1,6 +1,8 @@
 # Global define rules
 
-- **Scripts**: `plugins/global.*.raw.py`
+- **Scripts**:
+  - `plugins/global.local_define_undef.raw.py`
+  - `plugins/global.prefer_parameters.raw.py`
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
 - **Shared Helpers**: `plugins/lib/global_define_ruleset.py`

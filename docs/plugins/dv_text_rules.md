@@ -1,6 +1,31 @@
 # DV text rules
 
-- **Scripts**: `plugins/<rule_id>.raw.py` (one rule per file)
+- **Scripts**:
+  - `plugins/check.dv_macro_required.raw.py`
+  - `plugins/dpi.export_prefix.raw.py`
+  - `plugins/dpi.import_prefix.raw.py`
+  - `plugins/flow.no_disable_fork_label.raw.py`
+  - `plugins/flow.no_fork_label.raw.py`
+  - `plugins/flow.spinwait_macro_required.raw.py`
+  - `plugins/flow.wait_fork_isolation.raw.py`
+  - `plugins/flow.wait_macro_required.raw.py`
+  - `plugins/lang.no_program_construct.raw.py`
+  - `plugins/log.allowed_verbosity.raw.py`
+  - `plugins/log.no_display.raw.py`
+  - `plugins/log.no_none_full.raw.py`
+  - `plugins/log.no_uvm_report_api.raw.py`
+  - `plugins/log.no_uvm_warning.raw.py`
+  - `plugins/log.uvm_arg_macro.raw.py`
+  - `plugins/macro.dv_prefix_header_only.raw.py`
+  - `plugins/macro.guard_required.raw.py`
+  - `plugins/macro.missing_undef.raw.py`
+  - `plugins/macro.module_prefix.raw.py`
+  - `plugins/macro.no_local_guard.raw.py`
+  - `plugins/rand.dv_macro_required.raw.py`
+  - `plugins/rand.dv_macro_with_required.raw.py`
+  - `plugins/scoreboard.dv_eot_required.raw.py`
+  - `plugins/seq.no_uvm_do.raw.py`
+  - `plugins/style.function_scope.raw.py`
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`, `path`
 - **Shared Helpers**: `plugins/lib/dv_text_ruleset.py`

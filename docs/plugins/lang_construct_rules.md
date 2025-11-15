@@ -1,6 +1,11 @@
 # Language construct rules
 
-- **Scripts**: `plugins/lang.*.raw.py`
+- **Scripts**:
+  - `plugins/lang.no_delays.raw.py`
+  - `plugins/lang.prefer_always_comb.raw.py`
+  - `plugins/lang.no_always_latch.raw.py`
+  - `plugins/lang.always_ff_reset.raw.py`
+  - `plugins/lang.always_comb_at.raw.py`
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
 - **Shared Helpers**: `plugins/lib/lang_construct_ruleset.py`
