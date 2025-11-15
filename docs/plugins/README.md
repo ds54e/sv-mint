@@ -1,31 +1,15 @@
-# Plugin Layout Notes
+# Plugin Documentation
 
-Every bundled rule now lives in its own script following the `<rule_id>.<stage>.py` convention where `<stage>` is one of `raw`, `pp`, `cst`, or `ast`. When you keep custom plugins under `[plugin].root` (or any directory listed in `[plugin].search_paths`), `sv-mint` can infer both the script path and stage automatically. That means your `[[rule]]` entries only need to specify `id = "rule.id"` unless you deliberately want to override the script path.
+This directory contains one Markdown file per rule. Each file is named after the rule ID (`<rule_id>.md`) and documents:
 
-Example minimal configuration:
+- The script path under `plugins/`
+- The stage payload it consumes (`raw_text`, `pp_text`, `cst`, or `ast`)
+- A short summary plus trigger/message/remediation examples
 
-```toml
-[plugin]
-cmd = "python3"
-args = ["-u", "-B"]
-root = "plugins"
+When adding or updating rules:
 
-[[rule]]
-id = "format.no_tabs"           # uses plugins/format.no_tabs.raw.py
+1. Implement the script using the `<rule_id>.<stage>.py` convention under `plugins/`.
+2. Create or update `docs/plugins/<rule_id>.md` so it mirrors the script behavior.
+3. Keep the headings and bullet layout consistent with existing files so the docs stay easy to scan.
 
-[[rule]]
-id = "naming.port_suffix"       # uses plugins/naming.port_suffix.ast.py
-
-[[rule]]
-id = "module.no_port_wildcard"  # uses plugins/module.no_port_wildcard.cst.py
-```
-
-If you want to test a local experimental script, simply override the `script` field:
-
-```toml
-[[rule]]
-id = "format.no_tabs"
-script = "local_experiments/no_tabs_experiment.raw.py"
-```
-
-The resolver falls back to the explicit script path whenever it is provided. This keeps the default configuration terse while still allowing per-rule overrides when needed.
+For plugin configuration, loader behavior, and example `sv-mint.toml` entries, follow the instructions in the top-level `README.md`. This file focuses solely on how the per-rule documentation set is organized.
