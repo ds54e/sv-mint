@@ -23,7 +23,7 @@ We will migrate bundled rule scripts to a "one rule per file" layout and derive 
 
 4. **Complete DV Text Refactor**
    - Repeat extraction for the remaining `dv_text_rules` rules until the monolithic file is empty.
-   - Delete `dv_text_rules.py` and adjust documentation (`docs/plugins/dv_text_rules.md`) to reference the new file layout.
+   - Delete `dv_text_rules.py` and ensure each DV text rule has its own entry under `docs/plugins/`.
 
 5. **Other Plugins**
    - Apply the same approach to `naming_rules.py`, `format_spacing.py`, and other multi-rule scripts in manageable batches.
@@ -32,6 +32,7 @@ We will migrate bundled rule scripts to a "one rule per file" layout and derive 
 6. **Documentation & Samples**
    - Update README/Sample configs to describe the naming convention and stage inference.
    - Document how custom rules should be named and how stage inference works.
+   - **Per-rule documentation**: Split each `docs/plugins/*.md` entry so every rule has its own Markdown file. Update cross-references (README, docs/plugins/README.md) to point at the new locations.
 
 7. **Cleanup**
    - Remove now-unused helper code from old aggregate scripts.
@@ -40,4 +41,3 @@ We will migrate bundled rule scripts to a "one rule per file" layout and derive 
 ## Timeline
 - Day 1: Inventory, pilot extraction for a small subset, add stage inference logic.
 - Day 2+: Continue refactor in batches, update docs, final cleanup.
-

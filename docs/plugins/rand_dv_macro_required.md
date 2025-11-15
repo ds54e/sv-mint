@@ -1,0 +1,29 @@
+# rand_dv_macro_required.py
+
+- **Script**: `plugins/rand.dv_macro_required.raw.py`
+- **Stage**: `raw_text`
+- **Key Inputs**: `text`, `path`
+- **Shared Helpers**: `plugins/lib/dv_text_ruleset.py`
+- **Rule**:
+  - ``rand.dv_macro_required`` (warning): Enforce `DV_CHECK_*RANDOMIZE*` macros instead of raw `randomize()`
+
+## Rule Details
+
+### `rand.dv_macro_required`
+#### Trigger
+Looks for bare `randomize()` or `std::randomize()` calls.
+#### Message
+`` use DV_CHECK_*RANDOMIZE* macros instead of raw randomize() ``
+#### Remediation
+Wrap every randomization call with `DV_CHECK_RANDOMIZE_FATAL`, `DV_CHECK_STD_RANDOMIZE_FATAL`, or `DV_CHECK_MEMBER_RANDOMIZE_FATAL`.
+#### Good
+
+```systemverilog
+DV_CHECK_RANDOMIZE_FATAL(req.randomize());
+```
+
+#### Bad
+
+```systemverilog
+req.randomize();  // missing DV_CHECK_* wrapper
+```

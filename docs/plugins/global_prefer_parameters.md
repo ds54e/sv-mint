@@ -1,42 +1,13 @@
-# Global define rules
+# global_prefer_parameters.py
 
-- **Scripts**:
-  - `plugins/global.local_define_undef.raw.py`
-  - `plugins/global.prefer_parameters.raw.py`
+- **Script**: `plugins/global.prefer_parameters.raw.py`
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
 - **Shared Helpers**: `plugins/lib/global_define_ruleset.py`
-- **Rules**:
-  - ``global.local_define_undef`` (warning): Require local macros to be undefined in the same file
+- **Rule**:
   - ``global.prefer_parameters`` (warning): Discourage non-underscored `` `define`` macros in favor of parameters
 
 ## Rule Details
-
-### `global.local_define_undef`
-#### Trigger
-Flags macros such as `_FOO` that reach EOF without a matching `` `undef``.
-#### Message
-`` local macro <name> must be undefined after use ``
-#### Remediation
-Insert `` `undef <name>`` in the same translation unit or move the macro to a tighter scope.
-#### Good
-
-```systemverilog
-`define _FOO(ARG) (ARG + 1)
-assign data_o = `_FOO(data_i);
-`undef _FOO
-```
-
-#### Bad
-
-```systemverilog
-`define _FOO(ARG) (ARG + 1)
-assign data_o = `_FOO(data_i);
-// no `undef, so the macro leaks
-```
-
-#### Additional Tips
-Wrap the undef with guards such as `` `ifdef _FOO`` to avoid symbol clashes across includes.
 
 ### `global.prefer_parameters`
 #### Trigger
