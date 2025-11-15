@@ -4,242 +4,184 @@ timeout_ms_per_file = 3000
 [plugin]
 cmd = "python3"
 args = ["-u", "-B"]
+root = "../plugins"
 
 [[rule]]
 id = "flow.multiple_nonblocking"
-script = "../plugins/flow.multiple_nonblocking.ast.py"
 
 [[rule]]
 id = "comb.nb_in_alwayscomb"
-script = "../plugins/comb.nb_in_alwayscomb.cst.py"
 
 [[rule]]
 id = "decl.unused.param"
-script = "../plugins/decl.unused.param.ast.py"
 
 [[rule]]
 id = "decl.unused.net"
-script = "../plugins/decl.unused.net.ast.py"
 
 [[rule]]
 id = "decl.unused.var"
-script = "../plugins/decl.unused.var.ast.py"
 
 [[rule]]
 id = "lang.default_nettype_missing"
-script = "../plugins/lang.default_nettype_missing.raw.py"
 
 [[rule]]
 id = "lang.default_nettype_none"
-script = "../plugins/lang.default_nettype_none.raw.py"
 
 [[rule]]
 id = "lang.default_nettype_placement"
-script = "../plugins/lang.default_nettype_placement.raw.py"
 
 [[rule]]
 id = "lang.default_nettype_reset"
-script = "../plugins/lang.default_nettype_reset.raw.py"
 
 [[rule]]
 id = "format.ascii_only"
-script = "../plugins/format.ascii_only.raw.py"
 
 [[rule]]
 id = "format.no_tabs"
-script = "../plugins/format.no_tabs.raw.py"
 
 [[rule]]
 id = "format.no_trailing_whitespace"
-script = "../plugins/format.no_trailing_whitespace.raw.py"
 
 [[rule]]
 id = "format.final_newline"
-script = "../plugins/format.final_newline.raw.py"
 
 [[rule]]
 id = "format.comma_space"
-script = "../plugins/format.comma_space.raw.py"
 
 [[rule]]
 id = "format.call_spacing"
-script = "../plugins/format.call_spacing.raw.py"
 
 [[rule]]
 id = "format.macro_spacing"
-script = "../plugins/format.macro_spacing.raw.py"
 
 [[rule]]
 id = "format.case_colon_spacing"
-script = "../plugins/format.case_colon_spacing.cst.py"
 
 [[rule]]
 id = "format.case_colon_after"
-script = "../plugins/format.case_colon_after.cst.py"
 
 [[rule]]
 id = "format.line_length"
-script = "../plugins/format.line_length.raw.py"
 
 [[rule]]
 id = "module.no_port_wildcard"
-script = "../plugins/module.no_port_wildcard.cst.py"
 
 [[rule]]
 id = "format.end_else_inline"
-script = "../plugins/format.end_else_inline.pp.py"
 
 [[rule]]
 id = "format.begin_required"
-script = "../plugins/format.begin_required.pp.py"
 
 [[rule]]
 id = "naming.module_case"
-script = "../plugins/naming.module_case.ast.py"
 
 [[rule]]
 id = "naming.signal_case"
-script = "../plugins/naming.signal_case.ast.py"
 
 [[rule]]
 id = "naming.port_case"
-script = "../plugins/naming.port_case.ast.py"
 
 [[rule]]
 id = "naming.no_numeric_suffix"
-script = "../plugins/naming.no_numeric_suffix.ast.py"
 
 [[rule]]
 id = "naming.suffix_order"
-script = "../plugins/naming.suffix_order.ast.py"
 
 [[rule]]
 id = "naming.clk_prefix"
-script = "../plugins/naming.clk_prefix.ast.py"
 
 [[rule]]
 id = "naming.rst_active_low"
-script = "../plugins/naming.rst_active_low.ast.py"
 
 [[rule]]
 id = "naming.clk_order"
-script = "../plugins/naming.clk_order.ast.py"
 
 [[rule]]
 id = "naming.rst_before_clk"
-script = "../plugins/naming.rst_before_clk.ast.py"
 
 [[rule]]
 id = "naming.differential_pair"
-script = "../plugins/naming.differential_pair.ast.py"
 
 [[rule]]
 id = "naming.pipeline_sequence"
-script = "../plugins/naming.pipeline_sequence.ast.py"
 
 [[rule]]
 id = "naming.parameter_upper"
-script = "../plugins/naming.parameter_upper.ast.py"
 
 [[rule]]
 id = "lang.no_delays"
-script = "../plugins/lang.no_delays.raw.py"
 
 [[rule]]
 id = "lang.prefer_always_comb"
-script = "../plugins/lang.prefer_always_comb.raw.py"
 
 [[rule]]
 id = "lang.no_always_latch"
-script = "../plugins/lang.no_always_latch.raw.py"
 
 [[rule]]
 id = "lang.always_ff_reset"
-script = "../plugins/lang.always_ff_reset.raw.py"
 
 [[rule]]
 id = "lang.always_comb_at"
-script = "../plugins/lang.always_comb_at.raw.py"
 
 [[rule]]
 id = "global.local_define_undef"
-script = "../plugins/global.local_define_undef.raw.py"
 
 [[rule]]
 id = "global.prefer_parameters"
-script = "../plugins/global.prefer_parameters.raw.py"
 
 [[rule]]
 id = "width.unsized_base_literal"
-script = "../plugins/width.unsized_base_literal.raw.py"
 
 [[rule]]
 id = "lang.case_requires_unique"
-script = "../plugins/lang.case_requires_unique.cst.py"
 
 [[rule]]
 id = "package.multiple"
-script = "../plugins/package.multiple.raw.py"
 
 [[rule]]
 id = "package.missing_end"
-script = "../plugins/package.missing_end.raw.py"
 
 [[rule]]
 id = "package.end_mismatch"
-script = "../plugins/package.end_mismatch.raw.py"
 
 [[rule]]
 id = "package.define_in_package"
-script = "../plugins/package.define_in_package.raw.py"
 
 [[rule]]
 id = "module.named_ports_required"
-script = "../plugins/module.named_ports_required.raw.py"
 
 [[rule]]
 id = "header.missing_spdx"
-script = "../plugins/header.missing_spdx.raw.py"
 
 [[rule]]
 id = "header.missing_comment"
-script = "../plugins/header.missing_comment.raw.py"
 
 [[rule]]
 id = "typedef.enum_suffix"
-script = "../plugins/typedef.enum_suffix.raw.py"
 
 [[rule]]
 id = "typedef.type_suffix"
-script = "../plugins/typedef.type_suffix.raw.py"
 
 [[rule]]
 id = "format.case_begin_required"
-script = "../plugins/format.case_begin_required.cst.py"
 
 [[rule]]
 id = "format.indent_multiple_of_two"
-script = "../plugins/format.indent_multiple_of_two.raw.py"
 
 [[rule]]
 id = "format.preproc_left_align"
-script = "../plugins/format.preproc_left_align.raw.py"
 
 [[rule]]
 id = "format.line_continuation_right"
-script = "../plugins/format.line_continuation_right.raw.py"
 
 [[rule]]
 id = "case.missing_default"
-script = "../plugins/case.missing_default.cst.py"
 
 [[rule]]
 id = "seq.blocking_in_alwaysff"
-script = "../plugins/seq.blocking_in_alwaysff.cst.py"
 
 [[rule]]
 id = "template.raw_text_marker"
-script = "../plugins/template.raw_text_marker.raw.py"
 
 [logging]
 level = "info"

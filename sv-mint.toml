@@ -8,355 +8,267 @@ root = "plugins"
 
 [[rule]]
 id = "flow.multiple_nonblocking"
-script = "flow.multiple_nonblocking.ast.py"
 
 [[rule]]
 id = "format.begin_required"
-script = "format.begin_required.pp.py"
 
 [[rule]]
 id = "case.missing_default"
-script = "case.missing_default.cst.py"
 
 [[rule]]
 id = "lang.case_requires_unique"
-script = "lang.case_requires_unique.cst.py"
 
 [[rule]]
 id = "comb.nb_in_alwayscomb"
-script = "comb.nb_in_alwayscomb.cst.py"
 
 [[rule]]
 id = "decl.unused.net"
-script = "decl.unused.net.ast.py"
 
 [[rule]]
 id = "decl.unused.param"
-script = "decl.unused.param.ast.py"
 
 [[rule]]
 id = "decl.unused.var"
-script = "decl.unused.var.ast.py"
 
 [[rule]]
 id = "lang.default_nettype_missing"
-script = "lang.default_nettype_missing.raw.py"
 
 [[rule]]
 id = "lang.default_nettype_none"
-script = "lang.default_nettype_none.raw.py"
 
 [[rule]]
 id = "lang.default_nettype_placement"
-script = "lang.default_nettype_placement.raw.py"
 
 [[rule]]
 id = "lang.default_nettype_reset"
-script = "lang.default_nettype_reset.raw.py"
 
 [[rule]]
 id = "check.dv_macro_required"
-script = "check.dv_macro_required.raw.py"
 
 [[rule]]
 id = "dpi.export_prefix"
-script = "dpi.export_prefix.raw.py"
 
 [[rule]]
 id = "dpi.import_prefix"
-script = "dpi.import_prefix.raw.py"
 
 [[rule]]
 id = "flow.no_disable_fork_label"
-script = "flow.no_disable_fork_label.raw.py"
 
 [[rule]]
 id = "flow.no_fork_label"
-script = "flow.no_fork_label.raw.py"
 
 [[rule]]
 id = "flow.spinwait_macro_required"
-script = "flow.spinwait_macro_required.raw.py"
 
 [[rule]]
 id = "flow.wait_fork_isolation"
-script = "flow.wait_fork_isolation.raw.py"
 
 [[rule]]
 id = "flow.wait_macro_required"
-script = "flow.wait_macro_required.raw.py"
 
 [[rule]]
 id = "lang.no_program_construct"
-script = "lang.no_program_construct.raw.py"
 
 [[rule]]
 id = "log.allowed_verbosity"
-script = "log.allowed_verbosity.raw.py"
 
 [[rule]]
 id = "log.no_display"
-script = "log.no_display.raw.py"
 
 [[rule]]
 id = "log.no_none_full"
-script = "log.no_none_full.raw.py"
 
 [[rule]]
 id = "log.no_uvm_report_api"
-script = "log.no_uvm_report_api.raw.py"
 
 [[rule]]
 id = "log.no_uvm_warning"
-script = "log.no_uvm_warning.raw.py"
 
 [[rule]]
 id = "log.uvm_arg_macro"
-script = "log.uvm_arg_macro.raw.py"
 
 [[rule]]
 id = "macro.dv_prefix_header_only"
-script = "macro.dv_prefix_header_only.raw.py"
 
 [[rule]]
 id = "macro.guard_required"
-script = "macro.guard_required.raw.py"
 
 [[rule]]
 id = "macro.missing_undef"
-script = "macro.missing_undef.raw.py"
 
 [[rule]]
 id = "macro.module_prefix"
-script = "macro.module_prefix.raw.py"
 
 [[rule]]
 id = "macro.no_local_guard"
-script = "macro.no_local_guard.raw.py"
 
 [[rule]]
 id = "rand.dv_macro_required"
-script = "rand.dv_macro_required.raw.py"
 
 [[rule]]
 id = "rand.dv_macro_with_required"
-script = "rand.dv_macro_with_required.raw.py"
 
 [[rule]]
 id = "scoreboard.dv_eot_required"
-script = "scoreboard.dv_eot_required.raw.py"
 
 [[rule]]
 id = "seq.no_uvm_do"
-script = "seq.no_uvm_do.raw.py"
 
 [[rule]]
 id = "style.function_scope"
-script = "style.function_scope.raw.py"
 
 [[rule]]
 id = "format.end_else_inline"
-script = "format.end_else_inline.pp.py"
 
 [[rule]]
 id = "format.case_begin_required"
-script = "format.case_begin_required.cst.py"
 
 [[rule]]
 id = "format.indent_multiple_of_two"
-script = "format.indent_multiple_of_two.raw.py"
 
 [[rule]]
 id = "format.line_continuation_right"
-script = "format.line_continuation_right.raw.py"
 
 [[rule]]
 id = "format.preproc_left_align"
-script = "format.preproc_left_align.raw.py"
 
 [[rule]]
 id = "format.line_length"
-script = "format.line_length.raw.py"
 
 [[rule]]
 id = "format.call_spacing"
-script = "format.call_spacing.raw.py"
 
 [[rule]]
 id = "format.case_colon_after"
-script = "format.case_colon_after.cst.py"
 
 [[rule]]
 id = "format.case_colon_spacing"
-script = "format.case_colon_spacing.cst.py"
 
 [[rule]]
 id = "format.comma_space"
-script = "format.comma_space.raw.py"
 
 [[rule]]
 id = "format.macro_spacing"
-script = "format.macro_spacing.raw.py"
 
 [[rule]]
 id = "format.ascii_only"
-script = "format.ascii_only.raw.py"
 
 [[rule]]
 id = "format.final_newline"
-script = "format.final_newline.raw.py"
 
 [[rule]]
 id = "format.no_tabs"
-script = "format.no_tabs.raw.py"
 
 [[rule]]
 id = "format.no_trailing_whitespace"
-script = "format.no_trailing_whitespace.raw.py"
 
 [[rule]]
 id = "global.local_define_undef"
-script = "global.local_define_undef.raw.py"
 
 [[rule]]
 id = "global.prefer_parameters"
-script = "global.prefer_parameters.raw.py"
 
 [[rule]]
 id = "header.missing_comment"
-script = "header.missing_comment.raw.py"
 
 [[rule]]
 id = "header.missing_spdx"
-script = "header.missing_spdx.raw.py"
 
 [[rule]]
 id = "lang.always_comb_at"
-script = "lang.always_comb_at.raw.py"
 
 [[rule]]
 id = "lang.always_ff_reset"
-script = "lang.always_ff_reset.raw.py"
 
 [[rule]]
 id = "lang.no_always_latch"
-script = "lang.no_always_latch.raw.py"
 
 [[rule]]
 id = "lang.no_delays"
-script = "lang.no_delays.raw.py"
 
 [[rule]]
 id = "lang.prefer_always_comb"
-script = "lang.prefer_always_comb.raw.py"
 
 [[rule]]
 id = "module.named_ports_required"
-script = "module.named_ports_required.raw.py"
 
 [[rule]]
 id = "naming.clk_order"
-script = "naming.clk_order.ast.py"
 
 [[rule]]
 id = "naming.clk_prefix"
-script = "naming.clk_prefix.ast.py"
 
 [[rule]]
 id = "naming.differential_pair"
-script = "naming.differential_pair.ast.py"
 
 [[rule]]
 id = "naming.module_case"
-script = "naming.module_case.ast.py"
 
 [[rule]]
 id = "naming.no_numeric_suffix"
-script = "naming.no_numeric_suffix.ast.py"
 
 [[rule]]
 id = "naming.parameter_upper"
-script = "naming.parameter_upper.ast.py"
 
 [[rule]]
 id = "naming.pipeline_sequence"
-script = "naming.pipeline_sequence.ast.py"
 
 [[rule]]
 id = "naming.port_case"
-script = "naming.port_case.ast.py"
 
 [[rule]]
 id = "naming.port_suffix"
-script = "naming.port_suffix.ast.py"
 
 [[rule]]
 id = "naming.rst_active_low"
-script = "naming.rst_active_low.ast.py"
 
 [[rule]]
 id = "naming.rst_before_clk"
-script = "naming.rst_before_clk.ast.py"
 
 [[rule]]
 id = "naming.signal_case"
-script = "naming.signal_case.ast.py"
 
 [[rule]]
 id = "naming.suffix_order"
-script = "naming.suffix_order.ast.py"
 
 [[rule]]
 id = "module.no_port_wildcard"
-script = "module.no_port_wildcard.cst.py"
 
 [[rule]]
 id = "package.define_in_package"
-script = "package.define_in_package.raw.py"
 
 [[rule]]
 id = "package.end_mismatch"
-script = "package.end_mismatch.raw.py"
 
 [[rule]]
 id = "package.missing_end"
-script = "package.missing_end.raw.py"
 
 [[rule]]
 id = "package.multiple"
-script = "package.multiple.raw.py"
 
 [[rule]]
 id = "seq.blocking_in_alwaysff"
-script = "seq.blocking_in_alwaysff.cst.py"
 
 [[rule]]
 id = "template.raw_text_marker"
-script = "template.raw_text_marker.raw.py"
 
 [[rule]]
 id = "typedef.enum_lower_snake"
-script = "typedef.enum_lower_snake.raw.py"
 
 [[rule]]
 id = "typedef.enum_suffix"
-script = "typedef.enum_suffix.raw.py"
 
 [[rule]]
 id = "typedef.enum_value_case"
-script = "typedef.enum_value_case.raw.py"
 
 [[rule]]
 id = "typedef.enum_value_prefix"
-script = "typedef.enum_value_prefix.raw.py"
 
 [[rule]]
 id = "typedef.type_suffix"
-script = "typedef.type_suffix.raw.py"
 
 [[rule]]
 id = "width.unsized_base_literal"
-script = "width.unsized_base_literal.raw.py"
 
 [logging]
 level = "info"

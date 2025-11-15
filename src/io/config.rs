@@ -124,6 +124,7 @@ pub struct Stages {
 #[derive(Deserialize, Clone)]
 pub struct RuleConfig {
     pub id: String,
+    #[serde(default)]
     pub script: String,
     #[serde(default)]
     pub stage: Option<Stage>,
@@ -204,26 +205,73 @@ pub fn load_from_path(opt: Option<PathBuf>) -> Result<(Config, PathBuf), ConfigE
         .parent()
         .map(Path::to_path_buf)
         .unwrap_or_else(|| PathBuf::from("."));
-    normalize_rule_scripts(&mut cfg, &base_dir);
+    normalize_rule_scripts(&mut cfg, &base_dir)?;
     infer_rule_stages(&mut cfg.rule)?;
     validate_config(&cfg)?;
     Ok((cfg, path))
 }
 
-fn normalize_rule_scripts(cfg: &mut Config, base_dir: &Path) {
+fn normalize_rule_scripts(cfg: &mut Config, base_dir: &Path) -> Result<(), ConfigError> {
     cfg.plugin.normalized_root = cfg.plugin.root.as_ref().map(|root| to_abs(base_dir, root));
     cfg.plugin.normalized_search_paths = cfg.plugin.search_paths.iter().map(|p| to_abs(base_dir, p)).collect();
+    let mut search_roots = Vec::new();
+    if let Some(root) = cfg.plugin.normalized_root.clone() {
+        search_roots.push(root);
+    }
+    search_roots.extend(cfg.plugin.normalized_search_paths.clone());
+    let has_plugin_root = !search_roots.is_empty();
     for entry in &mut cfg.rule {
-        let script = entry.script.trim();
-        if script.is_empty() {
+        if entry.script.trim().is_empty() {
+            entry.script = derive_script_from_id(entry, &search_roots)?;
+        }
+        if has_plugin_root {
             continue;
         }
-        let script_path = Path::new(script);
+        let script_path = Path::new(&entry.script);
         if script_path.is_absolute() {
             continue;
         }
         let candidate = base_dir.join(script_path);
         entry.script = candidate.to_string_lossy().into_owned();
+    }
+    Ok(())
+}
+
+fn derive_script_from_id(entry: &RuleConfig, roots: &[PathBuf]) -> Result<String, ConfigError> {
+    if roots.is_empty() {
+        return Err(ConfigError::InvalidValue {
+            detail: format!(
+                "rule {} missing script; set plugin.root/search_paths or specify script explicitly",
+                entry.id
+            ),
+        });
+    }
+    let mut found = Vec::new();
+    for root in roots {
+        for stage in ["raw", "pp", "cst", "ast"] {
+            let file = format!("{}.{}.py", entry.id, stage);
+            let path = root.join(&file);
+            if path.exists() {
+                found.push(file);
+            }
+        }
+    }
+    found.sort();
+    found.dedup();
+    match found.len() {
+        1 => Ok(found.remove(0)),
+        0 => Err(ConfigError::InvalidValue {
+            detail: format!(
+                "rule {} missing script and no bundled file named {}.{{raw,pp,cst,ast}}.py exists under plugin roots",
+                entry.id, entry.id
+            ),
+        }),
+        _ => Err(ConfigError::InvalidValue {
+            detail: format!(
+                "rule {} matches multiple scripts {:?}; specify script explicitly",
+                entry.id, found
+            ),
+        }),
     }
 }
 

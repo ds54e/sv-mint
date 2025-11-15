@@ -109,7 +109,7 @@ Prefer the parser-provided `loc` objects whenever available to avoid off-by-one 
 - Temporary prints should go to stderr; bump `logging.stderr_snippet_bytes` so the CLI captures them.
 
 ### 4.1 Local Reproduction Checklist
-1. Add a `[[rule]]` entry (or entries) to `sv-mint.toml`, pointing `script` at your plugin. Scripts follow the `<rule_id>.<stage>.py` convention (`*.raw.py`, `*.pp.py`, `*.cst.py`, `*.ast.py`), so the loader infers `stage` automatically when the suffix matches; include `stage` explicitly only when the file name does not follow the convention.
+1. Add a `[[rule]]` entry (or entries) to `sv-mint.toml`, pointing `script` at your plugin. Scripts follow the `<rule_id>.<stage>.py` convention (`*.raw.py`, `*.pp.py`, `*.cst.py`, `*.ast.py`), so the loader infers `stage` automatically when the suffix matches. If `[plugin].root` (or `search_paths`) is set and the file lives under those directories, you can omit `script` entirely—the loader will search for `<rule_id>.<stage>.py`. Include `stage` explicitly only when the file name does not follow the convention.
 2. Create a failing SystemVerilog sample under `fixtures/`.
 3. Run `cargo run -- --config sv-mint.toml fixtures/sample.sv`.
 4. Set `logging.show_plugin_events = true` to inspect per-rule timings.
@@ -122,7 +122,7 @@ Prefer the parser-provided `loc` objects whenever available to avoid off-by-one 
 - For custom project rules, create subdirectories under `plugins/` and reference absolute or relative paths from the `script` field inside each `[[rule]]`. Document every rule under `docs/plugins/<script_name>.md`.
 
 ### 5.1 Configuration Hooks
-- `[[rule]]`: declare one entry per `rule_id` with `id`, `script`, `stage` (optional if `script` ends with `.raw/.pp/.cst/.ast.py`), `enabled`, and optional `severity` overrides.
+- `[[rule]]`: declare one entry per `rule_id` with `id`, `script` (optional when `[plugin].root` is set and the file matches `<rule_id>.<stage>.py`), `stage` (optional if `script` ends with `.raw/.pp/.cst/.ast.py`), `enabled`, and optional `severity` overrides.
 - Legacy `[ruleset.*]` options have been removed; migrate all configs to the `[[rule]]` schema.
 
 Document any non-default toggles inside the corresponding `docs/plugins/*.md` entry.
