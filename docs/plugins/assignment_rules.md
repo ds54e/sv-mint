@@ -14,17 +14,21 @@
 - **Trigger**: Groups AST `assigns` with `op == nonblocking` by `(module, lhs)` and reports the second and later assignments.
 - **Message**: `` multiple nonblocking assignments to <lhs> ``
 - **Remediation**: Ensure only one `<=` drives a flop per clock domain. If you intentionally assign the same flop in multiple blocks, refactor so one side writes `state_d` (or uses `=`) and keep a single `<=`.
-- **Notes**: Unless disabled in `sv-mint.toml`, the rule aggregates across hierarchical generates as long as the module/LHS pair matches, so double-check emitted code.
+- **Notes**: The rule inspects the AST, so it catches repeated `<=` even when they live in plain `always @(posedge clk)` blocks or macro-expanded logic. Unless disabled in `sv-mint.toml`, it also aggregates across hierarchical generates as long as the module/LHS pair matches, so double-check emitted code.
 - **LowRISC Reference**: The Sequential Logic Process section requires a single `<=` per flop; this rule enforces that expectation.
 - **Good**:
 
 ```systemverilog
-always_ff @(posedge clk_i or negedge rst_ni) begin
-  if (!rst_ni) begin
-    state_q <= IDLE;
-  end else begin
-    state_q <= state_d;  // one assignment site
+always_comb begin
+  state_d = state_q;
+  if (flush_i) begin
+    state_d = IDLE;  // compute next state with blocking assignments
   end
+end
+
+always_ff @(posedge clk_i or negedge rst_ni) begin
+  if (!rst_ni) state_q <= IDLE;
+  else state_q <= state_d;  // single nonblocking assignment site
 end
 ```
 
@@ -32,8 +36,13 @@ end
 
 ```systemverilog
 always_ff @(posedge clk_i) begin
-  state_q <= state_d;
-  if (flush_i) state_q <= IDLE;  // second <= in the same clock
+  if (flush_i) begin
+    state_q <= IDLE;  // first <= to state_q
+  end
+end
+
+always_ff @(posedge clk_i) begin
+  state_q <= state_d;  // second <= in the same module
 end
 ```
 
