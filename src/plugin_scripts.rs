@@ -14,6 +14,12 @@ pub fn resolve_script_path(s: &str) -> String {
         }
     }
     if let Ok(exe) = std::env::current_exe() {
+        if let Some(base) = exe.parent() {
+            let c = base.join(s);
+            if c.exists() {
+                return c.to_string_lossy().into_owned();
+            }
+        }
         if let Some(base) = exe.parent().and_then(|d| d.parent()) {
             let c = base.join(s);
             if c.exists() {
