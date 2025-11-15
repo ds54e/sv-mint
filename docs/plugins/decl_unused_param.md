@@ -14,7 +14,7 @@
 - **Trigger**: Filters `symbols` for `class == param` and flags entries with `ref_count` (or `read_count`) equal to zero.
 - **Message**: `` unused param <module>.<name> ``
 - **Remediation**: Remove unused parameters, ensure configuration knobs are referenced, or annotate intentional placeholders with inline comments containing `unused` (for example, `` parameter bit EnableDbg = 0  // unused ``).
-- **Notes**: The rule treats both `parameter` and `localparam` symbols identically because the AST reports them under the `param` class. Auto-generated code that allows dummy parameters can downgrade severity by setting `severity = "info"` (or a lower level) in the matching `[[rule]]` entry.
+- **Notes**: The rule treats both `parameter` and `localparam` symbols identically because the AST reports them under the `param` class.
 - **LowRISC Reference**: Parameters should document module configurability; unused ones must be deleted.
 - **Good**:
 
