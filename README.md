@@ -24,24 +24,14 @@ sv-mint is a SystemVerilog lint pipeline that combines a Rust core with Python p
 ### Sample `sv-mint.toml`
 
 ```toml
-[plugin]
-cmd = "python3"
-args = ["-u", "-B"]
-root = "plugins"
-
 [[rule]]
 id = "format.no_tabs"
-script = "format.no_tabs.raw.py"  # stage inferred as raw_text
-
-[[rule]]
-id = "naming.module_case"
-script = "naming.module_case.ast.py"  # stage inferred as ast
 
 [[rule]]
 id = "module.no_port_wildcard"
-script = "no_port_wildcard.py"
-stage = "cst"  # explicit stage still allowed when filenames do not follow the convention
 ```
+
+See [`docs/configuration.md`](docs/configuration.md) for every optional section, stage inference, and script resolution rules.
 
 5. Narrow or relax checks directly from the CLI when experimenting:
    - `sv-mint --only rule_x path/to/file.sv` runs only `rule_x`, temporarily disabling every other rule.
