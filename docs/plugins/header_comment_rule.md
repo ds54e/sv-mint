@@ -15,7 +15,6 @@
 - **Trigger**: Scans the first 200 characters for `SPDX-License-Identifier`; reports the file start when absent.
 - **Message**: `` file should include SPDX-License-Identifier header ``
 - **Remediation**: Add lines such as `// SPDX-License-Identifier: Apache-2.0` near the top.
-- **LowRISC Reference**: Every source file must carry an SPDX tag (Apache-2.0, Proprietary, etc.).
 - **Good**:
 
 ```systemverilog
@@ -35,7 +34,6 @@
 - **Trigger**: If the first five lines contain no `//` comment, the rule fires.
 - **Message**: `` file header should include descriptive comment ``
 - **Remediation**: Summarize module purpose, contacts, or key context at the top of the file.
-- **LowRISC Reference**: Files should open with a short description of their role and licensing.
 - **Good**:
 
 ```systemverilog

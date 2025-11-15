@@ -15,7 +15,6 @@
 - **Trigger**: Flags macros such as `_FOO` that reach EOF without a matching `` `undef``.
 - **Message**: `` local macro <name> must be undefined after use ``
 - **Remediation**: Insert `` `undef <name>`` in the same translation unit or move the macro to a tighter scope.
-- **LowRISC Reference**: Local macros carry an underscore prefix and must be undefined before the file ends.
 - **Good**:
 
 ```systemverilog
@@ -38,7 +37,6 @@ assign data_o = `_FOO(data_i);
 - **Trigger**: Reports any `` `define`` that does not start with `_`, discouraging project-wide macro switches.
 - **Message**: `` use parameters instead of global macro `FOO``
 - **Remediation**: Replace macros with module parameters or `localparam`. Lower the noise floor by setting `severity = "info"` in the corresponding `[[rule]]` entry when policy allows.
-- **LowRISC Reference**: The guide favors parameters for configurability and limits global macros to a tiny curated set.
 - **Good**:
 
 ```systemverilog

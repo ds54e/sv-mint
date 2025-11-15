@@ -15,7 +15,6 @@
 - **Message**: `` else must be on the same line as the preceding end ``
 - **Remediation**: Join `end else` onto a single line or adopt `end else begin` formatting consistently.
 - **Notes**: Lines split by comments are ignored. The goal is to keep `end/else` visually paired.
-- **LowRISC Reference**: The guide explicitly keeps `else` on the same line as `end` and disallows blank lines between them.
 - **Good**:
 
 ```systemverilog

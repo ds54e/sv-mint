@@ -17,7 +17,6 @@
 - **Trigger**: Reports every character whose `ord(ch) > 127`.
 - **Message**: `` non-ASCII character detected ``
 - **Remediation**: Remove non-ASCII glyphs (comments included) or disable the rule if UTF-8 text is unavoidable.
-- **LowRISC Reference**: The lowRISC text spec requires SystemVerilog sources to be ASCII-only. Put multilingual docs under `docs/` instead of inline comments.
 - **Good**:
 
 ```systemverilog
@@ -30,13 +29,11 @@
 // Δ-state start  ← contains non-ASCII character
 ```
 
-- **Notes**: Temporarily disable `format_text_basics` for auto-generated comments that must include non-ASCII text, but storing translations in `docs/` remains safer.
 
 ### `format.no_tabs`
 - **Trigger**: Emits a violation for every tab (`\t`) encountered.
 - **Message**: `` tab character detected ``
 - **Remediation**: Replace tabs with spaces and follow the widths enforced by `format_indent_rules`.
-- **LowRISC Reference**: The style guide bans tabs to avoid tooling inconsistencies.
 - **Good**:
 
 ```systemverilog
@@ -57,7 +54,6 @@ logic ready;
 - **Trigger**: Reverse scans each line and flags trailing spaces or tabs.
 - **Message**: `` trailing whitespace at line end ``
 - **Remediation**: Trim on save or rely on editor hooks.
-- **LowRISC Reference**: The guide recommends banning trailing whitespace and running `git diff --check`.
 - **Good**:
 
 ```systemverilog
@@ -76,7 +72,6 @@ assign ready_o = valid_i;␠
 - **Trigger**: Warns when the file does not end with `\n`.
 - **Message**: `` file must end with newline ``
 - **Remediation**: Insert a newline after the last line.
-- **LowRISC Reference**: POSIX compliance requires LF at EOF.
 - **Good**: End the file with one blank line after `endmodule`.
 - **Bad**: File ends immediately after `endmodule` without LF.
 - **Notes**: Git adds `\ No newline at end of file` to diffs; this rule catches the issue before CI noise appears.

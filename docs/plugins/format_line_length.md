@@ -15,7 +15,6 @@
 - **Message**: `` line exceeds 100 columns (118) ``
 - **Remediation**: Break long expressions, introduce temporaries, or wrap comments to stay within 100 columns.
 - **Notes**: Threshold is fixed in code; tweak severity via the `severity` field in the corresponding `[[rule]]` entry if needed.
-- **LowRISC Reference**: The style guide caps SystemVerilog lines at 100 characters, including doc comments.
 - **Good**:
 
 ```systemverilog

@@ -15,7 +15,6 @@
 - **Message**: `` unused var <module>.<name> ``
 - **Remediation**: Delete the variable, wire it into surrounding logic, or annotate intentional placeholders with inline comments that include `unused` (e.g., `` logic debug_shadow; // unused ``).
 - **Notes**: Location data always comes from `sv-parser`, so when the declaration lives in an included file, inspect `Location.file`.
-- **LowRISC Reference**: The guide discourages unused variables unless they are explicitly marked as `_unused`.
 - **Good**:
 
 ```systemverilog

@@ -17,7 +17,6 @@
 - **Trigger**: Counts `package` keywords; if more than one appears, the rule reports the first occurrence.
 - **Message**: `` multiple package declarations in single file (pkg_name) ``
 - **Remediation**: Split packages into separate files or rename them.
-- **LowRISC Reference**: One package per file, including helper packages for tests.
 - **Additional Tips**: If packages must share a file with interfaces, configure exceptions or separate the sources.
 
 ### `package.missing_end`
@@ -35,7 +34,6 @@
 - **Trigger**: Searches the package body for `` `define`` tokens that do not start with `_`.
 - **Message**: `` prefer parameters over `define NAME inside package ``
 - **Remediation**: Publish constants via `parameter` or `localparam` instead of macros.
-- **LowRISC Reference**: Packages should expose types and parameters, not macros.
 - **Additional Tips**: Transition legacy macros to `localparam` and consume them through `import foo_pkg::*;`.
 - **Good**:
 

@@ -15,7 +15,6 @@
 - **Message**: `` case statement must include a default item ``
 - **Remediation**: Add a `default` branch unless you can prove completeness with `unique case`. Even for intentional fall-through, prefer `default: <noop>;`.
 - **Notes**: The pass inspects preprocessed `pp_text`, so macros that expand to `default` must emit the token after preprocessing.
-- **LowRISC Reference**: The Case Statements section requires `default` even for `unique case` so abnormal values fall into an explicit handler like `state_d = state_q;`.
 - **Good**:
 
 ```systemverilog

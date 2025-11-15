@@ -15,7 +15,6 @@
 - **Message**: `` nonblocking '<=' inside always_comb ``
 - **Remediation**: Use blocking `=` inside combinational logic; if state is required, move the logic to `always_ff`.
 - **Notes**: When `sv-parser` updates token kinds, ensure `op_le` remains present in `tok_kind_table`.
-- **LowRISC Reference**: The style guide explicitly forbids `<=` in `always_comb`, keeping these blocks purely combinational.
 - **Good**:
 
 ```systemverilog

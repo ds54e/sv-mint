@@ -15,7 +15,6 @@
 - **Message**: `` multiple nonblocking assignments to <lhs> ``
 - **Remediation**: Ensure only one `<=` drives a flop per clock domain. If you intentionally assign the same flop in multiple blocks, refactor so one side writes `state_d` (or uses `=`) and keep a single `<=`.
 - **Notes**: The rule inspects the AST, so it catches repeated `<=` even when they live in plain `always @(posedge clk)` blocks or macro-expanded logic. Unless disabled in `sv-mint.toml`, it also aggregates across hierarchical generates as long as the module/LHS pair matches, so double-check emitted code.
-- **LowRISC Reference**: The Sequential Logic Process section requires a single `<=` per flop; this rule enforces that expectation.
 - **Good**:
 
 ```systemverilog
