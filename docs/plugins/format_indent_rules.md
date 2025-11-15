@@ -24,7 +24,7 @@
 - **Trigger**: Checks lines containing `\` and warns when characters follow the backslash.
 - **Message**: `` line continuation \ must be last character ``
 - **Remediation**: Ensure the backslash is the final character—move comments to the next line.
-- **Good**:
+#### Good
 
 ```systemverilog
 module foo;
@@ -33,7 +33,7 @@ module foo;
 end
 ```
 
-- **Bad**:
+#### Bad
 
 ```systemverilog
 module foo;

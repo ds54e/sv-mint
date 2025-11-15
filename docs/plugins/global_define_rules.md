@@ -13,7 +13,7 @@
 - **Trigger**: Flags macros such as `_FOO` that reach EOF without a matching `` `undef``.
 - **Message**: `` local macro <name> must be undefined after use ``
 - **Remediation**: Insert `` `undef <name>`` in the same translation unit or move the macro to a tighter scope.
-- **Good**:
+#### Good
 
 ```systemverilog
 `define _FOO(ARG) (ARG + 1)
@@ -21,7 +21,7 @@ assign data_o = `_FOO(data_i);
 `undef _FOO
 ```
 
-- **Bad**:
+#### Bad
 
 ```systemverilog
 `define _FOO(ARG) (ARG + 1)
@@ -35,13 +35,13 @@ assign data_o = `_FOO(data_i);
 - **Trigger**: Reports any `` `define`` that does not start with `_`, discouraging project-wide macro switches.
 - **Message**: `` use parameters instead of global macro `FOO``
 - **Remediation**: Replace macros with module parameters or `localparam`. Lower the noise floor by setting `severity = "info"` in the corresponding `[[rule]]` entry when policy allows.
-- **Good**:
+#### Good
 
 ```systemverilog
 module foo #(parameter bit EnableParity = 1'b1) (...);
 ```
 
-- **Bad**:
+#### Bad
 
 ```systemverilog
 `define ENABLE_PARITY 1

@@ -33,7 +33,7 @@
 - **Message**: `` prefer parameters over `define NAME inside package ``
 - **Remediation**: Publish constants via `parameter` or `localparam` instead of macros.
 - **Additional Tips**: Transition legacy macros to `localparam` and consume them through `import foo_pkg::*;`.
-- **Good**:
+#### Good
 
 ```systemverilog
 package foo_pkg;
@@ -41,7 +41,7 @@ package foo_pkg;
 endpackage : foo_pkg
 ```
 
-- **Bad**:
+#### Bad
 
 ```systemverilog
 package foo_pkg;

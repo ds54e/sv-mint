@@ -13,7 +13,7 @@
 - **Message**: `` <keyword> body must start with begin when split across lines ``
 - **Remediation**: Insert `begin` after the condition and add the matching `end`. For single statements, either keep them on one line or still wrap them for clarity.
 - **Notes**: `else if` chains are analyzed with awareness of `else`, so match both sides. Because the rule uses preprocessed text, macros must expand to include the `begin` keyword.
-- **Good**:
+#### Good
 
 ```systemverilog
 if (req_i) begin
@@ -22,7 +22,7 @@ if (req_i) begin
 end
 ```
 
-- **Bad**:
+#### Bad
 
 ```systemverilog
 if (req_i)

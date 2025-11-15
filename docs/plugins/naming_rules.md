@@ -47,7 +47,7 @@
 ### Parameters (`naming.parameter_upper`)
 - **Trigger**: Flags `parameter` names that are not UpperCamelCase.
 - **Fix**: Rename to `DataWidth`, `NumAlerts`, etc., leaving ALLCAPS for `localparam` only.
-- **Good**:
+#### Good
 
 ```systemverilog
 module entropy_ctrl (
@@ -63,7 +63,7 @@ logic data_q1, data_q2;
 logic tx_p_o, tx_n_o;
 ```
 
-- **Bad**:
+#### Bad
 
 ```systemverilog
 module EntropyCtrl (

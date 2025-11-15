@@ -13,7 +13,7 @@
 - **Message**: `` use named port connections instead of positional arguments ``
 - **Remediation**: Rewrite as `.clk(clk)` style to remove ordering hazards.
 - **Notes**: Formatting tools such as `verible-verilog-format --named-port-formatting` help during migrations.
-- **Good**:
+#### Good
 
 ```systemverilog
 foo u_foo (
@@ -24,7 +24,7 @@ foo u_foo (
 );
 ```
 
-- **Bad**:
+#### Bad
 
 ```systemverilog
 foo u_foo (clk_i, rst_ni, req_i, gnt_o);  // positional arguments

@@ -13,7 +13,7 @@
 - **Message**: `` named port connections must not use .* wildcard ``
 - **Remediation**: Expand connections to `.port(signal)` or update generators accordingly.
 - **Notes**: Complements `module_inst_rules.py`; this variant survives preprocessing and macro expansion.
-- **Good**:
+#### Good
 
 ```systemverilog
 foo u_foo (
@@ -23,7 +23,7 @@ foo u_foo (
 );
 ```
 
-- **Bad**:
+#### Bad
 
 ```systemverilog
 foo u_foo (.*);  // wildcard connection

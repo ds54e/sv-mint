@@ -13,7 +13,7 @@
 - **Message**: `` case statement must include a default item ``
 - **Remediation**: Add a `default` branch unless you can prove completeness with `unique case`. Even for intentional fall-through, prefer `default: <noop>;`.
 - **Notes**: The pass inspects preprocessed `pp_text`, so macros that expand to `default` must emit the token after preprocessing.
-- **Good**:
+#### Good
 
 ```systemverilog
 unique case (state_q)
@@ -23,7 +23,7 @@ unique case (state_q)
 endcase
 ```
 
-- **Bad**:
+#### Bad
 
 ```systemverilog
 case (opcode_i)

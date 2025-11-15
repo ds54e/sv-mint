@@ -13,14 +13,14 @@
 - **Trigger**: Scans the first 200 characters for `SPDX-License-Identifier`; reports the file start when absent.
 - **Message**: `` file should include SPDX-License-Identifier header ``
 - **Remediation**: Add lines such as `// SPDX-License-Identifier: Apache-2.0` near the top.
-- **Good**:
+#### Good
 
 ```systemverilog
 // SPDX-License-Identifier: Apache-2.0
 // DMA channel control logic
 ```
 
-- **Bad**:
+#### Bad
 
 ```systemverilog
 // DMA channel control logic  // missing SPDX
@@ -32,14 +32,14 @@
 - **Trigger**: If the first five lines contain no `//` comment, the rule fires.
 - **Message**: `` file header should include descriptive comment ``
 - **Remediation**: Summarize module purpose, contacts, or key context at the top of the file.
-- **Good**:
+#### Good
 
 ```systemverilog
 // Control logic for entropy distribution network.
 module entropy_ctrl (...);
 ```
 
-- **Bad**:
+#### Bad
 
 ```systemverilog
 module entropy_ctrl (...);

@@ -13,7 +13,7 @@
 - **Message**: `` unused var <module>.<name> ``
 - **Remediation**: Delete the variable, wire it into surrounding logic, or annotate intentional placeholders with inline comments that include `unused` (e.g., `` logic debug_shadow; // unused ``).
 - **Notes**: Location data always comes from `sv-parser`, so when the declaration lives in an included file, inspect `Location.file`.
-- **Good**:
+#### Good
 
 ```systemverilog
 logic enable;
@@ -29,7 +29,7 @@ end
 logic debug_shadow;  // unused (documented placeholder)
 ```
 
-- **Bad**:
+#### Bad
 
 ```systemverilog
 logic enable;

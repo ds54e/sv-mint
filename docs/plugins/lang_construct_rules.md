@@ -36,7 +36,7 @@
 - **Trigger**: Flags `always_comb` followed by `@`.
 - **Message**: `` always_comb must not have sensitivity list ``
 - **Remediation**: Remove the explicit sensitivity list; `always_comb` already infers it.
-- **Good**:
+#### Good
 
 ```systemverilog
 always_comb begin
@@ -53,7 +53,7 @@ always_ff @(posedge clk_i or negedge rst_ni) begin
 end
 ```
 
-- **Bad**:
+#### Bad
 
 ```systemverilog
 always @* state_d = next_state;  // prefer always_comb

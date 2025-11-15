@@ -15,13 +15,13 @@
 - **Trigger**: Reports every character whose `ord(ch) > 127`.
 - **Message**: `` non-ASCII character detected ``
 - **Remediation**: Remove non-ASCII glyphs (comments included) or disable the rule if UTF-8 text is unavoidable.
-- **Good**:
+#### Good
 
 ```systemverilog
 // state machine controls DMA start
 ```
 
-- **Bad**:
+#### Bad
 
 ```systemverilog
 // Δ-state start  ← contains non-ASCII character
@@ -32,13 +32,13 @@
 - **Trigger**: Emits a violation for every tab (`\t`) encountered.
 - **Message**: `` tab character detected ``
 - **Remediation**: Replace tabs with spaces and follow the widths enforced by `format_indent_rules`.
-- **Good**:
+#### Good
 
 ```systemverilog
 logic ready;
 ```
 
-- **Bad**:
+#### Bad
 
 ```systemverilog
 	logic ready;
@@ -52,13 +52,13 @@ logic ready;
 - **Trigger**: Reverse scans each line and flags trailing spaces or tabs.
 - **Message**: `` trailing whitespace at line end ``
 - **Remediation**: Trim on save or rely on editor hooks.
-- **Good**:
+#### Good
 
 ```systemverilog
 assign ready_o = valid_i;
 ```
 
-- **Bad**:
+#### Bad
 
 ```systemverilog
 assign ready_o = valid_i;␠

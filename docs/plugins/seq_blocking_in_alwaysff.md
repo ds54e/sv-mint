@@ -13,7 +13,7 @@
 - **Message**: `` blocking '=' inside always_ff ``
 - **Remediation**: Use non-blocking `<=` for sequential logic or refactor the assignment into combinational logic.
 - **Notes**: Falls back to text scanning when token data is unavailable.
-- **Good**:
+#### Good
 
 ```systemverilog
 always_ff @(posedge clk_i or negedge rst_ni) begin
@@ -22,7 +22,7 @@ always_ff @(posedge clk_i or negedge rst_ni) begin
 end
 ```
 
-- **Bad**:
+#### Bad
 
 ```systemverilog
 always_ff @(posedge clk_i) begin

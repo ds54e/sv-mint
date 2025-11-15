@@ -13,7 +13,7 @@
 - **Message**: `` case statements should use unique or priority ``
 - **Remediation**: Use `unique case` for completeness or `priority case` when priority matters. Disable the rule if your spec intentionally omits modifiers.
 - **Notes**: For constructs like `case inside`, only the first `case` is checked; add modifiers individually if needed.
-- **Good**:
+#### Good
 
 ```systemverilog
 unique case (opcode_i)
@@ -23,7 +23,7 @@ unique case (opcode_i)
 endcase
 ```
 
-- **Bad**:
+#### Bad
 
 ```systemverilog
 case (opcode_i)

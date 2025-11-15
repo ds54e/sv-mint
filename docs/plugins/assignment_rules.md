@@ -13,7 +13,7 @@
 - **Message**: `` multiple nonblocking assignments to <lhs> ``
 - **Remediation**: Ensure only one `<=` drives a flop per clock domain. If you intentionally assign the same flop in multiple blocks, refactor so one side writes `state_d` (or uses `=`) and keep a single `<=`.
 - **Notes**: The rule inspects the AST, so it catches repeated `<=` even when they live in plain `always @(posedge clk)` blocks or macro-expanded logic. Unless disabled in `sv-mint.toml`, it also aggregates across hierarchical generates as long as the module/LHS pair matches, so double-check emitted code.
-- **Good**:
+#### Good
 
 ```systemverilog
 always_comb begin
@@ -29,7 +29,7 @@ always_ff @(posedge clk_i or negedge rst_ni) begin
 end
 ```
 
-- **Bad**:
+#### Bad
 
 ```systemverilog
 always_ff @(posedge clk_i) begin

@@ -35,7 +35,7 @@
 - **Message**: `` typedef names should end with _t: data ``
 - **Remediation**: Append `_t`, e.g., `data_t`.
 - **Additional Tips**: When exporting typedefs from packages, keep the `_t` suffix for downstream consistency.
-- **Good**:
+#### Good
 
 ```systemverilog
 typedef enum logic [1:0] {
@@ -49,7 +49,7 @@ typedef struct packed {
 } payload_t;
 ```
 
-- **Bad**:
+#### Bad
 
 ```systemverilog
 typedef enum logic [1:0] {

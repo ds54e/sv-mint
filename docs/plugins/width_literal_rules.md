@@ -13,14 +13,14 @@
 - **Message**: `` base literal must include explicit width (e.g. 8'hFF) ``
 - **Remediation**: Add widths (`8'h`, `4'd`, etc.) to every base literal.
 - **Additional Tips**: Use underscores for readability (`32'hDEAD_BEEF`) and move constants into `localparam` for reuse.
-- **Good**:
+#### Good
 
 ```systemverilog
 assign mask_o = 8'hFF;
 localparam logic [31:0] MagicValue = 32'hDEAD_BEEF;
 ```
 
-- **Bad**:
+#### Bad
 
 ```systemverilog
 assign mask_o = 'hFF;      // missing width

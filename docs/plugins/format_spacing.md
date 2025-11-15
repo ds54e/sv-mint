@@ -36,7 +36,7 @@
   - `` case item must have space after ':' ``
 - **Remediation**: Format labels as `LABEL: statement;` with no space before and exactly one space after the colon.
 - **Notes**: Only case labels are analyzed (not enums or `localparam`). When adding comments, keep `LABEL: // comment` ordering to satisfy both rules.
-- **Good**:
+#### Good
 
 ```systemverilog
 foo(a, b, c);
@@ -48,7 +48,7 @@ unique case (state_q)
 endcase
 ```
 
-- **Bad**:
+#### Bad
 
 ```systemverilog
 foo (a,b,c);

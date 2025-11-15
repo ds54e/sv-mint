@@ -12,7 +12,7 @@
 - **Message**: `` case item should wrap statements in begin/end ``
 - **Remediation**: Add `begin ... end` blocks to every case item so the first token after `:` is always `begin`.
 - **Notes**: Single statements that already start with `begin` are skipped; the policy applies equally to `unique case` and `case inside`. The implementation does not count statements inside the item—any label without an immediate `begin` fails the rule.
-- **Good**:
+#### Good
 
 ```systemverilog
 unique case (state_q)
@@ -26,7 +26,7 @@ unique case (state_q)
 endcase
 ```
 
-- **Bad**:
+#### Bad
 
 ```systemverilog
 case (state_q)

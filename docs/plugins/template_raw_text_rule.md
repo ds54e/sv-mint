@@ -13,14 +13,14 @@
 - **Message**: `` template marker detected ``
 - **Remediation**: Remove the marker after copying templates into production code.
 - **Notes**: Only one location per file is reported. Split template files if you need multiple markers.
-- **Good**:
+#### Good
 
 ```systemverilog
 // SPDX-License-Identifier: Apache-2.0
 // DMA channel template instantiation (marker removed)
 ```
 
-- **Bad**:
+#### Bad
 
 ```systemverilog
 // __SV_MINT_TEMPLATE__ keep/remove?
