@@ -21,6 +21,17 @@ Regex `,(?!\s)` finds commas not followed by whitespace.
 Separate arguments and concatenations with `, ` for readability.
 #### Notes
 Applies to macro arguments as well. If packed literals require different spacing, adjust the script locally or disable the rule via its `[[rule]]` entry.
+#### Good
+
+```systemverilog
+foo(a, b, c);
+```
+
+#### Bad
+
+```systemverilog
+foo(a,b,c);
+```
 
 ### `format.call_spacing`
 #### Trigger
@@ -31,6 +42,17 @@ Detects `foo (` in call sites (declarations like `function foo (` are ignored).
 Use `foo(`.
 #### Notes
 For multiline argument lists, break right after `(` to avoid other spacing rules.
+#### Good
+
+```systemverilog
+foo(a, b);
+```
+
+#### Bad
+
+```systemverilog
+foo (a, b);
+```
 
 ### `format.macro_spacing`
 #### Trigger
@@ -39,6 +61,17 @@ Flags macro invocations with spaces before `(`.
 `` macro invocation must not have space before '(' ``
 #### Remediation
 Use `` `MY_MACRO(`` syntax consistently.
+#### Good
+
+```systemverilog
+`MY_MACRO(a, b)
+```
+
+#### Bad
+
+```systemverilog
+`MY_MACRO (a, b)
+```
 
 ### `format.case_colon_spacing` / `format.case_colon_after`
 #### Trigger
@@ -53,11 +86,9 @@ Only case labels are analyzed (not enums or `localparam`). When adding comments,
 #### Good
 
 ```systemverilog
-foo(a, b, c);
-`MY_MACRO(a, b)
 unique case (state_q)
-  IDLE: data_d = IDLE_NEXT;
-  DONE: data_d = DONE_NEXT;
+  IDLE:   data_d = IDLE_NEXT;
+  DONE:   data_d = DONE_NEXT;
   default: data_d = state_q;
 endcase
 ```
@@ -65,11 +96,9 @@ endcase
 #### Bad
 
 ```systemverilog
-foo (a,b,c);
-`MY_MACRO (a,b)
 unique case (state_q)
-  IDLE :data_d = IDLE_NEXT;
-  DONE:begin
+  IDLE :data_d = IDLE_NEXT;  // space before colon
+  DONE:begin                // no space after colon
     data_d = DONE_NEXT;
   end
 endcase

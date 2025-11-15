@@ -18,8 +18,22 @@ Counts `package` keywords; if more than one appears, the rule reports the first 
 `` multiple package declarations in single file (pkg_name) ``
 #### Remediation
 Split packages into separate files or rename them.
-#### Additional Tips
-If packages must share a file with interfaces, configure exceptions or separate the sources.
+#### Good
+
+```systemverilog
+package foo_pkg;
+endpackage : foo_pkg
+```
+
+#### Bad
+
+```systemverilog
+package foo_pkg;
+endpackage
+
+package bar_pkg;  // second package in same file
+endpackage
+```
 
 ### `package.missing_end`
 #### Trigger
@@ -30,6 +44,21 @@ Detects `package` without a matching `endpackage`.
 Add `endpackage : foo`.
 #### Notes
 Do not wrap `endpackage` in conditionals; place `ifdef` blocks inside the package body.
+#### Good
+
+```systemverilog
+package foo_pkg;
+  // declarations
+endpackage : foo_pkg
+```
+
+#### Bad
+
+```systemverilog
+package foo_pkg;
+  // declarations
+// missing endpackage
+```
 
 ### `package.end_mismatch`
 #### Trigger
@@ -38,6 +67,19 @@ Compares `endpackage : label` with the original `package name` and warns on mism
 `` endpackage label bar does not match package foo ``
 #### Remediation
 Fix the label or regenerate the file with consistent templates.
+#### Good
+
+```systemverilog
+package foo_pkg;
+endpackage : foo_pkg
+```
+
+#### Bad
+
+```systemverilog
+package foo_pkg;
+endpackage : bar_pkg
+```
 
 ### `package.define_in_package`
 #### Trigger
@@ -52,18 +94,14 @@ Transition legacy macros to `localparam` and consume them through `import foo_pk
 
 ```systemverilog
 package foo_pkg;
-  parameter int DataWidth = 32;
-endpackage : foo_pkg
+  parameter bit EnableFoo = 1'b1;
+endpackage
 ```
 
 #### Bad
 
 ```systemverilog
 package foo_pkg;
-  parameter int DataWidth = 32;
-endpackage : bar_pkg  // mismatched end label and missing second package guard
-
-package extra_pkg;  // multiple packages per file
-  `define ENABLE_FOO 1  // macro defined inside package
+  `define ENABLE_FOO 1  // macros inside packages are banned
 endpackage
 ```

@@ -21,24 +21,92 @@ Matches `typedef enum { ... } name;` constructs whose `name` does not end with `
 Rename to `state_e`, etc.
 #### Additional Tips
 Do not use `_t` for enums; that conflicts with the struct rule below.
+#### Good
+
+```systemverilog
+typedef enum logic [1:0] {
+  IDLE,
+  BUSY
+} state_e;
+```
+
+#### Bad
+
+```systemverilog
+typedef enum logic [1:0] {
+  IDLE,
+  BUSY
+} state;
+```
 
 ### `typedef.enum_lower_snake`
 #### Trigger
 Enum type names not written in `lower_snake_case`.
 #### Remediation
 Follow the DVCodingStyle guidance and adopt names such as `uart_interrupt_e` or `aon_timer_mode_e` so the enum base is unambiguous.
+#### Good
+
+```systemverilog
+typedef enum logic [1:0] {
+  IDLE,
+  BUSY
+} uart_mode_e;
+```
+
+#### Bad
+
+```systemverilog
+typedef enum logic [1:0] {
+  IDLE,
+  BUSY
+} UartMode_e;
+```
 
 ### `typedef.enum_value_case`
 #### Trigger
 Enum members that are not `UpperCamelCase`.
 #### Remediation
 Capitalize each word (`UartInterruptFrameErr`) to match the doc's readability requirement.
+#### Good
+
+```systemverilog
+typedef enum logic [1:0] {
+  UartModeIdle,
+  UartModeBusy
+} uart_mode_e;
+```
+
+#### Bad
+
+```systemverilog
+typedef enum logic [1:0] {
+  UART_MODE_IDLE,
+  uart_mode_busy
+} uart_mode_e;
+```
 
 ### `typedef.enum_value_prefix`
 #### Trigger
 Enum members whose names do not start with the CamelCase form of the enum type (type name without `_e`).
 #### Remediation
 Include the enum base in every member (`AonTimerModeDisabled`) to keep DV logs searchable, as recommended by DVCodingStyle.
+#### Good
+
+```systemverilog
+typedef enum logic [1:0] {
+  AonTimerModeIdle,
+  AonTimerModeRun
+} aon_timer_mode_e;
+```
+
+#### Bad
+
+```systemverilog
+typedef enum logic [1:0] {
+  Idle,
+  Run
+} aon_timer_mode_e;
+```
 
 ### `typedef.type_suffix`
 #### Trigger
@@ -52,11 +120,6 @@ When exporting typedefs from packages, keep the `_t` suffix for downstream consi
 #### Good
 
 ```systemverilog
-typedef enum logic [1:0] {
-  IDLE,
-  BUSY
-} state_e;
-
 typedef struct packed {
   logic valid;
   logic [31:0] data;
@@ -66,11 +129,6 @@ typedef struct packed {
 #### Bad
 
 ```systemverilog
-typedef enum logic [1:0] {
-  IDLE,
-  BUSY
-} state;
-
 typedef struct packed {
   logic valid;
   logic [31:0] data;

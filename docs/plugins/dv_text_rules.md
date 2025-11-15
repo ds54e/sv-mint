@@ -33,55 +33,516 @@
 ## Rule Details
 
 ### `style.function_scope`
-The DVCodingStyle guide requires package-level and other static functions to declare either `automatic` or `static`. This rule scans the raw text (outside of classes) and flags `function` declarations that omit both keywords, helping enforce deterministic lifetime semantics.
+#### Trigger
+Finds `function` declarations outside classes that omit both `automatic` and `static`.
+#### Message
+`` function must declare automatic or static ``
+#### Remediation
+Add the `automatic` keyword (or `static` when intentional) so lifetime semantics are explicit.
+#### Good
+
+```systemverilog
+function automatic int calc_checksum(input int data);
+  return data ^ 32'hDEADBEEF;
+endfunction
+```
+
+#### Bad
+
+```systemverilog
+function int calc_checksum(input int data);  // missing automatic/static
+  return data;
+endfunction
+```
 
 ### `rand.dv_macro_required`
-Randomization must go through `DV_CHECK_RANDOMIZE_FATAL`, `DV_CHECK_STD_RANDOMIZE_FATAL`, or `DV_CHECK_MEMBER_RANDOMIZE_FATAL`. Any direct `randomize()` or `std::randomize()` call produces a violation so DV code always benefits from the macro-provided error checks.
+#### Trigger
+Looks for bare `randomize()` or `std::randomize()` calls.
+#### Message
+`` use DV_CHECK_*RANDOMIZE* macros instead of raw randomize() ``
+#### Remediation
+Wrap every randomization call with `DV_CHECK_RANDOMIZE_FATAL`, `DV_CHECK_STD_RANDOMIZE_FATAL`, or `DV_CHECK_MEMBER_RANDOMIZE_FATAL`.
+#### Good
+
+```systemverilog
+DV_CHECK_RANDOMIZE_FATAL(req.randomize());
+```
+
+#### Bad
+
+```systemverilog
+req.randomize();  // missing DV_CHECK_* wrapper
+```
 
 ### `rand.dv_macro_with_required`
-When constraints accompany `randomize()`, the `_WITH` family of DV macros must be used. The rule spots `randomize() with { ... }` snippets that aren’t already wrapped by a `DV_CHECK_*` macro and reminds authors to switch to `DV_CHECK_RANDOMIZE_WITH_FATAL`, `DV_CHECK_STD_RANDOMIZE_WITH_FATAL`, etc.
+#### Trigger
+Detects `randomize() with { ... }` blocks not already wrapped by `_WITH` macros.
+#### Message
+`` use DV_CHECK_*_WITH_FATAL macros when constraints are present ``
+#### Remediation
+Switch to `DV_CHECK_RANDOMIZE_WITH_FATAL`, `DV_CHECK_STD_RANDOMIZE_WITH_FATAL`, etc.
+#### Good
 
-### Logging Rules (`log.*`)
-- `log.uvm_arg_macro` ensures the first argument to `uvm_info`, `uvm_error`, and `uvm_fatal` is either `` `gfn`` or `` `gtn``. This keeps logs searchable by hierarchy, as prescribed in the logging section of DVCodingStyle.
-- `log.no_uvm_warning` bans `uvm_warning` outright; the guide mandates `uvm_error` or `uvm_fatal` instead.
-- `log.no_uvm_report_api` blocks `uvm_report_*` usage so teams always rely on the concise shorthand macros.
-- `log.no_display` forbids `$display` and pushes users toward the UVM reporting macros.
-- `log.no_none_full` prevents `UVM_NONE` and `UVM_FULL` verbosity levels, matching the recommended verbosity banding.
-- `log.allowed_verbosity` warns when `uvm_*` macros use a custom numeric verbosity instead of the supported `UVM_LOW/MEDIUM/HIGH/DEBUG` constants.
+```systemverilog
+DV_CHECK_RANDOMIZE_WITH_FATAL(req.randomize() with { kind inside {READ}; });
+```
 
-### DPI Rules (`dpi.*`)
-Section “DPI and C Connections” requires imported functions to be prefixed with `c_dpi_` and exported handles with `sv_dpi_`. These rules look for `import "DPI"` / `export "DPI"` statements and flag any identifiers that break the prefix contract.
+#### Bad
+
+```systemverilog
+req.randomize() with { kind inside {READ}; };
+```
+
+### `log.uvm_arg_macro`
+#### Trigger
+Ensures the first argument to `uvm_info/error/fatal` is `` `gfn`` or `` `gtn``.
+#### Message
+`` first argument to uvm_* must be `gfn or `gtn ``
+#### Remediation
+Replace literal strings with the standard macros for hierarchy tags.
+#### Good
+
+```systemverilog
+uvm_info(`gfn, "DMA started", UVM_LOW);
+```
+
+#### Bad
+
+```systemverilog
+uvm_info("dma", "DMA started", UVM_LOW);
+```
+
+### `log.no_uvm_warning`
+#### Trigger
+Flags any use of `uvm_warning`.
+#### Message
+`` uvm_warning is banned; use uvm_error or uvm_fatal ``
+#### Remediation
+Upgrade warnings to `uvm_error` (or `uvm_fatal` when appropriate).
+#### Good
+
+```systemverilog
+uvm_error(`gfn, "Timeout waiting for ack");
+```
+
+#### Bad
+
+```systemverilog
+uvm_warning(`gfn, "Timeout waiting for ack");
+```
+
+### `log.no_uvm_report_api`
+#### Trigger
+Searches for `uvm_report_*` calls.
+#### Message
+`` use uvm_info/error/fatal instead of uvm_report_* APIs ``
+#### Remediation
+Switch to the shorthand macros (`uvm_info`, etc.).
+#### Good
+
+```systemverilog
+uvm_info(`gfn, "Starting sequence", UVM_MEDIUM);
+```
+
+#### Bad
+
+```systemverilog
+uvm_report_info(`gfn, "Starting sequence", UVM_MEDIUM);
+```
+
+### `log.no_display`
+#### Trigger
+Looks for `$display` within DV sources.
+#### Message
+`` use uvm_* logging macros instead of $display ``
+#### Remediation
+Replace `$display` with `uvm_info` and friends.
+#### Good
+
+```systemverilog
+uvm_info(`gfn, $sformatf("value=%0d", value_q), UVM_LOW);
+```
+
+#### Bad
+
+```systemverilog
+$display("value=%0d", value_q);
+```
+
+### `log.no_none_full`
+#### Trigger
+Flags verbosity arguments equal to `UVM_NONE` or `UVM_FULL`.
+#### Message
+`` use UVM_LOW/MEDIUM/HIGH/DEBUG verbosity levels ``
+#### Remediation
+Choose one of the supported verbosity constants.
+#### Good
+
+```systemverilog
+uvm_info(`gfn, "Ping", UVM_LOW);
+```
+
+#### Bad
+
+```systemverilog
+uvm_info(`gfn, "Ping", UVM_NONE);
+```
+
+### `log.allowed_verbosity`
+#### Trigger
+Warns when the verbosity argument is a numeric literal or custom value.
+#### Message
+`` verbosity must be UVM_LOW/MEDIUM/HIGH/DEBUG ``
+#### Remediation
+Stick to the canonical verbosity constants.
+#### Good
+
+```systemverilog
+uvm_info(`gfn, "Packet received", UVM_HIGH);
+```
+
+#### Bad
+
+```systemverilog
+uvm_info(`gfn, "Packet received", 700);
+```
+
+### `dpi.import_prefix`
+#### Trigger
+Inspects DPI import statements and verifies identifiers start with `c_dpi_`.
+#### Message
+`` imported DPI symbol must start with c_dpi_ ``
+#### Remediation
+Rename imported C functions with the `c_dpi_` prefix.
+#### Good
+
+```systemverilog
+import "DPI-C" function int c_dpi_hash(input int data);
+```
+
+#### Bad
+
+```systemverilog
+import "DPI-C" function int hash(input int data);
+```
+
+### `dpi.export_prefix`
+#### Trigger
+Checks DPI export declarations for the `sv_dpi_` prefix.
+#### Message
+`` exported DPI symbol must start with sv_dpi_ ``
+#### Remediation
+Rename exported tasks/functions accordingly.
+#### Good
+
+```systemverilog
+export "DPI-C" task sv_dpi_alert;
+```
+
+#### Bad
+
+```systemverilog
+export "DPI-C" task alert_task;
+```
 
 ### `macro.missing_undef`
-The macro section of the guide states that local macros must be undefined at the end of the file to avoid polluting downstream compilation units. This rule records each `` `define`` outside `_macros.svh` files and reports the ones that are never `` `undef``’d.
+#### Trigger
+Finds local `` `define`` statements that never see an `` `undef`` in the same file.
+#### Message
+`` local macro <name> must be undefined before EOF ``
+#### Remediation
+Add `` `undef`` once the macro is no longer needed.
+#### Good
+
+```systemverilog
+`define _INC(x) ((x)+1)
+assign data_o = `_INC(data_i);
+`undef _INC
+```
+
+#### Bad
+
+```systemverilog
+`define _INC(x) ((x)+1)
+assign data_o = `_INC(data_i);  // leaks macro
+```
 
 ### `macro.guard_required`
-Global macro headers (`*_macros.svh`) must wrap each definition in a `` `ifndef` guard so the macro can be safely included multiple times. Any guarded macro missing its matching `` `ifndef`` is flagged.
+#### Trigger
+Ensures `_macros.svh` files wrap each `define` in `` `ifndef`` guards.
+#### Message
+`` macro headers must wrap definitions with `ifndef/`define/`endif ``
+#### Remediation
+Add guards so re-including the header is safe.
+#### Good
+
+```systemverilog
+`ifndef FOO_MACROS_SVH
+`define FOO_MACROS_SVH
+`define FOO_CLR(req) req.clear()
+`endif
+```
+
+#### Bad
+
+```systemverilog
+`define FOO_CLR(req) req.clear()  // unguarded in shared header
+```
 
 ### `macro.no_local_guard`
-Conversely, local macros (defined directly inside `.sv` or package sources) must *not* use `` `ifndef`` guards. Guards hide redefinition errors and were explicitly called out in the guide. This rule warns when a non-header source gate its macro with `` `ifndef`.
+#### Trigger
+Warns when source files (non-header) wrap local macros inside `` `ifndef``.
+#### Message
+`` local macros must not use `ifndef guards ``
+#### Remediation
+Remove the guard so redefinition errors surface immediately.
+#### Good
+
+```systemverilog
+`define _LOCAL_DEBUG(msg) \
+  uvm_info(`gfn, msg, UVM_LOW)
+`undef _LOCAL_DEBUG
+```
+
+#### Bad
+
+```systemverilog
+`ifndef _LOCAL_DEBUG
+`define _LOCAL_DEBUG(msg) $display(msg);
+`endif
+```
 
 ### `macro.dv_prefix_header_only`
-The DVCodingStyle doc reserves the `DV_` prefix for shared helper macros. Any `` `define`` that starts with `DV_` must therefore reside in a `_macros.svh` header. This rule flags local files that introduce `DV_` macros so they can be moved.
+#### Trigger
+Flags `DV_*` macros defined outside shared `_macros.svh` headers.
+#### Message
+`` DV_* macros must live in shared macro headers ``
+#### Remediation
+Move the macro into the common header or rename it without the `DV_` prefix.
+#### Good
+
+```systemverilog
+// shared_macros.svh
+`define DV_RAL_POKE(addr, data) \
+  `uvm_info(`gfn, {"poke:", addr}, UVM_HIGH)
+```
+
+#### Bad
+
+```systemverilog
+// inside a test .sv
+`define DV_RAL_POKE(addr, data) $display(addr, data);
+```
 
 ### `macro.module_prefix`
-Macros declared inside a `module ... endmodule` block must be namespaced with that module’s name (converted to uppercase). This prevents collisions when multiple modules are compiled together. The rule reports `` `define MY_MACRO`` inside `module foo` unless the macro name starts with `FOO_`.
+#### Trigger
+Ensures macros defined inside modules start with the module name in uppercase.
+#### Message
+`` module-local macros must be prefixed with MODULE_NAME_ ``
+#### Remediation
+Rename macros to `FOO_CFG_*` if they live inside `module foo`.
+#### Good
 
-### Wait/Fork Rules (`flow.*`)
-- `flow.wait_fork_isolation` rejects `wait fork`, nudging engineers toward the isolation-fork pattern (`DV_SPINWAIT`) recommended by the spec.
-- `flow.wait_macro_required` warns on `wait (condition)` so that watchdog-backed `` `DV_WAIT`` helpers are used instead.
-- `flow.spinwait_macro_required` reports polling `while` loops that are not invoked through `` `DV_SPINWAIT``, ensuring watchdog timers accompany non-forever loops.
-- `flow.no_fork_label` and `flow.no_disable_fork_label` discourage `fork : label` / `disable fork_label`, matching the spec’s guidance to rely on isolation forks for portability.
+```systemverilog
+module foo;
+  `define FOO_SET_CFG(val) cfg_q = (val)
+endmodule
+```
+
+#### Bad
+
+```systemverilog
+module foo;
+  `define SET_CFG(val) cfg_q = (val);  // missing FOO_ prefix
+endmodule
+```
+
+### `flow.wait_fork_isolation`
+#### Trigger
+Reports `wait fork`.
+#### Message
+`` wait fork is banned; use isolation helpers ``
+#### Remediation
+Use watchdog-backed isolation helpers such as `DV_SPINWAIT`.
+#### Good
+
+```systemverilog
+`DV_SPINWAIT(wait_done);
+```
+
+#### Bad
+
+```systemverilog
+wait fork;  // blocked until all child processes finish
+```
+
+### `flow.wait_macro_required`
+#### Trigger
+Detects raw `wait (cond)` statements.
+#### Message
+`` use `DV_WAIT(cond)` instead of raw wait ``
+#### Remediation
+Wrap waits with the macro so watchdog timeouts are included.
+#### Good
+
+```systemverilog
+`DV_WAIT(req_done)
+```
+
+#### Bad
+
+```systemverilog
+wait (req_done);
+```
+
+### `flow.spinwait_macro_required`
+#### Trigger
+Flags `while` polling loops outside of `` `DV_SPINWAIT``.
+#### Message
+`` polling loops must use `DV_SPINWAIT``
+#### Remediation
+Wrap loops with the macro or move them into `DV_SPINWAIT`.
+#### Good
+
+```systemverilog
+`DV_SPINWAIT(req_done)
+```
+
+#### Bad
+
+```systemverilog
+while (!req_done) begin
+  #10ns;
+end
+```
+
+### `flow.no_fork_label`
+#### Trigger
+Looks for `fork : label` syntax.
+#### Message
+`` fork blocks must not be labeled ``
+#### Remediation
+Use unlabeled `fork ... join` blocks or isolation helpers.
+#### Good
+
+```systemverilog
+fork
+  do_task();
+join_none
+```
+
+#### Bad
+
+```systemverilog
+fork : worker_threads
+  do_task();
+join
+```
+
+### `flow.no_disable_fork_label`
+#### Trigger
+Warns when `disable` targets a fork label.
+#### Message
+`` disable fork_label is not portable; use disable fork ``
+#### Remediation
+Call `disable fork;` or rely on DV isolation helpers instead.
+#### Good
+
+```systemverilog
+disable fork;
+```
+
+#### Bad
+
+```systemverilog
+disable worker_threads;
+```
 
 ### `seq.no_uvm_do`
-The macro section explicitly bans `` `uvm_do`` helpers; tests must call `start_item`, randomize, `finish_item`, and `get_response` manually. This rule catches any usage of the legacy macro family so authors migrate to the recommended flow.
+#### Trigger
+Matches `` `uvm_do`` and similar legacy macros.
+#### Message
+`` use start_item/randomize/finish_item instead of `uvm_do ``
+#### Remediation
+Expand the macro into explicit sequence item handling.
+#### Good
+
+```systemverilog
+req = my_item::type_id::create("req");
+start_item(req);
+DV_CHECK_RANDOMIZE_FATAL(req.randomize());
+finish_item(req);
+```
+
+#### Bad
+
+```systemverilog
+`uvm_do(req)
+```
 
 ### `scoreboard.dv_eot_required`
-Scoreboards should print TLM FIFO state at end-of-test using `DV_EOT_PRINT_*` macros. When a file declares a `*_scoreboard` class but never references the macro family, this rule reminds the author to add the recommended logging.
+#### Trigger
+Looks for classes ending with `_scoreboard` that never invoke `DV_EOT_PRINT_*`.
+#### Message
+`` scoreboard must call DV_EOT_PRINT_* macros ``
+#### Remediation
+Insert the macro in `report_phase` or `phase_ready_to_end`.
+#### Good
+
+```systemverilog
+class my_scoreboard extends uvm_component;
+  function void report_phase(uvm_phase phase);
+    `DV_EOT_PRINT_SB("my_scoreboard")
+  endfunction
+endclass
+```
+
+#### Bad
+
+```systemverilog
+class my_scoreboard extends uvm_component;
+  // no DV_EOT_PRINT_* invocation
+endclass
+```
 
 ### `lang.no_program_construct`
-`program` blocks are prohibited; they complicate reuse and are explicitly discouraged in the guide. A simple raw-text search keeps them out of the codebase.
+#### Trigger
+Scans for the `program` keyword.
+#### Message
+`` program blocks are forbidden in DV sources ``
+#### Remediation
+Use `module`/`interface`/`class` constructs instead of `program`.
+#### Good
+
+```systemverilog
+module testbench;
+endmodule
+```
+
+#### Bad
+
+```systemverilog
+program automatic testbench;
+endprogram
+```
 
 ### `check.dv_macro_required`
-Manual `if (...) uvm_error(...)` comparisons scatter duplicated logging logic. DVCodingStyle mandates `DV_CHECK_*` helpers (such as `DV_CHECK_EQ`) for these cases. The rule looks for `if` statements with comparison operators that immediately invoke `uvm_info/error/fatal` and flags them when no `DV_CHECK_*` macro is present.
-  | `check.dv_macro_required` | warning | Comparison-based checks must use `DV_CHECK_*` macros |
+#### Trigger
+Finds `if (lhs != rhs) uvm_error(...)` style comparisons that omit `DV_CHECK_*`.
+#### Message
+`` use DV_CHECK_* macros for comparison-based checks ``
+#### Remediation
+Replace manual comparisons with `DV_CHECK_EQ`, `DV_CHECK_NE`, etc.
+#### Good
+
+```systemverilog
+`DV_CHECK_EQ(exp_data, act_data)
+```
+
+#### Bad
+
+```systemverilog
+if (exp_data != act_data) begin
+  uvm_error(`gfn, "Mismatch");
+end
+```

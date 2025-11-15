@@ -17,6 +17,21 @@ Computes indentation width after stripping tabs; flags lines with an odd number 
 `` indentation should be multiples of 2 spaces ``
 #### Remediation
 Replace tabs with spaces and keep indentation at two-space steps.
+#### Good
+
+```systemverilog
+module foo;
+  logic data_q;
+endmodule
+```
+
+#### Bad
+
+```systemverilog
+module foo;
+   logic  data_q;  // uneven indentation
+endmodule
+```
 
 ### `format.preproc_left_align`
 #### Trigger
@@ -25,6 +40,21 @@ Finds `define/ifdef/ifndef/endif` directives that start with whitespace.
 `` preprocessor directives must be left aligned ``
 #### Remediation
 Remove leading whitespace so directives start in column 1, regardless of nesting depth.
+#### Good
+
+```systemverilog
+`ifdef FOO
+logic bar;
+`endif
+```
+
+#### Bad
+
+```systemverilog
+  `ifdef FOO  // directive indented
+logic bar;
+  `endif
+```
 
 ### `format.line_continuation_right`
 #### Trigger
@@ -36,20 +66,13 @@ Ensure the backslash is the final character—move comments to the next line.
 #### Good
 
 ```systemverilog
-module foo;
-  `define FOO(value) \
-    value + 1
-end
+`define INCR(value) \
+  (value + 1)
 ```
 
 #### Bad
 
 ```systemverilog
-module foo;
-   logic  data_q;   // odd indentation
-  `ifdef FOO        // directive not in column 1
-  assign result = a + \  // characters after backslash
-    b;
-  `endif
-endmodule
+`define INCR(value) \ // comment after backslash
+  (value + 1)
 ```

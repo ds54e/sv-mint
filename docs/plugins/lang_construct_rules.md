@@ -19,6 +19,22 @@ Finds standalone `#` delay operators (excluding parameterized `#(...)` clauses).
 `` delay (#) constructs are not permitted ``
 #### Remediation
 Move timing behavior to testbenches or constraints; keep RTL delay-free.
+#### Good
+
+```systemverilog
+always_ff @(posedge clk_i or negedge rst_ni) begin
+  if (!rst_ni) state_q <= IDLE;
+  else state_q <= state_d;
+end
+```
+
+#### Bad
+
+```systemverilog
+always_ff @(posedge clk_i) begin
+  #1 state_q <= state_d;  // delay not allowed in RTL
+end
+```
 
 ### `lang.prefer_always_comb`
 #### Trigger
@@ -27,6 +43,25 @@ Detects `always @*`/`always @ (*)` and suggests `always_comb`.
 `` use always_comb instead of always @* ``
 #### Remediation
 Convert to `always_comb` blocks with explicit default assignments.
+#### Good
+
+```systemverilog
+always_comb begin
+  state_d = state_q;
+  unique case (opcode_i)
+    ADD: state_d = ADD_EXEC;
+    default: ;
+  endcase
+end
+```
+
+#### Bad
+
+```systemverilog
+always @* begin
+  state_d = next_state;  // missing always_comb
+end
+```
 
 ### `lang.no_always_latch`
 #### Trigger
@@ -35,6 +70,22 @@ Reports any `always_latch` keyword.
 `` always_latch is discouraged; prefer flip-flops ``
 #### Remediation
 Re-architect the logic with `always_ff` or justify the latch and disable the rule locally.
+#### Good
+
+```systemverilog
+always_ff @(posedge clk_i or negedge rst_ni) begin
+  if (!rst_ni) state_q <= IDLE;
+  else state_q <= state_d;
+end
+```
+
+#### Bad
+
+```systemverilog
+always_latch begin
+  state_q <= state_d;  // latch discouraged
+end
+```
 
 ### `lang.always_ff_reset`
 #### Trigger
@@ -43,6 +94,22 @@ Checks `always_ff` sensitivity lists for the literal substring `negedge`; if abs
 `` always_ff should include asynchronous reset (negedge rst_n) ``
 #### Remediation
 Add `or negedge rst_ni` (or update the plugin if a different reset style is required) so the sensitivity list contains `negedge`.
+#### Good
+
+```systemverilog
+always_ff @(posedge clk_i or negedge rst_ni) begin
+  if (!rst_ni) state_q <= IDLE;
+  else state_q <= state_d;
+end
+```
+
+#### Bad
+
+```systemverilog
+always_ff @(posedge clk_i) begin
+  state_q <= state_d;  // missing negedge reset
+end
+```
 
 ### `lang.always_comb_at`
 #### Trigger
@@ -55,28 +122,14 @@ Remove the explicit sensitivity list; `always_comb` already infers it.
 
 ```systemverilog
 always_comb begin
-  state_d = state_q;
-  unique case (opcode_i)
-    ADD: state_d = ADD_EXEC;
-    default: ;
-  endcase
-end
-
-always_ff @(posedge clk_i or negedge rst_ni) begin
-  if (!rst_ni) state_q <= IDLE;
-  else state_q <= state_d;
+  data_d = data_q;
 end
 ```
 
 #### Bad
 
 ```systemverilog
-always @* state_d = next_state;  // prefer always_comb
-always_latch begin
-  state_q <= next_state;
+always_comb @(posedge clk_i) begin
+  data_d = data_q;  // sensitivity list disallowed
 end
-always_ff @(posedge clk_i) begin  // missing negedge reset
-  #1 state_q <= next_state;       // delay operator banned in RTL
-end
-always_comb @(posedge clk_i) data_d = data_q;  // sensitivity list on always_comb
 ```
