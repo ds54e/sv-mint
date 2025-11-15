@@ -16,7 +16,6 @@ sv-mint is a SystemVerilog lint pipeline that combines a Rust core with Python p
    ./sv-mint --config ./sv-mint.toml path/to/files/*.sv
    ```
 4. Tailor rules by editing `sv-mint.toml`. A section-by-section reference (including default values and stage behavior) lives in [`docs/configuration.md`](docs/configuration.md). The short version: declare your `[[rule]]` entries, point `[plugin]` at your Python interpreter, and let sv-mint’s built-in defaults cover everything else unless you need overrides.
-5. Need to build from source instead? Install Rust stable and run `cargo build --release`; the resulting binary lives under `target/release/sv-mint`.
 
 ### Sample `sv-mint.toml`
 
