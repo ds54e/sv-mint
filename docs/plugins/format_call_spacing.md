@@ -1,6 +1,5 @@
-# format_call_spacing.py
+# format.call_spacing.raw.py
 
-- **Script**: `plugins/format.call_spacing.raw.py`
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`, `cst_ir.pp_text`, `line_starts`
 - **Shared Helpers**: `plugins/lib/format_spacing_ruleset.py`

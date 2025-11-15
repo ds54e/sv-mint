@@ -1,6 +1,5 @@
-# format_macro_spacing.py
+# format.macro_spacing.raw.py
 
-- **Script**: `plugins/format.macro_spacing.raw.py`
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`, `cst_ir.pp_text`, `line_starts`
 - **Shared Helpers**: `plugins/lib/format_spacing_ruleset.py`

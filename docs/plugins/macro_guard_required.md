@@ -1,6 +1,5 @@
-# macro_guard_required.py
+# macro.guard_required.raw.py
 
-- **Script**: `plugins/macro.guard_required.raw.py`
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`, `path`
 - **Shared Helpers**: `plugins/lib/dv_text_ruleset.py`

@@ -1,6 +1,5 @@
-# lang_default_nettype_placement.py
+# lang.default_nettype_placement.raw.py
 
-- **Script**: `plugins/lang.default_nettype_placement.raw.py`
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
 - **Shared Helpers**: `plugins/lib/default_nettype_ruleset.py`

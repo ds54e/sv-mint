@@ -1,6 +1,5 @@
-# package_end_mismatch.py
+# package.end_mismatch.raw.py
 
-- **Script**: `plugins/package.end_mismatch.raw.py`
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
 - **Shared Helpers**: `plugins/lib/package_ruleset.py`

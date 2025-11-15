@@ -1,6 +1,5 @@
-# format_no_trailing_whitespace.py
+# format.no_trailing_whitespace.raw.py
 
-- **Script**: `plugins/format.no_trailing_whitespace.raw.py`
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
 - **Shared Helpers**: `plugins/lib/format_text_ruleset.py`

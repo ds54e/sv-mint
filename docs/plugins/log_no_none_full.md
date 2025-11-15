@@ -1,6 +1,5 @@
-# log_no_none_full.py
+# log.no_none_full.raw.py
 
-- **Script**: `plugins/log.no_none_full.raw.py`
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`, `path`
 - **Shared Helpers**: `plugins/lib/dv_text_ruleset.py`

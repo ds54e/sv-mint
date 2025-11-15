@@ -1,6 +1,5 @@
-# package_define_in_package.py
+# package.define_in_package.raw.py
 
-- **Script**: `plugins/package.define_in_package.raw.py`
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
 - **Shared Helpers**: `plugins/lib/package_ruleset.py`

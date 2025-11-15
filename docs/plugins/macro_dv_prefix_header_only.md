@@ -1,6 +1,5 @@
-# macro_dv_prefix_header_only.py
+# macro.dv_prefix_header_only.raw.py
 
-- **Script**: `plugins/macro.dv_prefix_header_only.raw.py`
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`, `path`
 - **Shared Helpers**: `plugins/lib/dv_text_ruleset.py`

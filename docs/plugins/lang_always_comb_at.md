@@ -1,6 +1,5 @@
-# lang_always_comb_at.py
+# lang.always_comb_at.raw.py
 
-- **Script**: `plugins/lang.always_comb_at.raw.py`
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
 - **Shared Helpers**: `plugins/lib/lang_construct_ruleset.py`

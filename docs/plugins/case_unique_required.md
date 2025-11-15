@@ -1,6 +1,5 @@
-# case_unique_required.py
+# lang.case_requires_unique.cst.py
 
-- **Script**: `plugins/lang.case_requires_unique.cst.py`
 - **Stage**: `cst` (`mode = inline`)
 - **Key Inputs**: `cst_ir.tokens`, `tok_kind_table`, `line_starts`
 - **Summary**: Recommend adding `unique` or `priority` to `case` statements

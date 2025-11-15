@@ -1,6 +1,5 @@
-# macro_no_local_guard.py
+# macro.no_local_guard.raw.py
 
-- **Script**: `plugins/macro.no_local_guard.raw.py`
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`, `path`
 - **Shared Helpers**: `plugins/lib/dv_text_ruleset.py`

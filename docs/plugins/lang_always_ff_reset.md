@@ -1,6 +1,5 @@
-# lang_always_ff_reset.py
+# lang.always_ff_reset.raw.py
 
-- **Script**: `plugins/lang.always_ff_reset.raw.py`
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
 - **Shared Helpers**: `plugins/lib/lang_construct_ruleset.py`

@@ -1,6 +1,5 @@
-# naming_parameter_upper.py
+# naming.parameter_upper.ast.py
 
-- **Script**: `plugins/naming.parameter_upper.ast.py`
 - **Stage**: `ast`
 - **Key Inputs**: `decls`, `symbols`, `ports`
 - **Shared Helpers**: `plugins/lib/naming_ruleset.py`

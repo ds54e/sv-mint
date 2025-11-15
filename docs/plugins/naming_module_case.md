@@ -1,6 +1,5 @@
-# naming_module_case.py
+# naming.module_case.ast.py
 
-- **Script**: `plugins/naming.module_case.ast.py`
 - **Stage**: `ast`
 - **Key Inputs**: `decls`, `symbols`, `ports`
 - **Shared Helpers**: `plugins/lib/naming_ruleset.py`

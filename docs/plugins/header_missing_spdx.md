@@ -1,6 +1,5 @@
-# header_missing_spdx.py
+# header.missing_spdx.raw.py
 
-- **Script**: `plugins/header.missing_spdx.raw.py`
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
 - **Shared Helpers**: `plugins/lib/header_comment_ruleset.py`

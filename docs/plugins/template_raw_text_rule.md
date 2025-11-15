@@ -1,6 +1,5 @@
-# template_raw_text_rule.py
+# template.raw_text_marker.raw.py
 
-- **Script**: `plugins/template.raw_text_marker.raw.py`
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
 - **Summary**: Report placeholder markers left in templates

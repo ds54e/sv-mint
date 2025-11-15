@@ -1,6 +1,5 @@
-# check_dv_macro_required.py
+# check.dv_macro_required.raw.py
 
-- **Script**: `plugins/check.dv_macro_required.raw.py`
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`, `path`
 - **Shared Helpers**: `plugins/lib/dv_text_ruleset.py`

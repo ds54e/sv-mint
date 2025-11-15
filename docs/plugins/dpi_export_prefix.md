@@ -1,6 +1,5 @@
-# dpi_export_prefix.py
+# dpi.export_prefix.raw.py
 
-- **Script**: `plugins/dpi.export_prefix.raw.py`
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`, `path`
 - **Shared Helpers**: `plugins/lib/dv_text_ruleset.py`

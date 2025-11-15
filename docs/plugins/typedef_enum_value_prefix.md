@@ -1,6 +1,5 @@
-# typedef_enum_value_prefix.py
+# typedef.enum_value_prefix.raw.py
 
-- **Script**: `plugins/typedef.enum_value_prefix.raw.py`
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
 - **Shared Helpers**: `plugins/lib/typedef_naming_ruleset.py`

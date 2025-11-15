@@ -1,6 +1,5 @@
-# naming_port_suffix.py
+# naming.port_suffix.ast.py
 
-- **Script**: `plugins/naming.port_suffix.ast.py`
 - **Stage**: `ast`
 - **Key Inputs**: `decls`, `symbols`, `ports`
 - **Shared Helpers**: `plugins/lib/naming_ruleset.py`

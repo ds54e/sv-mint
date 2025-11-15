@@ -1,6 +1,5 @@
-# lang_no_program_construct.py
+# lang.no_program_construct.raw.py
 
-- **Script**: `plugins/lang.no_program_construct.raw.py`
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`, `path`
 - **Shared Helpers**: `plugins/lib/dv_text_ruleset.py`

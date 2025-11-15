@@ -1,6 +1,5 @@
-# package_missing_end.py
+# package.missing_end.raw.py
 
-- **Script**: `plugins/package.missing_end.raw.py`
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
 - **Shared Helpers**: `plugins/lib/package_ruleset.py`

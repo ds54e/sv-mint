@@ -1,6 +1,5 @@
-# log_no_display.py
+# log.no_display.raw.py
 
-- **Script**: `plugins/log.no_display.raw.py`
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`, `path`
 - **Shared Helpers**: `plugins/lib/dv_text_ruleset.py`

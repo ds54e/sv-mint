@@ -1,6 +1,5 @@
-# decl_unused_net.py
+# decl.unused.net.ast.py
 
-- **Script**: `plugins/decl.unused.net.ast.py`
 - **Stage**: `ast`
 - **Key Inputs**: `symbols` entries with `class == net`
 - **Summary**: Warn when declared nets are never read or written

@@ -1,6 +1,5 @@
-# end_else_same_line.py
+# format.end_else_inline.pp.py
 
-- **Script**: `plugins/format.end_else_inline.pp.py`
 - **Stage**: `pp_text`
 - **Key Inputs**: Preprocessed `text`
 - **Summary**: Require `else` to share the same line as the preceding `end`

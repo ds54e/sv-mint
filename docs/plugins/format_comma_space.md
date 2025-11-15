@@ -1,6 +1,5 @@
-# format_comma_space.py
+# format.comma_space.raw.py
 
-- **Script**: `plugins/format.comma_space.raw.py`
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`, `cst_ir.pp_text`, `line_starts`
 - **Shared Helpers**: `plugins/lib/format_spacing_ruleset.py`

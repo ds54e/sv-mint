@@ -1,6 +1,5 @@
-# naming_differential_pair.py
+# naming.differential_pair.ast.py
 
-- **Script**: `plugins/naming.differential_pair.ast.py`
 - **Stage**: `ast`
 - **Key Inputs**: `decls`, `symbols`, `ports`
 - **Shared Helpers**: `plugins/lib/naming_ruleset.py`

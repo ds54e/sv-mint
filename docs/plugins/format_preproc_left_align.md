@@ -1,6 +1,5 @@
-# format_preproc_left_align.py
+# format.preproc_left_align.raw.py
 
-- **Script**: `plugins/format.preproc_left_align.raw.py`
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
 - **Shared Helpers**: `plugins/lib/format_indent_ruleset.py`

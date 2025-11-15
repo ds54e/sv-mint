@@ -1,6 +1,5 @@
-# module_inst_rules.py
+# module.named_ports_required.raw.py
 
-- **Script**: `plugins/module.named_ports_required.raw.py`
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
 - **Summary**: Require named `.port(signal)` connections

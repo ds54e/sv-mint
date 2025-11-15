@@ -1,6 +1,5 @@
-# format_no_tabs.py
+# format.no_tabs.raw.py
 
-- **Script**: `plugins/format.no_tabs.raw.py`
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
 - **Shared Helpers**: `plugins/lib/format_text_ruleset.py`

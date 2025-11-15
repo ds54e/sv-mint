@@ -1,6 +1,5 @@
-# format_case_colon_after.py
+# format.case_colon_after.cst.py
 
-- **Script**: `plugins/format.case_colon_after.cst.py`
 - **Stage**: `cst`
 - **Key Inputs**: `text`, `cst_ir.pp_text`, `line_starts`
 - **Shared Helpers**: `plugins/lib/format_spacing_ruleset.py`

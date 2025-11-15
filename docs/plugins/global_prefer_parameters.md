@@ -1,6 +1,5 @@
-# global_prefer_parameters.py
+# global.prefer_parameters.raw.py
 
-- **Script**: `plugins/global.prefer_parameters.raw.py`
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
 - **Shared Helpers**: `plugins/lib/global_define_ruleset.py`

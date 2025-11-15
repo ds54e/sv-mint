@@ -1,6 +1,5 @@
-# assignment_rules.py
+# flow.multiple_nonblocking.ast.py
 
-- **Script**: `plugins/flow.multiple_nonblocking.ast.py`
 - **Stage**: `ast`
 - **Key Inputs**: `assigns` (each entry includes `module`, `lhs`, `op`, and locations)
 - **Summary**: Report multiple non-blocking assignments to the same LHS within a module
