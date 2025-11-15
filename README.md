@@ -9,17 +9,14 @@ sv-mint is a SystemVerilog lint pipeline that combines a Rust core with Python p
 - **Operational safety**: configurable (default 12/16 MB) size guards, per-file timeouts, stderr snippet limits, and request accounting keep runaway rules in check.
 
 ## Getting Started
-1. Install Rust stable, Python 3.x, and a recent sv-parser-compatible toolchain.
-2. Build the project:
+1. Download the latest release from GitHub (`sv-mint-vX.Y.Z-<platform>.tar.gz`/`.zip`) and extract it somewhere on your machine.
+2. Add the extracted directory (it contains `sv-mint`, `docs/`, `plugins/`, `sv-mint.toml`, and `LICENSE`) to your `PATH`, or call the binary via an absolute path.
+3. Lint your sources:
    ```bash
-   rustup default stable
-   cargo build --release
-   ```
-3. Run the CLI against your sources:
-   ```bash
-   target/release/sv-mint --config ./sv-mint.toml path/to/files/*.sv
+   ./sv-mint --config ./sv-mint.toml path/to/files/*.sv
    ```
 4. Tailor rules by editing `sv-mint.toml`. A section-by-section reference (including default values and stage behavior) lives in [`docs/configuration.md`](docs/configuration.md). The short version: declare your `[[rule]]` entries, point `[plugin]` at your Python interpreter, and let sv-mint’s built-in defaults cover everything else unless you need overrides.
+5. Need to build from source instead? Install Rust stable and run `cargo build --release`; the resulting binary lives under `target/release/sv-mint`.
 
 ### Sample `sv-mint.toml`
 
