@@ -1,6 +1,6 @@
 # log.no_uvm_warning
 
-- **Script**: `plugins/log.no_uvm_warning.py`
+- **Script**: `plugins/log.no_uvm_warning.raw.py`
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`, `path`
 - **Shared Helpers**: `plugins/lib/dv_text_ruleset.py`

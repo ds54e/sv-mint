@@ -11,17 +11,16 @@ def check(req):
     line_cache = {}
     out = []
     for s in symbols:
-        if s.get("class") != "var":
+        if s.get("class") != "param":
             continue
-        reads = int(s.get("read_count", 0) or 0)
-        writes = int(s.get("write_count", 0) or 0)
-        if reads == 0 and writes == 0:
+        refs = int(s.get("ref_count", s.get("read_count", 0) or 0) or 0)
+        if refs == 0:
             if _has_unused_comment(line_cache, s.get("loc")):
                 continue
             out.append({
-                "rule_id": "decl.unused.var",
+                "rule_id": "decl.unused_param",
                 "severity": "warning",
-                "message": f"unused var {s.get('module','')}.{s.get('name','')}",
+                "message": f"unused param {s.get('module','')}.{s.get('name','')}",
                 "location": s.get("loc", {"line":1,"col":1,"end_line":1,"end_col":1})
             })
     return out

@@ -1,6 +1,6 @@
 # format.line_length
 
-- **Script**: `plugins/format.line_length.py`
+- **Script**: `plugins/format.line_length.raw.py`
 - **Stage**: `raw_text`
 - **Key Inputs**: LF-normalized `text`
 - **Summary**: Flag lines longer than 100 columns

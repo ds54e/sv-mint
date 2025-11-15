@@ -112,7 +112,7 @@ fn detects_width_literal_violations() {
 
 #[test]
 fn detects_unused_net_violation() {
-    run_fixture("fixtures/unused_net_violation.sv", "decl.unused.net");
+    run_fixture("fixtures/unused_net_violation.sv", "decl.unused_net");
 }
 
 #[test]
@@ -122,7 +122,7 @@ fn allows_marked_unused_net() {
 
 #[test]
 fn detects_unused_param_violation() {
-    run_fixture("fixtures/unused_param_violation.sv", "decl.unused.param");
+    run_fixture("fixtures/unused_param_violation.sv", "decl.unused_param");
 }
 
 #[test]
@@ -132,7 +132,7 @@ fn allows_marked_unused_param() {
 
 #[test]
 fn detects_unused_var_violation() {
-    run_fixture("fixtures/unused_var_violation.sv", "decl.unused.var");
+    run_fixture("fixtures/unused_var_violation.sv", "decl.unused_var");
 }
 
 #[test]
@@ -352,6 +352,6 @@ fn reports_include_file_path() {
     run_with_config(
         "fixtures/include_top.sv",
         "tests/include_config.toml",
-        &["include_child.sv", "decl.unused.var"],
+        &["include_child.sv", "decl.unused_var"],
     );
 }

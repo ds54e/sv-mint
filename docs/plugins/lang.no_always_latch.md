@@ -1,6 +1,6 @@
 # lang.no_always_latch
 
-- **Script**: `plugins/lang.no_always_latch.py`
+- **Script**: `plugins/lang.no_always_latch.raw.py`
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
 - **Shared Helpers**: `plugins/lib/lang_construct_ruleset.py`

@@ -1,6 +1,6 @@
 # naming.clk_prefix
 
-- **Script**: `plugins/naming.clk_prefix.py`
+- **Script**: `plugins/naming.clk_prefix.ast.py`
 - **Stage**: `ast`
 - **Key Inputs**: `decls`, `symbols`, `ports`
 - **Shared Helpers**: `plugins/lib/naming_ruleset.py`

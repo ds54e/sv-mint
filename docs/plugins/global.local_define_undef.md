@@ -1,6 +1,6 @@
 # global.local_define_undef
 
-- **Script**: `plugins/global.local_define_undef.py`
+- **Script**: `plugins/global.local_define_undef.raw.py`
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
 - **Shared Helpers**: `plugins/lib/global_define_ruleset.py`

@@ -1,6 +1,6 @@
 # naming.rst_active_low
 
-- **Script**: `plugins/naming.rst_active_low.py`
+- **Script**: `plugins/naming.rst_active_low.ast.py`
 - **Stage**: `ast`
 - **Key Inputs**: `decls`, `symbols`, `ports`
 - **Shared Helpers**: `plugins/lib/naming_ruleset.py`

@@ -1,6 +1,6 @@
 # rand.dv_macro_with_required
 
-- **Script**: `plugins/rand.dv_macro_with_required.py`
+- **Script**: `plugins/rand.dv_macro_with_required.raw.py`
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`, `path`
 - **Shared Helpers**: `plugins/lib/dv_text_ruleset.py`

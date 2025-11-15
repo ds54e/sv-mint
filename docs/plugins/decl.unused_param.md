@@ -1,6 +1,6 @@
-# decl.unused.param
+# decl.unused_param
 
-- **Script**: `plugins/decl.unused.param.py`
+- **Script**: `plugins/decl.unused_param.ast.py`
 - **Stage**: `ast`
 - **Key Inputs**: `symbols` entries with `class == param`
 - **Summary**: Detect parameters whose reference count stays at zero

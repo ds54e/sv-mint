@@ -1,6 +1,6 @@
 # package.multiple
 
-- **Script**: `plugins/package.multiple.py`
+- **Script**: `plugins/package.multiple.raw.py`
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
 - **Shared Helpers**: `plugins/lib/package_ruleset.py`

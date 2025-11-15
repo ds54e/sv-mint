@@ -1,6 +1,6 @@
-# decl.unused.var
+# decl.unused_var
 
-- **Script**: `plugins/decl.unused.var.py`
+- **Script**: `plugins/decl.unused_var.ast.py`
 - **Stage**: `ast`
 - **Key Inputs**: `symbols` entries with `class == var`
 - **Summary**: Warn about variable declarations that are never referenced

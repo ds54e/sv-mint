@@ -1,6 +1,6 @@
 # naming.no_numeric_suffix
 
-- **Script**: `plugins/naming.no_numeric_suffix.py`
+- **Script**: `plugins/naming.no_numeric_suffix.ast.py`
 - **Stage**: `ast`
 - **Key Inputs**: `decls`, `symbols`, `ports`
 - **Shared Helpers**: `plugins/lib/naming_ruleset.py`

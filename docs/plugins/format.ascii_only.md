@@ -1,6 +1,6 @@
 # format.ascii_only
 
-- **Script**: `plugins/format.ascii_only.py`
+- **Script**: `plugins/format.ascii_only.raw.py`
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
 - **Shared Helpers**: `plugins/lib/format_text_ruleset.py`

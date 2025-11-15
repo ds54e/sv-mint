@@ -1,6 +1,6 @@
 # lang.default_nettype_reset
 
-- **Script**: `plugins/lang.default_nettype_reset.py`
+- **Script**: `plugins/lang.default_nettype_reset.raw.py`
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
 - **Shared Helpers**: `plugins/lib/default_nettype_ruleset.py`

@@ -1,6 +1,6 @@
 # lang.no_delays
 
-- **Script**: `plugins/lang.no_delays.py`
+- **Script**: `plugins/lang.no_delays.raw.py`
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
 - **Shared Helpers**: `plugins/lib/lang_construct_ruleset.py`

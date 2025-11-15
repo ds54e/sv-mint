@@ -1,6 +1,6 @@
 # module.no_port_wildcard
 
-- **Script**: `plugins/module.no_port_wildcard.py`
+- **Script**: `plugins/module.no_port_wildcard.cst.py`
 - **Stage**: `cst` (`mode = inline`)
 - **Key Inputs**: `cst_ir.tokens`, `tok_kind_table`, `line_starts`
 - **Summary**: Catch `.*` port wildcards at the CST level

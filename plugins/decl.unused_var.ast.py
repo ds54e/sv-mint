@@ -11,7 +11,7 @@ def check(req):
     line_cache = {}
     out = []
     for s in symbols:
-        if s.get("class") != "net":
+        if s.get("class") != "var":
             continue
         reads = int(s.get("read_count", 0) or 0)
         writes = int(s.get("write_count", 0) or 0)
@@ -19,9 +19,9 @@ def check(req):
             if _has_unused_comment(line_cache, s.get("loc")):
                 continue
             out.append({
-                "rule_id": "decl.unused.net",
+                "rule_id": "decl.unused_var",
                 "severity": "warning",
-                "message": f"unused net {s.get('module','')}.{s.get('name','')}",
+                "message": f"unused var {s.get('module','')}.{s.get('name','')}",
                 "location": s.get("loc", {"line":1,"col":1,"end_line":1,"end_col":1})
             })
     return out

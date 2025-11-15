@@ -1,6 +1,6 @@
 # format.begin_required
 
-- **Script**: `plugins/format.begin_required.py`
+- **Script**: `plugins/format.begin_required.pp.py`
 - **Stage**: `pp_text`
 - **Key Inputs**: Preprocessed `text`
 - **Summary**: Require multiline control bodies to use `begin ... end`

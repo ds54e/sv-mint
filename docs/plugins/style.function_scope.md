@@ -1,6 +1,6 @@
 # style.function_scope
 
-- **Script**: `plugins/style.function_scope.py`
+- **Script**: `plugins/style.function_scope.raw.py`
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`, `path`
 - **Shared Helpers**: `plugins/lib/dv_text_ruleset.py`

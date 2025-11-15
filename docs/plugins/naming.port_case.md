@@ -1,6 +1,6 @@
 # naming.port_case
 
-- **Script**: `plugins/naming.port_case.py`
+- **Script**: `plugins/naming.port_case.ast.py`
 - **Stage**: `ast`
 - **Key Inputs**: `decls`, `symbols`, `ports`
 - **Shared Helpers**: `plugins/lib/naming_ruleset.py`

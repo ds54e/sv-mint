@@ -1,6 +1,6 @@
 # lang.default_nettype_missing
 
-- **Script**: `plugins/lang.default_nettype_missing.py`
+- **Script**: `plugins/lang.default_nettype_missing.raw.py`
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
 - **Shared Helpers**: `plugins/lib/default_nettype_ruleset.py`

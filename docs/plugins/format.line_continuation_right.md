@@ -1,6 +1,6 @@
 # format.line_continuation_right
 
-- **Script**: `plugins/format.line_continuation_right.py`
+- **Script**: `plugins/format.line_continuation_right.raw.py`
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
 - **Shared Helpers**: `plugins/lib/format_indent_ruleset.py`

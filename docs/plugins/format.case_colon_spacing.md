@@ -1,6 +1,6 @@
 # format.case_colon_spacing
 
-- **Script**: `plugins/format.case_colon_spacing.py`
+- **Script**: `plugins/format.case_colon_spacing.cst.py`
 - **Stage**: `cst`
 - **Key Inputs**: `text`, `cst_ir.pp_text`, `line_starts`
 - **Shared Helpers**: `plugins/lib/format_spacing_ruleset.py`

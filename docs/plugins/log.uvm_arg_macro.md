@@ -1,6 +1,6 @@
 # log.uvm_arg_macro
 
-- **Script**: `plugins/log.uvm_arg_macro.py`
+- **Script**: `plugins/log.uvm_arg_macro.raw.py`
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`, `path`
 - **Shared Helpers**: `plugins/lib/dv_text_ruleset.py`

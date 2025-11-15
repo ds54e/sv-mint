@@ -22,13 +22,13 @@ id = "lang.case_requires_unique"
 id = "comb.nb_in_alwayscomb"
 
 [[rule]]
-id = "decl.unused.net"
+id = "decl.unused_net"
 
 [[rule]]
-id = "decl.unused.param"
+id = "decl.unused_param"
 
 [[rule]]
-id = "decl.unused.var"
+id = "decl.unused_var"
 
 [[rule]]
 id = "lang.default_nettype_missing"

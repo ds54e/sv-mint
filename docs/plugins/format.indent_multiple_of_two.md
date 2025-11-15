@@ -1,6 +1,6 @@
 # format.indent_multiple_of_two
 
-- **Script**: `plugins/format.indent_multiple_of_two.py`
+- **Script**: `plugins/format.indent_multiple_of_two.raw.py`
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
 - **Shared Helpers**: `plugins/lib/format_indent_ruleset.py`

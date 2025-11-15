@@ -1,6 +1,6 @@
 # format.case_begin_required
 
-- **Script**: `plugins/format.case_begin_required.py`
+- **Script**: `plugins/format.case_begin_required.cst.py`
 - **Stage**: `cst` (`mode = inline`)
 - **Key Inputs**: `cst_ir.tokens`, `tok_kind_table`, `line_starts`
 - **Summary**: Require each `case` item to wrap statements in `begin/end`

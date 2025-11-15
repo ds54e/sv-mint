@@ -1,6 +1,6 @@
 # case.missing_default
 
-- **Script**: `plugins/case.missing_default.py`
+- **Script**: `plugins/case.missing_default.cst.py`
 - **Stage**: `cst` (`mode = inline`)
 - **Key Inputs**: `cst_ir.tokens`, `line_starts`, `pp_text`
 - **Summary**: Warn when a `case` statement lacks a `default` label
