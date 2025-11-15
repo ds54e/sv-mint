@@ -1,8 +1,9 @@
-# global_define_rules.py
+# Global define rules
 
-- **Script**: `plugins/global_define_rules.py`
+- **Scripts**: `plugins/global.*.raw.py`
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
+- **Shared Helpers**: `plugins/lib/global_define_ruleset.py`
 - **Rules**:
   - ``global.local_define_undef`` (warning): Require local macros to be undefined in the same file
   - ``global.prefer_parameters`` (warning): Discourage non-underscored `` `define`` macros in favor of parameters

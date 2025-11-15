@@ -1,8 +1,9 @@
-# naming_rules.py
+# Naming rules
 
-- **Script**: `plugins/naming_rules.py`
+- **Scripts**: `plugins/<rule_id>.ast.py` (one per rule)
 - **Stage**: `ast`
 - **Key Inputs**: `decls`, `symbols`, `ports`
+- **Shared Helpers**: `plugins/lib/naming_ruleset.py`
 - **Rules**:
   - ``naming.module_case`` (warning): Modules must use lower_snake_case
   - ``naming.signal_case`` (warning): Signals/variables must use lower_snake_case

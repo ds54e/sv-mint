@@ -1,8 +1,9 @@
-# dv_text_rules.py
+# DV text rules
 
-- **Script**: `plugins/dv_text_rules.py`
+- **Scripts**: `plugins/<rule_id>.raw.py` (one rule per file)
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`, `path`
+- **Shared Helpers**: `plugins/lib/dv_text_ruleset.py`
 - **Rules**:
   - ``style.function_scope`` (warning): Functions inside packages/modules/interfaces must be `automatic` or `static`
   - ``rand.dv_macro_required`` (warning): Enforce `DV_CHECK_*RANDOMIZE*` macros instead of raw `randomize()`

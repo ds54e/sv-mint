@@ -1,8 +1,9 @@
-# format_indent_rules.py
+# Format indent rules
 
-- **Script**: `plugins/format_indent_rules.py`
+- **Scripts**: `plugins/format.*.raw.py`
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
+- **Shared Helpers**: `plugins/lib/format_indent_ruleset.py`
 - **Rules**:
   - ``format.indent_multiple_of_two`` (warning): Enforce indentation in multiples of two spaces
   - ``format.preproc_left_align`` (warning): Left-align preprocessor directives

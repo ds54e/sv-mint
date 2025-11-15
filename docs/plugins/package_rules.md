@@ -1,8 +1,9 @@
-# package_rules.py
+# Package rules
 
-- **Script**: `plugins/package_rules.py`
+- **Scripts**: `plugins/package.*.raw.py`
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
+- **Shared Helpers**: `plugins/lib/package_ruleset.py`
 - **Rules**:
   - ``package.multiple`` (warning): Limit each file to a single `package`
   - ``package.missing_end`` (warning): Require `endpackage` when a package is declared

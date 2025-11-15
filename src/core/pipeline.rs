@@ -289,7 +289,7 @@ fn build_stage_rule_map(cfg: &Config) -> HashMap<Stage, StageRuleSet> {
         map.entry(stage).or_default();
     }
     for rule in &cfg.rule {
-        let entry = map.entry(rule.stage).or_default();
+        let entry = map.entry(rule.stage()).or_default();
         if rule.enabled {
             entry.enabled.push(rule.id.clone());
         } else {

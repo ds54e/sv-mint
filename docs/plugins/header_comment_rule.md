@@ -1,8 +1,9 @@
-# header_comment_rule.py
+# Header comment rules
 
-- **Script**: `plugins/header_comment_rule.py`
+- **Scripts**: `plugins/header.*.raw.py`
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
+- **Shared Helpers**: `plugins/lib/header_comment_ruleset.py`
 - **Rules**:
   - ``header.missing_spdx`` (warning): Require an SPDX identifier near the top of the file
   - ``header.missing_comment`` (warning): Require a header comment within the first five lines

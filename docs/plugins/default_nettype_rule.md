@@ -1,8 +1,9 @@
-# default_nettype_rule.py
+# Default nettype rules
 
-- **Script**: `plugins/default_nettype_rule.py`
+- **Scripts**: `plugins/lang.default_nettype_*.raw.py`
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
+- **Shared Helpers**: `plugins/lib/default_nettype_ruleset.py`
 - **Rules**:
   - ``lang.default_nettype_missing`` (warning): Require `` `default_nettype none`` in every file
   - ``lang.default_nettype_none`` (warning): The first `default_nettype` must set the value to `none`

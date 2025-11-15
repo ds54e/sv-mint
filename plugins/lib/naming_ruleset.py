@@ -1,48 +1,82 @@
-
 import re
 
+CACHE_KEY = "__naming_ruleset"
 LOWER_SNAKE = re.compile(r"^[a-z][a-z0-9_]*$")
 DIGIT_SUFFIX = re.compile(r"_[0-9]+$")
 
 
-def check(req):
+def violations_for(req, rule_id):
+    table = evaluate(req)
+    return list(table.get(rule_id) or [])
+
+
+def evaluate(req):
+    cached = req.get(CACHE_KEY)
+    if cached is not None:
+        return cached
     if req.get("stage") != "ast":
-        return []
+        req[CACHE_KEY] = {}
+        return req[CACHE_KEY]
     payload = req.get("payload") or {}
     decls = payload.get("decls") or []
     symbols = payload.get("symbols") or []
     ports = payload.get("ports") or []
+    name_set = {sym.get("name") or "" for sym in symbols}
+    collected = []
+    collected.extend(_check_modules(decls))
+    collected.extend(_check_symbols(symbols))
+    collected.extend(_check_ports(ports))
+    collected.extend(_check_clock_reset_order(ports))
+    collected.extend(_check_differential_pairs(ports))
+    collected.extend(_check_port_direction_suffixes(ports))
+    collected.extend(_check_pipeline_suffixes(name_set))
+    collected.extend(_check_parameter_naming(decls))
+    table = {}
+    for item in collected:
+        rule_id = item.get("rule_id")
+        if not rule_id:
+            continue
+        table.setdefault(rule_id, []).append(item)
+    req[CACHE_KEY] = table
+    return table
+
+
+def _check_modules(decls):
     out = []
     for decl in decls:
         if decl.get("kind") != "module":
             continue
         name = decl.get("name") or ""
         loc = decl.get("loc")
-        out.extend(validate_name(name, loc, "naming.module_case"))
-    name_set = {sym.get("name") for sym in symbols}
+        out.extend(_validate_name(name, loc, "naming.module_case"))
+    return out
+
+
+def _check_symbols(symbols):
+    out = []
     for sym in symbols:
         if sym.get("class") not in ("net", "var"):
             continue
         name = sym.get("name") or ""
         loc = sym.get("loc")
-        out.extend(validate_name(name, loc, "naming.signal_case"))
-        out.extend(check_suffixes(name, loc))
-        out.extend(check_clock_reset(name, loc))
-    for port in ports:
-        name = port.get("name") or ""
-        loc = port.get("loc")
-        out.extend(validate_name(name, loc, "naming.port_case"))
-        out.extend(check_suffixes(name, loc))
-        out.extend(check_clock_reset(name, loc))
-    out.extend(check_clock_reset_order(ports))
-    out.extend(check_differential_pairs(ports))
-    out.extend(check_port_direction_suffixes(ports))
-    out.extend(check_pipeline_suffixes(name_set))
-    out.extend(check_parameter_naming(decls))
+        out.extend(_validate_name(name, loc, "naming.signal_case"))
+        out.extend(_check_suffixes(name, loc))
+        out.extend(_check_clock_reset(name, loc))
     return out
 
 
-def validate_name(name, loc, rule_id):
+def _check_ports(ports):
+    out = []
+    for port in ports:
+        name = port.get("name") or ""
+        loc = port.get("loc")
+        out.extend(_validate_name(name, loc, "naming.port_case"))
+        out.extend(_check_suffixes(name, loc))
+        out.extend(_check_clock_reset(name, loc))
+    return out
+
+
+def _validate_name(name, loc, rule_id):
     issues = []
     if not name or loc is None:
         return issues
@@ -63,7 +97,7 @@ def validate_name(name, loc, rule_id):
     return issues
 
 
-def check_suffixes(name, loc):
+def _check_suffixes(name, loc):
     issues = []
     if loc is None:
         return issues
@@ -77,7 +111,7 @@ def check_suffixes(name, loc):
     return issues
 
 
-def check_clock_reset(name, loc):
+def _check_clock_reset(name, loc):
     issues = []
     if loc is None:
         return issues
@@ -98,14 +132,13 @@ def check_clock_reset(name, loc):
     return issues
 
 
-def check_clock_reset_order(ports):
+def _check_clock_reset_order(ports):
     issues = []
     clk_seen = False
     rst_phase = False
     for port in ports:
         name = port.get("name") or ""
         loc = port.get("loc")
-        direction = port.get("direction") or ""
         if name.startswith("clk"):
             if clk_seen and rst_phase and loc:
                 issues.append({
@@ -127,12 +160,12 @@ def check_clock_reset_order(ports):
     return issues
 
 
-def check_differential_pairs(ports):
+def _check_differential_pairs(ports):
     issues = []
     modules = {}
     for port in ports:
         modules.setdefault(port.get("module"), []).append(port)
-    for module, plist in modules.items():
+    for plist in modules.values():
         names = {p.get("name") or "": p for p in plist}
         for name, port in names.items():
             if name.endswith("_p"):
@@ -142,17 +175,15 @@ def check_differential_pairs(ports):
                         "rule_id": "naming.differential_pair",
                         "severity": "warning",
                         "message": f"differential pair missing counterpart for {name}",
-                        "location": port.get("loc") or {"line": 1, "col": 1, "end_line": 1, "end_col": 1},
+                        "location": port.get("loc") or _default_loc(),
                     })
     return issues
 
 
-def check_pipeline_suffixes(names):
+def _check_pipeline_suffixes(names):
     issues = []
     for name in names:
-        if name.endswith("_q"):
-            continue
-        if name.endswith("_q0"):
+        if name.endswith("_q") or name.endswith("_q0"):
             continue
         re_match = _pipeline_match(name)
         if re_match:
@@ -163,14 +194,12 @@ def check_pipeline_suffixes(names):
                     "rule_id": "naming.pipeline_sequence",
                     "severity": "warning",
                     "message": f"pipeline stage {name} missing previous stage {prev}",
-                    "location": {"line": 1, "col": 1, "end_line": 1, "end_col": 1},
+                    "location": _default_loc(),
                 })
     return issues
 
 
 def _pipeline_match(name):
-    import re
-
     m = re.match(r"(.+)_q(\d+)$", name)
     if not m:
         return None
@@ -180,7 +209,7 @@ def _pipeline_match(name):
     return m.group(1), stage
 
 
-def check_parameter_naming(decls):
+def _check_parameter_naming(decls):
     issues = []
     for decl in decls:
         if decl.get("kind") != "param":
@@ -191,12 +220,12 @@ def check_parameter_naming(decls):
                 "rule_id": "naming.parameter_upper",
                 "severity": "warning",
                 "message": f"parameter {name} should use UpperCamelCase",
-                "location": decl.get("loc") or {"line": 1, "col": 1, "end_line": 1, "end_col": 1},
+                "location": decl.get("loc") or _default_loc(),
             })
     return issues
 
 
-def check_port_direction_suffixes(ports):
+def _check_port_direction_suffixes(ports):
     issues = []
     suffixes = {
         "input": ("_i", "_ni"),
@@ -211,7 +240,7 @@ def check_port_direction_suffixes(ports):
         name = port.get("name") or ""
         if not name:
             continue
-        loc = port.get("loc") or {"line": 1, "col": 1, "end_line": 1, "end_col": 1}
+        loc = port.get("loc") or _default_loc()
         if any(name.endswith(sfx) for sfx in allowed):
             continue
         exp = " or ".join(allowed)
@@ -222,3 +251,7 @@ def check_port_direction_suffixes(ports):
             "location": loc,
         })
     return issues
+
+
+def _default_loc():
+    return {"line": 1, "col": 1, "end_line": 1, "end_col": 1}

@@ -1,15 +1,27 @@
 import re
 
+from lib.dv_helpers import loc, raw_text_inputs
+
 TYPEDEF_ENUM_RE = re.compile(r"typedef\s+enum(?P<head>[\s\S]*?)\{(?P<body>[\s\S]*?)\}\s*(?P<name>[A-Za-z_]\w*)\s*;", re.DOTALL)
 TYPEDEF_RE = re.compile(r"typedef(?!\s+enum).*?\s+([A-Za-z_]\w*)\s*;", re.DOTALL)
 LOWER_SNAKE = re.compile(r"^[a-z][a-z0-9_]*$")
+CACHE_KEY = "__typedef_naming_ruleset"
 
 
-def check(req):
-    if req.get("stage") != "raw_text":
-        return []
-    payload = req.get("payload") or {}
-    text = payload.get("text") or ""
+def violations_for(req, rule_id):
+    table = evaluate(req)
+    return list(table.get(rule_id) or [])
+
+
+def evaluate(req):
+    cached = req.get(CACHE_KEY)
+    if cached is not None:
+        return cached
+    inputs = raw_text_inputs(req)
+    if not inputs:
+        req[CACHE_KEY] = {}
+        return req[CACHE_KEY]
+    text, _ = inputs
     out = []
     for match in TYPEDEF_ENUM_RE.finditer(text):
         name = match.group("name")
@@ -22,18 +34,19 @@ def check(req):
         name = match.group(1)
         if not name.endswith("_t"):
             out.append(_violation("typedef.type_suffix", name, match.start(), text, "typedef names should end with _t"))
-    return out
+    table = {}
+    for item in out:
+        table.setdefault(item["rule_id"], []).append(item)
+    req[CACHE_KEY] = table
+    return table
 
 
 def _violation(rule_id, name, index, text, message):
-    line = text.count("\n", 0, index) + 1
-    prev = text.rfind("\n", 0, index)
-    col = index + 1 if prev < 0 else index - prev
     return {
         "rule_id": rule_id,
         "severity": "warning",
         "message": f"{message}: {name}",
-        "location": {"line": line, "col": col, "end_line": line, "end_col": col + 1},
+        "location": loc(text, index),
     }
 
 

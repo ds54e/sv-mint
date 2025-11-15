@@ -1,8 +1,9 @@
-# lang_construct_rules.py
+# Language construct rules
 
-- **Script**: `plugins/lang_construct_rules.py`
+- **Scripts**: `plugins/lang.*.raw.py`
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
+- **Shared Helpers**: `plugins/lib/lang_construct_ruleset.py`
 - **Rules**:
   - ``lang.no_delays`` (warning): Ban `#5`-style delays in RTL
   - ``lang.prefer_always_comb`` (warning): Replace `always @*` with `always_comb`

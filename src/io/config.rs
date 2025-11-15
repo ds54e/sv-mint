@@ -125,11 +125,18 @@ pub struct Stages {
 pub struct RuleConfig {
     pub id: String,
     pub script: String,
-    pub stage: Stage,
+    #[serde(default)]
+    pub stage: Option<Stage>,
     #[serde(default = "default_true")]
     pub enabled: bool,
     #[serde(default)]
     pub severity: Option<String>,
+}
+
+impl RuleConfig {
+    pub fn stage(&self) -> Stage {
+        self.stage.expect("rule stage must be set during config load")
+    }
 }
 
 fn default_true() -> bool {
@@ -193,20 +200,19 @@ pub fn load_from_path(opt: Option<PathBuf>) -> Result<(Config, PathBuf), ConfigE
         detail: format!("{} ({})", path.display(), e),
     })?;
     let mut cfg = load(&cfg_text)?;
-    let base_dir = path.parent().map(Path::to_path_buf).unwrap_or_else(|| PathBuf::from("."));
+    let base_dir = path
+        .parent()
+        .map(Path::to_path_buf)
+        .unwrap_or_else(|| PathBuf::from("."));
     normalize_rule_scripts(&mut cfg, &base_dir);
+    infer_rule_stages(&mut cfg.rule)?;
     validate_config(&cfg)?;
     Ok((cfg, path))
 }
 
 fn normalize_rule_scripts(cfg: &mut Config, base_dir: &Path) {
     cfg.plugin.normalized_root = cfg.plugin.root.as_ref().map(|root| to_abs(base_dir, root));
-    cfg.plugin.normalized_search_paths = cfg
-        .plugin
-        .search_paths
-        .iter()
-        .map(|p| to_abs(base_dir, p))
-        .collect();
+    cfg.plugin.normalized_search_paths = cfg.plugin.search_paths.iter().map(|p| to_abs(base_dir, p)).collect();
     for entry in &mut cfg.rule {
         let script = entry.script.trim();
         if script.is_empty() {
@@ -218,6 +224,63 @@ fn normalize_rule_scripts(cfg: &mut Config, base_dir: &Path) {
         }
         let candidate = base_dir.join(script_path);
         entry.script = candidate.to_string_lossy().into_owned();
+    }
+}
+
+fn infer_rule_stages(rules: &mut [RuleConfig]) -> Result<(), ConfigError> {
+    for rule in rules {
+        if rule.stage.is_some() {
+            continue;
+        }
+        let inferred = infer_stage_from_script(rule)?;
+        rule.stage = Some(inferred);
+    }
+    Ok(())
+}
+
+fn infer_stage_from_script(rule: &RuleConfig) -> Result<Stage, ConfigError> {
+    let path = Path::new(&rule.script);
+    let file_name = path
+        .file_name()
+        .and_then(|s| s.to_str())
+        .ok_or_else(|| ConfigError::InvalidValue {
+            detail: format!("rule {} missing stage and script {} is invalid", rule.id, rule.script),
+        })?;
+    let ext = path.extension().and_then(|s| s.to_str()).unwrap_or("");
+    if ext != "py" {
+        return Err(ConfigError::InvalidValue {
+            detail: format!(
+                "rule {} missing stage and script {} must end with .py",
+                rule.id, file_name
+            ),
+        });
+    }
+    let stem = path
+        .file_stem()
+        .and_then(|s| s.to_str())
+        .ok_or_else(|| ConfigError::InvalidValue {
+            detail: format!("rule {} missing stage and script {} is invalid", rule.id, rule.script),
+        })?;
+    let suffix = stem
+        .rsplit_once('.')
+        .map(|(_, suffix)| suffix)
+        .ok_or_else(|| ConfigError::InvalidValue {
+            detail: format!(
+                "rule {} missing stage and script {} lacks .<stage> suffix",
+                rule.id, file_name
+            ),
+        })?;
+    match suffix {
+        "raw" => Ok(Stage::RawText),
+        "pp" => Ok(Stage::PpText),
+        "cst" => Ok(Stage::Cst),
+        "ast" => Ok(Stage::Ast),
+        other => Err(ConfigError::InvalidValue {
+            detail: format!(
+                "rule {} missing stage and script {} has unsupported stage suffix {}",
+                rule.id, file_name, other
+            ),
+        }),
     }
 }
 
@@ -283,9 +346,10 @@ pub fn validate_config(cfg: &Config) -> Result<(), ConfigError> {
                 detail: format!("duplicate rule id {}", entry.id),
             });
         }
-        if !cfg.stages.enabled.contains(&entry.stage) {
+        let stage = entry.stage();
+        if !cfg.stages.enabled.contains(&stage) {
             return Err(ConfigError::InvalidValue {
-                detail: format!("rule {} references disabled stage {:?}", entry.id, entry.stage),
+                detail: format!("rule {} references disabled stage {:?}", entry.id, stage),
             });
         }
     }
@@ -319,21 +383,21 @@ mod tests {
             RuleConfig {
                 id: "a".to_string(),
                 script: "a.py".to_string(),
-                stage: Stage::RawText,
+                stage: Some(Stage::RawText),
                 enabled: true,
                 severity: None,
             },
             RuleConfig {
                 id: "b".to_string(),
                 script: "b.py".to_string(),
-                stage: Stage::RawText,
+                stage: Some(Stage::RawText),
                 enabled: true,
                 severity: None,
             },
             RuleConfig {
                 id: "c".to_string(),
                 script: "c.py".to_string(),
-                stage: Stage::RawText,
+                stage: Some(Stage::RawText),
                 enabled: true,
                 severity: None,
             },
@@ -380,6 +444,32 @@ mod tests {
         let mut rules = make_rules();
         let only = vec!["missing".to_string()];
         let err = apply_rule_overrides(&mut rules, &only, &[]);
+        assert!(matches!(err, Err(ConfigError::InvalidValue { .. })));
+    }
+
+    #[test]
+    fn infers_stage_from_script_suffix() {
+        let mut rules = vec![RuleConfig {
+            id: "flow.wait_macro_required".to_string(),
+            script: "plugins/flow.wait_macro_required.raw.py".to_string(),
+            stage: None,
+            enabled: true,
+            severity: None,
+        }];
+        infer_rule_stages(&mut rules).unwrap();
+        assert!(matches!(rules[0].stage(), Stage::RawText));
+    }
+
+    #[test]
+    fn errors_when_stage_suffix_missing() {
+        let mut rules = vec![RuleConfig {
+            id: "example".to_string(),
+            script: "plugins/example.py".to_string(),
+            stage: None,
+            enabled: true,
+            severity: None,
+        }];
+        let err = infer_rule_stages(&mut rules);
         assert!(matches!(err, Err(ConfigError::InvalidValue { .. })));
     }
 }

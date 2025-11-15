@@ -22,9 +22,32 @@ sv-mint is a SystemVerilog lint pipeline that combines a Rust core with Python p
 4. Tailor rules by editing `sv-mint.toml`:
    - `[defaults]` sets `timeout_ms_per_file` and stage toggles.
    - `[plugin]` selects the Python interpreter/arguments。`root = "plugins"` のように設定すると、相対パスの `script` はそのルート配下を基準に解決されます。追加のディレクトリを探したい場合は `search_paths = ["../plugins"]` のように列挙してください。
-   - `[[rule]]` entries bind each `rule_id` to a script, stage, `enabled` flag, and optional severity override.
+   - `[[rule]]` entries bind each `rule_id` to a script, stage, `enabled` flag, and optional severity override. Scripts follow the `<rule_id>.<stage>.py` naming convention (`*.raw.py`, `*.pp.py`, `*.cst.py`, `*.ast.py`). When `stage` is omitted, sv-mint infers it from this suffix; specifying `stage` manually is still supported but no longer required for bundled rules.
    - `[logging]` controls `level`, `format` (`text|json`), and event visibility.
    - `[transport]` defines request/response byte limits, warning margins, and how strictly to treat size overruns; mark critical stages under `[stages.required]` to fail fast.
+
+### Sample `sv-mint.toml`
+
+```toml
+[plugin]
+cmd = "python3"
+args = ["-u", "-B"]
+root = "plugins"
+
+[[rule]]
+id = "format.no_tabs"
+script = "format.no_tabs.raw.py"  # stage inferred as raw_text
+
+[[rule]]
+id = "naming.module_case"
+script = "naming.module_case.ast.py"  # stage inferred as ast
+
+[[rule]]
+id = "module.no_port_wildcard"
+script = "no_port_wildcard.py"
+stage = "cst"  # explicit stage still allowed when filenames do not follow the convention
+```
+
 5. Narrow or relax checks directly from the CLI when experimenting:
    - `sv-mint --only rule_x path/to/file.sv` runs only `rule_x`, temporarily disabling every other rule.
    - `sv-mint --disable rule_a,rule_b path/to/file.sv` disables just the listed rules; specify multiple IDs or repeat `--disable` as needed.

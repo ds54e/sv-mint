@@ -1,8 +1,9 @@
-# format_text_basics.py
+# Format text basics
 
-- **Script**: `plugins/format_text_basics.py`
+- **Scripts**: `plugins/<rule_id>.raw.py`
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
+- **Shared Helpers**: `plugins/lib/format_text_ruleset.py`
 - **Rules**:
   - ``format.ascii_only`` (warning): Reject non-ASCII characters
   - ``format.no_tabs`` (warning): Reject tab characters

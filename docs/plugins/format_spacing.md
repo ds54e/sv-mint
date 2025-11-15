@@ -1,8 +1,9 @@
-# format_spacing.py
+# Format spacing rules
 
-- **Script**: `plugins/format_spacing.py`
-- **Stages**: `raw_text` and `cst`
+- **Scripts**: `plugins/<rule_id>.(raw|cst).py`
+- **Stages**: `raw_text` (`format.comma_space`, `format.call_spacing`, `format.macro_spacing`), `cst` (`format.case_colon_*`)
 - **Key Inputs**: `text`, `cst_ir.pp_text`, `line_starts`
+- **Shared Helpers**: `plugins/lib/format_spacing_ruleset.py`
 - **Rules**:
   - ``format.comma_space`` (warning): Require a space after commas
   - ``format.call_spacing`` (warning): Disallow spaces between function/task names and `(`

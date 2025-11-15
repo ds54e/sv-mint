@@ -1,8 +1,9 @@
-# typedef_naming_rules.py
+# Typedef naming rules
 
-- **Script**: `plugins/typedef_naming_rules.py`
+- **Scripts**: `plugins/typedef.*.raw.py`
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
+- **Shared Helpers**: `plugins/lib/typedef_naming_ruleset.py`
 - **Rules**:
   - ``typedef.enum_suffix`` (warning): Require `typedef enum` names to end with `_e`
   - ``typedef.enum_lower_snake`` (warning): Enum type names must use `lower_snake_case`

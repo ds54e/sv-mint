@@ -52,14 +52,15 @@ pub fn collect_script_specs(cfg: &Config) -> Vec<ScriptSpec> {
     let mut specs: HashMap<String, ScriptSpecBuilder> = HashMap::new();
     for rule in &cfg.rule {
         let path = resolve_script_path(cfg, &rule.script);
+        let stage = rule.stage();
         let entry = specs.entry(path.clone()).or_insert_with(|| {
             order.push(path.clone());
             ScriptSpecBuilder::default()
         });
-        entry.stages.insert(rule.stage.as_str().to_string());
+        entry.stages.insert(stage.as_str().to_string());
         entry
             .stage_rules
-            .entry(rule.stage.as_str().to_string())
+            .entry(stage.as_str().to_string())
             .or_default()
             .push(rule.id.clone());
     }

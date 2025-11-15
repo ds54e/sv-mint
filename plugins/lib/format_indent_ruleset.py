@@ -1,11 +1,23 @@
+from lib.dv_helpers import raw_text_inputs
+
 PREPROC = ("`define", "`ifdef", "`ifndef", "`elsif", "`else", "`endif")
+CACHE_KEY = "__format_indent_ruleset"
 
 
-def check(req):
-    if req.get("stage") != "raw_text":
-        return []
-    payload = req.get("payload") or {}
-    text = payload.get("text") or ""
+def violations_for(req, rule_id):
+    table = evaluate(req)
+    return list(table.get(rule_id) or [])
+
+
+def evaluate(req):
+    cached = req.get(CACHE_KEY)
+    if cached is not None:
+        return cached
+    inputs = raw_text_inputs(req)
+    if not inputs:
+        req[CACHE_KEY] = {}
+        return req[CACHE_KEY]
+    text, _ = inputs
     out = []
     lines = text.splitlines()
     for idx, line in enumerate(lines, start=1):
@@ -19,7 +31,11 @@ def check(req):
         if line.rstrip().endswith("\\") and not line.endswith("\\"):
             col = len(line.rstrip())
             out.append(_violation("format.line_continuation_right", idx, col, "line continuation \\\\ must be last character"))
-    return out
+    table = {}
+    for item in out:
+        table.setdefault(item["rule_id"], []).append(item)
+    req[CACHE_KEY] = table
+    return table
 
 
 def _violation(rule_id, line, col, message):

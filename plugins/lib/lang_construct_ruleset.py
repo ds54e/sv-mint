@@ -1,30 +1,36 @@
-def locate(text, index, length=1):
-    line = text.count("\n", 0, index) + 1
-    prev = text.rfind("\n", 0, index)
-    col = index + 1 if prev < 0 else index - prev
-    return {
-        "line": line,
-        "col": col,
-        "end_line": line,
-        "end_col": col + length - 1,
-    }
+from lib.dv_helpers import loc, raw_text_inputs
+
+CACHE_KEY = "__lang_construct_ruleset"
 
 
-def check(req):
-    if req.get("stage") != "raw_text":
-        return []
-    payload = req.get("payload") or {}
-    text = payload.get("text") or ""
+def violations_for(req, rule_id):
+    table = evaluate(req)
+    return list(table.get(rule_id) or [])
+
+
+def evaluate(req):
+    cached = req.get(CACHE_KEY)
+    if cached is not None:
+        return cached
+    inputs = raw_text_inputs(req)
+    if not inputs:
+        req[CACHE_KEY] = {}
+        return req[CACHE_KEY]
+    text, _ = inputs
     out = []
-    out.extend(find_delays(text))
-    out.extend(find_always_star(text))
-    out.extend(find_always_latch(text))
-    out.extend(check_always_ff(text))
-    out.extend(check_always_comb(text))
-    return out
+    out.extend(_find_delays(text))
+    out.extend(_find_always_star(text))
+    out.extend(_find_always_latch(text))
+    out.extend(_check_always_ff(text))
+    out.extend(_check_always_comb(text))
+    table = {}
+    for item in out:
+        table.setdefault(item["rule_id"], []).append(item)
+    req[CACHE_KEY] = table
+    return table
 
 
-def find_delays(text):
+def _find_delays(text):
     out = []
     idx = 0
     while True:
@@ -41,13 +47,13 @@ def find_delays(text):
             "rule_id": "lang.no_delays",
             "severity": "warning",
             "message": "delay (#) constructs are not permitted",
-            "location": locate(text, pos),
+            "location": loc(text, pos),
         })
         idx = pos + 1
     return out
 
 
-def find_always_star(text):
+def _find_always_star(text):
     out = []
     idx = 0
     needle = "always"
@@ -67,16 +73,16 @@ def find_always_star(text):
                     "rule_id": "lang.prefer_always_comb",
                     "severity": "warning",
                     "message": "use always_comb instead of always @*",
-                    "location": locate(text, pos, length=len("always @*")),
+                    "location": loc(text, pos),
                 })
         idx = pos + 1
     return out
 
 
-def find_always_latch(text):
+def _find_always_latch(text):
     out = []
-    idx = 0
     needle = "always_latch"
+    idx = 0
     while True:
         pos = text.find(needle, idx)
         if pos < 0:
@@ -85,13 +91,13 @@ def find_always_latch(text):
             "rule_id": "lang.no_always_latch",
             "severity": "warning",
             "message": "always_latch is discouraged; prefer flip-flops",
-            "location": locate(text, pos, length=len(needle)),
+            "location": loc(text, pos),
         })
         idx = pos + 1
     return out
 
 
-def check_always_ff(text):
+def _check_always_ff(text):
     out = []
     needle = "always_ff"
     idx = 0
@@ -109,13 +115,13 @@ def check_always_ff(text):
                         "rule_id": "lang.always_ff_reset",
                         "severity": "warning",
                         "message": "always_ff should include asynchronous reset (negedge rst_n)",
-                        "location": locate(text, pos, length=len(needle)),
+                        "location": loc(text, pos),
                     })
         idx = pos + 1
     return out
 
 
-def check_always_comb(text):
+def _check_always_comb(text):
     out = []
     needle = "always_comb"
     idx = 0
@@ -131,7 +137,7 @@ def check_always_comb(text):
                 "rule_id": "lang.always_comb_at",
                 "severity": "warning",
                 "message": "always_comb must not have sensitivity list",
-                "location": locate(text, pos, length=len(needle)),
+                "location": loc(text, pos),
             })
         idx = pos + 1
     return out
