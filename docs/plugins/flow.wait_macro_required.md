@@ -1,5 +1,6 @@
 # flow.wait_macro_required
 
+- **Script**: `plugins/flow.wait_macro_required.py`
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`, `path`
 - **Shared Helpers**: `plugins/lib/dv_text_ruleset.py`

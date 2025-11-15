@@ -1,5 +1,6 @@
 # naming.clk_order
 
+- **Script**: `plugins/naming.clk_order.py`
 - **Stage**: `ast`
 - **Key Inputs**: `decls`, `symbols`, `ports`
 - **Shared Helpers**: `plugins/lib/naming_ruleset.py`

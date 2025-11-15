@@ -1,5 +1,6 @@
 # naming.suffix_order
 
+- **Script**: `plugins/naming.suffix_order.py`
 - **Stage**: `ast`
 - **Key Inputs**: `decls`, `symbols`, `ports`
 - **Shared Helpers**: `plugins/lib/naming_ruleset.py`

@@ -1,5 +1,6 @@
 # flow.wait_fork_isolation
 
+- **Script**: `plugins/flow.wait_fork_isolation.py`
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`, `path`
 - **Shared Helpers**: `plugins/lib/dv_text_ruleset.py`

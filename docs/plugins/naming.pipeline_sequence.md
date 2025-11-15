@@ -1,5 +1,6 @@
 # naming.pipeline_sequence
 
+- **Script**: `plugins/naming.pipeline_sequence.py`
 - **Stage**: `ast`
 - **Key Inputs**: `decls`, `symbols`, `ports`
 - **Shared Helpers**: `plugins/lib/naming_ruleset.py`

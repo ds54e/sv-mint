@@ -1,5 +1,6 @@
 # dpi.import_prefix
 
+- **Script**: `plugins/dpi.import_prefix.py`
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`, `path`
 - **Shared Helpers**: `plugins/lib/dv_text_ruleset.py`

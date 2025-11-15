@@ -1,5 +1,6 @@
 # naming.rst_before_clk
 
+- **Script**: `plugins/naming.rst_before_clk.py`
 - **Stage**: `ast`
 - **Key Inputs**: `decls`, `symbols`, `ports`
 - **Shared Helpers**: `plugins/lib/naming_ruleset.py`

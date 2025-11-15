@@ -1,5 +1,6 @@
 # lang.default_nettype_none
 
+- **Script**: `plugins/lang.default_nettype_none.py`
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
 - **Shared Helpers**: `plugins/lib/default_nettype_ruleset.py`

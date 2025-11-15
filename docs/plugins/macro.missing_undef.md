@@ -1,5 +1,6 @@
 # macro.missing_undef
 
+- **Script**: `plugins/macro.missing_undef.py`
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`, `path`
 - **Shared Helpers**: `plugins/lib/dv_text_ruleset.py`

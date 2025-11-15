@@ -1,5 +1,6 @@
 # lang.prefer_always_comb
 
+- **Script**: `plugins/lang.prefer_always_comb.py`
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
 - **Shared Helpers**: `plugins/lib/lang_construct_ruleset.py`

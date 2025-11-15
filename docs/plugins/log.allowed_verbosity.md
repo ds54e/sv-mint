@@ -1,5 +1,6 @@
 # log.allowed_verbosity
 
+- **Script**: `plugins/log.allowed_verbosity.py`
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`, `path`
 - **Shared Helpers**: `plugins/lib/dv_text_ruleset.py`

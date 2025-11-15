@@ -1,5 +1,6 @@
 # typedef.enum_suffix
 
+- **Script**: `plugins/typedef.enum_suffix.py`
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
 - **Shared Helpers**: `plugins/lib/typedef_naming_ruleset.py`

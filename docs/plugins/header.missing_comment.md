@@ -1,5 +1,6 @@
 # header.missing_comment
 
+- **Script**: `plugins/header.missing_comment.py`
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
 - **Shared Helpers**: `plugins/lib/header_comment_ruleset.py`

@@ -1,5 +1,6 @@
 # typedef.enum_value_case
 
+- **Script**: `plugins/typedef.enum_value_case.py`
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
 - **Shared Helpers**: `plugins/lib/typedef_naming_ruleset.py`

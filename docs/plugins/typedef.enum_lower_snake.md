@@ -1,5 +1,6 @@
 # typedef.enum_lower_snake
 
+- **Script**: `plugins/typedef.enum_lower_snake.py`
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
 - **Shared Helpers**: `plugins/lib/typedef_naming_ruleset.py`

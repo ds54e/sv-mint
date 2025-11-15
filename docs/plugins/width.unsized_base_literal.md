@@ -1,5 +1,6 @@
 # width.unsized_base_literal
 
+- **Script**: `plugins/width.unsized_base_literal.py`
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
 - **Summary**: Ban base literals without explicit widths

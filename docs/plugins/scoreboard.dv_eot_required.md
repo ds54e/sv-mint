@@ -1,5 +1,6 @@
 # scoreboard.dv_eot_required
 
+- **Script**: `plugins/scoreboard.dv_eot_required.py`
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`, `path`
 - **Shared Helpers**: `plugins/lib/dv_text_ruleset.py`

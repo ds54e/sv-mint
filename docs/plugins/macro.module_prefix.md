@@ -1,5 +1,6 @@
 # macro.module_prefix
 
+- **Script**: `plugins/macro.module_prefix.py`
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`, `path`
 - **Shared Helpers**: `plugins/lib/dv_text_ruleset.py`

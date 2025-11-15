@@ -1,5 +1,6 @@
 # naming.signal_case
 
+- **Script**: `plugins/naming.signal_case.py`
 - **Stage**: `ast`
 - **Key Inputs**: `decls`, `symbols`, `ports`
 - **Shared Helpers**: `plugins/lib/naming_ruleset.py`
