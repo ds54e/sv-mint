@@ -63,7 +63,6 @@ sv-mint is a SystemVerilog lint pipeline that combines a Rust core with Python p
 4. **Deeper semantic rules**: add bit-width analysis, dependency graphs, and state-machine coverage checks.
 
 ## Versioning
-- Current release: **1.0.0**. Use semantic versioning going forward so downstream automation can pin to stable rule/transport behavior.
 - Tags matching `v*` trigger `.github/workflows/release.yml`, which runs fmt/clippy/tests, builds release binaries for Linux/macOS/Windows, and uploads archives containing the binary plus `docs/`, `plugins/`, `sv-mint.toml`, `README.md`, `LICENSE`, and `CHANGELOG.md` (with accompanying SHA-256 checksums).
 - Linux artifacts are built with `x86_64-unknown-linux-musl`, so they run on glibc-2.28 era distributions (e.g., RHEL8) without additional dependencies.
 
