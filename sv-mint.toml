@@ -4,445 +4,446 @@ timeout_ms_per_file = 6000
 [plugin]
 cmd = "python3"
 args = ["-u", "-B"]
+root = "plugins"
 
 [[rule]]
 id = "flow.multiple_nonblocking"
-script = "plugins/assignment_rules.py"
+script = "assignment_rules.py"
 stage = "ast"
 
 [[rule]]
 id = "format.begin_required"
-script = "plugins/begin_end_required.py"
+script = "begin_end_required.py"
 stage = "pp_text"
 
 [[rule]]
 id = "case.missing_default"
-script = "plugins/case_default_required.py"
+script = "case_default_required.py"
 stage = "cst"
 
 [[rule]]
 id = "lang.case_requires_unique"
-script = "plugins/case_unique_required.py"
+script = "case_unique_required.py"
 stage = "cst"
 
 [[rule]]
 id = "comb.nb_in_alwayscomb"
-script = "plugins/comb_nb_in_alwayscomb.py"
+script = "comb_nb_in_alwayscomb.py"
 stage = "cst"
 
 [[rule]]
 id = "decl.unused.net"
-script = "plugins/decl_unused_net.py"
+script = "decl_unused_net.py"
 stage = "ast"
 
 [[rule]]
 id = "decl.unused.param"
-script = "plugins/decl_unused_param.py"
+script = "decl_unused_param.py"
 stage = "ast"
 
 [[rule]]
 id = "decl.unused.var"
-script = "plugins/decl_unused_var.py"
+script = "decl_unused_var.py"
 stage = "ast"
 
 [[rule]]
 id = "lang.default_nettype_missing"
-script = "plugins/default_nettype_rule.py"
+script = "default_nettype_rule.py"
 stage = "raw_text"
 
 [[rule]]
 id = "lang.default_nettype_none"
-script = "plugins/default_nettype_rule.py"
+script = "default_nettype_rule.py"
 stage = "raw_text"
 
 [[rule]]
 id = "lang.default_nettype_placement"
-script = "plugins/default_nettype_rule.py"
+script = "default_nettype_rule.py"
 stage = "raw_text"
 
 [[rule]]
 id = "lang.default_nettype_reset"
-script = "plugins/default_nettype_rule.py"
+script = "default_nettype_rule.py"
 stage = "raw_text"
 
 [[rule]]
 id = "check.dv_macro_required"
-script = "plugins/dv_text_rules.py"
+script = "dv_text_rules.py"
 stage = "raw_text"
 
 [[rule]]
 id = "dpi.export_prefix"
-script = "plugins/dv_text_rules.py"
+script = "dv_text_rules.py"
 stage = "raw_text"
 
 [[rule]]
 id = "dpi.import_prefix"
-script = "plugins/dv_text_rules.py"
+script = "dv_text_rules.py"
 stage = "raw_text"
 
 [[rule]]
 id = "flow.no_disable_fork_label"
-script = "plugins/dv_text_rules.py"
+script = "dv_text_rules.py"
 stage = "raw_text"
 
 [[rule]]
 id = "flow.no_fork_label"
-script = "plugins/dv_text_rules.py"
+script = "dv_text_rules.py"
 stage = "raw_text"
 
 [[rule]]
 id = "flow.spinwait_macro_required"
-script = "plugins/dv_text_rules.py"
+script = "dv_text_rules.py"
 stage = "raw_text"
 
 [[rule]]
 id = "flow.wait_fork_isolation"
-script = "plugins/dv_text_rules.py"
+script = "dv_text_rules.py"
 stage = "raw_text"
 
 [[rule]]
 id = "flow.wait_macro_required"
-script = "plugins/dv_text_rules.py"
+script = "dv_text_rules.py"
 stage = "raw_text"
 
 [[rule]]
 id = "lang.no_program_construct"
-script = "plugins/dv_text_rules.py"
+script = "dv_text_rules.py"
 stage = "raw_text"
 
 [[rule]]
 id = "log.allowed_verbosity"
-script = "plugins/dv_text_rules.py"
+script = "dv_text_rules.py"
 stage = "raw_text"
 
 [[rule]]
 id = "log.no_display"
-script = "plugins/dv_text_rules.py"
+script = "dv_text_rules.py"
 stage = "raw_text"
 
 [[rule]]
 id = "log.no_none_full"
-script = "plugins/dv_text_rules.py"
+script = "dv_text_rules.py"
 stage = "raw_text"
 
 [[rule]]
 id = "log.no_uvm_report_api"
-script = "plugins/dv_text_rules.py"
+script = "dv_text_rules.py"
 stage = "raw_text"
 
 [[rule]]
 id = "log.no_uvm_warning"
-script = "plugins/dv_text_rules.py"
+script = "dv_text_rules.py"
 stage = "raw_text"
 
 [[rule]]
 id = "log.uvm_arg_macro"
-script = "plugins/dv_text_rules.py"
+script = "dv_text_rules.py"
 stage = "raw_text"
 
 [[rule]]
 id = "macro.dv_prefix_header_only"
-script = "plugins/dv_text_rules.py"
+script = "dv_text_rules.py"
 stage = "raw_text"
 
 [[rule]]
 id = "macro.guard_required"
-script = "plugins/dv_text_rules.py"
+script = "dv_text_rules.py"
 stage = "raw_text"
 
 [[rule]]
 id = "macro.missing_undef"
-script = "plugins/dv_text_rules.py"
+script = "dv_text_rules.py"
 stage = "raw_text"
 
 [[rule]]
 id = "macro.module_prefix"
-script = "plugins/dv_text_rules.py"
+script = "dv_text_rules.py"
 stage = "raw_text"
 
 [[rule]]
 id = "macro.no_local_guard"
-script = "plugins/dv_text_rules.py"
+script = "dv_text_rules.py"
 stage = "raw_text"
 
 [[rule]]
 id = "rand.dv_macro_required"
-script = "plugins/dv_text_rules.py"
+script = "dv_text_rules.py"
 stage = "raw_text"
 
 [[rule]]
 id = "rand.dv_macro_with_required"
-script = "plugins/dv_text_rules.py"
+script = "dv_text_rules.py"
 stage = "raw_text"
 
 [[rule]]
 id = "scoreboard.dv_eot_required"
-script = "plugins/dv_text_rules.py"
+script = "dv_text_rules.py"
 stage = "raw_text"
 
 [[rule]]
 id = "seq.no_uvm_do"
-script = "plugins/dv_text_rules.py"
+script = "dv_text_rules.py"
 stage = "raw_text"
 
 [[rule]]
 id = "style.function_scope"
-script = "plugins/dv_text_rules.py"
+script = "dv_text_rules.py"
 stage = "raw_text"
 
 [[rule]]
 id = "format.end_else_inline"
-script = "plugins/end_else_same_line.py"
+script = "end_else_same_line.py"
 stage = "pp_text"
 
 [[rule]]
 id = "format.case_begin_required"
-script = "plugins/format_case_begin_cst.py"
+script = "format_case_begin_cst.py"
 stage = "cst"
 
 [[rule]]
 id = "format.indent_multiple_of_two"
-script = "plugins/format_indent_rules.py"
+script = "format_indent_rules.py"
 stage = "raw_text"
 
 [[rule]]
 id = "format.line_continuation_right"
-script = "plugins/format_indent_rules.py"
+script = "format_indent_rules.py"
 stage = "raw_text"
 
 [[rule]]
 id = "format.preproc_left_align"
-script = "plugins/format_indent_rules.py"
+script = "format_indent_rules.py"
 stage = "raw_text"
 
 [[rule]]
 id = "format.line_length"
-script = "plugins/format_line_length.py"
+script = "format_line_length.py"
 stage = "raw_text"
 
 [[rule]]
 id = "format.call_spacing"
-script = "plugins/format_spacing.py"
+script = "format_spacing.py"
 stage = "raw_text"
 
 [[rule]]
 id = "format.case_colon_after"
-script = "plugins/format_spacing.py"
+script = "format_spacing.py"
 stage = "cst"
 
 [[rule]]
 id = "format.case_colon_spacing"
-script = "plugins/format_spacing.py"
+script = "format_spacing.py"
 stage = "cst"
 
 [[rule]]
 id = "format.comma_space"
-script = "plugins/format_spacing.py"
+script = "format_spacing.py"
 stage = "raw_text"
 
 [[rule]]
 id = "format.macro_spacing"
-script = "plugins/format_spacing.py"
+script = "format_spacing.py"
 stage = "raw_text"
 
 [[rule]]
 id = "format.ascii_only"
-script = "plugins/format_text_basics.py"
+script = "format_text_basics.py"
 stage = "raw_text"
 
 [[rule]]
 id = "format.final_newline"
-script = "plugins/format_text_basics.py"
+script = "format_text_basics.py"
 stage = "raw_text"
 
 [[rule]]
 id = "format.no_tabs"
-script = "plugins/format_text_basics.py"
+script = "format_text_basics.py"
 stage = "raw_text"
 
 [[rule]]
 id = "format.no_trailing_whitespace"
-script = "plugins/format_text_basics.py"
+script = "format_text_basics.py"
 stage = "raw_text"
 
 [[rule]]
 id = "global.local_define_undef"
-script = "plugins/global_define_rules.py"
+script = "global_define_rules.py"
 stage = "raw_text"
 
 [[rule]]
 id = "global.prefer_parameters"
-script = "plugins/global_define_rules.py"
+script = "global_define_rules.py"
 stage = "raw_text"
 
 [[rule]]
 id = "header.missing_comment"
-script = "plugins/header_comment_rule.py"
+script = "header_comment_rule.py"
 stage = "raw_text"
 
 [[rule]]
 id = "header.missing_spdx"
-script = "plugins/header_comment_rule.py"
+script = "header_comment_rule.py"
 stage = "raw_text"
 
 [[rule]]
 id = "lang.always_comb_at"
-script = "plugins/lang_construct_rules.py"
+script = "lang_construct_rules.py"
 stage = "raw_text"
 
 [[rule]]
 id = "lang.always_ff_reset"
-script = "plugins/lang_construct_rules.py"
+script = "lang_construct_rules.py"
 stage = "raw_text"
 
 [[rule]]
 id = "lang.no_always_latch"
-script = "plugins/lang_construct_rules.py"
+script = "lang_construct_rules.py"
 stage = "raw_text"
 
 [[rule]]
 id = "lang.no_delays"
-script = "plugins/lang_construct_rules.py"
+script = "lang_construct_rules.py"
 stage = "raw_text"
 
 [[rule]]
 id = "lang.prefer_always_comb"
-script = "plugins/lang_construct_rules.py"
+script = "lang_construct_rules.py"
 stage = "raw_text"
 
 [[rule]]
 id = "module.named_ports_required"
-script = "plugins/module_inst_rules.py"
+script = "module_inst_rules.py"
 stage = "raw_text"
 
 [[rule]]
 id = "naming.clk_order"
-script = "plugins/naming_rules.py"
+script = "naming_rules.py"
 stage = "ast"
 
 [[rule]]
 id = "naming.clk_prefix"
-script = "plugins/naming_rules.py"
+script = "naming_rules.py"
 stage = "ast"
 
 [[rule]]
 id = "naming.differential_pair"
-script = "plugins/naming_rules.py"
+script = "naming_rules.py"
 stage = "ast"
 
 [[rule]]
 id = "naming.module_case"
-script = "plugins/naming_rules.py"
+script = "naming_rules.py"
 stage = "ast"
 
 [[rule]]
 id = "naming.no_numeric_suffix"
-script = "plugins/naming_rules.py"
+script = "naming_rules.py"
 stage = "ast"
 
 [[rule]]
 id = "naming.parameter_upper"
-script = "plugins/naming_rules.py"
+script = "naming_rules.py"
 stage = "ast"
 
 [[rule]]
 id = "naming.pipeline_sequence"
-script = "plugins/naming_rules.py"
+script = "naming_rules.py"
 stage = "ast"
 
 [[rule]]
 id = "naming.port_case"
-script = "plugins/naming_rules.py"
+script = "naming_rules.py"
 stage = "ast"
 
 [[rule]]
 id = "naming.port_suffix"
-script = "plugins/naming_rules.py"
+script = "naming_rules.py"
 stage = "ast"
 
 [[rule]]
 id = "naming.rst_active_low"
-script = "plugins/naming_rules.py"
+script = "naming_rules.py"
 stage = "ast"
 
 [[rule]]
 id = "naming.rst_before_clk"
-script = "plugins/naming_rules.py"
+script = "naming_rules.py"
 stage = "ast"
 
 [[rule]]
 id = "naming.signal_case"
-script = "plugins/naming_rules.py"
+script = "naming_rules.py"
 stage = "ast"
 
 [[rule]]
 id = "naming.suffix_order"
-script = "plugins/naming_rules.py"
+script = "naming_rules.py"
 stage = "ast"
 
 [[rule]]
 id = "module.no_port_wildcard"
-script = "plugins/no_port_wildcard.py"
+script = "no_port_wildcard.py"
 stage = "cst"
 
 [[rule]]
 id = "package.define_in_package"
-script = "plugins/package_rules.py"
+script = "package_rules.py"
 stage = "raw_text"
 
 [[rule]]
 id = "package.end_mismatch"
-script = "plugins/package_rules.py"
+script = "package_rules.py"
 stage = "raw_text"
 
 [[rule]]
 id = "package.missing_end"
-script = "plugins/package_rules.py"
+script = "package_rules.py"
 stage = "raw_text"
 
 [[rule]]
 id = "package.multiple"
-script = "plugins/package_rules.py"
+script = "package_rules.py"
 stage = "raw_text"
 
 [[rule]]
 id = "seq.blocking_in_alwaysff"
-script = "plugins/seq_blocking_in_alwaysff.py"
+script = "seq_blocking_in_alwaysff.py"
 stage = "cst"
 
 [[rule]]
 id = "template.raw_text_marker"
-script = "plugins/template_raw_text_rule.py"
+script = "template_raw_text_rule.py"
 stage = "raw_text"
 
 [[rule]]
 id = "typedef.enum_lower_snake"
-script = "plugins/typedef_naming_rules.py"
+script = "typedef_naming_rules.py"
 stage = "raw_text"
 
 [[rule]]
 id = "typedef.enum_suffix"
-script = "plugins/typedef_naming_rules.py"
+script = "typedef_naming_rules.py"
 stage = "raw_text"
 
 [[rule]]
 id = "typedef.enum_value_case"
-script = "plugins/typedef_naming_rules.py"
+script = "typedef_naming_rules.py"
 stage = "raw_text"
 
 [[rule]]
 id = "typedef.enum_value_prefix"
-script = "plugins/typedef_naming_rules.py"
+script = "typedef_naming_rules.py"
 stage = "raw_text"
 
 [[rule]]
 id = "typedef.type_suffix"
-script = "plugins/typedef_naming_rules.py"
+script = "typedef_naming_rules.py"
 stage = "raw_text"
 
 [[rule]]
 id = "width.unsized_base_literal"
-script = "plugins/width_literal_rules.py"
+script = "width_literal_rules.py"
 stage = "raw_text"
 
 [logging]
