@@ -184,9 +184,28 @@ pub fn load_from_path(opt: Option<PathBuf>) -> Result<(Config, PathBuf), ConfigE
     let cfg_text = fs::read_to_string(&path).map_err(|e| ConfigError::IoFailed {
         detail: format!("{} ({})", path.display(), e),
     })?;
-    let cfg = load(&cfg_text)?;
+    let mut cfg = load(&cfg_text)?;
+    let base_dir = path.parent().map(Path::to_path_buf).unwrap_or_else(|| PathBuf::from("."));
+    normalize_rule_scripts(&mut cfg, &base_dir);
     validate_config(&cfg)?;
     Ok((cfg, path))
+}
+
+fn normalize_rule_scripts(cfg: &mut Config, base_dir: &Path) {
+    for entry in &mut cfg.rule {
+        let script = entry.script.trim();
+        if script.is_empty() {
+            continue;
+        }
+        let script_path = Path::new(script);
+        if script_path.is_absolute() {
+            continue;
+        }
+        let candidate = base_dir.join(script_path);
+        if candidate.exists() {
+            entry.script = candidate.to_string_lossy().into_owned();
+        }
+    }
 }
 
 #[derive(Clone)]
