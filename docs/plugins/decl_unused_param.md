@@ -13,7 +13,7 @@
 ### `decl.unused.param`
 - **Trigger**: Filters `symbols` for `class == param` and flags entries with `ref_count` (or `read_count`) equal to zero.
 - **Message**: `` unused param <module>.<name> ``
-- **Remediation**: Remove unused parameters or ensure top-level configuration knobs are actually referenced inside the module.
+- **Remediation**: Remove unused parameters, ensure configuration knobs are referenced, or annotate intentional placeholders with inline comments containing `unused` (for example, `` parameter bit EnableDbg /* unused */ = 0 ``).
 - **Notes**: Auto-generated code that allows dummy parameters can downgrade severity by setting `severity = "info"` (or a lower level) in the matching `[[rule]]` entry.
 - **LowRISC Reference**: Parameters should document module configurability; unused ones must be deleted.
 - **Good**:
@@ -37,4 +37,4 @@ logic [Depth-1:0] mem_q;
 // ... implementation never looks at EnableDbg
 ```
 
-- **Additional Tips**: `localparam` emitted by macros under conditionals often end up unused; keep the declaration inside the `ifdef` or tag it with attributes like `(* keep = "true" *)`. If the symbol still needs to exist, disable the rule temporarily via its `[[rule]]` entry or rename the symbol to an obvious `_unused` placeholder.
+- **Additional Tips**: Only comments on the declaration line are checked for the `unused` keyword. Macro-generated `localparam` entries should carry that inline note or be kept inside the guarding `ifdef`. When sweeping auto-generated code, disable the rule in `sv-mint.toml` temporarily so other files still propagate warnings.

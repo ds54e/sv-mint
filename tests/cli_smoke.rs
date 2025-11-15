@@ -34,6 +34,12 @@ fn run_fixture_with_fragments(path: &str, expected: &[&str]) {
     cmd.assert().failure().stdout(pred);
 }
 
+fn run_fixture_success(path: &str) {
+    let mut cmd = Command::new(assert_cmd::cargo::cargo_bin!("sv-mint"));
+    cmd.arg(path);
+    cmd.assert().success();
+}
+
 fn run_with_config(path: &str, config: &str, expected: &[&str]) {
     let mut cmd = Command::new(assert_cmd::cargo::cargo_bin!("sv-mint"));
     cmd.arg("--config").arg(config).arg(path);
@@ -102,6 +108,36 @@ fn detects_global_define_violations() {
 #[test]
 fn detects_width_literal_violations() {
     run_fixture("fixtures/width_literal_violation.sv", "width.unsized_base_literal");
+}
+
+#[test]
+fn detects_unused_net_violation() {
+    run_fixture("fixtures/unused_net_violation.sv", "decl.unused.net");
+}
+
+#[test]
+fn allows_marked_unused_net() {
+    run_fixture_success("fixtures/unused_net_compliant.sv");
+}
+
+#[test]
+fn detects_unused_param_violation() {
+    run_fixture("fixtures/unused_param_violation.sv", "decl.unused.param");
+}
+
+#[test]
+fn allows_marked_unused_param() {
+    run_fixture_success("fixtures/unused_param_compliant.sv");
+}
+
+#[test]
+fn detects_unused_var_violation() {
+    run_fixture("fixtures/unused_var_violation.sv", "decl.unused.var");
+}
+
+#[test]
+fn allows_marked_unused_var() {
+    run_fixture_success("fixtures/unused_var_compliant.sv");
 }
 
 #[test]
