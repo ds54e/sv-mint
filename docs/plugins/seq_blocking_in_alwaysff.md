@@ -1,6 +1,6 @@
 # seq_blocking_in_alwaysff.py
 
-- **Script**: `plugins/seq_blocking_in_alwaysff.py`
+- **Script**: `plugins/seq.blocking_in_alwaysff.cst.py`
 - **Stage**: `cst`
 - **Key Inputs**: `cst_ir.tokens`, `tok_kind_table`, `line_starts`, `pp_text`
 - **Rule**:

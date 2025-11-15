@@ -1,6 +1,6 @@
 # decl_unused_param.py
 
-- **Script**: `plugins/decl_unused_param.py`
+- **Script**: `plugins/decl.unused.param.ast.py`
 - **Stage**: `ast`
 - **Key Inputs**: `symbols` entries with `class == param`
 - **Rule**:

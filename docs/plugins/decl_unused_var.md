@@ -1,6 +1,6 @@
 # decl_unused_var.py
 
-- **Script**: `plugins/decl_unused_var.py`
+- **Script**: `plugins/decl.unused.var.ast.py`
 - **Stage**: `ast`
 - **Key Inputs**: `symbols` entries with `class == var`
 - **Rule**:

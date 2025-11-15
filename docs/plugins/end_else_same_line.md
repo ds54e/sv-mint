@@ -1,6 +1,6 @@
 # end_else_same_line.py
 
-- **Script**: `plugins/end_else_same_line.py`
+- **Script**: `plugins/format.end_else_inline.pp.py`
 - **Stage**: `pp_text`
 - **Key Inputs**: Preprocessed `text`
 - **Rule**:

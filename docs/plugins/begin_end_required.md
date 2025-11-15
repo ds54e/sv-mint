@@ -1,6 +1,6 @@
 # begin_end_required.py
 
-- **Script**: `plugins/begin_end_required.py`
+- **Script**: `plugins/format.begin_required.pp.py`
 - **Stage**: `pp_text`
 - **Key Inputs**: Preprocessed `text`
 - **Rule**:

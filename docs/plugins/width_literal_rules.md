@@ -1,6 +1,6 @@
 # width_literal_rules.py
 
-- **Script**: `plugins/width_literal_rules.py`
+- **Script**: `plugins/width.unsized_base_literal.raw.py`
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
 - **Rule**:

@@ -8,43 +8,35 @@ root = "plugins"
 
 [[rule]]
 id = "flow.multiple_nonblocking"
-script = "assignment_rules.py"
-stage = "ast"
+script = "flow.multiple_nonblocking.ast.py"
 
 [[rule]]
 id = "format.begin_required"
-script = "begin_end_required.py"
-stage = "pp_text"
+script = "format.begin_required.pp.py"
 
 [[rule]]
 id = "case.missing_default"
-script = "case_default_required.py"
-stage = "cst"
+script = "case.missing_default.cst.py"
 
 [[rule]]
 id = "lang.case_requires_unique"
-script = "case_unique_required.py"
-stage = "cst"
+script = "lang.case_requires_unique.cst.py"
 
 [[rule]]
 id = "comb.nb_in_alwayscomb"
-script = "comb_nb_in_alwayscomb.py"
-stage = "cst"
+script = "comb.nb_in_alwayscomb.cst.py"
 
 [[rule]]
 id = "decl.unused.net"
-script = "decl_unused_net.py"
-stage = "ast"
+script = "decl.unused.net.ast.py"
 
 [[rule]]
 id = "decl.unused.param"
-script = "decl_unused_param.py"
-stage = "ast"
+script = "decl.unused.param.ast.py"
 
 [[rule]]
 id = "decl.unused.var"
-script = "decl_unused_var.py"
-stage = "ast"
+script = "decl.unused.var.ast.py"
 
 [[rule]]
 id = "lang.default_nettype_missing"
@@ -164,13 +156,11 @@ script = "style.function_scope.raw.py"
 
 [[rule]]
 id = "format.end_else_inline"
-script = "end_else_same_line.py"
-stage = "pp_text"
+script = "format.end_else_inline.pp.py"
 
 [[rule]]
 id = "format.case_begin_required"
-script = "format_case_begin_cst.py"
-stage = "cst"
+script = "format.case_begin_required.cst.py"
 
 [[rule]]
 id = "format.indent_multiple_of_two"
@@ -186,8 +176,7 @@ script = "format.preproc_left_align.raw.py"
 
 [[rule]]
 id = "format.line_length"
-script = "format_line_length.py"
-stage = "raw_text"
+script = "format.line_length.raw.py"
 
 [[rule]]
 id = "format.call_spacing"
@@ -263,8 +252,7 @@ script = "lang.prefer_always_comb.raw.py"
 
 [[rule]]
 id = "module.named_ports_required"
-script = "module_inst_rules.py"
-stage = "raw_text"
+script = "module.named_ports_required.raw.py"
 
 [[rule]]
 id = "naming.clk_order"
@@ -320,8 +308,7 @@ script = "naming.suffix_order.ast.py"
 
 [[rule]]
 id = "module.no_port_wildcard"
-script = "no_port_wildcard.py"
-stage = "cst"
+script = "module.no_port_wildcard.cst.py"
 
 [[rule]]
 id = "package.define_in_package"
@@ -341,13 +328,11 @@ script = "package.multiple.raw.py"
 
 [[rule]]
 id = "seq.blocking_in_alwaysff"
-script = "seq_blocking_in_alwaysff.py"
-stage = "cst"
+script = "seq.blocking_in_alwaysff.cst.py"
 
 [[rule]]
 id = "template.raw_text_marker"
-script = "template_raw_text_rule.py"
-stage = "raw_text"
+script = "template.raw_text_marker.raw.py"
 
 [[rule]]
 id = "typedef.enum_lower_snake"
@@ -371,8 +356,7 @@ script = "typedef.type_suffix.raw.py"
 
 [[rule]]
 id = "width.unsized_base_literal"
-script = "width_literal_rules.py"
-stage = "raw_text"
+script = "width.unsized_base_literal.raw.py"
 
 [logging]
 level = "info"

@@ -1,6 +1,6 @@
 # no_port_wildcard.py
 
-- **Script**: `plugins/no_port_wildcard.py`
+- **Script**: `plugins/module.no_port_wildcard.cst.py`
 - **Stage**: `cst` (`mode = inline`)
 - **Key Inputs**: `cst_ir.tokens`, `tok_kind_table`, `line_starts`
 - **Rule**:

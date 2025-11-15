@@ -1,6 +1,6 @@
 # format_case_begin_cst.py
 
-- **Script**: `plugins/format_case_begin_cst.py`
+- **Script**: `plugins/format.case_begin_required.cst.py`
 - **Stage**: `cst` (`mode = inline`)
 - **Key Inputs**: `cst_ir.tokens`, `tok_kind_table`, `line_starts`
 - **Rule**:

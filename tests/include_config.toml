@@ -7,28 +7,23 @@ args = ["-u", "-B"]
 
 [[rule]]
 id = "flow.multiple_nonblocking"
-script = "../plugins/assignment_rules.py"
-stage = "ast"
+script = "../plugins/flow.multiple_nonblocking.ast.py"
 
 [[rule]]
 id = "comb.nb_in_alwayscomb"
-script = "../plugins/comb_nb_in_alwayscomb.py"
-stage = "cst"
+script = "../plugins/comb.nb_in_alwayscomb.cst.py"
 
 [[rule]]
 id = "decl.unused.param"
-script = "../plugins/decl_unused_param.py"
-stage = "ast"
+script = "../plugins/decl.unused.param.ast.py"
 
 [[rule]]
 id = "decl.unused.net"
-script = "../plugins/decl_unused_net.py"
-stage = "ast"
+script = "../plugins/decl.unused.net.ast.py"
 
 [[rule]]
 id = "decl.unused.var"
-script = "../plugins/decl_unused_var.py"
-stage = "ast"
+script = "../plugins/decl.unused.var.ast.py"
 
 [[rule]]
 id = "lang.default_nettype_missing"
@@ -84,23 +79,19 @@ script = "../plugins/format.case_colon_after.cst.py"
 
 [[rule]]
 id = "format.line_length"
-script = "../plugins/format_line_length.py"
-stage = "raw_text"
+script = "../plugins/format.line_length.raw.py"
 
 [[rule]]
 id = "module.no_port_wildcard"
-script = "../plugins/no_port_wildcard.py"
-stage = "cst"
+script = "../plugins/module.no_port_wildcard.cst.py"
 
 [[rule]]
 id = "format.end_else_inline"
-script = "../plugins/end_else_same_line.py"
-stage = "pp_text"
+script = "../plugins/format.end_else_inline.pp.py"
 
 [[rule]]
 id = "format.begin_required"
-script = "../plugins/begin_end_required.py"
-stage = "pp_text"
+script = "../plugins/format.begin_required.pp.py"
 
 [[rule]]
 id = "naming.module_case"
@@ -180,13 +171,11 @@ script = "../plugins/global.prefer_parameters.raw.py"
 
 [[rule]]
 id = "width.unsized_base_literal"
-script = "../plugins/width_literal_rules.py"
-stage = "raw_text"
+script = "../plugins/width.unsized_base_literal.raw.py"
 
 [[rule]]
 id = "lang.case_requires_unique"
-script = "../plugins/case_unique_required.py"
-stage = "cst"
+script = "../plugins/lang.case_requires_unique.cst.py"
 
 [[rule]]
 id = "package.multiple"
@@ -206,8 +195,7 @@ script = "../plugins/package.define_in_package.raw.py"
 
 [[rule]]
 id = "module.named_ports_required"
-script = "../plugins/module_inst_rules.py"
-stage = "raw_text"
+script = "../plugins/module.named_ports_required.raw.py"
 
 [[rule]]
 id = "header.missing_spdx"
@@ -227,8 +215,7 @@ script = "../plugins/typedef.type_suffix.raw.py"
 
 [[rule]]
 id = "format.case_begin_required"
-script = "../plugins/format_case_begin_cst.py"
-stage = "cst"
+script = "../plugins/format.case_begin_required.cst.py"
 
 [[rule]]
 id = "format.indent_multiple_of_two"
@@ -244,18 +231,15 @@ script = "../plugins/format.line_continuation_right.raw.py"
 
 [[rule]]
 id = "case.missing_default"
-script = "../plugins/case_default_required.py"
-stage = "cst"
+script = "../plugins/case.missing_default.cst.py"
 
 [[rule]]
 id = "seq.blocking_in_alwaysff"
-script = "../plugins/seq_blocking_in_alwaysff.py"
-stage = "cst"
+script = "../plugins/seq.blocking_in_alwaysff.cst.py"
 
 [[rule]]
 id = "template.raw_text_marker"
-script = "../plugins/template_raw_text_rule.py"
-stage = "raw_text"
+script = "../plugins/template.raw_text_marker.raw.py"
 
 [logging]
 level = "info"

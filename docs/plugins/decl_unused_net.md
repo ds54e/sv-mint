@@ -1,6 +1,6 @@
 # decl_unused_net.py
 
-- **Script**: `plugins/decl_unused_net.py`
+- **Script**: `plugins/decl.unused.net.ast.py`
 - **Stage**: `ast`
 - **Key Inputs**: `symbols` entries with `class == net`
 - **Rule**:

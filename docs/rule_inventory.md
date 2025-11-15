@@ -2,31 +2,22 @@
 
 This reference captures the current rule IDs exposed by each bundled plugin script.
 
-## assignment_rules.py
-- flow.multiple_nonblocking
-
-## begin_end_required.py
-- format.begin_required
-
-## case_default_required.py
+## case.missing_default.cst.py
 - case.missing_default
-
-## case_unique_required.py
-- lang.case_requires_unique
 
 ## check.dv_macro_required.raw.py
 - check.dv_macro_required
 
-## comb_nb_in_alwayscomb.py
+## comb.nb_in_alwayscomb.cst.py
 - comb.nb_in_alwayscomb
 
-## decl_unused_net.py
+## decl.unused.net.ast.py
 - decl.unused.net
 
-## decl_unused_param.py
+## decl.unused.param.ast.py
 - decl.unused.param
 
-## decl_unused_var.py
+## decl.unused.var.ast.py
 - decl.unused.var
 
 ## dpi.export_prefix.raw.py
@@ -35,8 +26,8 @@ This reference captures the current rule IDs exposed by each bundled plugin scri
 ## dpi.import_prefix.raw.py
 - dpi.import_prefix
 
-## end_else_same_line.py
-- format.end_else_inline
+## flow.multiple_nonblocking.ast.py
+- flow.multiple_nonblocking
 
 ## flow.no_disable_fork_label.raw.py
 - flow.no_disable_fork_label
@@ -56,8 +47,14 @@ This reference captures the current rule IDs exposed by each bundled plugin scri
 ## format.ascii_only.raw.py
 - format.ascii_only
 
+## format.begin_required.pp.py
+- format.begin_required
+
 ## format.call_spacing.raw.py
 - format.call_spacing
+
+## format.case_begin_required.cst.py
+- format.case_begin_required
 
 ## format.case_colon_after.cst.py
 - format.case_colon_after
@@ -68,6 +65,9 @@ This reference captures the current rule IDs exposed by each bundled plugin scri
 ## format.comma_space.raw.py
 - format.comma_space
 
+## format.end_else_inline.pp.py
+- format.end_else_inline
+
 ## format.final_newline.raw.py
 - format.final_newline
 
@@ -76,6 +76,9 @@ This reference captures the current rule IDs exposed by each bundled plugin scri
 
 ## format.line_continuation_right.raw.py
 - format.line_continuation_right
+
+## format.line_length.raw.py
+- format.line_length
 
 ## format.macro_spacing.raw.py
 - format.macro_spacing
@@ -88,12 +91,6 @@ This reference captures the current rule IDs exposed by each bundled plugin scri
 
 ## format.preproc_left_align.raw.py
 - format.preproc_left_align
-
-## format_case_begin_cst.py
-- format.case_begin_required
-
-## format_line_length.py
-- format.line_length
 
 ## global.local_define_undef.raw.py
 - global.local_define_undef
@@ -112,6 +109,9 @@ This reference captures the current rule IDs exposed by each bundled plugin scri
 
 ## lang.always_ff_reset.raw.py
 - lang.always_ff_reset
+
+## lang.case_requires_unique.cst.py
+- lang.case_requires_unique
 
 ## lang.default_nettype_missing.raw.py
 - lang.default_nettype_missing
@@ -170,8 +170,11 @@ This reference captures the current rule IDs exposed by each bundled plugin scri
 ## macro.no_local_guard.raw.py
 - macro.no_local_guard
 
-## module_inst_rules.py
+## module.named_ports_required.raw.py
 - module.named_ports_required
+
+## module.no_port_wildcard.cst.py
+- module.no_port_wildcard
 
 ## naming.clk_order.ast.py
 - naming.clk_order
@@ -212,9 +215,6 @@ This reference captures the current rule IDs exposed by each bundled plugin scri
 ## naming.suffix_order.ast.py
 - naming.suffix_order
 
-## no_port_wildcard.py
-- module.no_port_wildcard
-
 ## package.define_in_package.raw.py
 - package.define_in_package
 
@@ -236,16 +236,16 @@ This reference captures the current rule IDs exposed by each bundled plugin scri
 ## scoreboard.dv_eot_required.raw.py
 - scoreboard.dv_eot_required
 
+## seq.blocking_in_alwaysff.cst.py
+- seq.blocking_in_alwaysff
+
 ## seq.no_uvm_do.raw.py
 - seq.no_uvm_do
-
-## seq_blocking_in_alwaysff.py
-- seq.blocking_in_alwaysff
 
 ## style.function_scope.raw.py
 - style.function_scope
 
-## template_raw_text_rule.py
+## template.raw_text_marker.raw.py
 - template.raw_text_marker
 
 ## typedef.enum_lower_snake.raw.py
@@ -263,6 +263,6 @@ This reference captures the current rule IDs exposed by each bundled plugin scri
 ## typedef.type_suffix.raw.py
 - typedef.type_suffix
 
-## width_literal_rules.py
+## width.unsized_base_literal.raw.py
 - width.unsized_base_literal
 

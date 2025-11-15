@@ -1,6 +1,6 @@
 # format_line_length.py
 
-- **Script**: `plugins/format_line_length.py`
+- **Script**: `plugins/format.line_length.raw.py`
 - **Stage**: `raw_text`
 - **Key Inputs**: LF-normalized `text`
 - **Rule**:

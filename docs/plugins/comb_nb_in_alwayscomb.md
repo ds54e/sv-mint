@@ -1,6 +1,6 @@
 # comb_nb_in_alwayscomb.py
 
-- **Script**: `plugins/comb_nb_in_alwayscomb.py`
+- **Script**: `plugins/comb.nb_in_alwayscomb.cst.py`
 - **Stage**: `cst`
 - **Key Inputs**: `cst_ir.tokens`, `tok_kind_table`, `line_starts`, `pp_text`
 - **Rule**:

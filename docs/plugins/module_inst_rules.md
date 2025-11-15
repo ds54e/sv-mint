@@ -1,6 +1,6 @@
 # module_inst_rules.py
 
-- **Script**: `plugins/module_inst_rules.py`
+- **Script**: `plugins/module.named_ports_required.raw.py`
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
 - **Rules**:

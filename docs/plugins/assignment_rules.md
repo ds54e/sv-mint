@@ -1,6 +1,6 @@
 # assignment_rules.py
 
-- **Script**: `plugins/assignment_rules.py`
+- **Script**: `plugins/flow.multiple_nonblocking.ast.py`
 - **Stage**: `ast`
 - **Key Inputs**: `assigns` (each entry includes `module`, `lhs`, `op`, and locations)
 - **Rules**:
