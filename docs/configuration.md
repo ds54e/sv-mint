@@ -8,6 +8,7 @@
 | --- | --- | --- |
 | `timeout_ms_per_file` | Budget for every file across all stages. Rules that exceed the budget abort the run. | `6000` |
 Values below 100 or above 60000 are rejected during config validation.
+The timeout is applied per stage (each stage gets the same budget), not as a single cumulative budget across stages.
 
 ## `[plugin]`
 

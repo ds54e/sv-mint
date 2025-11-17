@@ -287,9 +287,10 @@ fn warn_on_unknown_keys(cfg_text: &str) {
         if let Some(obj) = table.as_table() {
             for (k, v) in obj {
                 match k.as_str() {
-                    "logging" | "defaults" | "plugin" | "stages" | "svparser" | "rule" | "transport" => {
+                    "logging" | "defaults" | "plugin" | "stages" | "svparser" | "transport" => {
                         warn_nested_unknowns(k, v);
                     }
+                    "rule" => warn_rule_unknowns(v),
                     other => tracing::warn!("unknown top-level key: {}", other),
                 }
             }
@@ -319,12 +320,24 @@ fn warn_nested_unknowns(parent: &str, val: &toml::Value) {
             "on_exceed",
             "fail_ci_on_skip",
         ],
-        "rule" => &["id", "script", "stage", "enabled", "severity"],
         _ => &[],
     };
     for key in table.keys() {
         if !known.contains(&key.as_str()) {
             tracing::warn!("unknown key {}.{}", parent, key);
+        }
+    }
+}
+
+fn warn_rule_unknowns(val: &toml::Value) {
+    let Some(array) = val.as_array() else { return };
+    for (idx, entry) in array.iter().enumerate() {
+        let Some(table) = entry.as_table() else { continue };
+        let known = ["id", "script", "stage", "enabled", "severity"];
+        for key in table.keys() {
+            if !known.contains(&key.as_str()) {
+                tracing::warn!("unknown key rule[{}].{}", idx, key);
+            }
         }
     }
 }
@@ -1030,6 +1043,20 @@ unknown_transport = true
 foo = "bar"
 "#;
         let _ = load(cfg_text).expect("load");
+        warn_on_unknown_keys(cfg_text);
+    }
+
+    #[test]
+    fn warns_on_unknown_rule_keys() {
+        let cfg_text = r#"
+[[rule]]
+id = "format.no_tabs"
+script = "format.no_tabs.raw.py"
+stage = "raw_text"
+unknown_field = true
+"#;
+        let cfg = load(cfg_text).expect("load");
+        assert_eq!(cfg.rule.len(), 1);
         warn_on_unknown_keys(cfg_text);
     }
 
