@@ -126,6 +126,8 @@ pub struct Plugin {
     pub normalized_root: Option<PathBuf>,
     #[serde(skip)]
     pub normalized_search_paths: Vec<PathBuf>,
+    #[serde(skip)]
+    pub config_dir: Option<PathBuf>,
 }
 
 impl Default for Plugin {
@@ -137,6 +139,7 @@ impl Default for Plugin {
             search_paths: Vec::new(),
             normalized_root: None,
             normalized_search_paths: Vec::new(),
+            config_dir: None,
         }
     }
 }
@@ -270,6 +273,7 @@ pub fn load_from_path(opt: Option<PathBuf>) -> Result<(Config, PathBuf), ConfigE
 }
 
 fn normalize_rule_scripts(cfg: &mut Config, base_dir: &Path) -> Result<(), ConfigError> {
+    cfg.plugin.config_dir = Some(base_dir.to_path_buf());
     cfg.plugin.normalized_root = cfg.plugin.root.as_ref().map(|root| to_abs(base_dir, root));
     cfg.plugin.normalized_search_paths = cfg.plugin.search_paths.iter().map(|p| to_abs(base_dir, p)).collect();
     let mut search_roots = Vec::new();
@@ -448,6 +452,9 @@ pub fn plugin_search_paths(cfg: &Config, rel: &str) -> Vec<PathBuf> {
     }
     for extra in &cfg.plugin.normalized_search_paths {
         out.push(extra.join(rel));
+    }
+    if let Some(config_dir) = cfg.plugin.config_dir.as_ref() {
+        out.push(config_dir.join("plugins").join(rel));
     }
     if !out.is_empty() {
         return out;
@@ -751,10 +758,32 @@ id = "format.no_tabs"
         match err {
             ConfigError::InvalidValue { detail } => {
                 assert!(detail.contains("default plugin directory"));
-                assert!(detail.contains("plugins"));
+                assert!(detail.contains(&tmp_dir.path().join("plugins").display().to_string()));
             }
             other => panic!("unexpected error {other:?}"),
         }
+    }
+
+    #[test]
+    fn resolves_default_plugins_relative_to_config_dir() {
+        let tmp_dir = tempdir().expect("tempdir");
+        let plugins = tmp_dir.path().join("plugins");
+        fs::create_dir_all(&plugins).expect("plugins dir");
+        let script_path = plugins.join("format.no_tabs.raw.py");
+        fs::write(&script_path, "print('ok')").expect("script file");
+        let mut cfg = load(
+            r#"
+[[rule]]
+id = "format.no_tabs"
+"#,
+        )
+        .expect("load rule");
+        normalize_rule_scripts(&mut cfg, tmp_dir.path()).expect("normalize");
+        infer_rule_stages(&mut cfg.rule).expect("stage");
+        let resolved = super::plugin_search_paths(&cfg, "format.no_tabs.raw.py");
+        assert!(resolved.iter().any(|p| p == &script_path));
+        let err = validate_rule_script_paths(&cfg);
+        assert!(err.is_ok());
     }
 
     #[test]
