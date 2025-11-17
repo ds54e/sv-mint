@@ -256,7 +256,15 @@ pub fn load(cfg_text: &str) -> Result<Config, ConfigError> {
 }
 
 pub fn load_from_path(opt: Option<PathBuf>) -> Result<(Config, PathBuf), ConfigError> {
-    let path = resolve_path(opt)?;
+    let path_rel = resolve_path(opt)?;
+    let cwd = env::current_dir().map_err(|e| ConfigError::IoFailed {
+        detail: format!("{} ({})", path_rel.display(), e),
+    })?;
+    let path = if path_rel.is_absolute() {
+        path_rel
+    } else {
+        cwd.join(path_rel)
+    };
     let cfg_text = fs::read_to_string(&path).map_err(|e| ConfigError::IoFailed {
         detail: format!("{} ({})", path.display(), e),
     })?;
