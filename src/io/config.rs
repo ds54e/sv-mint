@@ -2,6 +2,7 @@ use crate::errors::ConfigError;
 use crate::svparser::SvParserCfg;
 use crate::textutil::{normalize_lf, strip_bom};
 use crate::types::Stage;
+use crate::types::Severity;
 use serde::Deserialize;
 use std::collections::{HashMap, HashSet};
 use std::env;
@@ -273,11 +274,59 @@ pub fn load_from_path(opt: Option<PathBuf>) -> Result<(Config, PathBuf), ConfigE
         .parent()
         .map(Path::to_path_buf)
         .unwrap_or_else(|| PathBuf::from("."));
+    warn_on_unknown_keys(&cfg_text);
     normalize_rule_scripts(&mut cfg, &base_dir)?;
     infer_rule_stages(&mut cfg.rule)?;
     validate_config(&cfg)?;
     validate_rule_script_paths(&cfg)?;
     Ok((cfg, path))
+}
+
+fn warn_on_unknown_keys(cfg_text: &str) {
+    if let Ok(table) = cfg_text.parse::<toml::Value>() {
+        if let Some(obj) = table.as_table() {
+            for (k, v) in obj {
+                match k.as_str() {
+                    "logging" | "defaults" | "plugin" | "stages" | "svparser" | "rule" | "transport" => {
+                        warn_nested_unknowns(k, v);
+                    }
+                    other => tracing::warn!("unknown top-level key: {}", other),
+                }
+            }
+        }
+    }
+}
+
+fn warn_nested_unknowns(parent: &str, val: &toml::Value) {
+    let Some(table) = val.as_table() else { return };
+    let known: &'static [&'static str] = match parent {
+        "logging" => &[
+            "level",
+            "stderr_snippet_bytes",
+            "show_stage_events",
+            "show_plugin_events",
+            "show_parse_events",
+            "format",
+        ],
+        "defaults" => &["timeout_ms_per_file"],
+        "plugin" => &["cmd", "args", "root", "search_paths"],
+        "stages" => &["enabled", "required"],
+        "svparser" => &["include_paths", "defines", "strip_comments", "ignore_include", "allow_incomplete"],
+        "transport" => &[
+            "max_request_bytes",
+            "warn_margin_bytes",
+            "max_response_bytes",
+            "on_exceed",
+            "fail_ci_on_skip",
+        ],
+        "rule" => &["id", "script", "stage", "enabled", "severity"],
+        _ => &[],
+    };
+    for key in table.keys() {
+        if !known.contains(&key.as_str()) {
+            tracing::warn!("unknown key {}.{}", parent, key);
+        }
+    }
 }
 
 fn normalize_rule_scripts(cfg: &mut Config, base_dir: &Path) -> Result<(), ConfigError> {
@@ -493,6 +542,13 @@ fn validate_rule_script_paths(cfg: &Config) -> Result<(), ConfigError> {
         if script.is_empty() {
             continue;
         }
+        if let Some(sev) = &rule.severity {
+            if severity_from_str(sev).is_none() {
+                return Err(ConfigError::InvalidValue {
+                    detail: format!("rule {} severity must be error|warning|info", rule.id),
+                });
+            }
+        }
         let path = Path::new(script);
         let mut probed = if path.is_absolute() {
             vec![path.to_path_buf()]
@@ -514,6 +570,15 @@ fn validate_rule_script_paths(cfg: &Config) -> Result<(), ConfigError> {
         });
     }
     Ok(())
+}
+
+fn severity_from_str(s: &str) -> Option<Severity> {
+    match s {
+        "error" => Some(Severity::Error),
+        "warning" => Some(Severity::Warning),
+        "info" => Some(Severity::Info),
+        _ => None,
+    }
 }
 
 #[derive(Clone)]
@@ -939,5 +1004,58 @@ stage = "raw_text"
         let paths = plugin_search_paths(&cfg, &cfg.rule[0].script);
         assert_eq!(paths[0], root.join("format.no_tabs.raw.py"));
         assert_eq!(paths.len(), 1);
+    }
+
+    #[test]
+    fn warns_on_unknown_top_level_and_nested_keys() {
+        let cfg_text = r#"
+[logging]
+stderr_snippet_bytes = 10
+show_stage_events = true
+show_plugin_events = true
+show_parse_events = true
+level = "debug"
+unknown_log = true
+
+[plugin]
+cmd = "python3"
+extra_plugin = 1
+
+[transport]
+max_request_bytes = 10
+max_response_bytes = 10
+unknown_transport = true
+
+[mystery]
+foo = "bar"
+"#;
+        let _ = load(cfg_text).expect("load");
+        warn_on_unknown_keys(cfg_text);
+    }
+
+    #[test]
+    fn errors_on_invalid_severity_override() {
+        let tmp_dir = tempdir().expect("tempdir");
+        fs::create_dir_all(tmp_dir.path().join("plugins")).expect("plugins dir");
+        let mut cfg = load(
+            r#"
+[[rule]]
+id = "format.no_tabs"
+script = "format.no_tabs.raw.py"
+severity = "fatal"
+stage = "raw_text"
+"#,
+        )
+        .expect("load rule");
+        normalize_rule_scripts(&mut cfg, tmp_dir.path()).expect("normalize");
+        infer_rule_stages(&mut cfg.rule).expect("stage");
+        let err = validate_rule_script_paths(&cfg).unwrap_err();
+        match err {
+            ConfigError::InvalidValue { detail } => {
+                assert!(detail.contains("format.no_tabs"));
+                assert!(detail.contains("severity"));
+            }
+            other => panic!("unexpected error {other:?}"),
+        }
     }
 }

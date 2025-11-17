@@ -7,6 +7,7 @@
 | key | description | default |
 | --- | --- | --- |
 | `timeout_ms_per_file` | Budget for every file across all stages. Rules that exceed the budget abort the run. | `6000` |
+Values below 100 or above 60000 are rejected during config validation.
 
 ## `[plugin]`
 
@@ -18,6 +19,7 @@ Controls the Python worker that hosts rule scripts.
 | `args` | Extra arguments passed before the host script. | `["-u", "-B"]` |
 | `root` | Base directory used to resolve relative `script` paths. | _unset_ |
 | `search_paths` | Additional directories searched for every rule script. | `[]` |
+`cmd` must be non-empty; otherwise config validation fails.
 
 When `root` and `search_paths` are not provided, sv-mint looks under `./plugins` relative to the directory that holds `sv-mint.toml`. If a rule omits `script`, the loader searches these directories for `<rule_id>.<stage>.py`.
 
@@ -52,6 +54,8 @@ Pass-through options for the SystemVerilog parser. All keys default to empty vec
 | `required` | Subset that must succeed even if the transport would normally skip them. | `["raw_text","pp_text"]` |
 
 Stage names map to `Stage::{RawText,PpText,Cst,Ast}`. Any rule that targets a disabled stage triggers a config error.
+When no `[[rule]]` entries are present, sv-mint still runs but prints no diagnostics (the parser pipeline is not invoked in this mode).
+If `stages.enabled` is empty, config loading fails. If `stages.required` is empty, sv-mint still treats `raw_text` and `pp_text` as required stages.
 
 ## `[[rule]]`
 
@@ -62,7 +66,8 @@ Every rule needs an `id`. The following keys are optional:
 | `script` | Python file implementing the rule. When omitted, sv-mint searches the plugin roots for `<id>.<stage>.py`. | _derived_ |
 | `stage` | One of `raw_text`, `pp_text`, `cst`, or `ast`. If left out, sv-mint infers it from the filename suffix. | _inferred_ |
 | `enabled` | Toggle to include or skip the rule. | `true` |
-| `severity` | Overrides the severity reported by the script (`error`, `warning`, `info`). | _script-provided_ |
+| `severity` | Overrides the severity reported by the script (`error`, `warning`, `info`; other values are rejected). | _script-provided_ |
+`script` must end with `.py` for stage inference to succeed. When stage is omitted, the filename must also end with `.raw/.pp/.cst/.ast.py`.
 
 Rules are grouped per stage at runtime. When every rule for a stage is disabled, that stage is logged as "no enabled rules" and skipped, and if the entire config lacks `[[rule]]` entries the CLI still parses inputs but emits no lint findings.
 
@@ -77,6 +82,7 @@ Controls JSON request/response size guards and how strictly to enforce them.
 | `max_response_bytes` | Maximum bytes allowed in a response payload. | `16777216` |
 | `on_exceed` | `skip` or `error` for non-required stages. Required stages always error. | `skip` |
 | `fail_ci_on_skip` | Upgrade skipped stages to CI failures. | `false` |
+Values must be greater than zero, and `warn_margin_bytes` must not exceed `max_request_bytes`.
 
 ## Minimal example
 
