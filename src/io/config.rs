@@ -12,10 +12,15 @@ use toml::Value as TomlValue;
 
 #[derive(serde::Deserialize, Clone)]
 pub struct LoggingConfig {
+    #[serde(default = "default_log_level")]
     pub level: String,
+    #[serde(default = "default_stderr_snippet_bytes")]
     pub stderr_snippet_bytes: usize,
+    #[serde(default = "default_false")]
     pub show_stage_events: bool,
+    #[serde(default = "default_false")]
     pub show_plugin_events: bool,
+    #[serde(default = "default_false")]
     pub show_parse_events: bool,
     #[serde(default)]
     pub format: LogFormat,
@@ -26,11 +31,11 @@ pub struct LoggingConfig {
 impl Default for LoggingConfig {
     fn default() -> Self {
         Self {
-            level: "info".to_string(),
-            stderr_snippet_bytes: 2048,
-            show_stage_events: false,
-            show_plugin_events: false,
-            show_parse_events: false,
+            level: default_log_level(),
+            stderr_snippet_bytes: default_stderr_snippet_bytes(),
+            show_stage_events: default_false(),
+            show_plugin_events: default_false(),
+            show_parse_events: default_false(),
             format: LogFormat::Text,
             extra: HashMap::new(),
         }
@@ -59,9 +64,11 @@ fn default_warn_margin_bytes() -> usize {
 
 #[derive(Deserialize, Clone)]
 pub struct TransportConfig {
+    #[serde(default = "default_max_request_bytes")]
     pub max_request_bytes: usize,
     #[serde(default = "default_warn_margin_bytes")]
     pub warn_margin_bytes: usize,
+    #[serde(default = "default_max_request_bytes")]
     pub max_response_bytes: usize,
     #[serde(default)]
     pub on_exceed: TransportOnExceed,
@@ -72,9 +79,9 @@ pub struct TransportConfig {
 impl Default for TransportConfig {
     fn default() -> Self {
         Self {
-            max_request_bytes: 16_777_216,
+            max_request_bytes: default_max_request_bytes(),
             warn_margin_bytes: default_warn_margin_bytes(),
-            max_response_bytes: 16_777_216,
+            max_response_bytes: default_max_request_bytes(),
             on_exceed: TransportOnExceed::Skip,
             fail_ci_on_skip: false,
         }
@@ -187,6 +194,22 @@ fn default_true() -> bool {
 
 fn default_timeout_ms() -> u64 {
     6000
+}
+
+fn default_max_request_bytes() -> usize {
+    16_777_216
+}
+
+fn default_log_level() -> String {
+    "info".to_string()
+}
+
+fn default_stderr_snippet_bytes() -> usize {
+    2048
+}
+
+fn default_false() -> bool {
+    false
 }
 
 fn default_plugin_cmd() -> String {
@@ -1084,5 +1107,151 @@ stage = "raw_text"
             }
             other => panic!("unexpected error {other:?}"),
         }
+    }
+
+    #[test]
+    fn logging_partial_overrides_apply_defaults() {
+        let cfg = load(
+            r#"
+[logging]
+stderr_snippet_bytes = 512
+"#,
+        )
+        .expect("load");
+        assert_eq!(cfg.logging.stderr_snippet_bytes, 512);
+        assert_eq!(cfg.logging.show_stage_events, false);
+        assert_eq!(cfg.logging.show_plugin_events, false);
+        assert_eq!(cfg.logging.show_parse_events, false);
+        assert_eq!(cfg.logging.level, "info");
+    }
+
+    #[test]
+    fn plugin_args_can_be_empty() {
+        let cfg = load(
+            r#"
+[plugin]
+args = []
+
+[[rule]]
+id = "format.no_tabs"
+script = "format.no_tabs.raw.py"
+stage = "raw_text"
+"#,
+        )
+        .expect("load");
+        assert!(cfg.plugin.args.is_empty());
+    }
+
+    #[test]
+    fn stages_enabled_empty_errors() {
+        let cfg = load(
+            r#"
+[stages]
+enabled = []
+
+[[rule]]
+id = "format.no_tabs"
+script = "format.no_tabs.raw.py"
+stage = "raw_text"
+"#,
+        )
+        .expect("load");
+        let err = validate_config(&cfg).unwrap_err();
+        assert!(matches!(err, ConfigError::InvalidValue { .. }));
+    }
+
+    #[test]
+    fn svparser_defaults_fill_in() {
+        let cfg = load(
+            r#"
+[[rule]]
+id = "format.no_tabs"
+script = "format.no_tabs.raw.py"
+stage = "raw_text"
+"#,
+        )
+        .expect("load");
+        assert!(cfg.svparser.include_paths.is_empty());
+        assert!(cfg.svparser.defines.is_empty());
+        assert!(cfg.svparser.strip_comments);
+        assert!(cfg.svparser.ignore_include);
+        assert!(cfg.svparser.allow_incomplete);
+    }
+
+    #[test]
+    fn transport_invalid_values_error() {
+        let cfg = load(
+            r#"
+[transport]
+max_request_bytes = 0
+
+[[rule]]
+id = "format.no_tabs"
+script = "format.no_tabs.raw.py"
+stage = "raw_text"
+"#,
+        )
+        .expect("load");
+        let err = validate_config(&cfg).unwrap_err();
+        assert!(matches!(err, ConfigError::InvalidValue { .. }));
+
+        let cfg = load(
+            r#"
+[transport]
+max_request_bytes = 100
+warn_margin_bytes = 200
+max_response_bytes = 100
+
+[[rule]]
+id = "format.no_tabs"
+script = "format.no_tabs.raw.py"
+stage = "raw_text"
+"#,
+        )
+        .expect("load");
+        let err = validate_config(&cfg).unwrap_err();
+        assert!(matches!(err, ConfigError::InvalidValue { .. }));
+    }
+
+    #[test]
+    fn duplicate_rule_ids_error() {
+        let cfg = load(
+            r#"
+[[rule]]
+id = "format.no_tabs"
+script = "a.raw.py"
+stage = "raw_text"
+
+[[rule]]
+id = "format.no_tabs"
+script = "b.raw.py"
+stage = "raw_text"
+"#,
+        )
+        .expect("load");
+        let err = validate_config(&cfg).unwrap_err();
+        assert!(matches!(err, ConfigError::InvalidValue { .. }));
+    }
+
+    #[test]
+    fn plugin_root_must_be_directory() {
+        let tmp = tempdir().unwrap();
+        let file_path = tmp.path().join("not_a_dir");
+        fs::write(&file_path, "x").unwrap();
+        let mut cfg = load(
+            &format!(
+                r#"
+[plugin]
+root = "{}"
+
+[[rule]]
+id = "format.no_tabs"
+"#,
+                file_path.display()
+            ),
+        )
+        .expect("load");
+        let err = normalize_rule_scripts(&mut cfg, tmp.path()).unwrap_err();
+        assert!(matches!(err, ConfigError::InvalidValue { .. }));
     }
 }
