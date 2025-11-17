@@ -1,8 +1,8 @@
 use crate::errors::ConfigError;
 use crate::svparser::SvParserCfg;
 use crate::textutil::{normalize_lf, strip_bom};
-use crate::types::Stage;
 use crate::types::Severity;
+use crate::types::Stage;
 use serde::Deserialize;
 use std::collections::{HashMap, HashSet};
 use std::env;
@@ -335,7 +335,13 @@ fn warn_nested_unknowns(parent: &str, val: &toml::Value) {
         "defaults" => &["timeout_ms_per_file"],
         "plugin" => &["cmd", "args", "root", "search_paths"],
         "stages" => &["enabled", "required"],
-        "svparser" => &["include_paths", "defines", "strip_comments", "ignore_include", "allow_incomplete"],
+        "svparser" => &[
+            "include_paths",
+            "defines",
+            "strip_comments",
+            "ignore_include",
+            "allow_incomplete",
+        ],
         "transport" => &[
             "max_request_bytes",
             "warn_margin_bytes",
@@ -992,17 +998,15 @@ stage = "raw_text"
         if missing.exists() {
             fs::remove_file(&missing).unwrap();
         }
-        let mut cfg = load(
-            &format!(
-                r#"
+        let mut cfg = load(&format!(
+            r#"
 [[rule]]
 id = "format.no_tabs"
 script = "{}"
 stage = "raw_text"
 "#,
-                missing.display()
-            ),
-        )
+            missing.display()
+        ))
         .expect("load rule");
         let tmp_dir = tempdir().expect("tempdir");
         normalize_rule_scripts(&mut cfg, tmp_dir.path()).expect("normalize");
@@ -1238,18 +1242,16 @@ stage = "raw_text"
         let tmp = tempdir().unwrap();
         let file_path = tmp.path().join("not_a_dir");
         fs::write(&file_path, "x").unwrap();
-        let mut cfg = load(
-            &format!(
-                r#"
+        let mut cfg = load(&format!(
+            r#"
 [plugin]
 root = "{}"
 
 [[rule]]
 id = "format.no_tabs"
 "#,
-                file_path.display()
-            ),
-        )
+            file_path.display()
+        ))
         .expect("load");
         let err = normalize_rule_scripts(&mut cfg, tmp.path()).unwrap_err();
         assert!(matches!(err, ConfigError::InvalidValue { .. }));

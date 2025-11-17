@@ -11,6 +11,12 @@ All notable changes to this project are documented here, following [Keep a Chang
 - When rules omit `script`, the loader falls back to `./plugins/<rule>.<stage>.py` relative to the config file; pipeline stages without enabled rules are skipped and logged instead of invoking Python.
 - README’s config sample was simplified to the minimal `[[rule]]` form and now links to the new configuration guide.
 
+## [1.4.0] - 2025-11-16
+### Changed
+- Logging defaults now suppress stage, plugin, and parse events unless explicitly enabled.
+- Config loader warns on unknown keys (including within `[[rule]]`) and enforces stricter validation for severity, transport limits, and plugin directories.
+- Documentation clarifies timeout application per stage, transport value constraints, and rule/script validation; expanded config tests to cover partial overrides and error cases.
+
 ## [1.2.0] - 2025-11-15
 ### Changed
 - Alphabetized the bundled `sv-mint.toml` rule list and renamed stale rule identifiers so script references remain accurate.
