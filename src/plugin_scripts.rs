@@ -19,9 +19,11 @@ fn iter_search_paths(cfg: &Config, rel: &str) -> Vec<PathBuf> {
     let mut out = Vec::new();
     if let Some(root) = cfg.plugin.normalized_root.as_ref() {
         out.push(root.join(rel));
-        for extra in &cfg.plugin.normalized_search_paths {
-            out.push(extra.join(rel));
-        }
+    }
+    for extra in &cfg.plugin.normalized_search_paths {
+        out.push(extra.join(rel));
+    }
+    if !out.is_empty() {
         return out;
     }
     if let Ok(cwd) = std::env::current_dir() {
@@ -80,4 +82,36 @@ pub fn collect_script_specs(cfg: &Config) -> Vec<ScriptSpec> {
             }
         })
         .collect()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::io::config::load;
+    use std::fs;
+    use tempfile::tempdir;
+
+    #[test]
+    fn resolves_script_from_search_paths_without_root() {
+        let tmp = tempdir().unwrap();
+        let search_dir = tmp.path().join("plugins-extra");
+        fs::create_dir_all(&search_dir).unwrap();
+        let script_path = search_dir.join("format.no_tabs.raw.py");
+        fs::write(&script_path, "print('ok')").unwrap();
+        let cfg_text = format!(
+            r#"[plugin]
+search_paths = ["{}"]
+
+[[rule]]
+id = "format.no_tabs"
+script = "format.no_tabs.raw.py"
+stage = "raw_text"
+"#,
+            search_dir.to_string_lossy()
+        );
+        let mut cfg = load(&cfg_text).unwrap();
+        cfg.plugin.normalized_search_paths = vec![search_dir];
+        let resolved = resolve_script_path(&cfg, &cfg.rule[0].script);
+        assert_eq!(resolved, script_path.to_string_lossy().into_owned());
+    }
 }
