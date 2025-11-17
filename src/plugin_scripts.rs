@@ -128,6 +128,6 @@ root = "{}"
         let mut cfg = load(&cfg_text).unwrap();
         cfg.plugin.normalized_root = Some(root.clone());
         let resolved = resolve_script_path(&cfg, "plugins/lib/rule_host.py");
-        assert_eq!(resolved, host_path.to_string_lossy().into_owned());
+        assert_eq!(std::path::Path::new(&resolved), host_path.as_path());
     }
 }

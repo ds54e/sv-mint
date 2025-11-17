@@ -17,6 +17,10 @@ All notable changes to this project are documented here, following [Keep a Chang
 - Config loader warns on unknown keys (including within `[[rule]]`) and enforces stricter validation for severity, transport limits, and plugin directories.
 - Documentation clarifies timeout application per stage, transport value constraints, and rule/script validation; expanded config tests to cover partial overrides and error cases.
 
+## [1.4.1] - 2025-11-17
+### Changed
+- Plugin resolution now works with user-specified `root` alone; `plugins/lib/rule_host.py` is resolved under `root` without needing bundled plugins. Added tests to cover this.
+
 ## [1.2.0] - 2025-11-15
 ### Changed
 - Alphabetized the bundled `sv-mint.toml` rule list and renamed stale rule identifiers so script references remain accurate.
