@@ -30,9 +30,9 @@ When `root` and `search_paths` are not provided, sv-mint looks under `./plugins`
 | --- | --- | --- |
 | `level` | Tracing level forwarded to `tracing_subscriber`. | `info` |
 | `stderr_snippet_bytes` | Maximum bytes from plugin stderr kept for diagnostics. | `2048` |
-| `show_stage_events` | Emit `stage_*` events. | `true` |
-| `show_plugin_events` | Emit plugin invoke/done/timeout messages. | `true` |
-| `show_parse_events` | Emit parse pipeline events. | `true` |
+| `show_stage_events` | Emit `stage_*` events. | `false` |
+| `show_plugin_events` | Emit plugin invoke/done/timeout messages. | `false` |
+| `show_parse_events` | Emit parse pipeline events. | `false` |
 | `format` | `text` or `json`. | `text` |
 
 Unknown keys are logged as warnings but otherwise ignored, which allows experiment-specific toggles.

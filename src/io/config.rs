@@ -28,9 +28,9 @@ impl Default for LoggingConfig {
         Self {
             level: "info".to_string(),
             stderr_snippet_bytes: 2048,
-            show_stage_events: true,
-            show_plugin_events: true,
-            show_parse_events: true,
+            show_stage_events: false,
+            show_plugin_events: false,
+            show_parse_events: false,
             format: LogFormat::Text,
             extra: HashMap::new(),
         }
