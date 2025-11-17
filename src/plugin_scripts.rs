@@ -7,12 +7,29 @@ pub fn resolve_script_path(cfg: &Config, s: &str) -> String {
     if p.is_absolute() && p.exists() {
         return p.to_string_lossy().into_owned();
     }
-    for candidate in plugin_search_paths(cfg, s) {
+    for candidate in iter_candidates(cfg, s) {
         if candidate.exists() {
             return candidate.to_string_lossy().into_owned();
         }
     }
     s.to_string()
+}
+
+fn iter_candidates(cfg: &Config, rel: &str) -> Vec<std::path::PathBuf> {
+    let mut out = Vec::new();
+    let mut bases = plugin_search_paths(cfg, rel);
+    let stripped = rel.strip_prefix("plugins/").or_else(|| rel.strip_prefix("plugins\\"));
+    if let Some(trimmed) = stripped {
+        let mut extra = plugin_search_paths(cfg, trimmed);
+        bases.append(&mut extra);
+    }
+    for p in bases {
+        if out.contains(&p) {
+            continue;
+        }
+        out.push(p);
+    }
+    out
 }
 
 #[derive(Default)]
@@ -92,5 +109,25 @@ stage = "raw_text"
         cfg.plugin.normalized_search_paths = vec![search_dir];
         let resolved = resolve_script_path(&cfg, &cfg.rule[0].script);
         assert_eq!(resolved, script_path.to_string_lossy().into_owned());
+    }
+
+    #[test]
+    fn resolves_rule_host_under_plugin_root() {
+        let tmp = tempdir().unwrap();
+        let root = tmp.path().join("plugins");
+        let lib = root.join("lib");
+        fs::create_dir_all(&lib).unwrap();
+        let host_path = lib.join("rule_host.py");
+        fs::write(&host_path, "print('ok')").unwrap();
+        let cfg_text = format!(
+            r#"[plugin]
+root = "{}"
+"#,
+            root.to_string_lossy().replace('\\', "\\\\")
+        );
+        let mut cfg = load(&cfg_text).unwrap();
+        cfg.plugin.normalized_root = Some(root.clone());
+        let resolved = resolve_script_path(&cfg, "plugins/lib/rule_host.py");
+        assert_eq!(resolved, host_path.to_string_lossy().into_owned());
     }
 }
