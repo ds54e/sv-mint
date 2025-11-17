@@ -4,6 +4,7 @@ use crate::textutil::{normalize_lf, strip_bom};
 use crate::types::Stage;
 use serde::Deserialize;
 use std::collections::{HashMap, HashSet};
+use std::env;
 use std::fs;
 use std::path::{Path, PathBuf};
 use toml::Value as TomlValue;
@@ -264,6 +265,7 @@ pub fn load_from_path(opt: Option<PathBuf>) -> Result<(Config, PathBuf), ConfigE
     normalize_rule_scripts(&mut cfg, &base_dir)?;
     infer_rule_stages(&mut cfg.rule)?;
     validate_config(&cfg)?;
+    validate_rule_script_paths(&cfg)?;
     Ok((cfg, path))
 }
 
@@ -279,6 +281,8 @@ fn normalize_rule_scripts(cfg: &mut Config, base_dir: &Path) -> Result<(), Confi
     }
     let has_user_roots = !search_roots.is_empty();
     let fallback_root = base_dir.join("plugins");
+    let needs_default_root = cfg.rule.iter().any(|r| r.script.trim().is_empty());
+    validate_plugin_dirs(cfg, &fallback_root, has_user_roots, needs_default_root)?;
     if !has_user_roots {
         search_roots.push(fallback_root.clone());
     }
@@ -405,6 +409,87 @@ fn to_abs(base: &Path, rel: &str) -> PathBuf {
     } else {
         base.join(p)
     }
+}
+
+fn validate_plugin_dirs(
+    cfg: &Config,
+    fallback_root: &Path,
+    has_user_roots: bool,
+    needs_default_root: bool,
+) -> Result<(), ConfigError> {
+    if let Some(root) = cfg.plugin.normalized_root.as_ref() {
+        validate_dir(root, "plugin.root")?;
+    }
+    for search in &cfg.plugin.normalized_search_paths {
+        validate_dir(search, "plugin.search_paths entry")?;
+    }
+    if has_user_roots || !needs_default_root {
+        return Ok(());
+    }
+    validate_dir(fallback_root, "default plugin directory")
+}
+
+fn validate_dir(path: &Path, label: &str) -> Result<(), ConfigError> {
+    let meta = fs::metadata(path).map_err(|_| ConfigError::InvalidValue {
+        detail: format!("{label} not found: {}", path.display()),
+    })?;
+    if !meta.is_dir() {
+        return Err(ConfigError::InvalidValue {
+            detail: format!("{label} is not a directory: {}", path.display()),
+        });
+    }
+    Ok(())
+}
+
+pub fn plugin_search_paths(cfg: &Config, rel: &str) -> Vec<PathBuf> {
+    let mut out = Vec::new();
+    if let Some(root) = cfg.plugin.normalized_root.as_ref() {
+        out.push(root.join(rel));
+    }
+    for extra in &cfg.plugin.normalized_search_paths {
+        out.push(extra.join(rel));
+    }
+    if !out.is_empty() {
+        return out;
+    }
+    if let Ok(cwd) = env::current_dir() {
+        out.push(cwd.join(rel));
+    }
+    if let Ok(exe) = env::current_exe() {
+        if let Some(base) = exe.parent() {
+            out.push(base.join(rel));
+        }
+    }
+    out
+}
+
+fn validate_rule_script_paths(cfg: &Config) -> Result<(), ConfigError> {
+    for rule in &cfg.rule {
+        let script = rule.script.trim();
+        if script.is_empty() {
+            continue;
+        }
+        let path = Path::new(script);
+        let mut probed = if path.is_absolute() {
+            vec![path.to_path_buf()]
+        } else {
+            plugin_search_paths(cfg, script)
+        };
+        if probed.iter().any(|p| p.exists()) {
+            continue;
+        }
+        probed.sort();
+        probed.dedup();
+        let joined = probed
+            .iter()
+            .map(|p| p.display().to_string())
+            .collect::<Vec<_>>()
+            .join(", ");
+        return Err(ConfigError::InvalidValue {
+            detail: format!("rule {} script not found; searched {}", rule.id, joined),
+        });
+    }
+    Ok(())
 }
 
 #[derive(Clone)]
@@ -625,5 +710,77 @@ id = "format.no_tabs"
         let script = &cfg.rule[0].script;
         assert!(Path::new(script).is_absolute());
         assert!(script.ends_with("format.no_tabs.raw.py"));
+    }
+
+    #[test]
+    fn errors_when_search_path_missing() {
+        let tmp_dir = tempdir().expect("tempdir");
+        let mut cfg = load(
+            r#"
+[plugin]
+search_paths = ["./plugins-extra"]
+
+[[rule]]
+id = "format.no_tabs"
+script = "format.no_tabs.raw.py"
+stage = "raw_text"
+"#,
+        )
+        .expect("load rule");
+        let err = normalize_rule_scripts(&mut cfg, tmp_dir.path()).unwrap_err();
+        match err {
+            ConfigError::InvalidValue { detail } => {
+                assert!(detail.contains("plugin.search_paths"));
+                assert!(detail.contains("plugins-extra"));
+            }
+            other => panic!("unexpected error {other:?}"),
+        }
+    }
+
+    #[test]
+    fn errors_when_default_plugins_dir_missing() {
+        let tmp_dir = tempdir().expect("tempdir");
+        let mut cfg = load(
+            r#"
+[[rule]]
+id = "format.no_tabs"
+"#,
+        )
+        .expect("load rule");
+        let err = normalize_rule_scripts(&mut cfg, tmp_dir.path()).unwrap_err();
+        match err {
+            ConfigError::InvalidValue { detail } => {
+                assert!(detail.contains("default plugin directory"));
+                assert!(detail.contains("plugins"));
+            }
+            other => panic!("unexpected error {other:?}"),
+        }
+    }
+
+    #[test]
+    fn errors_when_rule_script_missing_lists_search_paths() {
+        let tmp_dir = tempdir().expect("tempdir");
+        fs::create_dir_all(tmp_dir.path().join("plugins")).expect("plugins dir");
+        let mut cfg = load(
+            r#"
+[[rule]]
+id = "format.no_tabs"
+script = "format.no_tabs.raw.py"
+stage = "raw_text"
+"#,
+        )
+        .expect("load rule");
+        normalize_rule_scripts(&mut cfg, tmp_dir.path()).expect("normalize");
+        infer_rule_stages(&mut cfg.rule).expect("stage");
+        let err = validate_rule_script_paths(&cfg).unwrap_err();
+        match err {
+            ConfigError::InvalidValue { detail } => {
+                assert!(detail.contains("format.no_tabs"));
+                assert!(detail.contains("searched"));
+                let expected = tmp_dir.path().join("format.no_tabs.raw.py");
+                assert!(detail.contains(&expected.display().to_string()));
+            }
+            other => panic!("unexpected error {other:?}"),
+        }
     }
 }

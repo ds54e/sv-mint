@@ -1,40 +1,18 @@
-use crate::config::Config;
+use crate::config::{plugin_search_paths, Config};
 use std::collections::{BTreeMap, BTreeSet, HashMap};
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 pub fn resolve_script_path(cfg: &Config, s: &str) -> String {
     let p = Path::new(s);
     if p.is_absolute() && p.exists() {
         return p.to_string_lossy().into_owned();
     }
-    for candidate in iter_search_paths(cfg, s) {
+    for candidate in plugin_search_paths(cfg, s) {
         if candidate.exists() {
             return candidate.to_string_lossy().into_owned();
         }
     }
     s.to_string()
-}
-
-fn iter_search_paths(cfg: &Config, rel: &str) -> Vec<PathBuf> {
-    let mut out = Vec::new();
-    if let Some(root) = cfg.plugin.normalized_root.as_ref() {
-        out.push(root.join(rel));
-    }
-    for extra in &cfg.plugin.normalized_search_paths {
-        out.push(extra.join(rel));
-    }
-    if !out.is_empty() {
-        return out;
-    }
-    if let Ok(cwd) = std::env::current_dir() {
-        out.push(cwd.join(rel));
-    }
-    if let Ok(exe) = std::env::current_exe() {
-        if let Some(base) = exe.parent() {
-            out.push(base.join(rel));
-        }
-    }
-    out
 }
 
 #[derive(Default)]
