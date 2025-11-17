@@ -26,6 +26,7 @@ endmodule
 
 ```systemverilog
 module foo;
-endmodule```
+endmodule
+```
 ### Notes
 Git adds `\ No newline at end of file` to diffs; this rule catches the issue before CI noise appears.
