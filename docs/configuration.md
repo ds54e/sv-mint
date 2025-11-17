@@ -22,7 +22,7 @@ Controls the Python worker that hosts rule scripts.
 | `search_paths` | Additional directories searched for every rule script. | `[]` |
 `cmd` must be non-empty; otherwise config validation fails.
 
-When `root` and `search_paths` are not provided, sv-mint looks under `./plugins` relative to the directory that holds `sv-mint.toml`. If a rule omits `script`, the loader searches these directories for `<rule_id>.<stage>.py`.
+When `root` and `search_paths` are not provided, sv-mint looks under `./plugins` relative to the directory that holds `sv-mint.toml`. If a rule omits `script`, the loader searches these directories for `<rule_id>.<stage>.py`. When `root` is set, `plugins/lib/rule_host.py` and `<rule_id>.<stage>.py` are resolved under that root; specify `search_paths` only when you want to add extra lookup locations.
 
 ## `[logging]`
 
