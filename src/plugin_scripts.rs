@@ -76,6 +76,7 @@ mod tests {
         fs::create_dir_all(&search_dir).unwrap();
         let script_path = search_dir.join("format.no_tabs.raw.py");
         fs::write(&script_path, "print('ok')").unwrap();
+        let search_str = search_dir.to_string_lossy().replace('\\', "\\\\");
         let cfg_text = format!(
             r#"[plugin]
 search_paths = ["{}"]
@@ -85,7 +86,7 @@ id = "format.no_tabs"
 script = "format.no_tabs.raw.py"
 stage = "raw_text"
 "#,
-            search_dir.to_string_lossy()
+            search_str
         );
         let mut cfg = load(&cfg_text).unwrap();
         cfg.plugin.normalized_search_paths = vec![search_dir];

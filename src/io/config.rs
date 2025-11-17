@@ -1242,6 +1242,7 @@ stage = "raw_text"
         let tmp = tempdir().unwrap();
         let file_path = tmp.path().join("not_a_dir");
         fs::write(&file_path, "x").unwrap();
+        let path_str = file_path.to_string_lossy().replace('\\', "\\\\");
         let mut cfg = load(&format!(
             r#"
 [plugin]
@@ -1250,7 +1251,7 @@ root = "{}"
 [[rule]]
 id = "format.no_tabs"
 "#,
-            file_path.display()
+            path_str
         ))
         .expect("load");
         let err = normalize_rule_scripts(&mut cfg, tmp.path()).unwrap_err();
