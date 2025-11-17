@@ -1123,9 +1123,9 @@ stderr_snippet_bytes = 512
         )
         .expect("load");
         assert_eq!(cfg.logging.stderr_snippet_bytes, 512);
-        assert_eq!(cfg.logging.show_stage_events, false);
-        assert_eq!(cfg.logging.show_plugin_events, false);
-        assert_eq!(cfg.logging.show_parse_events, false);
+        assert!(!cfg.logging.show_stage_events);
+        assert!(!cfg.logging.show_plugin_events);
+        assert!(!cfg.logging.show_parse_events);
         assert_eq!(cfg.logging.level, "info");
     }
 
