@@ -445,26 +445,35 @@ fn validate_dir(path: &Path, label: &str) -> Result<(), ConfigError> {
     Ok(())
 }
 
+fn push_unique(out: &mut Vec<PathBuf>, seen: &mut HashSet<PathBuf>, p: PathBuf) {
+    if seen.insert(p.clone()) {
+        out.push(p);
+    }
+}
+
 pub fn plugin_search_paths(cfg: &Config, rel: &str) -> Vec<PathBuf> {
     let mut out = Vec::new();
+    let mut seen = HashSet::new();
+    let has_user_roots = cfg.plugin.normalized_root.is_some() || !cfg.plugin.normalized_search_paths.is_empty();
     if let Some(root) = cfg.plugin.normalized_root.as_ref() {
-        out.push(root.join(rel));
+        push_unique(&mut out, &mut seen, root.join(rel));
     }
     for extra in &cfg.plugin.normalized_search_paths {
-        out.push(extra.join(rel));
+        push_unique(&mut out, &mut seen, extra.join(rel));
     }
-    if let Some(config_dir) = cfg.plugin.config_dir.as_ref() {
-        out.push(config_dir.join("plugins").join(rel));
+    if !has_user_roots && cfg.plugin.config_dir.is_some() {
+        let config_dir = cfg.plugin.config_dir.as_ref().unwrap();
+        push_unique(&mut out, &mut seen, config_dir.join("plugins").join(rel));
     }
     if !out.is_empty() {
         return out;
     }
     if let Ok(cwd) = env::current_dir() {
-        out.push(cwd.join(rel));
+        push_unique(&mut out, &mut seen, cwd.join(rel));
     }
     if let Ok(exe) = env::current_exe() {
         if let Some(base) = exe.parent() {
-            out.push(base.join(rel));
+            push_unique(&mut out, &mut seen, base.join(rel));
         }
     }
     out
@@ -811,5 +820,116 @@ stage = "raw_text"
             }
             other => panic!("unexpected error {other:?}"),
         }
+    }
+
+    #[test]
+    fn resolves_script_under_relative_plugin_root() {
+        let tmp_dir = tempdir().expect("tempdir");
+        let root = tmp_dir.path().join("plugins-root");
+        fs::create_dir_all(&root).expect("root dir");
+        let script_path = root.join("format.no_tabs.raw.py");
+        fs::write(&script_path, "print('ok')").expect("script file");
+        let mut cfg = load(
+            r#"
+[plugin]
+root = "./plugins-root"
+
+[[rule]]
+id = "format.no_tabs"
+"#,
+        )
+        .expect("load rule");
+        normalize_rule_scripts(&mut cfg, tmp_dir.path()).expect("normalize");
+        infer_rule_stages(&mut cfg.rule).expect("stage");
+        let paths = plugin_search_paths(&cfg, "format.no_tabs.raw.py");
+        assert_eq!(paths[0], root.join("format.no_tabs.raw.py"));
+        validate_rule_script_paths(&cfg).expect("scripts exist");
+    }
+
+    #[test]
+    fn resolves_script_from_search_paths_and_root_prefers_root() {
+        let tmp_dir = tempdir().expect("tempdir");
+        let root = tmp_dir.path().join("plugins-root");
+        let extra = tmp_dir.path().join("plugins-extra");
+        fs::create_dir_all(&root).expect("root dir");
+        fs::create_dir_all(&extra).expect("extra dir");
+        let in_root = root.join("format.no_tabs.raw.py");
+        let in_extra = extra.join("format.no_tabs.raw.py");
+        fs::write(&in_root, "print('root')").expect("script file");
+        fs::write(&in_extra, "print('extra')").expect("script file");
+        let mut cfg = load(
+            r#"
+[plugin]
+root = "./plugins-root"
+search_paths = ["./plugins-extra"]
+
+[[rule]]
+id = "format.no_tabs"
+script = "format.no_tabs.raw.py"
+stage = "raw_text"
+"#,
+        )
+        .expect("load rule");
+        normalize_rule_scripts(&mut cfg, tmp_dir.path()).expect("normalize");
+        infer_rule_stages(&mut cfg.rule).expect("stage");
+        let paths = plugin_search_paths(&cfg, &cfg.rule[0].script);
+        assert_eq!(paths[0], in_root);
+        validate_rule_script_paths(&cfg).expect("scripts exist");
+    }
+
+    #[test]
+    fn errors_for_missing_absolute_script_with_probes_listed() {
+        let missing = PathBuf::from("/tmp/sv-mint-test-missing.py");
+        if missing.exists() {
+            fs::remove_file(&missing).unwrap();
+        }
+        let mut cfg = load(
+            &format!(
+                r#"
+[[rule]]
+id = "format.no_tabs"
+script = "{}"
+stage = "raw_text"
+"#,
+                missing.display()
+            ),
+        )
+        .expect("load rule");
+        let tmp_dir = tempdir().expect("tempdir");
+        normalize_rule_scripts(&mut cfg, tmp_dir.path()).expect("normalize");
+        infer_rule_stages(&mut cfg.rule).expect("stage");
+        let err = validate_rule_script_paths(&cfg).unwrap_err();
+        match err {
+            ConfigError::InvalidValue { detail } => {
+                assert!(detail.contains("format.no_tabs"));
+                assert!(detail.contains(&missing.display().to_string()));
+            }
+            other => panic!("unexpected error {other:?}"),
+        }
+    }
+
+    #[test]
+    fn search_paths_and_root_dedup_probes() {
+        let tmp_dir = tempdir().expect("tempdir");
+        let root = tmp_dir.path().join("plugins-root");
+        fs::create_dir_all(&root).expect("root dir");
+        let mut cfg = load(
+            r#"
+[plugin]
+root = "./plugins-root"
+search_paths = ["./plugins-root"]
+
+[[rule]]
+id = "format.no_tabs"
+script = "format.no_tabs.raw.py"
+stage = "raw_text"
+"#,
+        )
+        .expect("load rule");
+        normalize_rule_scripts(&mut cfg, tmp_dir.path()).expect("normalize");
+        infer_rule_stages(&mut cfg.rule).expect("stage");
+        let paths = plugin_search_paths(&cfg, &cfg.rule[0].script);
+        assert_eq!(paths[0], root.join("format.no_tabs.raw.py"));
+        assert_eq!(paths.len(), 1);
     }
 }
