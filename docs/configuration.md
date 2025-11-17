@@ -7,6 +7,7 @@
 | key | description | default |
 | --- | --- | --- |
 | `timeout_ms_per_file` | Budget for every file across all stages. Rules that exceed the budget abort the run. | `6000` |
+
 Values below 100 or above 60000 are rejected during config validation.
 The timeout is applied per stage (each stage gets the same budget), not as a single cumulative budget across stages.
 
@@ -20,6 +21,7 @@ Controls the Python worker that hosts rule scripts.
 | `args` | Extra arguments passed before the host script. | `["-u", "-B"]` |
 | `root` | Base directory used to resolve relative `script` paths. | _unset_ |
 | `search_paths` | Additional directories searched for every rule script. | `[]` |
+
 `cmd` must be non-empty; otherwise config validation fails.
 
 When `root` and `search_paths` are not provided, sv-mint looks under `./plugins` relative to the directory that holds `sv-mint.toml`. If a rule omits `script`, the loader searches these directories for `<rule_id>.<stage>.py`. When `root` is set, `plugins/lib/rule_host.py` and `<rule_id>.<stage>.py` are resolved under that root; specify `search_paths` only when you want to add extra lookup locations.
@@ -68,6 +70,7 @@ Every rule needs an `id`. The following keys are optional:
 | `stage` | One of `raw_text`, `pp_text`, `cst`, or `ast`. If left out, sv-mint infers it from the filename suffix. | _inferred_ |
 | `enabled` | Toggle to include or skip the rule. | `true` |
 | `severity` | Overrides the severity reported by the script (`error`, `warning`, `info`; other values are rejected). | _script-provided_ |
+
 `script` must end with `.py` for stage inference to succeed. When stage is omitted, the filename must also end with `.raw/.pp/.cst/.ast.py`.
 
 Rules are grouped per stage at runtime. When every rule for a stage is disabled, that stage is logged as "no enabled rules" and skipped, and if the entire config lacks `[[rule]]` entries the CLI still parses inputs but emits no lint findings.
