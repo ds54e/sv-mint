@@ -86,6 +86,7 @@ Controls JSON request/response size guards and how strictly to enforce them.
 | `max_response_bytes` | Maximum bytes allowed in a response payload. | `16777216` |
 | `on_exceed` | `skip` or `error` for non-required stages. Required stages always error. | `skip` |
 | `fail_ci_on_skip` | Upgrade skipped stages to CI failures. | `false` |
+
 Values must be greater than zero, and `warn_margin_bytes` must not exceed `max_request_bytes`.
 
 ## Minimal example
