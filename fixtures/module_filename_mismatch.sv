@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 `default_nettype none
 
-module multiple_modules_ok;
+module wrong_name;
 endmodule
 
 `default_nettype wire

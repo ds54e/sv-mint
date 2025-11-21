@@ -44,6 +44,9 @@ id = "module.named_ports_required"
 id = "module.no_multiple_modules"
 
 [[rule]]
+id = "module.file_name_match"
+
+[[rule]]
 id = "naming.module_case"
 
 [[rule]]

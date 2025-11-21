@@ -66,6 +66,12 @@ fn detects_multiple_modules() {
 }
 
 #[test]
+fn detects_filename_mismatch() {
+    run_fixture("fixtures/module_filename_mismatch.sv", "module.file_name_match");
+    run_fixture_success("fixtures/module_filename_match_ok.sv");
+}
+
+#[test]
 fn allows_unique_case_without_default() {
     let mut cmd = Command::new(assert_cmd::cargo::cargo_bin!("sv-mint"));
     cmd.arg("--disable").arg("module.named_ports_required");
