@@ -103,7 +103,7 @@ def _check_function_scope(text):
                 if " automatic" in segment or " static" in segment:
                     continue
                 out.append({
-                    "rule_id": "require_function_scope",
+                    "rule_id": "style_require_function_scope",
                     "severity": "warning",
                     "message": "functions in packages/modules/interfaces must declare automatic or static",
                     "location": loc(text, offset + match.start()),
@@ -162,7 +162,7 @@ def _check_logging(text):
         norm = arg.lstrip("`").strip()
         if norm not in ("gfn", "gtn"):
             out.append({
-                "rule_id": "require_log_arg_macro",
+                "rule_id": "dv_log_uvm_arg_macro",
                 "severity": "warning",
                 "message": "uvm report macros must use gfn/gtn as the message tag",
                 "location": loc(text, match.start()),
@@ -171,7 +171,7 @@ def _check_logging(text):
             verb = args[2].strip()
             if verb not in ALLOWED_VERBOSITY:
                 out.append({
-                    "rule_id": "require_log_allowed_verbosity",
+                    "rule_id": "dv_log_allowed_verbosity",
                     "severity": "warning",
                     "message": "uvm report macros must use UVM_LOW/MEDIUM/HIGH/DEBUG verbosity",
                     "location": loc(text, match.start()),
@@ -190,7 +190,7 @@ def _check_logging(text):
             })
     for match in UVM_NONE_FULL_RE.finditer(text):
         out.append({
-            "rule_id": "forbid_log_none_full",
+            "rule_id": "dv_log_no_none_full",
             "severity": "warning",
             "message": "avoid UVM_NONE and UVM_FULL verbosity levels",
             "location": loc(text, match.start()),
@@ -227,7 +227,7 @@ def _check_dpi(text):
         name = match.group(1)
         if not name.startswith("c_dpi_"):
             out.append({
-                "rule_id": "require_dpi_import_prefix",
+                "rule_id": "dv_dpi_import_prefix",
                 "severity": "warning",
                 "message": "imported DPI functions must start with c_dpi_",
                 "location": loc(text, match.start(1)),
@@ -236,7 +236,7 @@ def _check_dpi(text):
         name = match.group(1)
         if not name.startswith("sv_dpi_"):
             out.append({
-                "rule_id": "require_dpi_export_prefix",
+                "rule_id": "dv_dpi_export_prefix",
                 "severity": "warning",
                 "message": "exported DPI handles must start with sv_dpi_",
                 "location": loc(text, match.start(1)),
@@ -258,7 +258,7 @@ def _check_macros(text, path):
     for name, index in defs:
         if name not in undefs and not macros_file:
             out.append({
-                "rule_id": "require_macro_undef",
+                "rule_id": "macro_require_trailing_undef",
                 "severity": "warning",
                 "message": f"`define {name} must be undefined at end of file",
                 "location": loc(text, index),
@@ -266,14 +266,14 @@ def _check_macros(text, path):
         guarded = any(pos < index for pos in guard_positions.get(name, []))
         if macros_file and not guarded:
             out.append({
-                "rule_id": "require_macro_guard",
+                "rule_id": "dv_macro_guard_required",
                 "severity": "warning",
                 "message": f"`define {name} in *_macros.svh must be wrapped with `ifndef {name}",
                 "location": loc(text, index),
             })
         if not macros_file and guarded:
             out.append({
-                "rule_id": "forbid_macro_local_guard",
+                "rule_id": "dv_macro_no_local_guard",
                 "severity": "warning",
                 "message": f"local macro {name} must not use `ifndef guards",
                 "location": loc(text, index),
@@ -283,7 +283,7 @@ def _check_macros(text, path):
             continue
         pos = text.find(name)
         out.append({
-            "rule_id": "require_macro_prefix_header",
+            "rule_id": "dv_macro_prefix_header_only",
             "severity": "warning",
             "message": "DV_* macros must live in dedicated *_macros.svh headers",
             "location": loc(text, pos),
@@ -295,7 +295,7 @@ def _check_uvm_do(text):
     out = []
     for match in UVM_DO_RE.finditer(text):
         out.append({
-            "rule_id": "forbid_uvm_do",
+            "rule_id": "dv_seq_no_uvm_do",
             "severity": "warning",
             "message": "replace `uvm_do macros with start_item/finish_item flow",
             "location": loc(text, match.start()),
@@ -308,7 +308,7 @@ def _check_scoreboard(text):
     if not DV_EOT_RE.search(text):
         for match in SCOREBOARD_CLASS_RE.finditer(text):
             out.append({
-                "rule_id": "require_scoreboard_eot",
+                "rule_id": "dv_scoreboard_require_eot_macro",
                 "severity": "warning",
                 "message": "scoreboard classes should call DV_EOT_PRINT_* macros in check_phase",
                 "location": loc(text, match.start()),
@@ -321,7 +321,7 @@ def _check_program(text):
     out = []
     for match in PROGRAM_RE.finditer(text):
         out.append({
-            "rule_id": "forbid_program_block",
+            "rule_id": "lang_no_program_construct",
             "severity": "warning",
             "message": "program blocks are disallowed; use module/interface alternatives",
             "location": loc(text, match.start()),
@@ -339,7 +339,7 @@ def _check_comparison_macros(text):
         if not UVM_REPORT_CALL_RE.search(window):
             continue
         out.append({
-            "rule_id": "require_dv_check_macro",
+            "rule_id": "dv_check_macro_required",
             "severity": "warning",
             "message": "use DV_CHECK_* comparison macros instead of manual if/uvm_* checks",
             "location": loc(text, start),
@@ -360,7 +360,7 @@ def _check_module_macro_prefix(text):
                 continue
             location = loc(text, offset + match.start(1))
             out.append({
-                "rule_id": "require_macro_module_prefix",
+                "rule_id": "macro_require_module_prefix",
                 "severity": "warning",
                 "message": f"`define {macro} inside module {name} must be prefixed with {prefix}",
                 "location": location,
