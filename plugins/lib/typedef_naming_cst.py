@@ -6,6 +6,7 @@ TYPEDEF_ENUM_RE = re.compile(r"typedef\s+enum(?P<head>[\s\S]*?)\{(?P<body>[\s\S]
 TYPEDEF_RE = re.compile(r"typedef(?!\s+enum).*?\s+(?P<name>[A-Za-z_]\w*)\s*;", re.DOTALL)
 LOWER_SNAKE = re.compile(r"^[a-z][a-z0-9_]*$")
 UPPER_CAMEL = re.compile(r"^[A-Z][A-Za-z0-9]*$")
+ALL_CAPS = re.compile(r"^[A-Z][A-Z0-9_]*$")
 CACHE_KEY = "__typedef_naming_cst"
 
 
@@ -49,8 +50,8 @@ def _check_enum(snippet, base, line_starts):
         for member, rel in _enum_entries(body):
             off = body_off + rel
             loc = byte_span_to_loc(off, off + len(member), line_starts)
-            if not UPPER_CAMEL.match(member):
-                out.append(_make("typedef.enum_value_case", f"enum values should use UpperCamelCase: {member}", loc))
+            if not (UPPER_CAMEL.match(member) or ALL_CAPS.match(member)):
+                out.append(_make("typedef.enum_value_case", f"enum values should use UpperCamelCase or ALL_CAPS: {member}", loc))
     return out
 
 

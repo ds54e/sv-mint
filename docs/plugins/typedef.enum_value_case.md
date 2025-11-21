@@ -3,14 +3,14 @@
 - **Script**: `plugins/typedef.naming.cst.py`
 - **Stage**: `cst` (`mode = inline`)
 - **Key Inputs**: `cst_ir.tokens`, `line_starts`, `pp_text`
-- **Summary**: Enum members must be UpperCamelCase
+- **Summary**: Enum members must be UpperCamelCase or ALL_CAPS
 
 ## Details
 
 ### Trigger
-Enum members that are not `UpperCamelCase`.
+Enum members that are not `UpperCamelCase` or `ALL_CAPS`.
 ### Remediation
-Capitalize each word (`UartInterruptFrameErr`) to match the doc's readability requirement.
+Capitalize each word (`UartInterruptFrameErr`) or use ALL_CAPS (`UART_MODE_IDLE`) to match the doc's readability requirement.
 ### Good
 
 ```systemverilog
@@ -24,7 +24,6 @@ typedef enum logic [1:0] {
 
 ```systemverilog
 typedef enum logic [1:0] {
-  UART_MODE_IDLE,
   uart_mode_busy
 } uart_mode_e;
 ```
