@@ -2,7 +2,7 @@
 id = "case.require_default"
 
 [[rule]]
-id = "comb.no_nb_in_always_comb"
+id = "always_comb.no_nonblocking"
 
 [[rule]]
 id = "decl.no_unused_net"
@@ -75,7 +75,7 @@ id = "package.no_define_in_package"
 id = "package.single_package"
 
 [[rule]]
-id = "seq.no_blocking_in_always_ff"
+id = "always_ff.no_blocking"
 
 [[rule]]
 id = "style.require_function_scope"

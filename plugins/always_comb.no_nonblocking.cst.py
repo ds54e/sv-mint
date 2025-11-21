@@ -7,7 +7,7 @@ def find_regions_text(text):
     i = 0
     n = len(text)
     while True:
-        i = text.find("always_ff", i)
+        i = text.find("always_comb", i)
         if i < 0:
             break
         j = i
@@ -44,18 +44,18 @@ def check(req):
     line_starts = ir.get("line_starts") or [0]
     tokens = ir.get("tokens") or []
     kinds = {name: i for i, name in enumerate(ir.get("tok_kind_table") or [])}
-    op_eq = kinds.get("op_eq")
-    kw_ff = kinds.get("kw_always_ff")
+    op_le = kinds.get("op_le")
+    kw_comb = kinds.get("kw_always_comb")
     regions = []
-    if cst.nodes and tokens and kw_ff is not None:
+    if cst.nodes and tokens and kw_comb is not None:
         for node in cst.of_kind("AlwaysConstruct"):
             toks = cst.tokens_in(node)
-            if any(t.get("kind") == kw_ff for t in toks):
+            if any(t.get("kind") == kw_comb for t in toks):
                 regions.append((node.get("start"), node.get("end")))
     else:
         regions = find_regions_text(text)
     out = []
-    if tokens and op_eq is not None and regions:
+    if tokens and op_le is not None and regions:
         for start, end in regions:
             for tok in tokens:
                 ts = tok.get("start")
@@ -66,16 +66,16 @@ def check(req):
                     continue
                 if ts >= end:
                     break
-                if tok.get("kind") == op_eq:
+                if tok.get("kind") == op_le:
                     loc = byte_span_to_loc(ts, te, line_starts)
                     out.append({
-                        "rule_id": "seq.no_blocking_in_always_ff",
+                        "rule_id": "always_comb.no_nonblocking",
                         "severity": "warning",
-                        "message": "blocking '=' inside always_ff",
+                        "message": "nonblocking '<=' inside always_comb",
                         "location": loc,
                     })
     else:
-        pat = re.compile(r"(?<!<)=(?!=)")
+        pat = re.compile(r"<=")
         for start, end in regions:
             scan = start
             while True:
@@ -84,9 +84,9 @@ def check(req):
                     break
                 loc = byte_span_to_loc(m.start(), m.end(), line_starts)
                 out.append({
-                    "rule_id": "seq.no_blocking_in_always_ff",
+                    "rule_id": "always_comb.no_nonblocking",
                     "severity": "warning",
-                    "message": "blocking '=' inside always_ff",
+                    "message": "nonblocking '<=' inside always_comb",
                     "location": loc,
                 })
                 scan = m.end()

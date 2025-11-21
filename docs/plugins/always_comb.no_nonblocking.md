@@ -1,6 +1,6 @@
-# comb.no_nb_in_always_comb
+# always_comb.no_nonblocking
 
-- **Script**: `plugins/comb.no_nb_in_always_comb.cst.py`
+- **Script**: `plugins/always_comb.no_nonblocking.cst.py`
 - **Stage**: `cst`
 - **Key Inputs**: `cst_ir.tokens`, `tok_kind_table`, `line_starts`, `pp_text`
 - **Summary**: Ban non-blocking assignments (`<=`) inside `always_comb`

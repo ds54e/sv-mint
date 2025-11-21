@@ -1,6 +1,6 @@
-# seq.no_blocking_in_always_ff
+# always_ff.no_blocking
 
-- **Script**: `plugins/seq.no_blocking_in_always_ff.cst.py`
+- **Script**: `plugins/always_ff.no_blocking.cst.py`
 - **Stage**: `cst`
 - **Key Inputs**: `cst_ir.tokens`, `tok_kind_table`, `line_starts`, `pp_text`
 - **Summary**: Ban blocking `=` assignments inside `always_ff`
