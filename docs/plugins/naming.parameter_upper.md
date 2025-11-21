@@ -18,7 +18,6 @@ Rename parameters to `DataWidth`, `NumAlerts`, or `DATA_WIDTH`, etc.
 
 ```systemverilog
 parameter int DataWidth = 32;
-
 parameter int DATA_WIDTH = 32;
 ```
 
