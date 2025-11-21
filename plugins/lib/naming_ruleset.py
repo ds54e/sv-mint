@@ -61,7 +61,6 @@ def _check_symbols(symbols):
             continue
         name = sym.get("name") or ""
         loc = sym.get("loc")
-        out.extend(_validate_name(name, loc, "naming.signal_lower_snake"))
         out.extend(_check_suffixes(name, loc))
         out.extend(_check_clock_reset(name, loc))
     return out
