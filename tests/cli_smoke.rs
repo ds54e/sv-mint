@@ -94,7 +94,7 @@ fn detects_parameter_naming_violations() {
 
 #[test]
 fn detects_localparam_naming_violations() {
-    run_fixture("fixtures/localparam_case_violation.sv", "naming.localparam_lower_snake");
+    run_fixture("fixtures/localparam_case_violation.sv", "naming.localparam_uppercase");
     let mut cmd = Command::new(assert_cmd::cargo::cargo_bin!("sv-mint"));
     cmd.arg("--disable").arg("decl.no_unused_param");
     cmd.arg("fixtures/localparam_case_ok.sv");

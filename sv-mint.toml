@@ -60,7 +60,7 @@ id = "naming.module_lower_snake"
 id = "naming.parameter_uppercase"
 
 [[rule]]
-id = "naming.localparam_lower_snake"
+id = "naming.localparam_uppercase"
 
 [[rule]]
 id = "naming.port_lower_snake"

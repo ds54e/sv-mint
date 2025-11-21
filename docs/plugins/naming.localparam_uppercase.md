@@ -1,6 +1,6 @@
-# naming.localparam_lower_snake
+# naming.localparam_uppercase
 
-- **Script**: `plugins/naming.localparam_lower_snake.ast.py`
+- **Script**: `plugins/naming.localparam_uppercase.ast.py`
 - **Stage**: `ast`
 - **Summary**: Warn when `localparam` names are not UpperCamelCase or ALL_CAPS
 
