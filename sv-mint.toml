@@ -41,6 +41,9 @@ id = "macro.unused_macro"
 id = "module.named_ports_required"
 
 [[rule]]
+id = "module.no_multiple_modules"
+
+[[rule]]
 id = "naming.module_case"
 
 [[rule]]

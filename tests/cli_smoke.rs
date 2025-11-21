@@ -60,6 +60,12 @@ fn detects_multiple_nonblocking_assignments() {
 }
 
 #[test]
+fn detects_multiple_modules() {
+    run_fixture("fixtures/multiple_modules_violation.sv", "module.no_multiple_modules");
+    run_fixture_success("fixtures/multiple_modules_ok.sv");
+}
+
+#[test]
 fn allows_unique_case_without_default() {
     let mut cmd = Command::new(assert_cmd::cargo::cargo_bin!("sv-mint"));
     cmd.arg("--disable").arg("module.named_ports_required");
