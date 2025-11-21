@@ -12,7 +12,7 @@ Walks each CST `CaseStatement`; if no `default` token appears, the rule reports 
 ### Message
 `` case statement must include a default item ``
 ### Remediation
-Add a `default` branch. `unique`/`unique0 case` is exempt, but only if the statement is actually declared `unique` or `unique0`.
+Add a `default` branch when using plain `case`. `unique`/`unique0` cases are exempt (the rule does not check exhaustiveness).
 ### Notes
 The pass inspects preprocessed `pp_text`, so macros that expand to `default` must emit the token after preprocessing.
 ### Good
@@ -33,12 +33,6 @@ endcase
 ```
 
 ### Bad
-
-```systemverilog
-unique case (state_q)  // even with unique, add default if not exhaustive
-  IDLE:   state_d = START;
-endcase
-```
 
 ```systemverilog
 case (opcode_i)
