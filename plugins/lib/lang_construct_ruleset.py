@@ -69,12 +69,7 @@ def _find_always_star(text):
             while after < len(text) and text[after].isspace():
                 after += 1
             if after < len(text) and text[after] == "*":
-                out.append({
-                    "rule_id": "lang.prefer_always_comb",
-                    "severity": "warning",
-                    "message": "use always_comb instead of always @*",
-                    "location": loc(text, pos),
-                })
+                pass
         idx = pos + 1
     return out
 
