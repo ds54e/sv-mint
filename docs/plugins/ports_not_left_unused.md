@@ -25,7 +25,7 @@ endmodule
 
 ```systemverilog
 module fixture(input logic debug_i, output logic ready_o);
-  logic unused_tap /* unused */;
+  logic unused_tap;  // unused
   assign ready_o = 1'b0;
 endmodule
 ```
