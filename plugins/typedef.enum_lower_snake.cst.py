@@ -1,4 +1,4 @@
-from lib.typedef_naming_ruleset import violations_for
+from lib.typedef_naming_cst import violations_for
 
 
 def check(req):

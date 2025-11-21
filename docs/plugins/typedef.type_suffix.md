@@ -1,9 +1,8 @@
 # typedef.type_suffix
 
-- **Script**: `plugins/typedef.type_suffix.raw.py`
-- **Stage**: `raw_text`
-- **Key Inputs**: `text`
-- **Shared Helpers**: `plugins/lib/typedef_naming_ruleset.py`
+- **Script**: `plugins/typedef.naming.cst.py`
+- **Stage**: `cst` (`mode = inline`)
+- **Key Inputs**: `cst_ir.tokens`, `line_starts`, `pp_text`
 - **Summary**: Require other typedef names to end with `_t`
 
 ## Details
