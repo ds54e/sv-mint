@@ -55,6 +55,22 @@ fn allows_marked_unused_var() {
 }
 
 #[test]
+fn detects_unused_port_violation() {
+    let mut cmd = Command::new(assert_cmd::cargo::cargo_bin!("sv-mint"));
+    cmd.arg("--disable").arg("instances_use_named_ports");
+    cmd.arg("fixtures/unused_port_violation.sv");
+    cmd.assert().failure().stdout(contains("ports_not_left_unused"));
+}
+
+#[test]
+fn allows_used_ports() {
+    let mut cmd = Command::new(assert_cmd::cargo::cargo_bin!("sv-mint"));
+    cmd.arg("--disable").arg("instances_use_named_ports");
+    cmd.arg("fixtures/unused_port_compliant.sv");
+    cmd.assert().success();
+}
+
+#[test]
 fn detects_multiple_nonblocking_assignments() {
     run_fixture("fixtures/multiple_nonblocking.sv", "instances_use_named_ports");
 }

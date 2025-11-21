@@ -201,8 +201,9 @@ impl<'a> AstCollector<'a> {
 
     fn record_port_identifier(&mut self, node: RefNode<'_>) -> Result<(), ParseError> {
         if let Some(dir) = self.port_dir_stack.last().copied() {
-            if let Some((name, loc, _origin, _)) = self.lookup_identifier(node)? {
+            if let Some((name, loc, origin, _)) = self.lookup_identifier(node)? {
                 self.record_port(name, loc, dir);
+                self.decl_offsets.insert(origin);
             }
         }
         Ok(())
@@ -335,23 +336,25 @@ impl<'a> SyntaxVisitor for AstCollector<'a> {
 
 impl<'a> AstCollector<'a> {
     fn handle_ansi_port_net(&mut self, port: &sv_parser::AnsiPortDeclarationNet) -> Result<(), ParseError> {
-        if let Some((name, loc, _origin, _)) = self.lookup_identifier(RefNode::from(&port.nodes.1))? {
+        if let Some((name, loc, origin, _)) = self.lookup_identifier(RefNode::from(&port.nodes.1))? {
             let direction = net_header_direction(port.nodes.0.as_ref());
             self.record_port(name, loc, direction);
+            self.decl_offsets.insert(origin);
         }
         Ok(())
     }
 
     fn handle_ansi_port_var(&mut self, port: &sv_parser::AnsiPortDeclarationVariable) -> Result<(), ParseError> {
-        if let Some((name, loc, _origin, _)) = self.lookup_identifier(RefNode::from(&port.nodes.1))? {
+        if let Some((name, loc, origin, _)) = self.lookup_identifier(RefNode::from(&port.nodes.1))? {
             let direction = variable_header_direction(port.nodes.0.as_ref());
             self.record_port(name, loc, direction);
+            self.decl_offsets.insert(origin);
         }
         Ok(())
     }
 
     fn handle_ansi_port_paren(&mut self, port: &sv_parser::AnsiPortDeclarationParen) -> Result<(), ParseError> {
-        if let Some((name, loc, _origin, _)) = self.lookup_identifier(RefNode::from(&port.nodes.2))? {
+        if let Some((name, loc, origin, _)) = self.lookup_identifier(RefNode::from(&port.nodes.2))? {
             let direction = port
                 .nodes
                 .0
@@ -359,6 +362,7 @@ impl<'a> AstCollector<'a> {
                 .map(port_direction_to_str)
                 .unwrap_or("unspecified");
             self.record_port(name, loc, direction);
+            self.decl_offsets.insert(origin);
         }
         Ok(())
     }

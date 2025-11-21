@@ -14,6 +14,9 @@ id = "params_not_left_unused"
 id = "vars_not_left_unused"
 
 [[rule]]
+id = "ports_not_left_unused"
+
+[[rule]]
 id = "net_names_lower_snake"
 
 [[rule]]
