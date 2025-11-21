@@ -78,7 +78,7 @@ id = "package.single_package"
 id = "always_ff.no_blocking"
 
 [[rule]]
-id = "style.require_function_scope"
+id = "function.require_scope"
 
 [[rule]]
 id = "typedef.enum_name_lower_snake_e"

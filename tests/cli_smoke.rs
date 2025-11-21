@@ -136,7 +136,7 @@ fn detects_typedef_violations() {
 
 #[test]
 fn detects_function_scope_violations() {
-    run_fixture("fixtures/function_scope_violation.sv", "style.require_function_scope");
+    run_fixture("fixtures/function_scope_violation.sv", "function.require_scope");
 }
 
 #[test]
