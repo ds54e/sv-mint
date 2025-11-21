@@ -14,6 +14,9 @@ id = "decl.unused_param"
 id = "decl.unused_var"
 
 [[rule]]
+id = "decl.net_lower_snake"
+
+[[rule]]
 id = "flow.multiple_nonblocking"
 
 [[rule]]

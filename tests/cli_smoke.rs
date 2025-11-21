@@ -60,6 +60,15 @@ fn detects_multiple_nonblocking_assignments() {
 }
 
 #[test]
+fn detects_net_naming_violations() {
+    run_fixture("fixtures/net_lower_snake_violation.sv", "decl.net_lower_snake");
+    let mut cmd = Command::new(assert_cmd::cargo::cargo_bin!("sv-mint"));
+    cmd.arg("--disable").arg("decl.unused_net");
+    cmd.arg("fixtures/net_lower_snake_ok.sv");
+    cmd.assert().success();
+}
+
+#[test]
 fn detects_multiple_modules() {
     run_fixture("fixtures/multiple_modules_violation.sv", "module.no_multiple_modules");
     run_fixture_success("fixtures/multiple_modules_ok.sv");
