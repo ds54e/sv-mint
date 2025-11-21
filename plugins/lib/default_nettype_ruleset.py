@@ -24,14 +24,14 @@ def evaluate(req):
     out = []
     matches = list(DIRECTIVE_RE.finditer(text))
     if not matches:
-        out.append(_violation("lang.default_nettype.require_prologue_none", 0, text, "file must declare `default_nettype none` near the top"))
+        out.append(_violation("lang_default_nettype_require_prologue_none", 0, text, "file must declare `default_nettype none` near the top"))
     else:
         first = matches[0]
         value = first.group(1).lower()
         first_loc = loc(text, first.start())
         if value != "none":
             out.append({
-                "rule_id": "lang.default_nettype.require_none_value",
+                "rule_id": "lang_default_nettype_require_none_value",
                 "severity": "warning",
                 "message": "`default_nettype` must be set to `none`",
                 "location": first_loc,
@@ -40,7 +40,7 @@ def evaluate(req):
             significant = _significant_lines_before(text, first_loc["line"])
             if significant > PLACEMENT_LIMIT:
                 out.append({
-                    "rule_id": "lang.default_nettype.placement_limit",
+                    "rule_id": "lang_default_nettype_placement_limit",
                     "severity": "warning",
                     "message": f"`default_nettype none` should appear within the first {PLACEMENT_LIMIT} significant lines",
                     "location": first_loc,
@@ -90,7 +90,7 @@ def _check_trailing_reset(text, last_match):
     value = last_match.group(1).lower()
     if value != "wire":
         out.append({
-            "rule_id": "lang.default_nettype.require_epilogue_wire",
+            "rule_id": "lang_default_nettype_require_epilogue_wire",
             "severity": "warning",
             "message": "`default_nettype none` should be reset to `wire` at the end of the file",
             "location": loc(text, last_match.start()),

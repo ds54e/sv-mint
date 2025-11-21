@@ -50,7 +50,7 @@ def _check_modules(decls):
             continue
         name = decl.get("name") or ""
         loc = decl.get("loc")
-        out.extend(_validate_name(name, loc, "naming.module_lower_snake"))
+        out.extend(_validate_name(name, loc, "naming_module_lower_snake"))
     return out
 
 
@@ -71,7 +71,7 @@ def _check_ports(ports):
     for port in ports:
         name = port.get("name") or ""
         loc = port.get("loc")
-        out.extend(_validate_name(name, loc, "naming.port_lower_snake"))
+        out.extend(_validate_name(name, loc, "naming_port_lower_snake"))
         out.extend(_check_suffixes(name, loc))
         out.extend(_check_clock_reset(name, loc))
     return out
@@ -90,7 +90,7 @@ def _validate_name(name, loc, rule_id):
         })
     elif DIGIT_SUFFIX.search(name):
         issues.append({
-            "rule_id": "naming.no_numeric_suffix",
+            "rule_id": "naming_no_numeric_suffix",
             "severity": "warning",
             "message": f"{name} must not end with _<number>",
             "location": loc,
@@ -104,7 +104,7 @@ def _check_suffixes(name, loc):
         return issues
     if "_n_i" in name or "_n_o" in name or "_n_io" in name:
         issues.append({
-            "rule_id": "naming.suffix_order",
+            "rule_id": "naming_suffix_order",
             "severity": "warning",
             "message": f"{name} must combine suffixes without extra underscores (use '_ni', '_no', '_nio')",
             "location": loc,
@@ -118,14 +118,14 @@ def _check_clock_reset(name, loc):
         return issues
     if "clk" in name and not name.startswith("clk"):
         issues.append({
-            "rule_id": "naming.clock_prefix",
+            "rule_id": "naming_clock_prefix",
             "severity": "warning",
             "message": f"{name} must start with 'clk'",
             "location": loc,
         })
     if name.startswith("rst") and not (name.endswith("_n") or name.endswith("_ni") or name.endswith("_no") or name.endswith("_nio")):
         issues.append({
-            "rule_id": "naming.reset_active_low_suffix",
+            "rule_id": "naming_reset_active_low_suffix",
             "severity": "warning",
             "message": f"{name} must end with '_n' for active-low resets",
             "location": loc,
@@ -143,7 +143,7 @@ def _check_clock_reset_order(ports):
         if name.startswith("clk"):
             if clk_seen and rst_phase and loc:
                 issues.append({
-                    "rule_id": "naming.clock_port_order",
+                    "rule_id": "naming_clock_port_order",
                     "severity": "warning",
                     "message": "clk ports should appear before resets and other ports",
                     "location": loc,
@@ -152,7 +152,7 @@ def _check_clock_reset_order(ports):
         elif name.startswith("rst"):
             if not clk_seen and loc:
                 issues.append({
-                    "rule_id": "naming.reset_after_clock",
+                    "rule_id": "naming_reset_after_clock",
                     "severity": "warning",
                     "message": "rst ports should follow clk ports",
                     "location": loc,
@@ -173,7 +173,7 @@ def _check_differential_pairs(ports):
                 twin = name[:-2] + "_n"
                 if twin not in names:
                     issues.append({
-                        "rule_id": "naming.differential_pair",
+                        "rule_id": "naming_differential_pair",
                         "severity": "warning",
                         "message": f"differential pair missing counterpart for {name}",
                         "location": port.get("loc") or _default_loc(),
@@ -192,7 +192,7 @@ def _check_pipeline_suffixes(names):
             prev = base + ("_q" if stage == 2 else f"_q{stage-1}")
             if prev not in names:
                 issues.append({
-                    "rule_id": "naming.pipeline_sequence",
+                    "rule_id": "naming_pipeline_sequence",
                     "severity": "warning",
                     "message": f"pipeline stage {name} missing previous stage {prev}",
                     "location": _default_loc(),
@@ -220,7 +220,7 @@ def _check_parameter_naming(decls):
             continue
         if not (UPPER_CAMEL.match(name) or ALL_CAPS.match(name)):
             issues.append({
-                "rule_id": "naming.parameter_uppercase",
+                "rule_id": "naming_parameter_uppercase",
                 "severity": "warning",
                 "message": f"parameter {name} should use UpperCamelCase or ALL_CAPS",
                 "location": decl.get("loc") or _default_loc(),
@@ -248,7 +248,7 @@ def _check_port_direction_suffixes(ports):
             continue
         exp = " or ".join(allowed)
         issues.append({
-            "rule_id": "naming.port_direction_suffix",
+            "rule_id": "naming_port_direction_suffix",
             "severity": "warning",
             "message": f"{name} must end with {exp}",
             "location": loc,

@@ -94,10 +94,10 @@ Values must be greater than zero, and `warn_margin_bytes` must not exceed `max_r
 ```toml
 # Only declare the bundled rules you want; everything else uses defaults.
 [[rule]]
-id = "module.no_port_wildcard"
+id = "module_no_port_wildcard"
 
 [[rule]]
-id = "decl.no_unused_var"
+id = "decl_no_unused_var"
 ```
 
 To target a custom rule directory, set `[plugin].root` and list your scripts with explicit `script` or by following the `<id>.<stage>.py` pattern so sv-mint can infer them automatically.

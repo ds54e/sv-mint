@@ -21,10 +21,10 @@ sv-mint is a SystemVerilog lint pipeline that combines a Rust core with Python p
 
 ```toml
 [[rule]]
-id = "module.no_port_wildcard"
+id = "module_no_port_wildcard"
 
 [[rule]]
-id = "decl.no_unused_var"
+id = "decl_no_unused_var"
 ```
 
 See [`docs/configuration.md`](docs/configuration.md) for every optional section, stage inference, and script resolution rules.
