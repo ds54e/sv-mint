@@ -3,6 +3,8 @@ import re
 CACHE_KEY = "__naming_ruleset"
 LOWER_SNAKE = re.compile(r"^[a-z][a-z0-9_]*$")
 DIGIT_SUFFIX = re.compile(r"_[0-9]+$")
+ALL_CAPS = re.compile(r"^[A-Z][A-Z0-9_]*$")
+UPPER_CAMEL = re.compile(r"^[A-Z][A-Za-z0-9]*$")
 
 
 def violations_for(req, rule_id):
@@ -215,11 +217,13 @@ def _check_parameter_naming(decls):
         if decl.get("kind") != "param":
             continue
         name = decl.get("name") or ""
-        if not name or not name[0].isupper():
+        if not name:
+            continue
+        if not (UPPER_CAMEL.match(name) or ALL_CAPS.match(name)):
             issues.append({
                 "rule_id": "naming.parameter_upper",
                 "severity": "warning",
-                "message": f"parameter {name} should use UpperCamelCase",
+                "message": f"parameter {name} should use UpperCamelCase or ALL_CAPS",
                 "location": decl.get("loc") or _default_loc(),
             })
     return issues

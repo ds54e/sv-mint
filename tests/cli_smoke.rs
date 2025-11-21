@@ -75,6 +75,15 @@ fn detects_var_naming_violations() {
 }
 
 #[test]
+fn detects_parameter_naming_violations() {
+    run_fixture("fixtures/parameter_case_violation.sv", "naming.parameter_upper");
+    let mut cmd = Command::new(assert_cmd::cargo::cargo_bin!("sv-mint"));
+    cmd.arg("--disable").arg("decl.unused_param");
+    cmd.arg("fixtures/parameter_case_ok.sv");
+    cmd.assert().success();
+}
+
+#[test]
 fn detects_localparam_naming_violations() {
     run_fixture("fixtures/localparam_case_violation.sv", "naming.localparam_case");
     let mut cmd = Command::new(assert_cmd::cargo::cargo_bin!("sv-mint"));

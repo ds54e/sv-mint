@@ -4,20 +4,22 @@
 - **Stage**: `ast`
 - **Key Inputs**: `decls`, `symbols`, `ports`
 - **Shared Helpers**: `plugins/lib/naming_ruleset.py`
-- **Summary**: Parameters must be UpperCamelCase
+- **Summary**: Parameters must be UpperCamelCase or ALL_CAPS
 
 ## Details
 
 ### Trigger
-Flags `parameter` names that are not UpperCamelCase.
+Flags `parameter` names that are not UpperCamelCase or ALL_CAPS.
 ### Message
-`` parameter <name> must use UpperCamelCase ``
+`` parameter <name> should use UpperCamelCase or ALL_CAPS ``
 ### Remediation
-Rename parameters to `DataWidth`, `NumAlerts`, etc.
+Rename parameters to `DataWidth`, `NumAlerts`, or `DATA_WIDTH`, etc.
 ### Good
 
 ```systemverilog
 parameter int DataWidth = 32;
+
+parameter int DATA_WIDTH = 32;
 ```
 
 ### Bad
