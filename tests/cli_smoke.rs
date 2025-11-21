@@ -119,7 +119,7 @@ fn detects_module_inst_violations() {
 
 #[test]
 fn detects_typedef_violations() {
-    run_fixture("fixtures/typedef_violation.sv", "typedef.enum_suffix");
+    run_fixture("fixtures/typedef_violation.sv", "typedef.enum_name_style");
 }
 
 #[test]

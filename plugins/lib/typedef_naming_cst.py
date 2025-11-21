@@ -41,10 +41,8 @@ def _check_enum(snippet, base, line_starts):
         name = m.group("name")
         name_off = base + m.start("name")
         name_loc = byte_span_to_loc(name_off, name_off + len(name), line_starts)
-        if not name.endswith("_e"):
-            out.append(_make("typedef.enum_suffix", f"enum types should end with _e: {name}", name_loc))
-        if not LOWER_SNAKE.match(name):
-            out.append(_make("typedef.enum_lower_snake", f"enum types should use lower_snake_case: {name}", name_loc))
+        if not name.endswith("_e") or not LOWER_SNAKE.match(name):
+            out.append(_make("typedef.enum_name_style", f"enum types should use lower_snake_case and end with _e: {name}", name_loc))
         body = m.group("body")
         body_off = base + m.start("body")
         prefix = _enum_prefix(name)

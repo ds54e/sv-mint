@@ -86,11 +86,7 @@ id = "seq.blocking_in_alwaysff"
 id = "style.function_scope"
 
 [[rule]]
-id = "typedef.enum_lower_snake"
-stage = "cst"
-
-[[rule]]
-id = "typedef.enum_suffix"
+id = "typedef.enum_name_style"
 stage = "cst"
 
 [[rule]]
