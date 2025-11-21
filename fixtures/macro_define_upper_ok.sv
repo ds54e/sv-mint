@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: Apache-2.0
 `default_nettype none
 
 `define GOOD_MACRO 1

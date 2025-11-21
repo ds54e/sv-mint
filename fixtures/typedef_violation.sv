@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: Apache-2.0
 `default_nettype none
 
 typedef enum logic [1:0] { A, B } BadEnum;

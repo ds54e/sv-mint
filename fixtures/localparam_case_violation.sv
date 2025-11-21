@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: Apache-2.0
 `default_nettype none
 
 module localparam_case_violation;

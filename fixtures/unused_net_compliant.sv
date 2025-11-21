@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: Apache-2.0
 // Decl unused net compliant
 `default_nettype none
 

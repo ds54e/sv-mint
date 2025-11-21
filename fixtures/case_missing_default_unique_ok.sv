@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: Apache-2.0
 // Example unique case without default; all values covered
 `default_nettype none
 
