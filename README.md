@@ -33,20 +33,6 @@ See [`docs/configuration.md`](docs/configuration.md) for every optional section,
    - `sv-mint --only rule_x path/to/file.sv` runs only `rule_x`, temporarily disabling every other rule.
    - `sv-mint --disable rule_a,rule_b path/to/file.sv` disables just the listed rules; specify multiple IDs or repeat `--disable` as needed.
    - When `--only` is present, any `--disable` that follows removes rules from that already-filtered set, and referencing a nonexistent `rule_id` raises an error.
-6. Feed filelists via `-f/--filelist`. Entries can nest other lists with `-f`, inject include paths with `+incdir+`, and add defines with `+define+`. Relative paths are resolved against the filelist location before being passed to `sv-parser`.
-
-### Filelists
-
-`sv-mint -f path/to/files.f` consumes filelist entries using a small, svlint-like syntax:
-- `-f child.f` (or `-fchild.f`) recursively loads another list; cycles raise `invalid value` errors.
-- `-y libdir` (or `-ylibdir`) appends additional include/library directories, sharing the same resolution rules as `+incdir`. When combined with `+libext`, files under these directories are auto-added to the lint target if their extensions match.
-- `+incdir+dir1+dir2` appends include directories to `svparser.include_paths` after resolving each path relative to the filelist; environment variables like `${IP_ROOT}` or `$(OUTDIR)` are expanded before resolution, and paths may be quoted to preserve spaces (e.g., `+incdir+"path with spaces"`).
-- `+define+FOO=1+BAR` appends raw `name` or `name=value` strings to `svparser.defines`, matching the inline CLI format; multi-line entries can be continued with a trailing `\`.
-- `+libext+.sv+.svh` declares extensions for the auto-discovery pass; every `-y` directory is scanned recursively (symlinks are skipped) and files matching the listed extensions are added automatically. Prefix dots are optional (`.sv` or `sv`). Extremely large trees (>50k matches) abort with an error so you can refine the filelist.
-- Any other non-empty, non-comment line is treated as an input file path and queued for linting.
-- Comments beginning with `//` or `#`, plus blank lines, are ignored.
-- Windows drive-letter (`C:\proj\foo.sv`) and UNC (`\\server\share\bar.sv`) paths are treated as absolute even on Unix hosts, so mixed-platform filelists work out of the box.
-- Wrap any argument in single or double quotes to keep embedded whitespace or `+` characters intact; quotes are stripped only when they enclose the entire token.
 
 ## Anatomy of a Rule
 - Rules live under `plugins/` and expose a `check(req)` function.

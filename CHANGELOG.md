@@ -2,6 +2,10 @@
 
 All notable changes to this project are documented here, following [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) conventions and semantic versioning.
 
+## [2.0.0] - 2025-11-21
+### Removed
+- Filelist support across the CLI (`-f/--filelist`, `+incdir`, `+define`, `-y`, `+libext`) along with related documentation and tests.
+
 ## [1.3.0] - 2025-11-15
 ### Added
 - Introduced `docs/configuration.md`, a consolidated reference for every `sv-mint.toml` section, defaults, and script resolution rules.
@@ -49,6 +53,9 @@ All notable changes to this project are documented here, following [Keep a Chang
 - CLI gained `-f/--filelist` option to lint inputs described via svlint-style filelists.
 - Tests now include filelist-driven smoke coverage, and README documents the supported syntax in detail.
 
+[2.0.0]: https://github.com/foo/sv-mint/releases/tag/v2.0.0
+[1.4.1]: https://github.com/foo/sv-mint/releases/tag/v1.4.1
+[1.4.0]: https://github.com/foo/sv-mint/releases/tag/v1.4.0
 [1.3.0]: https://github.com/foo/sv-mint/releases/tag/v1.3.0
 [1.2.0]: https://github.com/foo/sv-mint/releases/tag/v1.2.0
 [1.1.3]: https://github.com/foo/sv-mint/releases/tag/v1.1.3
