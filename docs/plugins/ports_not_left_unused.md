@@ -23,6 +23,13 @@ module my_block(input logic a_i, output logic b_o);
 endmodule
 ```
 
+```systemverilog
+module fixture(input logic debug_i, output logic ready_o);
+  logic unused_tap /* unused */;
+  assign ready_o = 1'b0;
+endmodule
+```
+
 ### Bad
 
 ```systemverilog
