@@ -1,17 +1,16 @@
 # flow.no_disable_fork_label
 
-- **Script**: `plugins/flow.no_disable_fork_label.raw.py`
-- **Stage**: `raw_text`
-- **Key Inputs**: `text`, `path`
-- **Shared Helpers**: `plugins/lib/dv_text_ruleset.py`
+- **Script**: `plugins/flow.no_disable_fork_label.cst.py`
+- **Stage**: `cst` (`mode = inline`)
+- **Key Inputs**: `cst_ir.tokens`, `line_starts`, `pp_text`
 - **Summary**: `disable fork_label` is not portable
 
 ## Details
 
 ### Trigger
-Warns when `disable` targets a fork label.
+Walks CST `DisableStatement`; if it targets a label (anything other than `fork`), report it.
 ### Message
-`` disable fork_label is not portable; use disable fork ``
+`` disable block label is not portable; use disable fork ``
 ### Remediation
 Call `disable fork;` or rely on DV isolation helpers instead.
 ### Good

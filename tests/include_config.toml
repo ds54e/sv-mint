@@ -13,6 +13,9 @@ id = "decl.unused_var"
 id = "module.named_ports_required"
 
 [[rule]]
+id = "flow.no_disable_fork_label"
+
+[[rule]]
 id = "macro.unused_macro"
 
 [logging]
