@@ -39,6 +39,7 @@ pub struct DefineInfo {
 pub enum DeclKind {
     Module,
     Param,
+    LocalParam,
     Net,
     Var,
 }

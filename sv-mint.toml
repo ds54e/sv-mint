@@ -59,6 +59,9 @@ id = "naming.module_case"
 id = "naming.parameter_upper"
 
 [[rule]]
+id = "naming.localparam_case"
+
+[[rule]]
 id = "naming.port_case"
 
 [[rule]]

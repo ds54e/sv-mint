@@ -272,6 +272,9 @@ impl<'a> SyntaxVisitor for AstCollector<'a> {
             RefNode::ParamAssignment(x) => {
                 self.record_decl(RefNode::from(x), DeclKind::Param)?;
             }
+            RefNode::LocalParameterDeclaration(x) => {
+                self.record_decl(RefNode::from(x), DeclKind::LocalParam)?;
+            }
             RefNode::NetDeclAssignment(x) => {
                 self.record_decl(RefNode::from(x), DeclKind::Net)?;
             }
