@@ -26,7 +26,7 @@ fn run_with_config(path: &str, config: &str, expected: &[&str]) {
 
 #[test]
 fn detects_unused_net_violation() {
-    run_fixture("fixtures/unused_net_violation.sv", "decl_no_unused_net");
+    run_fixture("fixtures/unused_net_violation.sv", "forbid_unused_net");
 }
 
 #[test]
@@ -36,7 +36,7 @@ fn allows_marked_unused_net() {
 
 #[test]
 fn detects_unused_param_violation() {
-    run_fixture("fixtures/unused_param_violation.sv", "decl_no_unused_param");
+    run_fixture("fixtures/unused_param_violation.sv", "forbid_unused_param");
 }
 
 #[test]
@@ -46,7 +46,7 @@ fn allows_marked_unused_param() {
 
 #[test]
 fn detects_unused_var_violation() {
-    run_fixture("fixtures/unused_var_violation.sv", "decl_no_unused_var");
+    run_fixture("fixtures/unused_var_violation.sv", "forbid_unused_var");
 }
 
 #[test]
@@ -56,47 +56,47 @@ fn allows_marked_unused_var() {
 
 #[test]
 fn detects_multiple_nonblocking_assignments() {
-    run_fixture("fixtures/multiple_nonblocking.sv", "module_require_named_ports");
+    run_fixture("fixtures/multiple_nonblocking.sv", "require_named_ports");
 }
 
 #[test]
 fn detects_bare_always() {
-    run_fixture("fixtures/always_plain.sv", "lang_always_require_structured");
+    run_fixture("fixtures/always_plain.sv", "require_structured_always");
     let mut cmd = Command::new(assert_cmd::cargo::cargo_bin!("sv-mint"));
-    cmd.arg("--disable").arg("module_require_named_ports");
+    cmd.arg("--disable").arg("require_named_ports");
     cmd.arg("fixtures/always_structured_ok.sv");
     cmd.assert().success();
 }
 
 #[test]
 fn detects_net_naming_violations() {
-    run_fixture("fixtures/net_lower_snake_violation.sv", "naming_net_lower_snake");
+    run_fixture("fixtures/net_lower_snake_violation.sv", "require_net_lower_snake");
     let mut cmd = Command::new(assert_cmd::cargo::cargo_bin!("sv-mint"));
-    cmd.arg("--disable").arg("decl_no_unused_net");
+    cmd.arg("--disable").arg("forbid_unused_net");
     cmd.arg("fixtures/net_lower_snake_ok.sv");
     cmd.assert().success();
 }
 
 #[test]
 fn detects_var_naming_violations() {
-    run_fixture("fixtures/var_lower_snake_violation.sv", "naming_var_lower_snake");
+    run_fixture("fixtures/var_lower_snake_violation.sv", "require_var_lower_snake");
     run_fixture_success("fixtures/var_lower_snake_ok.sv");
 }
 
 #[test]
 fn detects_parameter_naming_violations() {
-    run_fixture("fixtures/parameter_case_violation.sv", "naming_parameter_uppercase");
+    run_fixture("fixtures/parameter_case_violation.sv", "require_param_uppercase");
     let mut cmd = Command::new(assert_cmd::cargo::cargo_bin!("sv-mint"));
-    cmd.arg("--disable").arg("decl_no_unused_param");
+    cmd.arg("--disable").arg("forbid_unused_param");
     cmd.arg("fixtures/parameter_case_ok.sv");
     cmd.assert().success();
 }
 
 #[test]
 fn detects_localparam_naming_violations() {
-    run_fixture("fixtures/localparam_case_violation.sv", "naming_localparam_uppercase");
+    run_fixture("fixtures/localparam_case_violation.sv", "require_localparam_uppercase");
     let mut cmd = Command::new(assert_cmd::cargo::cargo_bin!("sv-mint"));
-    cmd.arg("--disable").arg("decl_no_unused_param");
+    cmd.arg("--disable").arg("forbid_unused_param");
     cmd.arg("fixtures/localparam_case_ok.sv");
     cmd.assert().success();
 }
@@ -105,58 +105,58 @@ fn detects_localparam_naming_violations() {
 fn detects_multiple_modules() {
     run_fixture(
         "fixtures/multiple_modules_violation.sv",
-        "module_single_module_per_file",
+        "require_single_module",
     );
     run_fixture_success("fixtures/multiple_modules_ok.sv");
 }
 
 #[test]
 fn detects_filename_mismatch() {
-    run_fixture("fixtures/module_filename_mismatch.sv", "module_name_matches_file");
+    run_fixture("fixtures/module_filename_mismatch.sv", "require_module_filename_match");
     run_fixture_success("fixtures/module_filename_match_ok.sv");
 }
 
 #[test]
 fn allows_unique_case_without_default() {
     let mut cmd = Command::new(assert_cmd::cargo::cargo_bin!("sv-mint"));
-    cmd.arg("--disable").arg("module_require_named_ports");
+    cmd.arg("--disable").arg("require_named_ports");
     cmd.arg("fixtures/case_missing_default_unique_ok.sv");
     cmd.assert().success();
 }
 
 #[test]
 fn detects_module_inst_violations() {
-    run_fixture("fixtures/module_inst_violation.sv", "module_require_named_ports");
+    run_fixture("fixtures/module_inst_violation.sv", "require_named_ports");
 }
 
 #[test]
 fn detects_typedef_violations() {
-    run_fixture("fixtures/typedef_violation.sv", "typedef_enum_name_lower_snake_e");
+    run_fixture("fixtures/typedef_violation.sv", "require_enum_name_lower_snake_e");
 }
 
 #[test]
 fn detects_function_scope_violations() {
-    run_fixture("fixtures/function_scope_violation.sv", "function_require_scope");
+    run_fixture("fixtures/function_scope_violation.sv", "require_function_scope");
 }
 
 #[test]
 fn detects_macro_undef_violations() {
-    run_fixture("fixtures/macro_violation.sv", "macro_require_trailing_undef");
+    run_fixture("fixtures/macro_violation.sv", "require_macro_undef");
 }
 
 #[test]
 fn detects_define_upper_violations() {
-    run_fixture("fixtures/macro_define_upper_violation.sv", "macro_define_uppercase");
+    run_fixture("fixtures/macro_define_upper_violation.sv", "require_define_uppercase");
     let mut cmd = Command::new(assert_cmd::cargo::cargo_bin!("sv-mint"));
-    cmd.arg("--disable").arg("macro_no_unused_macro");
-    cmd.arg("--disable").arg("macro_require_trailing_undef");
+    cmd.arg("--disable").arg("forbid_unused_macro");
+    cmd.arg("--disable").arg("require_macro_undef");
     cmd.arg("fixtures/macro_define_upper_ok.sv");
     cmd.assert().success();
 }
 
 #[test]
 fn detects_unused_macro() {
-    run_fixture("fixtures/macro_unused.sv", "macro_no_unused_macro");
+    run_fixture("fixtures/macro_unused.sv", "forbid_unused_macro");
     run_fixture_success("fixtures/macro_used.sv");
 }
 
@@ -165,6 +165,6 @@ fn reports_include_file_path() {
     run_with_config(
         "fixtures/include_top.sv",
         "tests/include_config.toml",
-        &["include_child.sv", "decl_no_unused_var"],
+        &["include_child.sv", "forbid_unused_var"],
     );
 }

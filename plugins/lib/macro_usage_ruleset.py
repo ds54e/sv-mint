@@ -32,7 +32,7 @@ def evaluate(req):
         if _has_unused_comment(text, start):
             continue
         out.append({
-            "rule_id": "macro_no_unused_macro",
+            "rule_id": "forbid_unused_macro",
             "severity": "warning",
             "message": f"macro `{name}` is defined but never used",
             "location": loc(text, start),

@@ -25,7 +25,7 @@ def evaluate(req):
     location = {"line": 1, "col": 1, "end_line": 1, "end_col": 1}
     if not SPDX_RE.search(snippet):
         issues.append({
-            "rule_id": "header_missing_spdx",
+            "rule_id": "require_header_spdx",
             "severity": "warning",
             "message": "file should include SPDX-License-Identifier header",
             "location": location,
@@ -35,7 +35,7 @@ def evaluate(req):
         has_comment = any(line.strip().startswith("//") for line in lines[:5])
         if not has_comment:
             issues.append({
-                "rule_id": "header_missing_comment",
+                "rule_id": "require_header_comment",
                 "severity": "warning",
                 "message": "file header should include descriptive comment",
                 "location": location,

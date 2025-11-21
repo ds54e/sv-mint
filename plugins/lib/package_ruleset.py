@@ -28,7 +28,7 @@ def evaluate(req):
     if len(packages) > 1:
         match = packages[0]
         out.append(_violation(
-            "package_single_package",
+            "require_single_package",
             f"multiple package declarations in single file ({match.group(1)})",
             match.start(),
             text,
@@ -59,7 +59,7 @@ def evaluate(req):
             for match in DEFINE_RE.finditer(body):
                 name = match.group(1)
                 out.append(_violation(
-                    "package_no_define_in_package",
+                    "forbid_define_in_package",
                     f"prefer parameters over `define {name} inside package",
                     body_start + match.start(),
                     text,

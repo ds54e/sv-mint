@@ -1,93 +1,93 @@
 [[rule]]
-id = "case_require_default"
+id = "require_case_default"
 
 [[rule]]
-id = "always_comb_no_nonblocking"
+id = "forbid_always_comb_nb"
 
 [[rule]]
-id = "decl_no_unused_net"
+id = "forbid_unused_net"
 
 [[rule]]
-id = "decl_no_unused_param"
+id = "forbid_unused_param"
 
 [[rule]]
-id = "decl_no_unused_var"
+id = "forbid_unused_var"
 
 [[rule]]
-id = "naming_net_lower_snake"
+id = "require_net_lower_snake"
 
 [[rule]]
-id = "naming_var_lower_snake"
+id = "require_var_lower_snake"
 
 [[rule]]
-id = "flow_no_disable_label"
+id = "forbid_disable_label"
 
 [[rule]]
-id = "lang_default_nettype_require_prologue_none"
+id = "require_default_nettype_head_none"
 
 [[rule]]
-id = "lang_default_nettype_require_epilogue_wire"
+id = "require_default_nettype_tail_wire"
 
 [[rule]]
-id = "lang_always_require_structured"
+id = "require_structured_always"
 stage = "cst"
 
 [[rule]]
-id = "macro_require_trailing_undef"
+id = "require_macro_undef"
 
 [[rule]]
-id = "macro_require_module_prefix"
+id = "require_macro_module_prefix"
 
 [[rule]]
-id = "macro_no_unused_macro"
+id = "forbid_unused_macro"
 
 [[rule]]
-id = "macro_define_uppercase"
+id = "require_define_uppercase"
 
 [[rule]]
-id = "module_require_named_ports"
+id = "require_named_ports"
 
 [[rule]]
-id = "module_single_module_per_file"
+id = "require_single_module"
 
 [[rule]]
-id = "module_name_matches_file"
+id = "require_module_filename_match"
 
 [[rule]]
 id = "naming_module_lower_snake"
 
 [[rule]]
-id = "naming_parameter_uppercase"
+id = "require_param_uppercase"
 
 [[rule]]
-id = "naming_localparam_uppercase"
+id = "require_localparam_uppercase"
 
 [[rule]]
 id = "naming_port_lower_snake"
 
 [[rule]]
-id = "naming_port_direction_suffix"
+id = "require_port_direction_suffix"
 
 [[rule]]
-id = "package_no_define_in_package"
+id = "forbid_define_in_package"
 
 [[rule]]
-id = "package_single_package"
+id = "require_single_package"
 
 [[rule]]
-id = "always_ff_no_blocking"
+id = "forbid_always_ff_blocking"
 
 [[rule]]
-id = "function_require_scope"
+id = "require_function_scope"
 
 [[rule]]
-id = "typedef_enum_name_lower_snake_e"
+id = "require_enum_name_lower_snake_e"
 stage = "cst"
 
 [[rule]]
-id = "typedef_enum_value_upper"
+id = "require_enum_value_upper"
 stage = "cst"
 
 [[rule]]
-id = "typedef_type_name_lower_snake_t"
+id = "require_typedef_name_lower_snake_t"
 stage = "cst"
