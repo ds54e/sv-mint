@@ -19,6 +19,7 @@ def check(req):
         if first is None or last is None:
             continue
         has_default = False
+        is_unique = False
         for tok in tokens[first:last + 1]:
             start = tok.get("start")
             end = tok.get("end")
@@ -28,7 +29,9 @@ def check(req):
             if word == "default":
                 has_default = True
                 break
-        if not has_default:
+            if word in ("unique", "unique0"):
+                is_unique = True
+        if not has_default and not is_unique:
             anchor = tokens[first]
             loc = byte_span_to_loc(anchor.get("start"), anchor.get("end"), line_starts)
             out.append({

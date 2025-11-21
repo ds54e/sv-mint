@@ -167,6 +167,11 @@ fn detects_case_unique_violations() {
 }
 
 #[test]
+fn allows_unique_case_without_default() {
+    run_fixture_success("fixtures/case_missing_default_unique_ok.sv");
+}
+
+#[test]
 fn detects_case_begin_violations() {
     run_fixture("fixtures/case_begin_violation.sv", "format.case_begin_required");
 }

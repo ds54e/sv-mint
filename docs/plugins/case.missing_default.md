@@ -3,7 +3,7 @@
 - **Script**: `plugins/case.missing_default.cst.py`
 - **Stage**: `cst` (`mode = inline`)
 - **Key Inputs**: `cst_ir.tokens`, `line_starts`, `pp_text`
-- **Summary**: Warn when a `case` statement lacks a `default` label
+- **Summary**: Warn when a `case` statement lacks a `default` label (except for `unique`/`unique0 case`)
 
 ## Details
 
@@ -12,7 +12,7 @@ Walks each CST `CaseStatement`; if no `default` token appears, the rule reports 
 ### Message
 `` case statement must include a default item ``
 ### Remediation
-Add a `default` branch unless you can prove completeness with `unique case`. Even for intentional fall-through, prefer `default: <noop>;`.
+Add a `default` branch. `unique`/`unique0 case` is exempt, but only if the statement is actually declared `unique` or `unique0`.
 ### Notes
 The pass inspects preprocessed `pp_text`, so macros that expand to `default` must emit the token after preprocessing.
 ### Good
