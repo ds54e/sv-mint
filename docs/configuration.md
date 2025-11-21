@@ -97,7 +97,7 @@ Values must be greater than zero, and `warn_margin_bytes` must not exceed `max_r
 id = "module_no_port_wildcard"
 
 [[rule]]
-id = "decl_no_unused_var"
+id = "vars_not_left_unused"
 ```
 
 To target a custom rule directory, set `[plugin].root` and list your scripts with explicit `script` or by following the `<id>.<stage>.py` pattern so sv-mint can infer them automatically.

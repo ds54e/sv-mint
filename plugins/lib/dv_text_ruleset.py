@@ -258,7 +258,7 @@ def _check_macros(text, path):
     for name, index in defs:
         if name not in undefs and not macros_file:
             out.append({
-                "rule_id": "macro_require_trailing_undef",
+                "rule_id": "macros_close_with_undef",
                 "severity": "warning",
                 "message": f"`define {name} must be undefined at end of file",
                 "location": loc(text, index),
@@ -360,7 +360,7 @@ def _check_module_macro_prefix(text):
                 continue
             location = loc(text, offset + match.start(1))
             out.append({
-                "rule_id": "macro_require_module_prefix",
+                "rule_id": "macros_use_module_prefix",
                 "severity": "warning",
                 "message": f"`define {macro} inside module {name} must be prefixed with {prefix}",
                 "location": location,

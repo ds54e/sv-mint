@@ -50,7 +50,7 @@ def _check_modules(decls):
             continue
         name = decl.get("name") or ""
         loc = decl.get("loc")
-        out.extend(_validate_name(name, loc, "naming_module_lower_snake"))
+        out.extend(_validate_name(name, loc, "module_names_lower_snake"))
     return out
 
 
@@ -71,7 +71,7 @@ def _check_ports(ports):
     for port in ports:
         name = port.get("name") or ""
         loc = port.get("loc")
-        out.extend(_validate_name(name, loc, "naming_port_lower_snake"))
+        out.extend(_validate_name(name, loc, "port_names_lower_snake"))
         out.extend(_check_suffixes(name, loc))
         out.extend(_check_clock_reset(name, loc))
     return out
@@ -220,7 +220,7 @@ def _check_parameter_naming(decls):
             continue
         if not (UPPER_CAMEL.match(name) or ALL_CAPS.match(name)):
             issues.append({
-                "rule_id": "naming_parameter_uppercase",
+                "rule_id": "parameter_names_uppercase",
                 "severity": "warning",
                 "message": f"parameter {name} should use UpperCamelCase or ALL_CAPS",
                 "location": decl.get("loc") or _default_loc(),
@@ -248,7 +248,7 @@ def _check_port_direction_suffixes(ports):
             continue
         exp = " or ".join(allowed)
         issues.append({
-            "rule_id": "naming_port_direction_suffix",
+            "rule_id": "port_names_have_direction_suffix",
             "severity": "warning",
             "message": f"{name} must end with {exp}",
             "location": loc,

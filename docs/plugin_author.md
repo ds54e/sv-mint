@@ -117,7 +117,7 @@ Prefer the parser-provided `loc` objects whenever available to avoid off-by-one 
 6. Capture reference output (and plug it into `tests/cli_smoke.rs` if the rule is part of the default bundle).
 
 ## 5. Quality and Operations
-- Use `category.name` style rule IDs so users can search the README or user guide easily.
+- Name rule IDs after the specific check they enforce rather than grouping them by category (e.g., `unused_net`, `case_requires_default`).
 - Filter the AST/CST before heavy processing and avoid copying entire payloads.
 - For custom project rules, create subdirectories under `plugins/` and reference absolute or relative paths from the `script` field inside each `[[rule]]`. Document every rule under `docs/plugins/<rule_id>.md`.
 

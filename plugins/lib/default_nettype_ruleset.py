@@ -24,7 +24,7 @@ def evaluate(req):
     out = []
     matches = list(DIRECTIVE_RE.finditer(text))
     if not matches:
-        out.append(_violation("lang_default_nettype_require_prologue_none", 0, text, "file must declare `default_nettype none` near the top"))
+        out.append(_violation("default_nettype_begins_with_none", 0, text, "file must declare `default_nettype none` near the top"))
     else:
         first = matches[0]
         value = first.group(1).lower()
@@ -90,7 +90,7 @@ def _check_trailing_reset(text, last_match):
     value = last_match.group(1).lower()
     if value != "wire":
         out.append({
-            "rule_id": "lang_default_nettype_require_epilogue_wire",
+            "rule_id": "default_nettype_ends_with_wire",
             "severity": "warning",
             "message": "`default_nettype none` should be reset to `wire` at the end of the file",
             "location": loc(text, last_match.start()),

@@ -7,16 +7,16 @@ args = ["-u", "-B"]
 root = "../plugins"
 
 [[rule]]
-id = "decl_no_unused_var"
+id = "vars_not_left_unused"
 
 [[rule]]
-id = "module_require_named_ports"
+id = "instances_use_named_ports"
 
 [[rule]]
-id = "flow_no_disable_label"
+id = "disable_targets_fork_only"
 
 [[rule]]
-id = "macro_no_unused_macro"
+id = "macros_not_unused"
 
 [logging]
 level = "info"
