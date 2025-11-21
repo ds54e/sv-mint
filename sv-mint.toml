@@ -20,9 +20,6 @@ id = "naming.net_lower_snake"
 id = "naming.var_lower_snake"
 
 [[rule]]
-id = "flow.no_multiple_nb_assign"
-
-[[rule]]
 id = "flow.no_disable_label"
 
 [[rule]]

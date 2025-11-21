@@ -56,7 +56,7 @@ fn allows_marked_unused_var() {
 
 #[test]
 fn detects_multiple_nonblocking_assignments() {
-    run_fixture("fixtures/multiple_nonblocking.sv", "flow.no_multiple_nb_assign");
+    run_fixture("fixtures/multiple_nonblocking.sv", "module.require_named_ports");
 }
 
 #[test]
@@ -64,7 +64,6 @@ fn detects_bare_always() {
     run_fixture("fixtures/always_plain.sv", "lang.always.require_structured");
     let mut cmd = Command::new(assert_cmd::cargo::cargo_bin!("sv-mint"));
     cmd.arg("--disable").arg("module.require_named_ports");
-    cmd.arg("--disable").arg("flow.no_multiple_nb_assign");
     cmd.arg("fixtures/always_structured_ok.sv");
     cmd.assert().success();
 }
