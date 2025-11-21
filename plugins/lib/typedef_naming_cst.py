@@ -64,7 +64,7 @@ def _check_typedef(snippet, base, line_starts):
         name_off = base + m.start("name")
         name_loc = byte_span_to_loc(name_off, name_off + len(name), line_starts)
         if not name.endswith("_t") or not LOWER_SNAKE.match(name):
-            out.append(_make("typedef.type_name_suffix_t", f"typedef names should use lower_snake_case and end with _t: {name}", name_loc))
+            out.append(_make("typedef.type_name_lower_snake_t", f"typedef names should use lower_snake_case and end with _t: {name}", name_loc))
     return out
 
 

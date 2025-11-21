@@ -1,6 +1,6 @@
-# typedef.type_name_suffix_t
+# typedef.type_name_lower_snake_t
 
-- **Script**: `plugins/typedef.type_name_suffix_t.cst.py`
+- **Script**: `plugins/typedef.type_name_lower_snake_t.cst.py`
 - **Stage**: `cst` (`mode = inline`)
 - **Key Inputs**: `cst_ir.tokens`, `line_starts`, `pp_text`
 - **Summary**: Typedef names (non-enum) must be lower_snake_case and end with `_t`

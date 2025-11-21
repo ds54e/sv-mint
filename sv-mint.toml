@@ -92,5 +92,5 @@ id = "typedef.enum_value_upper"
 stage = "cst"
 
 [[rule]]
-id = "typedef.type_name_suffix_t"
+id = "typedef.type_name_lower_snake_t"
 stage = "cst"

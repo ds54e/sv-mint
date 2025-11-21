@@ -33,7 +33,7 @@ def evaluate(req):
     for match in TYPEDEF_RE.finditer(text):
         name = match.group(1)
         if not name.endswith("_t"):
-            out.append(_violation("typedef.type_name_suffix_t", name, match.start(), text, "typedef names should end with _t"))
+            out.append(_violation("typedef.type_name_lower_snake_t", name, match.start(), text, "typedef names should end with _t"))
     table = {}
     for item in out:
         table.setdefault(item["rule_id"], []).append(item)
