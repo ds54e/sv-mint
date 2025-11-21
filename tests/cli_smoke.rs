@@ -88,6 +88,12 @@ fn detects_macro_undef_violations() {
 }
 
 #[test]
+fn detects_unused_macro() {
+    run_fixture("fixtures/macro_unused.sv", "macro.unused_macro");
+    run_fixture_success("fixtures/macro_used.sv");
+}
+
+#[test]
 fn reports_include_file_path() {
     run_with_config(
         "fixtures/include_top.sv",

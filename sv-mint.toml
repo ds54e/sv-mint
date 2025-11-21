@@ -23,9 +23,6 @@ id = "flow.no_disable_fork_label"
 id = "flow.no_fork_label"
 
 [[rule]]
-id = "global.local_define_undef"
-
-[[rule]]
 id = "lang.default_nettype_missing"
 
 [[rule]]
@@ -39,6 +36,9 @@ id = "macro.missing_undef"
 
 [[rule]]
 id = "macro.module_prefix"
+
+[[rule]]
+id = "macro.unused_macro"
 
 [[rule]]
 id = "module.named_ports_required"

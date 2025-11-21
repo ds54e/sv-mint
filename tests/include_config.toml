@@ -12,6 +12,9 @@ id = "decl.unused_var"
 [[rule]]
 id = "module.named_ports_required"
 
+[[rule]]
+id = "macro.unused_macro"
+
 [logging]
 level = "info"
 stderr_snippet_bytes = 2000
@@ -29,4 +32,3 @@ allow_incomplete = true
 [stages]
 enabled = ["raw_text", "pp_text", "cst", "ast"]
 required = ["raw_text", "pp_text"]
-
