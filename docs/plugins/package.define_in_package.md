@@ -9,7 +9,7 @@
 ## Details
 
 ### Trigger
-Searches the package body for `` `define`` tokens that do not start with `_`.
+Searches the package body for any `` `define`` tokens.
 ### Message
 `` prefer parameters over `define NAME inside package ``
 ### Remediation

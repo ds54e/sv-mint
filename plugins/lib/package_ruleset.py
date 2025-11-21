@@ -58,13 +58,12 @@ def evaluate(req):
             body = text[body_start:body_end]
             for match in DEFINE_RE.finditer(body):
                 name = match.group(1)
-                if not name.startswith("_"):
-                    out.append(_violation(
-                        "package.define_in_package",
-                        f"prefer parameters over `define {name} inside package",
-                        body_start + match.start(),
-                        text,
-                    ))
+                out.append(_violation(
+                    "package.define_in_package",
+                    f"prefer parameters over `define {name} inside package",
+                    body_start + match.start(),
+                    text,
+                ))
     table = {}
     for item in out:
         table.setdefault(item["rule_id"], []).append(item)
