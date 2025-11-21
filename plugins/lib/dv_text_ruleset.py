@@ -103,7 +103,7 @@ def _check_function_scope(text):
                 if " automatic" in segment or " static" in segment:
                     continue
                 out.append({
-                    "rule_id": "style.function_scope",
+                    "rule_id": "style.require_function_scope",
                     "severity": "warning",
                     "message": "functions in packages/modules/interfaces must declare automatic or static",
                     "location": loc(text, offset + match.start()),
@@ -128,13 +128,13 @@ def _check_randomize(text):
     out.extend(_randomize_matches(
         text,
         RANDOMIZE_WITH_RE,
-        rule_id="rand.dv_macro_with_required",
+        rule_id="dv.rand.macro_with_required",
         message="use DV_CHECK_*_WITH macros when randomizing with constraints",
     ))
     return out
 
 
-def _randomize_matches(text, pattern, rule_id="rand.dv_macro_required", message="use DV_CHECK_* randomization macros instead of direct randomize()"):
+def _randomize_matches(text, pattern, rule_id="dv.rand.macro_required", message="use DV_CHECK_* randomization macros instead of direct randomize()"):
     out = []
     for match in pattern.finditer(text):
         prefix = text[max(0, match.start() - 40):match.start()]
@@ -162,7 +162,7 @@ def _check_logging(text):
         norm = arg.lstrip("`").strip()
         if norm not in ("gfn", "gtn"):
             out.append({
-                "rule_id": "log.uvm_arg_macro",
+                "rule_id": "dv.log.uvm_arg_macro",
                 "severity": "warning",
                 "message": "uvm report macros must use gfn/gtn as the message tag",
                 "location": loc(text, match.start()),
@@ -171,15 +171,15 @@ def _check_logging(text):
             verb = args[2].strip()
             if verb not in ALLOWED_VERBOSITY:
                 out.append({
-                    "rule_id": "log.allowed_verbosity",
+                    "rule_id": "dv.log.allowed_verbosity",
                     "severity": "warning",
                     "message": "uvm report macros must use UVM_LOW/MEDIUM/HIGH/DEBUG verbosity",
                     "location": loc(text, match.start()),
                 })
     for pattern, rule_id, message in (
-        (UVM_WARNING_RE, "log.no_uvm_warning", "use uvm_error or uvm_fatal instead of uvm_warning"),
-        (UVM_REPORT_RE, "log.no_uvm_report_api", "use uvm_{info,error,fatal} macros instead of uvm_report_*"),
-        (DISPLAY_RE, "log.no_display", "use uvm_* macros instead of $display"),
+        (UVM_WARNING_RE, "dv.log.no_uvm_warning", "use uvm_error or uvm_fatal instead of uvm_warning"),
+        (UVM_REPORT_RE, "dv.log.no_uvm_report_api", "use uvm_{info,error,fatal} macros instead of uvm_report_*"),
+        (DISPLAY_RE, "dv.log.no_display", "use uvm_* macros instead of $display"),
     ):
         for match in pattern.finditer(text):
             out.append({
@@ -190,7 +190,7 @@ def _check_logging(text):
             })
     for match in UVM_NONE_FULL_RE.finditer(text):
         out.append({
-            "rule_id": "log.no_none_full",
+            "rule_id": "dv.log.no_none_full",
             "severity": "warning",
             "message": "avoid UVM_NONE and UVM_FULL verbosity levels",
             "location": loc(text, match.start()),
@@ -227,7 +227,7 @@ def _check_dpi(text):
         name = match.group(1)
         if not name.startswith("c_dpi_"):
             out.append({
-                "rule_id": "dpi.import_prefix",
+                "rule_id": "dv.dpi.import_prefix",
                 "severity": "warning",
                 "message": "imported DPI functions must start with c_dpi_",
                 "location": loc(text, match.start(1)),
@@ -236,7 +236,7 @@ def _check_dpi(text):
         name = match.group(1)
         if not name.startswith("sv_dpi_"):
             out.append({
-                "rule_id": "dpi.export_prefix",
+                "rule_id": "dv.dpi.export_prefix",
                 "severity": "warning",
                 "message": "exported DPI handles must start with sv_dpi_",
                 "location": loc(text, match.start(1)),
@@ -258,7 +258,7 @@ def _check_macros(text, path):
     for name, index in defs:
         if name not in undefs and not macros_file:
             out.append({
-                "rule_id": "macro.missing_undef",
+                "rule_id": "macro.require_trailing_undef",
                 "severity": "warning",
                 "message": f"`define {name} must be undefined at end of file",
                 "location": loc(text, index),
@@ -266,14 +266,14 @@ def _check_macros(text, path):
         guarded = any(pos < index for pos in guard_positions.get(name, []))
         if macros_file and not guarded:
             out.append({
-                "rule_id": "macro.guard_required",
+                "rule_id": "dv.macro.guard_required",
                 "severity": "warning",
                 "message": f"`define {name} in *_macros.svh must be wrapped with `ifndef {name}",
                 "location": loc(text, index),
             })
         if not macros_file and guarded:
             out.append({
-                "rule_id": "macro.no_local_guard",
+                "rule_id": "dv.macro.no_local_guard",
                 "severity": "warning",
                 "message": f"local macro {name} must not use `ifndef guards",
                 "location": loc(text, index),
@@ -283,7 +283,7 @@ def _check_macros(text, path):
             continue
         pos = text.find(name)
         out.append({
-            "rule_id": "macro.dv_prefix_header_only",
+            "rule_id": "dv.macro.prefix_header_only",
             "severity": "warning",
             "message": "DV_* macros must live in dedicated *_macros.svh headers",
             "location": loc(text, pos),
@@ -295,7 +295,7 @@ def _check_uvm_do(text):
     out = []
     for match in UVM_DO_RE.finditer(text):
         out.append({
-            "rule_id": "seq.no_uvm_do",
+            "rule_id": "dv.seq.no_uvm_do",
             "severity": "warning",
             "message": "replace `uvm_do macros with start_item/finish_item flow",
             "location": loc(text, match.start()),
@@ -308,7 +308,7 @@ def _check_scoreboard(text):
     if not DV_EOT_RE.search(text):
         for match in SCOREBOARD_CLASS_RE.finditer(text):
             out.append({
-                "rule_id": "scoreboard.dv_eot_required",
+                "rule_id": "dv.scoreboard.require_eot_macro",
                 "severity": "warning",
                 "message": "scoreboard classes should call DV_EOT_PRINT_* macros in check_phase",
                 "location": loc(text, match.start()),
@@ -339,7 +339,7 @@ def _check_comparison_macros(text):
         if not UVM_REPORT_CALL_RE.search(window):
             continue
         out.append({
-            "rule_id": "check.dv_macro_required",
+            "rule_id": "dv.check.macro_required",
             "severity": "warning",
             "message": "use DV_CHECK_* comparison macros instead of manual if/uvm_* checks",
             "location": loc(text, start),
@@ -360,7 +360,7 @@ def _check_module_macro_prefix(text):
                 continue
             location = loc(text, offset + match.start(1))
             out.append({
-                "rule_id": "macro.module_prefix",
+                "rule_id": "macro.require_module_prefix",
                 "severity": "warning",
                 "message": f"`define {macro} inside module {name} must be prefixed with {prefix}",
                 "location": location,

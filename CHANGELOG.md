@@ -2,6 +2,10 @@
 
 All notable changes to this project are documented here, following [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) conventions and semantic versioning.
 
+## [Unreleased]
+### Changed
+- Renamed bundled rule IDs to a consistent `<domain>.<target>.<verb>` scheme (including new `dv.*` prefixes for verification-only checks) and aligned plugin filenames/docs/config defaults accordingly.
+
 ## [2.0.0] - 2025-11-21
 ### Removed
 - Filelist support across the CLI (`-f/--filelist`, `+incdir`, `+define`, `-y`, `+libext`) along with related documentation and tests.

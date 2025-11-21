@@ -26,14 +26,14 @@ def evaluate(req):
     for match in TYPEDEF_ENUM_RE.finditer(text):
         name = match.group("name")
         if not name.endswith("_e"):
-            out.append(_violation("typedef.enum_suffix", name, match.start(), text, "enum types should end with _e"))
+            out.append(_violation("typedef.enum_name_suffix_e", name, match.start(), text, "enum types should end with _e"))
         if not LOWER_SNAKE.match(name):
-            out.append(_violation("typedef.enum_lower_snake", name, match.start("name"), text, "enum types should use lower_snake_case"))
+            out.append(_violation("typedef.enum_name_lower_snake", name, match.start("name"), text, "enum types should use lower_snake_case"))
         out.extend(_check_enum_members(text, match))
     for match in TYPEDEF_RE.finditer(text):
         name = match.group(1)
         if not name.endswith("_t"):
-            out.append(_violation("typedef.type_suffix", name, match.start(), text, "typedef names should end with _t"))
+            out.append(_violation("typedef.type_name_suffix_t", name, match.start(), text, "typedef names should end with _t"))
     table = {}
     for item in out:
         table.setdefault(item["rule_id"], []).append(item)
@@ -81,7 +81,7 @@ def _check_enum_members(text, match):
         member = name_match.group(1)
         member_index = body_start + rel + chunk.find(member)
         if not re.match(r"^[A-Z][A-Za-z0-9]*$", member):
-            issues.append(_violation("typedef.enum_value_case", member, member_index, text, "enum values should use UpperCamelCase"))
+            issues.append(_violation("typedef.enum_value_upper", member, member_index, text, "enum values should use UpperCamelCase"))
             continue
         if prefix and not member.startswith(prefix):
             issues.append(_violation("typedef.enum_value_prefix", member, member_index, text, f"enum values should start with {prefix}"))

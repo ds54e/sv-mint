@@ -28,7 +28,7 @@ def evaluate(req):
     if len(packages) > 1:
         match = packages[0]
         out.append(_violation(
-            "package.multiple",
+            "package.single_package",
             f"multiple package declarations in single file ({match.group(1)})",
             match.start(),
             text,
@@ -37,7 +37,7 @@ def evaluate(req):
         expected = packages[0].group(1)
         if not endpackages:
             out.append(_violation(
-                "package.missing_end",
+                "package.require_endpackage",
                 f"package {expected} missing endpackage",
                 packages[0].start(),
                 text,
@@ -47,7 +47,7 @@ def evaluate(req):
             if label and label != expected:
                 pos = endpackages[-1].start()
                 out.append(_violation(
-                    "package.end_mismatch",
+                    "package.endpackage_label_match",
                     f"endpackage label {label} does not match package {expected}",
                     pos,
                     text,
@@ -59,7 +59,7 @@ def evaluate(req):
             for match in DEFINE_RE.finditer(body):
                 name = match.group(1)
                 out.append(_violation(
-                    "package.define_in_package",
+                    "package.require_defines_in_pkg",
                     f"prefer parameters over `define {name} inside package",
                     body_start + match.start(),
                     text,

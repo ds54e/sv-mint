@@ -112,7 +112,7 @@ def _check_always_ff(text):
                 window = text[start:end]
                 if "negedge" not in window:
                     out.append({
-                        "rule_id": "lang.always_ff_reset",
+                        "rule_id": "lang.always_ff.require_async_reset",
                         "severity": "warning",
                         "message": "always_ff should include asynchronous reset (negedge rst_n)",
                         "location": loc(text, pos),
@@ -134,7 +134,7 @@ def _check_always_comb(text):
             after += 1
         if after < len(text) and text[after] == "@":
             out.append({
-                "rule_id": "lang.always_comb_at",
+                "rule_id": "lang.always_comb.no_sensitivity",
                 "severity": "warning",
                 "message": "always_comb must not have sensitivity list",
                 "location": loc(text, pos),

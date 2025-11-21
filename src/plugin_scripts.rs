@@ -91,7 +91,7 @@ mod tests {
         let tmp = tempdir().unwrap();
         let search_dir = tmp.path().join("plugins-extra");
         fs::create_dir_all(&search_dir).unwrap();
-        let script_path = search_dir.join("dpi.import_prefix.raw.py");
+        let script_path = search_dir.join("dv.dpi.import_prefix.raw.py");
         fs::write(&script_path, "print('ok')").unwrap();
         let search_str = search_dir.to_string_lossy().replace('\\', "\\\\");
         let cfg_text = format!(
@@ -99,8 +99,8 @@ mod tests {
 search_paths = ["{}"]
 
 [[rule]]
-id = "dpi.import_prefix"
-script = "dpi.import_prefix.raw.py"
+id = "dv.dpi.import_prefix"
+script = "dv.dpi.import_prefix.raw.py"
 stage = "raw_text"
 "#,
             search_str

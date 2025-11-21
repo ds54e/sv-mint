@@ -43,7 +43,7 @@ def _check_enum(snippet, base, line_starts):
         name_off = base + m.start("name")
         name_loc = byte_span_to_loc(name_off, name_off + len(name), line_starts)
         if not name.endswith("_e") or not LOWER_SNAKE.match(name):
-            out.append(_make("typedef.enum_name_style", f"enum types should use lower_snake_case and end with _e: {name}", name_loc))
+            out.append(_make("typedef.enum_name_lower_snake_e", f"enum types should use lower_snake_case and end with _e: {name}", name_loc))
         body = m.group("body")
         body_off = base + m.start("body")
         prefix = _enum_prefix(name)
@@ -51,7 +51,7 @@ def _check_enum(snippet, base, line_starts):
             off = body_off + rel
             loc = byte_span_to_loc(off, off + len(member), line_starts)
             if not (UPPER_CAMEL.match(member) or ALL_CAPS.match(member)):
-                out.append(_make("typedef.enum_value_case", f"enum values should use UpperCamelCase or ALL_CAPS: {member}", loc))
+                out.append(_make("typedef.enum_value_upper", f"enum values should use UpperCamelCase or ALL_CAPS: {member}", loc))
     return out
 
 
@@ -64,7 +64,7 @@ def _check_typedef(snippet, base, line_starts):
         name_off = base + m.start("name")
         name_loc = byte_span_to_loc(name_off, name_off + len(name), line_starts)
         if not name.endswith("_t") or not LOWER_SNAKE.match(name):
-            out.append(_make("typedef.type_name_style", f"typedef names should use lower_snake_case and end with _t: {name}", name_loc))
+            out.append(_make("typedef.type_name_suffix_t", f"typedef names should use lower_snake_case and end with _t: {name}", name_loc))
     return out
 
 

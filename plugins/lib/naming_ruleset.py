@@ -50,7 +50,7 @@ def _check_modules(decls):
             continue
         name = decl.get("name") or ""
         loc = decl.get("loc")
-        out.extend(_validate_name(name, loc, "naming.module_case"))
+        out.extend(_validate_name(name, loc, "naming.module_lower_snake"))
     return out
 
 
@@ -61,7 +61,7 @@ def _check_symbols(symbols):
             continue
         name = sym.get("name") or ""
         loc = sym.get("loc")
-        out.extend(_validate_name(name, loc, "naming.signal_case"))
+        out.extend(_validate_name(name, loc, "naming.signal_lower_snake"))
         out.extend(_check_suffixes(name, loc))
         out.extend(_check_clock_reset(name, loc))
     return out
@@ -72,7 +72,7 @@ def _check_ports(ports):
     for port in ports:
         name = port.get("name") or ""
         loc = port.get("loc")
-        out.extend(_validate_name(name, loc, "naming.port_case"))
+        out.extend(_validate_name(name, loc, "naming.port_lower_snake"))
         out.extend(_check_suffixes(name, loc))
         out.extend(_check_clock_reset(name, loc))
     return out
@@ -119,14 +119,14 @@ def _check_clock_reset(name, loc):
         return issues
     if "clk" in name and not name.startswith("clk"):
         issues.append({
-            "rule_id": "naming.clk_prefix",
+            "rule_id": "naming.clock_prefix",
             "severity": "warning",
             "message": f"{name} must start with 'clk'",
             "location": loc,
         })
     if name.startswith("rst") and not (name.endswith("_n") or name.endswith("_ni") or name.endswith("_no") or name.endswith("_nio")):
         issues.append({
-            "rule_id": "naming.rst_active_low",
+            "rule_id": "naming.reset_active_low_suffix",
             "severity": "warning",
             "message": f"{name} must end with '_n' for active-low resets",
             "location": loc,
@@ -144,7 +144,7 @@ def _check_clock_reset_order(ports):
         if name.startswith("clk"):
             if clk_seen and rst_phase and loc:
                 issues.append({
-                    "rule_id": "naming.clk_order",
+                    "rule_id": "naming.clock_port_order",
                     "severity": "warning",
                     "message": "clk ports should appear before resets and other ports",
                     "location": loc,
@@ -153,7 +153,7 @@ def _check_clock_reset_order(ports):
         elif name.startswith("rst"):
             if not clk_seen and loc:
                 issues.append({
-                    "rule_id": "naming.rst_before_clk",
+                    "rule_id": "naming.reset_after_clock",
                     "severity": "warning",
                     "message": "rst ports should follow clk ports",
                     "location": loc,
@@ -221,7 +221,7 @@ def _check_parameter_naming(decls):
             continue
         if not (UPPER_CAMEL.match(name) or ALL_CAPS.match(name)):
             issues.append({
-                "rule_id": "naming.parameter_upper",
+                "rule_id": "naming.parameter_uppercase",
                 "severity": "warning",
                 "message": f"parameter {name} should use UpperCamelCase or ALL_CAPS",
                 "location": decl.get("loc") or _default_loc(),
@@ -249,7 +249,7 @@ def _check_port_direction_suffixes(ports):
             continue
         exp = " or ".join(allowed)
         issues.append({
-            "rule_id": "naming.port_suffix",
+            "rule_id": "naming.port_direction_suffix",
             "severity": "warning",
             "message": f"{name} must end with {exp}",
             "location": loc,

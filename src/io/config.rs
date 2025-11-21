@@ -806,8 +806,8 @@ mod tests {
         let cfg = load(
             r#"
 [[rule]]
-id = "dpi.import_prefix"
-script = "dpi.import_prefix.raw.py"
+id = "dv.dpi.import_prefix"
+script = "dv.dpi.import_prefix.raw.py"
 stage = "raw_text"
 "#,
         )
@@ -827,12 +827,12 @@ stage = "raw_text"
         let tmp_dir = tempdir().expect("tempdir");
         let plugins = tmp_dir.path().join("plugins");
         fs::create_dir_all(&plugins).expect("plugins dir");
-        let script_path = plugins.join("dpi.import_prefix.raw.py");
+        let script_path = plugins.join("dv.dpi.import_prefix.raw.py");
         fs::write(&script_path, "print('ok')").expect("script file");
         let mut cfg = load(
             r#"
 [[rule]]
-id = "dpi.import_prefix"
+id = "dv.dpi.import_prefix"
 "#,
         )
         .expect("load rule");
@@ -840,7 +840,7 @@ id = "dpi.import_prefix"
         assert_eq!(cfg.rule.len(), 1);
         let script = &cfg.rule[0].script;
         assert!(Path::new(script).is_absolute());
-        assert!(script.ends_with("dpi.import_prefix.raw.py"));
+        assert!(script.ends_with("dv.dpi.import_prefix.raw.py"));
     }
 
     #[test]
@@ -852,8 +852,8 @@ id = "dpi.import_prefix"
 search_paths = ["./plugins-extra"]
 
 [[rule]]
-id = "dpi.import_prefix"
-script = "dpi.import_prefix.raw.py"
+id = "dv.dpi.import_prefix"
+script = "dv.dpi.import_prefix.raw.py"
 stage = "raw_text"
 "#,
         )
@@ -874,7 +874,7 @@ stage = "raw_text"
         let mut cfg = load(
             r#"
 [[rule]]
-id = "dpi.import_prefix"
+id = "dv.dpi.import_prefix"
 "#,
         )
         .expect("load rule");
@@ -893,18 +893,18 @@ id = "dpi.import_prefix"
         let tmp_dir = tempdir().expect("tempdir");
         let plugins = tmp_dir.path().join("plugins");
         fs::create_dir_all(&plugins).expect("plugins dir");
-        let script_path = plugins.join("dpi.import_prefix.raw.py");
+        let script_path = plugins.join("dv.dpi.import_prefix.raw.py");
         fs::write(&script_path, "print('ok')").expect("script file");
         let mut cfg = load(
             r#"
 [[rule]]
-id = "dpi.import_prefix"
+id = "dv.dpi.import_prefix"
 "#,
         )
         .expect("load rule");
         normalize_rule_scripts(&mut cfg, tmp_dir.path()).expect("normalize");
         infer_rule_stages(&mut cfg.rule).expect("stage");
-        let resolved = super::plugin_search_paths(&cfg, "dpi.import_prefix.raw.py");
+        let resolved = super::plugin_search_paths(&cfg, "dv.dpi.import_prefix.raw.py");
         assert!(resolved.iter().any(|p| p == &script_path));
         let err = validate_rule_script_paths(&cfg);
         assert!(err.is_ok());
@@ -917,8 +917,8 @@ id = "dpi.import_prefix"
         let mut cfg = load(
             r#"
 [[rule]]
-id = "dpi.import_prefix"
-script = "dpi.import_prefix.raw.py"
+id = "dv.dpi.import_prefix"
+script = "dv.dpi.import_prefix.raw.py"
 stage = "raw_text"
 "#,
         )
@@ -928,9 +928,9 @@ stage = "raw_text"
         let err = validate_rule_script_paths(&cfg).unwrap_err();
         match err {
             ConfigError::InvalidValue { detail } => {
-                assert!(detail.contains("dpi.import_prefix"));
+                assert!(detail.contains("dv.dpi.import_prefix"));
                 assert!(detail.contains("searched"));
-                let expected = tmp_dir.path().join("dpi.import_prefix.raw.py");
+                let expected = tmp_dir.path().join("dv.dpi.import_prefix.raw.py");
                 assert!(detail.contains(&expected.display().to_string()));
             }
             other => panic!("unexpected error {other:?}"),
@@ -942,7 +942,7 @@ stage = "raw_text"
         let tmp_dir = tempdir().expect("tempdir");
         let root = tmp_dir.path().join("plugins-root");
         fs::create_dir_all(&root).expect("root dir");
-        let script_path = root.join("dpi.import_prefix.raw.py");
+        let script_path = root.join("dv.dpi.import_prefix.raw.py");
         fs::write(&script_path, "print('ok')").expect("script file");
         let mut cfg = load(
             r#"
@@ -950,14 +950,14 @@ stage = "raw_text"
 root = "./plugins-root"
 
 [[rule]]
-id = "dpi.import_prefix"
+id = "dv.dpi.import_prefix"
 "#,
         )
         .expect("load rule");
         normalize_rule_scripts(&mut cfg, tmp_dir.path()).expect("normalize");
         infer_rule_stages(&mut cfg.rule).expect("stage");
-        let paths = plugin_search_paths(&cfg, "dpi.import_prefix.raw.py");
-        assert_eq!(paths[0], root.join("dpi.import_prefix.raw.py"));
+        let paths = plugin_search_paths(&cfg, "dv.dpi.import_prefix.raw.py");
+        assert_eq!(paths[0], root.join("dv.dpi.import_prefix.raw.py"));
         validate_rule_script_paths(&cfg).expect("scripts exist");
     }
 
@@ -968,8 +968,8 @@ id = "dpi.import_prefix"
         let extra = tmp_dir.path().join("plugins-extra");
         fs::create_dir_all(&root).expect("root dir");
         fs::create_dir_all(&extra).expect("extra dir");
-        let in_root = root.join("dpi.import_prefix.raw.py");
-        let in_extra = extra.join("dpi.import_prefix.raw.py");
+        let in_root = root.join("dv.dpi.import_prefix.raw.py");
+        let in_extra = extra.join("dv.dpi.import_prefix.raw.py");
         fs::write(&in_root, "print('root')").expect("script file");
         fs::write(&in_extra, "print('extra')").expect("script file");
         let mut cfg = load(
@@ -979,8 +979,8 @@ root = "./plugins-root"
 search_paths = ["./plugins-extra"]
 
 [[rule]]
-id = "dpi.import_prefix"
-script = "dpi.import_prefix.raw.py"
+id = "dv.dpi.import_prefix"
+script = "dv.dpi.import_prefix.raw.py"
 stage = "raw_text"
 "#,
         )
@@ -1001,7 +1001,7 @@ stage = "raw_text"
         let mut cfg = load(&format!(
             r#"
 [[rule]]
-id = "dpi.import_prefix"
+id = "dv.dpi.import_prefix"
 script = "{}"
 stage = "raw_text"
 "#,
@@ -1014,7 +1014,7 @@ stage = "raw_text"
         let err = validate_rule_script_paths(&cfg).unwrap_err();
         match err {
             ConfigError::InvalidValue { detail } => {
-                assert!(detail.contains("dpi.import_prefix"));
+                assert!(detail.contains("dv.dpi.import_prefix"));
                 assert!(detail.contains(&missing.display().to_string()));
             }
             other => panic!("unexpected error {other:?}"),
@@ -1033,8 +1033,8 @@ root = "./plugins-root"
 search_paths = ["./plugins-root"]
 
 [[rule]]
-id = "dpi.import_prefix"
-script = "dpi.import_prefix.raw.py"
+id = "dv.dpi.import_prefix"
+script = "dv.dpi.import_prefix.raw.py"
 stage = "raw_text"
 "#,
         )
@@ -1042,7 +1042,7 @@ stage = "raw_text"
         normalize_rule_scripts(&mut cfg, tmp_dir.path()).expect("normalize");
         infer_rule_stages(&mut cfg.rule).expect("stage");
         let paths = plugin_search_paths(&cfg, &cfg.rule[0].script);
-        assert_eq!(paths[0], root.join("dpi.import_prefix.raw.py"));
+        assert_eq!(paths[0], root.join("dv.dpi.import_prefix.raw.py"));
         assert_eq!(paths.len(), 1);
     }
 
@@ -1077,8 +1077,8 @@ foo = "bar"
     fn warns_on_unknown_rule_keys() {
         let cfg_text = r#"
 [[rule]]
-id = "dpi.import_prefix"
-script = "dpi.import_prefix.raw.py"
+id = "dv.dpi.import_prefix"
+script = "dv.dpi.import_prefix.raw.py"
 stage = "raw_text"
 unknown_field = true
 "#;
@@ -1094,8 +1094,8 @@ unknown_field = true
         let mut cfg = load(
             r#"
 [[rule]]
-id = "dpi.import_prefix"
-script = "dpi.import_prefix.raw.py"
+id = "dv.dpi.import_prefix"
+script = "dv.dpi.import_prefix.raw.py"
 severity = "fatal"
 stage = "raw_text"
 "#,
@@ -1106,7 +1106,7 @@ stage = "raw_text"
         let err = validate_rule_script_paths(&cfg).unwrap_err();
         match err {
             ConfigError::InvalidValue { detail } => {
-                assert!(detail.contains("dpi.import_prefix"));
+                assert!(detail.contains("dv.dpi.import_prefix"));
                 assert!(detail.contains("severity"));
             }
             other => panic!("unexpected error {other:?}"),
@@ -1137,8 +1137,8 @@ stderr_snippet_bytes = 512
 args = []
 
 [[rule]]
-id = "dpi.import_prefix"
-script = "dpi.import_prefix.raw.py"
+id = "dv.dpi.import_prefix"
+script = "dv.dpi.import_prefix.raw.py"
 stage = "raw_text"
 "#,
         )
@@ -1154,8 +1154,8 @@ stage = "raw_text"
 enabled = []
 
 [[rule]]
-id = "dpi.import_prefix"
-script = "dpi.import_prefix.raw.py"
+id = "dv.dpi.import_prefix"
+script = "dv.dpi.import_prefix.raw.py"
 stage = "raw_text"
 "#,
         )
@@ -1169,8 +1169,8 @@ stage = "raw_text"
         let cfg = load(
             r#"
 [[rule]]
-id = "dpi.import_prefix"
-script = "dpi.import_prefix.raw.py"
+id = "dv.dpi.import_prefix"
+script = "dv.dpi.import_prefix.raw.py"
 stage = "raw_text"
 "#,
         )
@@ -1190,8 +1190,8 @@ stage = "raw_text"
 max_request_bytes = 0
 
 [[rule]]
-id = "dpi.import_prefix"
-script = "dpi.import_prefix.raw.py"
+id = "dv.dpi.import_prefix"
+script = "dv.dpi.import_prefix.raw.py"
 stage = "raw_text"
 "#,
         )
@@ -1207,8 +1207,8 @@ warn_margin_bytes = 200
 max_response_bytes = 100
 
 [[rule]]
-id = "dpi.import_prefix"
-script = "dpi.import_prefix.raw.py"
+id = "dv.dpi.import_prefix"
+script = "dv.dpi.import_prefix.raw.py"
 stage = "raw_text"
 "#,
         )
@@ -1222,12 +1222,12 @@ stage = "raw_text"
         let cfg = load(
             r#"
 [[rule]]
-id = "dpi.import_prefix"
+id = "dv.dpi.import_prefix"
 script = "a.raw.py"
 stage = "raw_text"
 
 [[rule]]
-id = "dpi.import_prefix"
+id = "dv.dpi.import_prefix"
 script = "b.raw.py"
 stage = "raw_text"
 "#,
@@ -1249,7 +1249,7 @@ stage = "raw_text"
 root = "{}"
 
 [[rule]]
-id = "dpi.import_prefix"
+id = "dv.dpi.import_prefix"
 "#,
             path_str
         ))
