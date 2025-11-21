@@ -71,6 +71,14 @@ fn allows_used_ports() {
 }
 
 #[test]
+fn allows_unused_port_with_unused_comment() {
+    let mut cmd = Command::new(assert_cmd::cargo::cargo_bin!("sv-mint"));
+    cmd.arg("--disable").arg("instances_use_named_ports");
+    cmd.arg("fixtures/unused_port_unused_comment.sv");
+    cmd.assert().success();
+}
+
+#[test]
 fn detects_multiple_nonblocking_assignments() {
     run_fixture("fixtures/multiple_nonblocking.sv", "instances_use_named_ports");
 }
