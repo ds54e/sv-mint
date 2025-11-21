@@ -8,7 +8,6 @@
 
 ### Trigger
 Scans `raw_text` for ``define NAME``, collects macro invocations (``NAME` anywhere in the source), and reports any defined macro that is never used.
-- Macros starting with `_` are ignored.
 - If a macro is `undef`’d, it is treated as used and not reported.
 
 ### Message

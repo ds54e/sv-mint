@@ -2,12 +2,13 @@
 
 - **Script**: `plugins/macro.define_uppercase.raw.py`
 - **Stage**: `raw_text`
-- **Summary**: Warn when ``define` names are not ALL_CAPS
+- **Key Inputs**: `text`
+- **Summary**: `define` names must be ALL_CAPS
 
 ## Details
 
 ### Trigger
-Scans raw text for ``define NAME`; if `NAME` is not ALL_CAPS (`^[A-Z][A-Z0-9_]*$`), a warning is emitted.
+Scans each `` `define NAME``; if `NAME` is not ALL_CAPS (`^[A-Z][A-Z0-9_]*$`), a warning is emitted.
 
 ### Message
 `` `define <name> should use ALL_CAPS ``
