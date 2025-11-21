@@ -1,27 +1,11 @@
 use assert_cmd::Command;
 use predicates::prelude::{PredicateBooleanExt, PredicateBoxExt};
 use predicates::str::contains;
-use std::io::Write;
-use tempfile::NamedTempFile;
 
 fn run_fixture(path: &str, fragment: &str) {
     let mut cmd = Command::new(assert_cmd::cargo::cargo_bin!("sv-mint"));
     cmd.arg(path);
     cmd.assert().failure().stdout(contains(fragment));
-}
-
-fn run_temp_source(content: &str, expected: &[&str]) {
-    let mut temp = NamedTempFile::new().expect("tempfile");
-    temp.write_all(content.as_bytes()).expect("write");
-    let path = temp.into_temp_path();
-    let mut cmd = Command::new(assert_cmd::cargo::cargo_bin!("sv-mint"));
-    cmd.arg(path.as_os_str());
-    let mut pred = contains(expected[0]).boxed();
-    for frag in &expected[1..] {
-        pred = pred.and(contains(*frag)).boxed();
-    }
-    cmd.assert().failure().stdout(pred);
-    path.close().expect("cleanup");
 }
 
 fn run_fixture_with_fragments(path: &str, expected: &[&str]) {
@@ -51,28 +35,8 @@ fn run_with_config(path: &str, config: &str, expected: &[&str]) {
 }
 
 #[test]
-fn detects_line_length_violation() {
-    run_fixture("fixtures/format_line_length_violation.sv", "format.line_length");
-}
-
-#[test]
 fn detects_port_wildcard() {
     run_fixture("fixtures/port_wildcard_violation.sv", "module.no_port_wildcard");
-}
-
-#[test]
-fn detects_if_without_begin() {
-    run_fixture("fixtures/if_without_begin.sv", "format.begin_required");
-}
-
-#[test]
-fn detects_whitespace_violations() {
-    run_fixture("fixtures/whitespace_violations.sv", "format.no_tabs");
-}
-
-#[test]
-fn detects_spacing_violations() {
-    run_fixture("fixtures/spacing_violations.sv", "format.call_spacing");
 }
 
 #[test]
@@ -146,34 +110,16 @@ fn detects_multiple_nonblocking_assignments() {
 }
 
 #[test]
-fn detects_ascii_and_newline_violations() {
-    run_temp_source(
-        "module ascii_check; // é",
-        &["format.ascii_only", "format.final_newline"],
-    );
-}
-
-#[test]
-fn detects_macro_spacing() {
-    run_temp_source(
-        "`define FOO(x) x\nmodule macro_spacing;\ninitial begin\n  `FOO (x)\nend\nendmodule\n",
-        &["format.macro_spacing"],
-    );
-}
-
-#[test]
 fn detects_case_unique_violations() {
     run_fixture("fixtures/case_unique_violation.sv", "lang.case_requires_unique");
 }
 
 #[test]
 fn allows_unique_case_without_default() {
-    run_fixture_success("fixtures/case_missing_default_unique_ok.sv");
-}
-
-#[test]
-fn detects_case_begin_violations() {
-    run_fixture("fixtures/case_begin_violation.sv", "format.case_begin_required");
+    let mut cmd = Command::new(assert_cmd::cargo::cargo_bin!("sv-mint"));
+    cmd.arg("--disable").arg("module.named_ports_required");
+    cmd.arg("fixtures/case_missing_default_unique_ok.sv");
+    cmd.assert().success();
 }
 
 #[test]
@@ -194,11 +140,6 @@ fn detects_header_missing() {
 #[test]
 fn detects_typedef_violations() {
     run_fixture("fixtures/typedef_violation.sv", "typedef.enum_suffix");
-}
-
-#[test]
-fn detects_indent_violations() {
-    run_fixture("fixtures/indent_violation.sv", "format.indent_multiple_of_two");
 }
 
 #[test]
@@ -322,14 +263,6 @@ fn detects_fork_label_usage() {
     run_fixture_with_fragments(
         "fixtures/fork_label_violation.sv",
         &["flow.no_fork_label", "flow.no_disable_fork_label"],
-    );
-}
-
-#[test]
-fn reports_crlf_and_bom_locations() {
-    run_fixture_with_fragments(
-        "fixtures/bom_crlf_violation.sv",
-        &["bom_crlf_violation.sv:3:", "format.line_length"],
     );
 }
 

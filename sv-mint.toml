@@ -41,54 +41,6 @@ id = "flow.wait_fork_isolation"
 id = "flow.wait_macro_required"
 
 [[rule]]
-id = "format.ascii_only"
-
-[[rule]]
-id = "format.begin_required"
-
-[[rule]]
-id = "format.call_spacing"
-
-[[rule]]
-id = "format.case_begin_required"
-
-[[rule]]
-id = "format.case_colon_after"
-
-[[rule]]
-id = "format.case_colon_spacing"
-
-[[rule]]
-id = "format.comma_space"
-
-[[rule]]
-id = "format.end_else_inline"
-
-[[rule]]
-id = "format.final_newline"
-
-[[rule]]
-id = "format.indent_multiple_of_two"
-
-[[rule]]
-id = "format.line_continuation_right"
-
-[[rule]]
-id = "format.line_length"
-
-[[rule]]
-id = "format.macro_spacing"
-
-[[rule]]
-id = "format.no_tabs"
-
-[[rule]]
-id = "format.no_trailing_whitespace"
-
-[[rule]]
-id = "format.preproc_left_align"
-
-[[rule]]
 id = "global.local_define_undef"
 
 [[rule]]

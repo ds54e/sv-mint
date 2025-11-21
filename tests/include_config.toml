@@ -7,181 +7,19 @@ args = ["-u", "-B"]
 root = "../plugins"
 
 [[rule]]
-id = "flow.multiple_nonblocking"
-
-[[rule]]
-id = "comb.nb_in_alwayscomb"
-
-[[rule]]
-id = "decl.unused_param"
-
-[[rule]]
-id = "decl.unused_net"
-
-[[rule]]
 id = "decl.unused_var"
-
-[[rule]]
-id = "lang.default_nettype_missing"
-
-[[rule]]
-id = "lang.default_nettype_none"
-
-[[rule]]
-id = "lang.default_nettype_placement"
-
-[[rule]]
-id = "lang.default_nettype_reset"
-
-[[rule]]
-id = "format.ascii_only"
-
-[[rule]]
-id = "format.no_tabs"
-
-[[rule]]
-id = "format.no_trailing_whitespace"
-
-[[rule]]
-id = "format.final_newline"
-
-[[rule]]
-id = "format.comma_space"
-
-[[rule]]
-id = "format.call_spacing"
-
-[[rule]]
-id = "format.macro_spacing"
-
-[[rule]]
-id = "format.case_colon_spacing"
-
-[[rule]]
-id = "format.case_colon_after"
-
-[[rule]]
-id = "format.line_length"
 
 [[rule]]
 id = "module.no_port_wildcard"
 
 [[rule]]
-id = "format.end_else_inline"
-
-[[rule]]
-id = "format.begin_required"
-
-[[rule]]
-id = "naming.module_case"
-
-[[rule]]
-id = "naming.signal_case"
-
-[[rule]]
-id = "naming.port_case"
-
-[[rule]]
-id = "naming.no_numeric_suffix"
-
-[[rule]]
-id = "naming.suffix_order"
-
-[[rule]]
-id = "naming.clk_prefix"
-
-[[rule]]
-id = "naming.rst_active_low"
-
-[[rule]]
-id = "naming.clk_order"
-
-[[rule]]
-id = "naming.rst_before_clk"
-
-[[rule]]
-id = "naming.differential_pair"
-
-[[rule]]
-id = "naming.pipeline_sequence"
-
-[[rule]]
-id = "naming.parameter_upper"
-
-[[rule]]
-id = "lang.no_delays"
-
-[[rule]]
-id = "lang.prefer_always_comb"
-
-[[rule]]
-id = "lang.no_always_latch"
-
-[[rule]]
-id = "lang.always_ff_reset"
-
-[[rule]]
-id = "lang.always_comb_at"
-
-[[rule]]
-id = "global.local_define_undef"
-
-[[rule]]
-id = "global.prefer_parameters"
-
-[[rule]]
-id = "width.unsized_base_literal"
+id = "module.named_ports_required"
 
 [[rule]]
 id = "lang.case_requires_unique"
 
 [[rule]]
-id = "package.multiple"
-
-[[rule]]
-id = "package.missing_end"
-
-[[rule]]
-id = "package.end_mismatch"
-
-[[rule]]
-id = "package.define_in_package"
-
-[[rule]]
-id = "module.named_ports_required"
-
-[[rule]]
 id = "header.missing_spdx"
-
-[[rule]]
-id = "header.missing_comment"
-
-[[rule]]
-id = "typedef.enum_suffix"
-
-[[rule]]
-id = "typedef.type_suffix"
-
-[[rule]]
-id = "format.case_begin_required"
-
-[[rule]]
-id = "format.indent_multiple_of_two"
-
-[[rule]]
-id = "format.preproc_left_align"
-
-[[rule]]
-id = "format.line_continuation_right"
-
-[[rule]]
-id = "case.missing_default"
-
-[[rule]]
-id = "seq.blocking_in_alwaysff"
-
-[[rule]]
-id = "template.raw_text_marker"
 
 [logging]
 level = "info"

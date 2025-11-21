@@ -38,7 +38,7 @@ See [docs/internal_spec.md](internal_spec.md) for `AstSummary` and `cst_ir` sche
 
 ```python
 return [{
-    "rule_id": "format.line_length",
+    "rule_id": "lang.case_requires_unique",
     "severity": "warning",  # error / warning / info
     "message": "line exceeds 120 columns (134)",
     "location": {"line": 10, "col": 121, "end_line": 10, "end_col": 135}
