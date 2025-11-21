@@ -20,9 +20,6 @@ id = "flow.multiple_nonblocking"
 id = "flow.no_disable_fork_label"
 
 [[rule]]
-id = "flow.no_fork_label"
-
-[[rule]]
 id = "lang.default_nettype_missing"
 
 [[rule]]
