@@ -59,7 +59,7 @@ def evaluate(req):
             for match in DEFINE_RE.finditer(body):
                 name = match.group(1)
                 out.append(_violation(
-                    "package.require_defines_in_pkg",
+                    "package.no_define_in_package",
                     f"prefer parameters over `define {name} inside package",
                     body_start + match.start(),
                     text,

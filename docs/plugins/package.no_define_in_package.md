@@ -1,6 +1,6 @@
-# package.require_defines_in_pkg
+# package.no_define_in_package
 
-- **Script**: `plugins/package.require_defines_in_pkg.raw.py`
+- **Script**: `plugins/package.no_define_in_package.raw.py`
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`
 - **Shared Helpers**: `plugins/lib/package_ruleset.py`

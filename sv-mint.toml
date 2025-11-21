@@ -72,7 +72,7 @@ id = "naming.port_lower_snake"
 id = "naming.port_direction_suffix"
 
 [[rule]]
-id = "package.require_defines_in_pkg"
+id = "package.no_define_in_package"
 
 [[rule]]
 id = "package.single_package"
