@@ -98,9 +98,5 @@ id = "typedef.enum_value_case"
 stage = "cst"
 
 [[rule]]
-id = "typedef.enum_value_prefix"
-stage = "cst"
-
-[[rule]]
 id = "typedef.type_suffix"
 stage = "cst"

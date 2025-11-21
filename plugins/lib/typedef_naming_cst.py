@@ -53,9 +53,6 @@ def _check_enum(snippet, base, line_starts):
             loc = byte_span_to_loc(off, off + len(member), line_starts)
             if not UPPER_CAMEL.match(member):
                 out.append(_make("typedef.enum_value_case", f"enum values should use UpperCamelCase: {member}", loc))
-                continue
-            if prefix and not member.startswith(prefix):
-                out.append(_make("typedef.enum_value_prefix", f"enum values should start with {prefix}: {member}", loc))
     return out
 
 
