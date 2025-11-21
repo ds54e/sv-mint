@@ -14,7 +14,7 @@ Scans each `` `define NAME``; if `NAME` is not ALL_CAPS (`^[A-Z][A-Z0-9_]*$`), a
 `` `define <name> should use ALL_CAPS ``
 
 ### Remediation
-Rename macros to ALL_CAPS (e.g., ``define MY_MACRO 1`).
+Rename macros to ALL_CAPS (e.g., `` `define MY_MACRO 1``).
 
 ### Good
 
