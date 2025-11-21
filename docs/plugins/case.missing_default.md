@@ -18,7 +18,14 @@ The pass inspects preprocessed `pp_text`, so macros that expand to `default` mus
 ### Good
 
 ```systemverilog
-unique case (state_q)
+unique case (state_q)  // unique → default not required
+  IDLE:   state_d = START;
+  START:  state_d = DONE;
+endcase
+```
+
+```systemverilog
+case (state_q)  // default required when not unique
   IDLE:   state_d = START;
   START:  state_d = DONE;
   default: state_d = IDLE;  // handle unexpected states
@@ -26,6 +33,12 @@ endcase
 ```
 
 ### Bad
+
+```systemverilog
+unique case (state_q)  // even with unique, add default if not exhaustive
+  IDLE:   state_d = START;
+endcase
+```
 
 ```systemverilog
 case (opcode_i)
