@@ -1,12 +1,10 @@
 import re
 
-from lib.dv_helpers import loc, raw_text_inputs
+from lib.raw_text_helpers import byte_loc, raw_inputs
 
 
 def check(req):
-    if req.get("stage") != "raw_text":
-        return []
-    inputs = raw_text_inputs(req)
+    inputs = raw_inputs(req)
     if not inputs:
         return []
     text, path = inputs
@@ -23,6 +21,6 @@ def check(req):
                 "rule_id": "macros_close_with_undef",
                 "severity": "warning",
                 "message": f"`define {name} must be undefined at end of file",
-                "location": loc(text, match.start(1)),
+                "location": byte_loc(text, match.start(1)),
             })
     return out

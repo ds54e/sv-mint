@@ -1,14 +1,12 @@
 import re
 
-from lib.dv_helpers import loc, raw_text_inputs
+from lib.raw_text_helpers import byte_loc, raw_inputs
 
 PACKAGE_RE = re.compile(r"(?m)^\s*package\s+([A-Za-z_][\w$]*)")
 
 
 def check(req):
-    if req.get("stage") != "raw_text":
-        return []
-    inputs = raw_text_inputs(req)
+    inputs = raw_inputs(req)
     if not inputs:
         return []
     text, _ = inputs
@@ -16,11 +14,9 @@ def check(req):
     if len(packages) <= 1:
         return []
     first = packages[0]
-    return [
-        {
-            "rule_id": "one_package_per_file",
-            "severity": "warning",
-            "message": f"multiple package declarations in single file ({first.group(1)})",
-            "location": loc(text, first.start()),
-        }
-    ]
+    return [{
+        "rule_id": "one_package_per_file",
+        "severity": "warning",
+        "message": f"multiple package declarations in single file ({first.group(1)})",
+        "location": byte_loc(text, first.start()),
+    }]

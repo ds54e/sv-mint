@@ -1,14 +1,12 @@
 import re
 
-from lib.dv_helpers import loc, raw_text_inputs
+from lib.raw_text_helpers import byte_loc, raw_inputs
 
 DIRECTIVE_RE = re.compile(r"`default_nettype\s+([A-Za-z_]\w*)", re.IGNORECASE | re.MULTILINE)
 
 
 def check(req):
-    if req.get("stage") != "raw_text":
-        return []
-    inputs = raw_text_inputs(req)
+    inputs = raw_inputs(req)
     if not inputs:
         return []
     text, _ = inputs
@@ -23,5 +21,5 @@ def check(req):
         "rule_id": "default_nettype_ends_with_wire",
         "severity": "warning",
         "message": "`default_nettype none` should be reset to `wire` at the end of the file",
-        "location": loc(text, last.start()),
+        "location": byte_loc(text, last.start()),
     }]

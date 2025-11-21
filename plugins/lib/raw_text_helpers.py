@@ -1,4 +1,7 @@
-def raw_text_inputs(req):
+"""Raw text stage helpers used by multiple plugins."""
+
+
+def raw_inputs(req):
     if req.get("stage") != "raw_text":
         return None
     payload = req.get("payload") or {}
@@ -7,7 +10,7 @@ def raw_text_inputs(req):
     return text, path
 
 
-def loc(text, index):
+def byte_loc(text, index):
     line = text.count("\n", 0, index) + 1
     prev = text.rfind("\n", 0, index)
     col = index + 1 if prev < 0 else index - prev

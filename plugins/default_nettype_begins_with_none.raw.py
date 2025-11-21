@@ -1,14 +1,12 @@
 import re
 
-from lib.dv_helpers import loc, raw_text_inputs
+from lib.raw_text_helpers import byte_loc, raw_inputs
 
 DIRECTIVE_RE = re.compile(r"`default_nettype\s+([A-Za-z_]\w*)", re.IGNORECASE | re.MULTILINE)
 
 
 def check(req):
-    if req.get("stage") != "raw_text":
-        return []
-    inputs = raw_text_inputs(req)
+    inputs = raw_inputs(req)
     if not inputs:
         return []
     text, _ = inputs
@@ -20,5 +18,5 @@ def check(req):
         "rule_id": "default_nettype_begins_with_none",
         "severity": "warning",
         "message": "file must declare `default_nettype none` near the top",
-        "location": loc(text, 0),
+        "location": byte_loc(text, 0),
     }]

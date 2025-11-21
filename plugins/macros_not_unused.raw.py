@@ -1,15 +1,13 @@
 import re
 
-from lib.dv_helpers import loc, raw_text_inputs
+from lib.raw_text_helpers import byte_loc, raw_inputs
 
 DEFINE_PATTERN = re.compile(r"(?m)^\s*`define\s+([A-Za-z_]\w*)")
 USE_PATTERN = re.compile(r"`([A-Za-z_]\w*)")
 
 
 def check(req):
-    if req.get("stage") != "raw_text":
-        return []
-    inputs = raw_text_inputs(req)
+    inputs = raw_inputs(req)
     if not inputs:
         return []
     text, _ = inputs
@@ -25,7 +23,7 @@ def check(req):
             "rule_id": "macros_not_unused",
             "severity": "warning",
             "message": f"macro `{name}` is defined but never used",
-            "location": loc(text, start),
+            "location": byte_loc(text, start),
         })
     return out
 

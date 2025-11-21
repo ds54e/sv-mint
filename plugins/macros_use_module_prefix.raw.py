@@ -1,12 +1,10 @@
 import re
 
-from lib.dv_helpers import loc, raw_text_inputs
+from lib.raw_text_helpers import byte_loc, raw_inputs
 
 
 def check(req):
-    if req.get("stage") != "raw_text":
-        return []
-    inputs = raw_text_inputs(req)
+    inputs = raw_inputs(req)
     if not inputs:
         return []
     text, _ = inputs
@@ -23,7 +21,7 @@ def check(req):
                 "rule_id": "macros_use_module_prefix",
                 "severity": "warning",
                 "message": f"`define {macro} inside module {name} must be prefixed with {prefix}",
-                "location": loc(text, offset + match.start(1)),
+                "location": byte_loc(text, offset + match.start(1)),
             })
     return out
 
