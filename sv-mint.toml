@@ -35,6 +35,10 @@ id = "lang.default_nettype.require_epilogue_wire"
 id = "lang.prefer_always_comb"
 
 [[rule]]
+id = "lang.always.require_structured"
+stage = "cst"
+
+[[rule]]
 id = "macro.require_trailing_undef"
 
 [[rule]]

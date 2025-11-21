@@ -60,6 +60,16 @@ fn detects_multiple_nonblocking_assignments() {
 }
 
 #[test]
+fn detects_bare_always() {
+    run_fixture("fixtures/always_plain.sv", "lang.always.require_structured");
+    let mut cmd = Command::new(assert_cmd::cargo::cargo_bin!("sv-mint"));
+    cmd.arg("--disable").arg("module.require_named_ports");
+    cmd.arg("--disable").arg("flow.no_multiple_nb_assign");
+    cmd.arg("fixtures/always_structured_ok.sv");
+    cmd.assert().success();
+}
+
+#[test]
 fn detects_net_naming_violations() {
     run_fixture("fixtures/net_lower_snake_violation.sv", "naming.net_lower_snake");
     let mut cmd = Command::new(assert_cmd::cargo::cargo_bin!("sv-mint"));
