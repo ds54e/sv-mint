@@ -69,6 +69,12 @@ fn detects_net_naming_violations() {
 }
 
 #[test]
+fn detects_var_naming_violations() {
+    run_fixture("fixtures/var_lower_snake_violation.sv", "decl.var_lower_snake");
+    run_fixture_success("fixtures/var_lower_snake_ok.sv");
+}
+
+#[test]
 fn detects_multiple_modules() {
     run_fixture("fixtures/multiple_modules_violation.sv", "module.no_multiple_modules");
     run_fixture_success("fixtures/multiple_modules_ok.sv");
