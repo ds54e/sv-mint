@@ -133,6 +133,16 @@ fn detects_macro_undef_violations() {
 }
 
 #[test]
+fn detects_define_upper_violations() {
+    run_fixture("fixtures/macro_define_upper_violation.sv", "macro.define_upper");
+    let mut cmd = Command::new(assert_cmd::cargo::cargo_bin!("sv-mint"));
+    cmd.arg("--disable").arg("macro.unused_macro");
+    cmd.arg("--disable").arg("macro.missing_undef");
+    cmd.arg("fixtures/macro_define_upper_ok.sv");
+    cmd.assert().success();
+}
+
+#[test]
 fn detects_unused_macro() {
     run_fixture("fixtures/macro_unused.sv", "macro.unused_macro");
     run_fixture_success("fixtures/macro_used.sv");

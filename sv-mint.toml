@@ -44,6 +44,9 @@ id = "macro.module_prefix"
 id = "macro.unused_macro"
 
 [[rule]]
+id = "macro.define_upper"
+
+[[rule]]
 id = "module.named_ports_required"
 
 [[rule]]
