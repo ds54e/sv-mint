@@ -10,16 +10,7 @@ root = "../plugins"
 id = "decl.unused_var"
 
 [[rule]]
-id = "module.no_port_wildcard"
-
-[[rule]]
 id = "module.named_ports_required"
-
-[[rule]]
-id = "lang.case_requires_unique"
-
-[[rule]]
-id = "header.missing_spdx"
 
 [logging]
 level = "info"
@@ -38,3 +29,4 @@ allow_incomplete = true
 [stages]
 enabled = ["raw_text", "pp_text", "cst", "ast"]
 required = ["raw_text", "pp_text"]
+

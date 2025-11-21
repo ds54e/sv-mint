@@ -2,9 +2,6 @@
 id = "case.missing_default"
 
 [[rule]]
-id = "check.dv_macro_required"
-
-[[rule]]
 id = "comb.nb_in_alwayscomb"
 
 [[rule]]
@@ -17,12 +14,6 @@ id = "decl.unused_param"
 id = "decl.unused_var"
 
 [[rule]]
-id = "dpi.export_prefix"
-
-[[rule]]
-id = "dpi.import_prefix"
-
-[[rule]]
 id = "flow.multiple_nonblocking"
 
 [[rule]]
@@ -32,82 +23,16 @@ id = "flow.no_disable_fork_label"
 id = "flow.no_fork_label"
 
 [[rule]]
-id = "flow.spinwait_macro_required"
-
-[[rule]]
-id = "flow.wait_fork_isolation"
-
-[[rule]]
-id = "flow.wait_macro_required"
-
-[[rule]]
 id = "global.local_define_undef"
-
-[[rule]]
-id = "global.prefer_parameters"
-
-[[rule]]
-id = "header.missing_comment"
-
-[[rule]]
-id = "header.missing_spdx"
-
-[[rule]]
-id = "lang.always_comb_at"
-
-[[rule]]
-id = "lang.always_ff_reset"
-
-[[rule]]
-id = "lang.case_requires_unique"
 
 [[rule]]
 id = "lang.default_nettype_missing"
 
 [[rule]]
-id = "lang.default_nettype_none"
-
-[[rule]]
-id = "lang.default_nettype_placement"
-
-[[rule]]
 id = "lang.default_nettype_reset"
 
 [[rule]]
-id = "lang.no_always_latch"
-
-[[rule]]
-id = "lang.no_delays"
-
-[[rule]]
-id = "lang.no_program_construct"
-
-[[rule]]
 id = "lang.prefer_always_comb"
-
-[[rule]]
-id = "log.allowed_verbosity"
-
-[[rule]]
-id = "log.no_display"
-
-[[rule]]
-id = "log.no_none_full"
-
-[[rule]]
-id = "log.no_uvm_report_api"
-
-[[rule]]
-id = "log.no_uvm_warning"
-
-[[rule]]
-id = "log.uvm_arg_macro"
-
-[[rule]]
-id = "macro.dv_prefix_header_only"
-
-[[rule]]
-id = "macro.guard_required"
 
 [[rule]]
 id = "macro.missing_undef"
@@ -116,34 +41,13 @@ id = "macro.missing_undef"
 id = "macro.module_prefix"
 
 [[rule]]
-id = "macro.no_local_guard"
-
-[[rule]]
 id = "module.named_ports_required"
-
-[[rule]]
-id = "module.no_port_wildcard"
-
-[[rule]]
-id = "naming.clk_order"
-
-[[rule]]
-id = "naming.clk_prefix"
-
-[[rule]]
-id = "naming.differential_pair"
 
 [[rule]]
 id = "naming.module_case"
 
 [[rule]]
-id = "naming.no_numeric_suffix"
-
-[[rule]]
 id = "naming.parameter_upper"
-
-[[rule]]
-id = "naming.pipeline_sequence"
 
 [[rule]]
 id = "naming.port_case"
@@ -152,49 +56,19 @@ id = "naming.port_case"
 id = "naming.port_suffix"
 
 [[rule]]
-id = "naming.rst_active_low"
-
-[[rule]]
-id = "naming.rst_before_clk"
-
-[[rule]]
 id = "naming.signal_case"
-
-[[rule]]
-id = "naming.suffix_order"
 
 [[rule]]
 id = "package.define_in_package"
 
 [[rule]]
-id = "package.end_mismatch"
-
-[[rule]]
-id = "package.missing_end"
-
-[[rule]]
 id = "package.multiple"
-
-[[rule]]
-id = "rand.dv_macro_required"
-
-[[rule]]
-id = "rand.dv_macro_with_required"
-
-[[rule]]
-id = "scoreboard.dv_eot_required"
 
 [[rule]]
 id = "seq.blocking_in_alwaysff"
 
 [[rule]]
-id = "seq.no_uvm_do"
-
-[[rule]]
 id = "style.function_scope"
-
-[[rule]]
-id = "template.raw_text_marker"
 
 [[rule]]
 id = "typedef.enum_lower_snake"
@@ -210,6 +84,3 @@ id = "typedef.enum_value_prefix"
 
 [[rule]]
 id = "typedef.type_suffix"
-
-[[rule]]
-id = "width.unsized_base_literal"
