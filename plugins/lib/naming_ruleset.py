@@ -46,10 +46,6 @@ def _check_modules(decls):
     return out
 
 
-def _check_symbols(symbols):
-    return []
-
-
 def _check_ports(ports):
     out = []
     for port in ports:
@@ -72,36 +68,6 @@ def _validate_name(name, loc, rule_id):
             "location": loc,
         })
     return issues
-
-
-def _check_suffixes(name, loc):
-    return []
-
-
-def _check_clock_reset(name, loc):
-    return []
-
-
-def _check_clock_reset_order(ports):
-    return []
-
-
-def _check_differential_pairs(ports):
-    return []
-
-
-def _check_pipeline_suffixes(names):
-    return []
-
-
-def _pipeline_match(name):
-    m = re.match(r"(.+)_q(\d+)$", name)
-    if not m:
-        return None
-    stage = int(m.group(2))
-    if stage < 2:
-        return None
-    return m.group(1), stage
 
 
 def _check_parameter_naming(decls):
