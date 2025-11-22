@@ -3,7 +3,6 @@
 - **Script**: `plugins/module_names_lower_snake.ast.py`
 - **Stage**: `ast`
 - **Key Inputs**: `decls`, `symbols`, `ports`
-- **Shared Helpers**: `plugins/lib/naming_ruleset.py`
 - **Summary**: Modules must use lower_snake_case
 
 ## Details

@@ -1,14 +1,13 @@
 # default_nettype_ends_with_wire
 
-- **Script**: `plugins/default_nettype_ends_with_wire.raw.py`
-- **Stage**: `raw_text`
-- **Key Inputs**: `text`
-- **Shared Helpers**: `plugins/lib/default_nettype_ruleset.py`
+- **Script**: `plugins/default_nettype_ends_with_wire.cst.py`
+- **Stage**: `cst`
+- **Key Inputs**: `cst_ir.directives`, `line_starts`, `source_text`/`pp_text`
 - **Summary**: Files must reset `default_nettype` back to `wire` near the end
 
 ## Details
 
-Because `default_nettype` stays in effect for all subsequent compilation units, each file that changes it must reset it back to `wire` at the end so other sources aren’t accidentally processed with `none`. This rule looks at the last `default_nettype` directive and warns when it doesn’t restore `wire`; files that never set `default_nettype` are ignored.
+Because `default_nettype` stays in effect for all subsequent compilation units, each file that changes it must reset it back to `wire` at the end so other sources aren’t accidentally processed with `none`. The CST directives table is scanned for the last `default_nettype` directive; the rule warns when it doesn’t restore `wire`, and ignores files that never set `default_nettype`.
 ### Good
 
 ```systemverilog

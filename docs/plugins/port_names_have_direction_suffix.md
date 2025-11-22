@@ -3,7 +3,6 @@
 - **Script**: `plugins/port_names_have_direction_suffix.ast.py`
 - **Stage**: `ast`
 - **Key Inputs**: `decls`, `symbols`, `ports`
-- **Shared Helpers**: `plugins/lib/naming_ruleset.py`
 - **Summary**: `_i/_o/_io` suffixes must match port direction
 
 ## Details

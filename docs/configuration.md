@@ -94,7 +94,7 @@ Values must be greater than zero, and `warn_margin_bytes` must not exceed `max_r
 ```toml
 # Only declare the bundled rules you want; everything else uses defaults.
 [[rule]]
-id = "module_no_port_wildcard"
+id = "macro_names_uppercase"
 
 [[rule]]
 id = "vars_not_left_unused"

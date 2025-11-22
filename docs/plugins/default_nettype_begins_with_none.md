@@ -1,14 +1,13 @@
 # default_nettype_begins_with_none
 
-- **Script**: `plugins/default_nettype_begins_with_none.raw.py`
-- **Stage**: `raw_text`
-- **Key Inputs**: `text`
-- **Shared Helpers**: `plugins/lib/default_nettype_ruleset.py`
+- **Script**: `plugins/default_nettype_begins_with_none.cst.py`
+- **Stage**: `cst`
+- **Key Inputs**: `cst_ir.directives`, `line_starts`, `source_text`/`pp_text`
 - **Summary**: Require `` `default_nettype none`` in every file
 
 ## Details
 
-Flags files that never declare `` `default_nettype``. Requiring `` `default_nettype none`` ensures misspelled nets do not silently become implicit wires.
+Flags files that never declare `` `default_nettype``. Using the CST directives table, the rule warns when no `` `default_nettype`` is found so misspelled nets do not silently become implicit wires.
 ### Good
 
 ```systemverilog

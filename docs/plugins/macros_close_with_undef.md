@@ -3,7 +3,6 @@
 - **Script**: `plugins/macros_close_with_undef.raw.py`
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`, `path`
-- **Shared Helpers**: `plugins/lib/dv_text_ruleset.py`
 - **Summary**: Local `` `define`` entries must be `` `undef``’d in the same file
 
 ## Details

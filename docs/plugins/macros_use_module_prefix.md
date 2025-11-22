@@ -3,7 +3,6 @@
 - **Script**: `plugins/macros_use_module_prefix.raw.py`
 - **Stage**: `raw_text`
 - **Key Inputs**: `text`, `path`
-- **Shared Helpers**: `plugins/lib/dv_text_ruleset.py`
 - **Summary**: Module-local macros must be prefixed with the module name
 
 ## Details

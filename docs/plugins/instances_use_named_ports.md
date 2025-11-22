@@ -1,8 +1,8 @@
 # instances_use_named_ports
 
-- **Script**: `plugins/instances_use_named_ports.raw.py`
-- **Stage**: `raw_text`
-- **Key Inputs**: `text`
+- **Script**: `plugins/instances_use_named_ports.cst.py`
+- **Stage**: `cst`
+- **Key Inputs**: `cst_ir.tokens`, `line_starts`, `pp_text`
 - **Summary**: Require named `.port(signal)` connections
 
 ## Details
@@ -27,4 +27,4 @@ foo u_foo (
 foo u_foo (clk_i, rst_ni, req_i, gnt_o);  // positional arguments
 ```
 
-`module_no_port_wildcard` is now enforced exclusively by `plugins/module_no_port_wildcard.cst.py` for precise diagnostics.
+This rule inspects the CST for positional port connections and flags them so instantiations stay readable and ordering-safe.

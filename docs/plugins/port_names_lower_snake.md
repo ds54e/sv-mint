@@ -3,7 +3,6 @@
 - **Script**: `plugins/port_names_lower_snake.ast.py`
 - **Stage**: `ast`
 - **Key Inputs**: `decls`, `symbols`, `ports`
-- **Shared Helpers**: `plugins/lib/naming_ruleset.py`
 - **Summary**: Ports follow lower_snake_case + direction suffix
 
 ## Details
