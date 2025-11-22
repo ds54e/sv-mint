@@ -26,4 +26,4 @@ id = "vars_not_left_unused"
 
 ## Provenance and License
 - Rust dependencies follow MIT or Apache-2.0 licenses as declared in `Cargo.toml`.
-- sv-mint itself is distributed under the same terms as the repository license (see `LICENSE`).
+- sv-mint itself is distributed under the MIT License (see `LICENSE`).
