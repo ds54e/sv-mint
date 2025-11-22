@@ -83,6 +83,9 @@ id = "functions_explicit_return_type"
 id = "functions_explicit_arg_types"
 
 [[rule]]
+id = "tasks_explicit_arg_types"
+
+[[rule]]
 id = "functions_args_have_direction"
 
 [[rule]]
