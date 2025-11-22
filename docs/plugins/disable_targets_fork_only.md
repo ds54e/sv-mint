@@ -5,7 +5,7 @@
 
 ## Description
 - `disable fork_label` is not portable
-- Why: Disabling named forks is non-portable; disabling the fork itself yields consistent simulator behavior.
+- Disabling named forks is non-portable; disabling the fork itself yields consistent simulator behavior.
 ## Good
 
 ```systemverilog

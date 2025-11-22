@@ -5,7 +5,7 @@
 
 ## Description
 - Replace bare `always` with `always_ff`/`always_comb`/`always_latch`
-- Why: Using always_* communicates intent and lets tools lint sensitivity/semantics accurately.
+- Using always_* communicates intent and lets tools lint sensitivity/semantics accurately.
 ## Good
 
 ```systemverilog

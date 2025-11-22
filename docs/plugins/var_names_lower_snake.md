@@ -5,7 +5,7 @@
 
 ## Description
 - Warn when variable names are not lower_snake_case (letters, digits, `_`, `$` allowed)
-- Why: Consistent variable naming improves readability and refactoring.
+- Consistent variable naming improves readability and refactoring.
 ## Good
 
 ```systemverilog

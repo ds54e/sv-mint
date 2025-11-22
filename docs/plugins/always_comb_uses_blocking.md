@@ -5,7 +5,7 @@
 
 ## Description
 - Prohibit non-blocking assignments (`<=`) inside `always_comb`
-- Why: Non-blocking in combinational logic can create delta-cycle races and unintended latches; blocking reflects true combinational intent.
+- Non-blocking in combinational logic can create delta-cycle races and unintended latches; blocking reflects true combinational intent.
 ## Good
 
 ```systemverilog

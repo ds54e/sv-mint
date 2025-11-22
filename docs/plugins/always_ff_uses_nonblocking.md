@@ -5,7 +5,7 @@
 
 ## Description
 - Ban blocking `=` assignments inside `always_ff`
-- Why: Non-blocking assignments preserve sequential semantics and avoid read-before-write races in flip-flop logic.
+- Non-blocking assignments preserve sequential semantics and avoid read-before-write races in flip-flop logic.
 ## Good
 
 ```systemverilog

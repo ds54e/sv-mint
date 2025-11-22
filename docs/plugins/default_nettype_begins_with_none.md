@@ -5,7 +5,7 @@
 
 ## Description
 - Require `` `default_nettype none`` in every file
-- Why: Forcing explicit net declarations catches typos instead of silently creating implicit wires.
+- Forcing explicit net declarations catches typos instead of silently creating implicit wires.
 ## Good
 
 ```systemverilog

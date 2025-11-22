@@ -5,7 +5,7 @@
 
 ## Description
 - Function arguments must declare explicit data types.
-- Why: Implicit types hide width/signedness and can diverge across tools.
+- Implicit types hide width/signedness and can diverge across tools.
 ## Good
 
 ```systemverilog

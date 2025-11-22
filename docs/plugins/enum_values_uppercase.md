@@ -5,7 +5,7 @@
 
 ## Description
 - Enum members must be UpperCamelCase or ALL_CAPS
-- Why: ALL_CAPS enum values read as constants and reduce confusion with signals.
+- ALL_CAPS enum values read as constants and reduce confusion with signals.
 ## Good
 
 ```systemverilog

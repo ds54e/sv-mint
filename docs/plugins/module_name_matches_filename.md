@@ -5,7 +5,7 @@
 
 ## Description
 - Warn when the module or package name does not match the file name
-- Why: Matching filenames simplifies navigation and tooling expectations.
+- Matching filenames simplifies navigation and tooling expectations.
 ## Good
 
 `module_filename_match_ok.sv`

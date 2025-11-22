@@ -5,7 +5,7 @@
 
 ## Description
 - Warn when net names are not lower_snake_case (letters, digits, `_`, `$` allowed)
-- Why: Consistent net naming improves readability and searchability.
+- Consistent net naming improves readability and searchability.
 ## Good
 
 ```systemverilog

@@ -5,7 +5,7 @@
 
 ## Description
 - Functions must declare an explicit return type.
-- Why: Explicit return types prevent unintended logic defaults and clarify width/signedness.
+- Explicit return types prevent unintended logic defaults and clarify width/signedness.
 ## Good
 
 ```systemverilog

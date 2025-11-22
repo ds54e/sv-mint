@@ -5,7 +5,7 @@
 
 ## Description
 - Warn when `localparam` names are not UpperCamelCase or ALL_CAPS
-- Why: ALL_CAPS/UpperCamel distinguish compile-time constants from signals.
+- ALL_CAPS/UpperCamel distinguish compile-time constants from signals.
 ## Good
 
 ```systemverilog

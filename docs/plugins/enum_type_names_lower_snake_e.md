@@ -5,7 +5,7 @@
 
 ## Description
 - Enum type names must be lower_snake_case and end with `_e`
-- Why: Consistent enum type naming distinguishes types from variables at a glance.
+- Consistent enum type naming distinguishes types from variables at a glance.
 ## Good
 
 ```systemverilog

@@ -5,7 +5,7 @@
 
 ## Description
 - `define` names must be ALL_CAPS
-- Why: ALL_CAPS visually separates macros from signals.
+- ALL_CAPS visually separates macros from signals.
 ## Good
 
 ```systemverilog

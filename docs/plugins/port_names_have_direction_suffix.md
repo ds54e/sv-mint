@@ -5,7 +5,7 @@
 
 ## Description
 - `_i/_o/_io` suffixes must match port direction
-- Why: Direction suffixes encode intent for readers and reduce hookup errors.
+- Direction suffixes encode intent for readers and reduce hookup errors.
 ## Good
 
 ```systemverilog

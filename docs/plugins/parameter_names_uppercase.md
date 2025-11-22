@@ -5,7 +5,7 @@
 
 ## Description
 - Parameters must be UpperCamelCase
-- Why: Capitalized parameters stand out from signals and locals.
+- Capitalized parameters stand out from signals and locals.
 ## Good
 
 ```systemverilog

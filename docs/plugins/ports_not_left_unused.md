@@ -8,7 +8,7 @@
 - Implicit `.*` connections are not elaborated; they will be counted as unused.
 - Implicit named port shorthand (e.g., `.foo`) is elaborated and counted as a use.
 - If the declaration line contains a comment with the words `used` or `reserved` (case-insensitive), the warning is suppressed.
-- Why: Unused ports suggest missing connections or obsolete interfaces.
+- Unused ports suggest missing connections or obsolete interfaces.
 ## Good
 
 ```systemverilog

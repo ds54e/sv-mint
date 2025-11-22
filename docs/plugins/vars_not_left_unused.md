@@ -6,7 +6,7 @@
 ## Description
 - Warn about variable declarations that are never referenced.
 - Implicit `.*` connections are not elaborated; they will be counted as unused.
-- Why: Unused variables indicate missing hookups or dead code.
+- Unused variables indicate missing hookups or dead code.
 ## Good
 
 ```systemverilog
