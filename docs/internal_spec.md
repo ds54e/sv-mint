@@ -71,6 +71,15 @@ Additional metadata:
 - `file_id`: stable identifier for cross-referencing includes.
 - `defines[*].origin`: indicates whether the define came from CLI `--define` or in-source macros.
 - `assigns[*].op`: `blocking`, `nonblocking`, or `continuous`.
+- `cst_ir` (schema v2):
+  - `tokens[*]`: `{id, kind, start, end, text}`, plus `tok_kind_table`/`tok_kind_map` for name lookup.
+  - `nodes[*]`: `{id, kind, parent, first_token, last_token, children[], fields{...}}`. Representative `fields`:
+    - `return_type`, `ports[]` (`dir`, `type`, `name_token`, `expr`) on `FunctionDeclaration`
+    - `type` on `ParameterDeclaration`/`LocalParameterDeclaration`
+    - `always_kind` and `events[]` (`separator`, `token`, `edge`, `expr`) on `AlwaysConstruct`
+    - `has_default` / `is_unique` / `is_priority` on `CaseStatement`
+    - `connections[]` / `param_connections[]` (`named`, `token`, optional `name_token`, `expr`) and `name_token` on `HierarchicalInstance`
+  - `directives[*]`: `{kind, value, token, start, end, parent, depth}` for preprocessor directives (e.g., ``default_nettype``, ``ifdef/ifndef`` with basic nesting).
 
 ### 3.2 `Violation`
 ```rust

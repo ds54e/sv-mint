@@ -61,6 +61,17 @@ Each stage has a predictable JSON layout. Prefer `.get()` accessors so your rule
 
 `sv-mint` ships a developer-only flag `--dump-payload <stage>` (guarded behind `cfg(debug_assertions)`). When unavailable, add temporary logging inside `plugins/lib/rule_host.py` to inspect incoming payloads.
 
+#### 2.4.1 CST IR quick reference
+- `tokens[*]`: `{id, kind, start, end, text}`, with `tok_kind_table`/`tok_kind_map` for lookup.
+- `nodes[*]`: `{id, kind, parent, first_token, last_token, children[], fields{...}}`. Relevant `fields` include:
+  - `return_type` on `FunctionDeclaration`
+  - `ports[]` on `FunctionDeclaration` (`dir`, `type`, `name_token`, optional `expr`)
+  - `type` on `ParameterDeclaration`/`LocalParameterDeclaration` and `DataType*` wrappers
+  - `always_kind` and `events[]` (comma/or separators, token) on `AlwaysConstruct`
+  - `has_default`/`is_unique`/`is_priority` on `CaseStatement`
+  - `connections[]` (`named`, `token`) and `name_token` on `HierarchicalInstance`
+- `directives[]`: `{kind, value, token, start, end}` for preprocessor directives such as ``default_nettype``.
+
 ## 3. Skeleton Example
 ```python
 from typing import Any, Dict, List

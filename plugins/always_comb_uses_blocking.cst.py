@@ -9,18 +9,18 @@ def check(req):
     cst = Cst(ir)
     line_starts = ir.get("line_starts") or [0]
     tokens = ir.get("tokens") or []
-    kinds = {name: i for i, name in enumerate(ir.get("tok_kind_table") or [])}
-    op_le = kinds.get("op_le")
-    kw_comb = kinds.get("kw_always_comb")
-    regions = []
-    if cst.nodes and tokens and kw_comb is not None:
-        for node in cst.of_kind("AlwaysConstruct"):
-            toks = cst.tokens_in(node)
-            if any(t.get("kind") == kw_comb for t in toks):
-                regions.append((node.get("start"), node.get("end")))
+    tok_kinds = ir.get("tok_kind_map") or {}
+    op_le = tok_kinds.get("op_le")
     out = []
-    if tokens and op_le is not None and regions:
-        for start, end in regions:
+    if tokens and op_le is not None:
+        for node in cst.of_kind("AlwaysConstruct"):
+            fields = node.get("fields") or {}
+            if (fields.get("always_kind") or "").lower() != "comb":
+                continue
+            start = node.get("start")
+            end = node.get("end")
+            if start is None or end is None:
+                continue
             for tok in tokens:
                 ts = tok.get("start")
                 te = tok.get("end")

@@ -80,7 +80,7 @@ fn allows_unused_port_with_unused_comment() {
 
 #[test]
 fn detects_multiple_nonblocking_assignments() {
-    run_fixture("fixtures/multiple_nonblocking.sv", "instances_use_named_ports");
+    run_fixture("fixtures/multiple_nonblocking.sv", "default_nettype_begins_with_none");
 }
 
 #[test]

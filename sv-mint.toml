@@ -27,9 +27,11 @@ id = "disable_targets_fork_only"
 
 [[rule]]
 id = "default_nettype_begins_with_none"
+stage = "cst"
 
 [[rule]]
 id = "default_nettype_ends_with_wire"
+stage = "cst"
 
 [[rule]]
 id = "always_is_structured"
@@ -53,6 +55,7 @@ id = "macro_names_uppercase"
 
 [[rule]]
 id = "instances_use_named_ports"
+stage = "cst"
 
 [[rule]]
 id = "one_module_per_file"
