@@ -3,6 +3,7 @@ import re
 USED_WORD = re.compile(r"\bused\b", re.IGNORECASE)
 RESERVED_WORD = re.compile(r"\breserved\b", re.IGNORECASE)
 
+
 def check(req):
     if req.get("stage") != "ast":
         return []
@@ -11,7 +12,7 @@ def check(req):
     line_cache = {}
     out = []
     for s in symbols:
-        if s.get("class") != "param":
+        if s.get("class") != "localparam":
             continue
         refs = int(s.get("ref_count", s.get("read_count", 0) or 0) or 0)
         if refs == 0:
@@ -19,15 +20,16 @@ def check(req):
                 continue
             out.append(
                 {
-                    "rule_id": "params_not_left_unused",
+                    "rule_id": "localparams_not_left_unused",
                     "severity": "warning",
-                    "message": f"unused param {s.get('module','')}.{s.get('name','')}",
+                    "message": f"unused localparam {s.get('module','')}.{s.get('name','')}",
                     "location": s.get(
                         "loc", {"line": 1, "col": 1, "end_line": 1, "end_col": 1}
                     ),
                 }
             )
     return out
+
 
 def _has_usage_comment(cache, loc):
     if not loc:
@@ -61,6 +63,7 @@ def _has_usage_comment(cache, loc):
             continue
         i += 1
     return False
+
 
 def _lines_for_file(cache, path):
     if not path:
