@@ -127,6 +127,16 @@ fn detects_parameter_naming_violations() {
 }
 
 #[test]
+fn detects_parameter_missing_type() {
+    run_fixture("fixtures/parameter_missing_type.sv", "parameter_has_type");
+}
+
+#[test]
+fn allows_parameter_with_type() {
+    run_fixture_success("fixtures/parameter_with_type.sv");
+}
+
+#[test]
 fn detects_localparam_naming_violations() {
     run_fixture("fixtures/localparam_case_violation.sv", "localparam_names_uppercase");
     let mut cmd = Command::new(assert_cmd::cargo::cargo_bin!("sv-mint"));
