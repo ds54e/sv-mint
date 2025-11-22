@@ -45,9 +45,7 @@ def _has_scope_keyword(tokens, node, text):
         if word == "automatic" or word == "static":
             return True
         if word.startswith("function"):
-            # continue scanning in case automatic/static follows
             continue
-        # stop if we hit a semicolon at the end of declaration header
         if word == ";":
             break
     return False

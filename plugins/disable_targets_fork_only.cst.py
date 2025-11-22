@@ -15,10 +15,8 @@ def check(req):
         last = node.get("last_token")
         if first is None or last is None:
             continue
-        # Check if this is "disable fork" (no label) or "disable <label>"
         label = _disable_label(tokens, first, last, text)
         if label is None:
-            # disable without label (e.g., disable fork;) is fine
             continue
         start = tokens[first].get("start")
         end = tokens[first].get("end")
@@ -36,7 +34,6 @@ def check(req):
     return out
 
 def _disable_label(tokens, first, last, text):
-    # Expect pattern: disable <id_or_fork> ... ;
     for tok in tokens[first : last + 1]:
         start = tok.get("start")
         end = tok.get("end")
@@ -47,9 +44,7 @@ def _disable_label(tokens, first, last, text):
             continue
         if word == ";":
             break
-        # if word is "fork", treat as no label
         if word.lower() == "fork":
             return None
-        # first non-disable, non-semicolon token is treated as label/target
         return word
     return None
