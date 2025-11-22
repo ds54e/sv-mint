@@ -4,8 +4,8 @@
 - `plugins/vars_not_left_unused.ast.py`
 
 ## Description
-- Warn about variable declarations that are never referenced. Implicit `.*` connections are not elaborated; they will be counted as unused.
-
+- Warn about variable declarations that are never referenced.
+- Implicit `.*` connections are not elaborated; they will be counted as unused.
 ## Good
 
 ```systemverilog

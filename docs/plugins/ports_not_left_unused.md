@@ -4,8 +4,10 @@
 - `plugins/ports_not_left_unused.ast.py`
 
 ## Description
-- Warn when module ports are never read or written inside the module body. Implicit `.*` connections are not elaborated; they will be counted as unused. Implicit named port shorthand (e.g., `.foo`) is elaborated and counted as a use. If the declaration line contains a comment with the words `used` or `reserved` (case-insensitive), the warning is suppressed.
-
+- Warn when module ports are never read or written inside the module body.
+- Implicit `.*` connections are not elaborated; they will be counted as unused.
+- Implicit named port shorthand (e.g., `.foo`) is elaborated and counted as a use.
+- If the declaration line contains a comment with the words `used` or `reserved` (case-insensitive), the warning is suppressed.
 ## Good
 
 ```systemverilog

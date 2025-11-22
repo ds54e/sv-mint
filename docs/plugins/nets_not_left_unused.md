@@ -4,8 +4,8 @@
 - `plugins/nets_not_left_unused.ast.py`
 
 ## Description
-- Warn when declared nets are never read or written. Implicit `.*` connections are not elaborated; they will be counted as unused.
-
+- Warn when declared nets are never read or written.
+- Implicit `.*` connections are not elaborated; they will be counted as unused.
 ## Good
 
 ```systemverilog
