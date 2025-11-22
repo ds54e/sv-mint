@@ -21,7 +21,7 @@ impl Default for SvParserCfg {
         Self {
             include_paths: Vec::new(),
             defines: Vec::new(),
-            strip_comments: true,
+            strip_comments: false,
             ignore_include: true,
             allow_incomplete: true,
         }

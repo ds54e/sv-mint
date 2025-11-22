@@ -1,6 +1,6 @@
 import re
 
-from lib.cst_inline import byte_span_to_loc
+from lib.utf8 import span_to_loc
 
 TYPEDEF_ENUM_RE = re.compile(
     r"typedef\s+enum(?P<head>[\s\S]*?)\{(?P<body>[\s\S]*?)\}\s*(?P<name>[A-Za-z_]\w*)\s*;",
@@ -18,8 +18,7 @@ def check(req):
     out = []
     for m in TYPEDEF_ENUM_RE.finditer(text):
         name = m.group("name")
-        off = m.start("name")
-        loc = byte_span_to_loc(off, off + len(name), line_starts)
+        loc = span_to_loc(text, m.start("name"), m.end("name"), line_starts)
         if not name.endswith("_e") or not LOWER_SNAKE.match(name):
             out.append(
                 {

@@ -1177,7 +1177,7 @@ stage = "raw_text"
         .expect("load");
         assert!(cfg.svparser.include_paths.is_empty());
         assert!(cfg.svparser.defines.is_empty());
-        assert!(cfg.svparser.strip_comments);
+        assert!(!cfg.svparser.strip_comments);
         assert!(cfg.svparser.ignore_include);
         assert!(cfg.svparser.allow_incomplete);
     }

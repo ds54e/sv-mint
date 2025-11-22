@@ -1,10 +1,13 @@
 import re
 
+from lib.utf8 import line_starts, point_to_loc
+
 def check(req):
     if req.get("stage") != "raw_text":
         return []
     payload = req.get("payload") or {}
     text = payload.get("text") or ""
+    starts = line_starts(text)
     out = []
     for start, end, name in _module_ranges(text):
         prefix = f"{name.upper()}_"
@@ -19,7 +22,7 @@ def check(req):
                     "rule_id": "macros_use_module_prefix",
                     "severity": "warning",
                     "message": f"`define {macro} inside module {name} must be prefixed with {prefix}",
-                    "location": _byte_loc(text, offset + match.start(1)),
+                    "location": point_to_loc(text, offset + match.start(1), len(macro), starts),
                 }
             )
     return out
@@ -46,9 +49,3 @@ def _find_matching_end(text, start):
                 return idx
         idx += 1
     return None
-
-def _byte_loc(text, index):
-    line = text.count("\n", 0, index) + 1
-    prev = text.rfind("\n", 0, index)
-    col = index + 1 if prev < 0 else index - prev
-    return {"line": line, "col": col, "end_line": line, "end_col": col + 1}

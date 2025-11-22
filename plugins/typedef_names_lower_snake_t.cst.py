@@ -1,6 +1,6 @@
 import re
 
-from lib.cst_inline import byte_span_to_loc
+from lib.utf8 import span_to_loc
 
 TYPEDEF_RE = re.compile(
     r"typedef(?!\s+enum).*?\s+(?P<name>[A-Za-z_]\w*)\s*;", re.DOTALL
@@ -19,8 +19,7 @@ def check(req):
         name = m.group("name")
         if name.endswith("_e"):
             continue
-        off = m.start("name")
-        loc = byte_span_to_loc(off, off + len(name), line_starts)
+        loc = span_to_loc(text, m.start("name"), m.end("name"), line_starts)
         if not name.endswith("_t") or not LOWER_SNAKE.match(name):
             out.append(
                 {

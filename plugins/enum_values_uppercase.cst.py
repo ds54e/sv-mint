@@ -1,6 +1,6 @@
 import re
 
-from lib.cst_inline import byte_span_to_loc
+from lib.utf8 import span_to_loc
 
 TYPEDEF_ENUM_RE = re.compile(
     r"typedef\s+enum(?P<head>[\s\S]*?)\{(?P<body>[\s\S]*?)\}\s*(?P<name>[A-Za-z_]\w*)\s*;",
@@ -22,7 +22,7 @@ def check(req):
         body_off = m.start("body")
         for member, rel in _enum_entries(body):
             off = body_off + rel
-            loc = byte_span_to_loc(off, off + len(member), line_starts)
+            loc = span_to_loc(text, off, off + len(member), line_starts)
             if not (UPPER_CAMEL.match(member) or ALL_CAPS.match(member)):
                 out.append(
                     {

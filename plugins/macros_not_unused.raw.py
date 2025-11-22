@@ -1,5 +1,7 @@
 import re
 
+from lib.utf8 import line_starts, point_to_loc
+
 DEFINE_PATTERN = re.compile(r"(?m)^\s*`define\s+([A-Za-z_]\w*)")
 USE_PATTERN = re.compile(r"`([A-Za-z_]\w*)")
 USED_WORD = re.compile(r"\bused\b", re.IGNORECASE)
@@ -10,6 +12,7 @@ def check(req):
         return []
     payload = req.get("payload") or {}
     text = payload.get("text") or ""
+    starts = line_starts(text)
     defines = [(m.group(1), m.start()) for m in DEFINE_PATTERN.finditer(text)]
     uses = {m.group(1) for m in USE_PATTERN.finditer(text)}
     out = []
@@ -23,7 +26,7 @@ def check(req):
                 "rule_id": "macros_not_unused",
                 "severity": "warning",
                 "message": f"macro `{name}` is defined but never used",
-                "location": _byte_loc(text, start),
+                "location": point_to_loc(text, start, len(name), starts),
             }
         )
     return out
@@ -60,9 +63,3 @@ def _has_unused_comment(text, offset):
             if USED_WORD.search(comment) or RESERVED_WORD.search(comment):
                 return True
     return False
-
-def _byte_loc(text, index):
-    line = text.count("\n", 0, index) + 1
-    prev = text.rfind("\n", 0, index)
-    col = index + 1 if prev < 0 else index - prev
-    return {"line": line, "col": col, "end_line": line, "end_col": col + 1}

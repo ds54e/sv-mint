@@ -1,5 +1,7 @@
 import re
 
+from lib.utf8 import line_starts, point_to_loc
+
 DEFINE_RE = re.compile(r"(?m)^\s*`define\s+([A-Za-z_]\w*)")
 ALL_CAPS = re.compile(r"^[A-Z][A-Z0-9_]*$")
 
@@ -8,6 +10,7 @@ def check(req):
         return []
     payload = req.get("payload") or {}
     text = payload.get("text") or ""
+    starts = line_starts(text)
     out = []
     for m in DEFINE_RE.finditer(text):
         name = m.group(1)
@@ -17,18 +20,7 @@ def check(req):
                     "rule_id": "macro_names_uppercase",
                     "severity": "warning",
                     "message": f"`define {name} should use ALL_CAPS",
-                    "location": _loc(text, m.start(1)),
+                    "location": point_to_loc(text, m.start(1), len(name), starts),
                 }
             )
     return out
-
-def _loc(text, index):
-    line = text.count("\n", 0, index) + 1
-    prev = text.rfind("\n", 0, index)
-    col = index + 1 if prev < 0 else index - prev
-    return {
-        "line": line,
-        "col": col,
-        "end_line": line,
-        "end_col": col + 1,
-    }

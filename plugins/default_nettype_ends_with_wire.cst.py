@@ -1,31 +1,32 @@
-from lib.cst_inline import byte_span_to_loc
+import re
+from pathlib import Path
+
+from lib.utf8 import line_starts, span_to_loc
 
 def check(req):
     if req.get("stage") != "cst":
         return []
     payload = req.get("payload") or {}
     ir = payload.get("cst_ir") or {}
-    directives = ir.get("directives") or []
-    line_starts = ir.get("line_starts") or [0]
-    tokens = ir.get("tokens") or []
-    defaults = [
-        d for d in directives if (d.get("kind") or "").lower() == "default_nettype"
-    ]
-    if not defaults:
+    text = payload.get("pp_text") or ir.get("pp_text") or ir.get("source_text") or ""
+    starts = payload.get("line_starts") or ir.get("line_starts")
+    if not text:
+        path = req.get("path")
+        if path:
+            try:
+                text = Path(path).read_text(encoding="utf-8")
+            except Exception:
+                text = ""
+    if not starts:
+        starts = line_starts(text) if text else [0]
+    matches = list(DEFAULT_RE.finditer(text))
+    if not matches:
         return []
-    last = defaults[-1]
-    value = (last.get("value") or "").lower()
+    last = matches[-1]
+    value = last.group("value").lower()
     if value == "wire":
         return []
-    tok = last.get("token")
-    if tok is not None and tok < len(tokens):
-        loc = byte_span_to_loc(
-            tokens[tok].get("start"), tokens[tok].get("end"), line_starts
-        )
-    else:
-        start = last.get("start") or 0
-        end = last.get("end") or start
-        loc = byte_span_to_loc(start, end, line_starts)
+    loc = span_to_loc(text, last.start(), last.end(), starts)
     return [
         {
             "rule_id": "default_nettype_ends_with_wire",
@@ -34,3 +35,6 @@ def check(req):
             "location": loc,
         }
     ]
+
+
+DEFAULT_RE = re.compile(r"`\s*default_nettype\s+(?P<value>\w+)", re.IGNORECASE)
