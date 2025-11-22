@@ -151,7 +151,6 @@ jobs:
           rm -rf "${DIST}"
           mkdir -p "${DIST}"
           cp "${TARGET_DIR}/${BIN}" "${DIST}/${BIN}"
-          cp -R docs "${DIST}/docs"
           cp -R plugins "${DIST}/plugins"
           cp sv-mint.toml "${DIST}/sv-mint.toml"
           cp README.md "${DIST}/README.md"
