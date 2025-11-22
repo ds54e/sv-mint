@@ -88,6 +88,10 @@ id = "always_ff_uses_nonblocking"
 id = "functions_marked_automatic_or_static"
 
 [[rule]]
+id = "functions_have_explicit_types"
+stage = "cst"
+
+[[rule]]
 id = "enum_type_names_lower_snake_e"
 stage = "cst"
 

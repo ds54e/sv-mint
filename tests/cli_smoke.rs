@@ -194,6 +194,16 @@ fn detects_function_scope_violations() {
 }
 
 #[test]
+fn detects_function_missing_types() {
+    run_fixture("fixtures/function_missing_types.sv", "functions_have_explicit_types");
+}
+
+#[test]
+fn allows_function_with_types() {
+    run_fixture_success("fixtures/function_with_explicit_types.sv");
+}
+
+#[test]
 fn detects_macro_undef_violations() {
     run_fixture("fixtures/macro_violation.sv", "macros_close_with_undef");
 }
