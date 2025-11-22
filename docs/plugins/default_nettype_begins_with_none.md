@@ -8,7 +8,7 @@
 
 ## Details
 
-Flags files that never declare `` `default_nettype``. The DVCodingStyle guidance (and most RTL style guides) expects `` `default_nettype none`` so that misspelled nets do not silently become implicit wires.
+Flags files that never declare `` `default_nettype``. Requiring `` `default_nettype none`` ensures misspelled nets do not silently become implicit wires.
 ### Good
 
 ```systemverilog
