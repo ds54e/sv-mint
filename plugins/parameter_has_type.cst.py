@@ -13,13 +13,11 @@ def check(req):
     line_starts = ir.get("line_starts") or [0]
     text = ir.get("pp_text") or ""
     out = []
-    for node in cst.of_kind("ParameterDeclaration"):
+    nodes = list(cst.of_kind("ParameterDeclaration")) + list(cst.of_kind("LocalParameterDeclaration"))
+    for node in nodes:
         first = node.get("first_token")
         last = node.get("last_token")
         if first is None or last is None:
-            continue
-        first_word = _tok_text(tokens[first], text).lower()
-        if first_word == "localparam":
             continue
         if _has_explicit_type(cst, node) or _has_type_tokens(tokens, first, last, text):
             continue
@@ -77,7 +75,7 @@ def _has_type_tokens(tokens, first, last, text):
             continue
         if word in ("=", ",", ";"):
             break
-        if low == "type" or word.startswith("["):
+        if low == "type":
             return True
         if word == "::":
             continue
