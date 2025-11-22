@@ -20,7 +20,7 @@ Rename the module/package or the file so they match (one module/package per file
 ```systemverilog
 module good;
 endmodule
-```systemverilog
+```
 
 ### Bad
 
@@ -28,4 +28,4 @@ endmodule
 ```systemverilog
 module not_bad;
 endmodule
-```systemverilog
+```

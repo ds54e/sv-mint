@@ -20,7 +20,7 @@ module m (
   output logic c_o
 );
 endmodule
-```systemverilog
+```
 
 ### Bad
 
@@ -31,4 +31,4 @@ module m (
   output logic c
 );
 endmodule
-```systemverilog
+```

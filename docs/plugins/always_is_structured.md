@@ -36,7 +36,7 @@ module m;
   end
 
 endmodule
-```systemverilog
+```
 
 ```systemverilog
 always_comb begin
@@ -46,7 +46,7 @@ end
 
 ### Bad
 
-```systemverilog
+```
 module m;
 
   logic a, b, c;
@@ -69,7 +69,7 @@ module m;
 endmodule
 ```systemverilog
 
-```systemverilog
+```
 always @* begin
   state_d = next_state;
 end

@@ -17,11 +17,11 @@ module m;
 endmodule
 
 `default_nettype wire
-```systemverilog
+```
 
 ### Bad
 
 ```systemverilog
 module m;
 endmodule
-```systemverilog
+```

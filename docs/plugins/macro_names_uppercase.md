@@ -17,11 +17,11 @@ Rename macros to ALL_CAPS (e.g., `` `define MY_MACRO 1``).
 
 ```systemverilog
 `define MY_MACRO
-```systemverilog
+```
 
 ### Bad
 
 ```systemverilog
 `define my_macro
 `define MyMacro
-```systemverilog
+```

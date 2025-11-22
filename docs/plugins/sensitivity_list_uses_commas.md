@@ -29,7 +29,7 @@ module sensitivity_list_uses_commas_good;
 endmodule
 
 `default_nettype wire
-```systemverilog
+```
 
 ### Bad
 
@@ -49,4 +49,4 @@ module sensitivity_or_violation;
 endmodule
 
 `default_nettype wire
-```systemverilog
+```

@@ -17,7 +17,7 @@ module m;
 endmodule
 
 `default_nettype wire
-```systemverilog
+```
 
 ### Bad
 
@@ -26,4 +26,4 @@ endmodule
 
 module m;
 endmodule
-```systemverilog
+```

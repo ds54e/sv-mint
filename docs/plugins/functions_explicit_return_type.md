@@ -17,7 +17,7 @@ Annotate the function header with a concrete return type (including width/signed
 function automatic logic f (input logic a);
   return 1'b0;
 endfunction
-```systemverilog
+```
 
 ### Bad
 
@@ -25,4 +25,4 @@ endfunction
 function automatic f (input logic a);
   return 1'b0;
 endfunction
-```systemverilog
+```

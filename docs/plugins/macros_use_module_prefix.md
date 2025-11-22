@@ -17,7 +17,7 @@ Rename macros to `FOO_CFG_*` if they live inside `module foo`.
 module my_module;
   `define MY_MODULE_MACRO
 endmodule
-```systemverilog
+```
 
 ### Bad
 
@@ -25,4 +25,4 @@ endmodule
 module my_module;
   `define MACRO
 endmodule
-```systemverilog
+```

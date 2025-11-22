@@ -17,7 +17,7 @@ Split modules into separate files so each file contains exactly one module decla
 ```systemverilog
 module m;
 endmodule
-```systemverilog
+```
 
 ### Bad
 
@@ -27,4 +27,4 @@ endmodule
 
 module m2;
 endmodule
-```systemverilog
+```

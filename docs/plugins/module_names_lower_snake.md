@@ -16,7 +16,7 @@ Rename modules so they start with a lowercase letter and only use lowercase lett
 ```systemverilog
 module my_module;
 endmodule
-```systemverilog
+```
 
 ### Bad
 
@@ -26,4 +26,4 @@ endmodule
 
 module MY_MODULE;
 endmodule
-```systemverilog
+```

@@ -26,7 +26,7 @@ module m (
 );
   assign c = a;
 endmodule
-```systemverilog
+```
 
 ```systemverilog
 module fixture(
@@ -39,7 +39,7 @@ endmodule
 
 ### Bad
 
-```systemverilog
+```
 module m (
   input logic a,
   output logic b

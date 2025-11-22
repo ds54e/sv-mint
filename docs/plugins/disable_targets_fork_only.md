@@ -25,7 +25,7 @@ module m;
   end
 
 endmodule
-```systemverilog
+```
 
 ### Bad
 
@@ -41,4 +41,4 @@ module m;
   end
 
 endmodule
-```systemverilog
+```

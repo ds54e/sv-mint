@@ -16,10 +16,10 @@ Add `` `undef`` once the macro is no longer needed.
 ```systemverilog
 `define MY_MACRO(a) a
 `undef MY_MACRO
-```systemverilog
+```
 
 ### Bad
 
 ```systemverilog
 `define MY_MACRO(a) a
-```systemverilog
+```

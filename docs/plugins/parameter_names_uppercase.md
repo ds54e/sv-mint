@@ -18,7 +18,7 @@ module m # (
   parameter int MyParam = 1
 );
 endmodule
-```systemverilog
+```
 
 ### Bad
 
@@ -28,4 +28,4 @@ module m #(
   parameter int MY_PARAM = 1
 );
 endmodule
-```systemverilog
+```

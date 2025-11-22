@@ -17,7 +17,7 @@ Annotate every argument with a full data type (width and signedness as needed), 
 function logic f (input logic a);
   return a;
 endfunction
-```systemverilog
+```
 
 ### Bad
 
@@ -25,4 +25,4 @@ endfunction
 function logic f (input a);
   return a;
 endfunction
-```systemverilog
+```

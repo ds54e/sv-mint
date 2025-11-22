@@ -20,7 +20,7 @@ module m;
     a <= 1'b1;
   end
 endmodule
-```systemverilog
+```
 
 ### Bad
 
@@ -31,4 +31,4 @@ module m;
     a = 1'b1;
   end
 endmodule
-```systemverilog
+```

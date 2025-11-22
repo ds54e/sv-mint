@@ -26,7 +26,7 @@ module parameter_has_type_good;
 endmodule
 
 `default_nettype wire
-```systemverilog
+```
 
 ### Bad
 
@@ -38,4 +38,4 @@ module parameter_missing_type;
 endmodule
 
 `default_nettype wire
-```systemverilog
+```

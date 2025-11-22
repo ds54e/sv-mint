@@ -19,7 +19,7 @@ module m;
   logic my_var;
   logic my_var$abc;
 endmodule
-```systemverilog
+```
 
 ### Bad
 
@@ -28,4 +28,4 @@ module m;
   logic MyVar;
   logic MY_VAR;
 endmodule
-```systemverilog
+```

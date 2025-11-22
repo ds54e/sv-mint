@@ -23,7 +23,7 @@ endfunction
 function automatic logic f2 (input logic a);
   return 1'b0;
 endfunction
-```systemverilog
+```
 
 ### Bad
 
@@ -31,4 +31,4 @@ endfunction
 function logic f (input logic a);
   return 1'b0;
 endfunction
-```systemverilog
+```

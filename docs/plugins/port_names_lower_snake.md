@@ -20,7 +20,7 @@ module m (
   output logic my_port_3
 );
 endmodule
-```systemverilog
+```
 
 ### Bad
 
@@ -38,4 +38,4 @@ module m2 (
   output logic MY_PORT_3
 );
 endmodule
-```systemverilog
+```

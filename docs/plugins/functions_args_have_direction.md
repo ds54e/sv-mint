@@ -17,7 +17,7 @@ Add an explicit direction to every function argument.
 function logic f (input logic a);
   return a;
 endfunction
-```systemverilog
+```
 
 ### Bad
 
@@ -25,4 +25,4 @@ endfunction
 function logic f (logic a);
   return a;
 endfunction
-```systemverilog
+```

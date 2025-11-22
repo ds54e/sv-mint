@@ -20,7 +20,7 @@ module m #(
   localparam int MY_CONST = 1
 );
 endmodule
-```systemverilog
+```
 
 ### Bad
 
@@ -29,4 +29,4 @@ module m #(
   localparam int my_const = 1
 );
 endmodule
-```systemverilog
+```

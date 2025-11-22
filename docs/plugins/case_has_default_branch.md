@@ -38,7 +38,7 @@ module m;
   end
 
 endmodule
-```systemverilog
+```
 
 ```systemverilog
 case (state_q)  // default required when not unique
@@ -50,7 +50,7 @@ endcase
 
 ### Bad
 
-```systemverilog
+```
 module m;
 
   logic [1:0] a;

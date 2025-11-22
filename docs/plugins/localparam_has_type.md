@@ -24,7 +24,7 @@ module localparam_has_type_good;
 endmodule
 
 `default_nettype wire
-```systemverilog
+```
 
 ### Bad
 
@@ -38,4 +38,4 @@ module localparam_missing_type;
 endmodule
 
 `default_nettype wire
-```systemverilog
+```

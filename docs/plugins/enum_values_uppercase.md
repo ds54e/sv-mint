@@ -21,7 +21,7 @@ typedef enum int unsigned {
   Off,
   On
 } state_2_e;
-```systemverilog
+```
 
 ### Bad
 
@@ -30,4 +30,4 @@ typedef enum int unsigned {
   off,
   on
 } state_e;
-```systemverilog
+```

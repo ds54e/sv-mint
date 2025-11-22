@@ -17,11 +17,11 @@ Rename typedefs such as `data_width_t`, `foo_bar_t`, etc.
 
 ```systemverilog
 typedef logic [3:0] my_type_t;
-```systemverilog
+```
 
 ### Bad
 
 ```systemverilog
 typedef logic [3:0] MyType_t;
 typedef logic [3:0] MY_TYPE;
-```systemverilog
+```

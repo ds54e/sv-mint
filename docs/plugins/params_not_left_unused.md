@@ -23,7 +23,7 @@ module m #(
   input logic [MyParam1:0] a
 );
 endmodule
-```systemverilog
+```
 
 ```systemverilog
 module stub #(
@@ -34,7 +34,7 @@ endmodule
 
 ### Bad
 
-```systemverilog
+```
 module m #(
   parameter int MyParam = 1
 );
