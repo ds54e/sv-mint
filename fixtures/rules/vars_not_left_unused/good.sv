@@ -29,5 +29,9 @@ module m;
     $display(i);
   end
 
+  logic j;
+  logic k;
+  my_module inst (.j, .k);
+
 endmodule
 

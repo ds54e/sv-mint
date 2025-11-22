@@ -92,6 +92,7 @@ struct AstCollector<'a> {
     refs: Vec<Reference>,
     assigns: Vec<Assignment>,
     ports: Vec<PortInfo>,
+    read_offsets: HashSet<usize>,
     write_offsets: HashSet<usize>,
     decl_offsets: HashSet<usize>,
     port_dir_stack: Vec<&'static str>,
@@ -107,6 +108,7 @@ impl<'a> AstCollector<'a> {
             refs: Vec::new(),
             assigns: Vec::new(),
             ports: Vec::new(),
+            read_offsets: HashSet::new(),
             write_offsets: HashSet::new(),
             decl_offsets: HashSet::new(),
             port_dir_stack: Vec::new(),
@@ -195,7 +197,10 @@ impl<'a> AstCollector<'a> {
 
     fn record_read(&mut self, node: RefNode<'_>) -> Result<(), ParseError> {
         if let Some((ident, loc, origin, _)) = self.lookup_identifier(node)? {
-            if self.write_offsets.contains(&origin) || self.decl_offsets.contains(&origin) {
+            if self.write_offsets.contains(&origin)
+                || self.decl_offsets.contains(&origin)
+                || self.read_offsets.contains(&origin)
+            {
                 return Ok(());
             }
             let module = self.scopes.last().cloned();
@@ -205,6 +210,7 @@ impl<'a> AstCollector<'a> {
                 kind: ReferenceKind::Read,
                 loc,
             });
+            self.read_offsets.insert(origin);
         }
         Ok(())
     }
@@ -316,6 +322,9 @@ impl<'a> SyntaxVisitor for AstCollector<'a> {
             RefNode::AnsiPortDeclarationParen(x) => {
                 self.handle_ansi_port_paren(x)?;
             }
+            RefNode::NamedPortConnectionIdentifier(x) => {
+                self.handle_named_port_connection_identifier(x)?;
+            }
             RefNode::PortIdentifier(x) => {
                 self.record_port_identifier(RefNode::PortIdentifier(x))?;
             }
@@ -383,6 +392,18 @@ impl<'a> AstCollector<'a> {
                 .unwrap_or("unspecified");
             self.record_port(name, loc, direction);
             self.decl_offsets.insert(origin);
+        }
+        Ok(())
+    }
+
+    fn handle_named_port_connection_identifier(
+        &mut self,
+        port: &sv_parser::NamedPortConnectionIdentifier,
+    ) -> Result<(), ParseError> {
+        if port.nodes.3.is_none() {
+            // Implicit `.foo` shorthand: no actual expression, so treat the port name as a read of
+            // the same-named signal in the current scope.
+            self.record_read(RefNode::from(&port.nodes.2))?;
         }
         Ok(())
     }

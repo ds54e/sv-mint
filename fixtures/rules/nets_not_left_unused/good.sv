@@ -29,5 +29,8 @@ module m;
     $display(i);
   end
 
+  wire j;
+  wire k;
+  my_module inst (.j, .k);
 
 endmodule

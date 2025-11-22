@@ -13,7 +13,8 @@
 Delete unused nets or annotate intentional placeholders with inline comments containing `unused` (e.g., `` wire debug_tap; // unused ``).
 
 ### Limitations
-- Implicit connections (`.*`, `.foo` shorthand) are not elaborated; they will be counted as unused.
+- Implicit named port shorthand (e.g., `.foo`) is elaborated and counted as a use.
+- Implicit `.*` connections are not elaborated; they will be counted as unused.
 - If the declaration line contains a comment with the words `used` or `reserved` (case-insensitive), the warning is suppressed.
 ### Good
 
@@ -48,6 +49,10 @@ module m;
   initial begin
     $display(i);
   end
+
+  wire j;
+  wire k;
+  my_module inst (.j, .k);
 
 
 endmodule
