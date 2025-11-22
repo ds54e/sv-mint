@@ -7,7 +7,7 @@ module always_plain(
   output logic b_o
 );
 
-always @(posedge clk_i or negedge rst_ni) begin
+always @(posedge clk_i, negedge rst_ni) begin
   b_o <= !rst_ni ? 1'b0 : a_i;
 end
 

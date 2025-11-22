@@ -14,7 +14,7 @@ Use non-blocking `<=` for sequential logic or refactor the assignment into combi
 ### Good
 
 ```systemverilog
-always_ff @(posedge clk_i or negedge rst_ni) begin
+always_ff @(posedge clk_i, negedge rst_ni) begin
   if (!rst_ni) data_q <= '0;
   else data_q <= data_d;
 end

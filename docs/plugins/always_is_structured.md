@@ -16,7 +16,7 @@ Rewrite the process using one of the structured forms. For sequential logic, pre
 ### Good
 
 ```systemverilog
-always_ff @(posedge clk_i or negedge rst_ni) begin
+always_ff @(posedge clk_i, negedge rst_ni) begin
   if (!rst_ni) state_q <= IDLE;
   else state_q <= state_d;
 end
@@ -31,7 +31,7 @@ end
 ### Bad
 
 ```systemverilog
-always @(posedge clk_i or negedge rst_ni) begin
+always @(posedge clk_i, negedge rst_ni) begin
   if (!rst_ni) state_q <= IDLE;
   else state_q <= state_d;
 end

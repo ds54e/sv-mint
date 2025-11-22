@@ -6,7 +6,7 @@ module multiple_nonblocking (
   output logic y_o
 );
 
-always_ff @(posedge clk_i or negedge rst_ni) begin
+always_ff @(posedge clk_i, negedge rst_ni) begin
   if (!rst_ni) begin
     y_o <= 1'b0;
   end else begin
