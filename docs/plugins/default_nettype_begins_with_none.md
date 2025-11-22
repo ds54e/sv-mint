@@ -7,7 +7,6 @@
 
 ## Details
 
-Flags files that never declare `` `default_nettype``. Using the CST directives table, the rule warns when no `` `default_nettype`` is found so misspelled nets do not silently become implicit wires.
 ### Good
 
 ```systemverilog

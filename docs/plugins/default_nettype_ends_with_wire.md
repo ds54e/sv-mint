@@ -7,7 +7,6 @@
 
 ## Details
 
-Because `default_nettype` stays in effect for all subsequent compilation units, each file that changes it must reset it back to `wire` at the end so other sources aren’t accidentally processed with `none`. The CST directives table is scanned for the last `default_nettype` directive; the rule warns when it doesn’t restore `wire`, and ignores files that never set `default_nettype`.
 ### Good
 
 ```systemverilog
@@ -17,6 +16,11 @@ module m;
 endmodule
 
 `default_nettype wire
+```
+
+```systemverilog
+module m;
+endmodule
 ```
 
 ### Bad
