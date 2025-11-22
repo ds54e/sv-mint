@@ -14,6 +14,7 @@ pub struct TokenRec {
     pub kind: u16,
     pub start: u32,
     pub end: u32,
+    pub text: String,
 }
 
 #[derive(Clone, Debug, Serialize)]
@@ -34,6 +35,7 @@ pub struct CstIr {
     pub sv_parser: String,
     pub file: String,
     pub hash: String,
+    pub source_text: String,
     pub line_starts: Vec<u32>,
     pub include: CstIncludeFlags,
     pub pp_text: Option<String>,
@@ -63,6 +65,7 @@ struct CstBuilder {
     file: String,
     sv_parser: String,
     line_starts: Vec<u32>,
+    source_text: String,
     pp_text: String,
     kind_table: Vec<String>,
     kind_map: HashMap<String, u16>,
@@ -80,6 +83,7 @@ impl CstBuilder {
             file: file.to_string(),
             sv_parser: sv_parser.to_string(),
             line_starts: line_starts.iter().map(|&x| x as u32).collect(),
+            source_text: pp_text.to_string(),
             pp_text: pp_text.to_string(),
             kind_table: Vec::new(),
             kind_map: HashMap::new(),
@@ -116,6 +120,7 @@ impl CstBuilder {
             sv_parser: self.sv_parser,
             file: self.file,
             hash: String::new(),
+            source_text: self.source_text,
             line_starts: self.line_starts,
             include: CstIncludeFlags {
                 text: true,
@@ -178,7 +183,13 @@ impl CstBuilder {
             let start = loc.offset as u32;
             let end = (loc.offset + loc.len) as u32;
             let id = self.tokens.len() as u32;
-            self.tokens.push(TokenRec { id, kind, start, end });
+            self.tokens.push(TokenRec {
+                id,
+                kind,
+                start,
+                end,
+                text: text.to_string(),
+            });
             for state in self.stack.iter_mut().rev() {
                 if state.start.is_none() {
                     state.start = Some(start);
