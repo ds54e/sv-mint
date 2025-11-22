@@ -1,12 +1,10 @@
 # sv-mint
 
-sv-mint is a SystemVerilog lint pipeline that combines a Rust core with Python plugins. It focuses on reproducible diagnostics, predictable resource usage, and easy rule authoring.
+sv-mint is a SystemVerilog lint pipeline that combines a Rust core with Python plugins. It shines when you want to add rules quickly without recompiling and target different pipeline stages (raw, preprocessed, CST, AST) as needed.
 
 ## Overview
 - **Multi-stage analysis**: raw text, preprocessed text, CST, and AST payloads flow through the pipeline so rules can attach at the right abstraction.
 - **Python rule host**: `plugins/lib/rule_host.py` runs once per worker thread and loads every script referenced by `[[rule]]` entries.
-- **Deterministic diagnostics**: violations are sorted by file/line, emitted as `path:line:col: [severity] rule_id: message`, and mirrored to `tracing` events for log aggregation.
-- **Operational safety**: configurable (default 12/16 MB) size guards, per-file timeouts, stderr snippet limits, and request accounting keep runaway rules in check.
 
 ## Getting Started
 1. Download the latest release from GitHub (`sv-mint-vX.Y.Z-<platform>.tar.gz`/`.zip`) and extract it somewhere on your machine.
