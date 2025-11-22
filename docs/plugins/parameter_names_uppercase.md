@@ -10,7 +10,7 @@
 ### Message
 `` parameter <name> should use UpperCamelCase ``
 ### Remediation
-Rename parameters to `DataWidth` or `NumAlerts`; ALL_CAPS is not allowed.
+Rename parameters to UpperCamelCase; ALL_CAPS is not allowed.
 ### Good
 
 ```systemverilog

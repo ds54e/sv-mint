@@ -10,7 +10,7 @@
 `` localparam <name> should use UpperCamelCase or ALL_CAPS ``
 
 ### Remediation
-Rename localparams to follow UpperCamelCase (e.g., `WidthParam`) or ALL_CAPS (e.g., `BUS_WIDTH`).
+Rename localparams to UpperCamelCase or ALL_CAPS.
 
 ### Good
 
