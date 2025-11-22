@@ -1,5 +1,4 @@
 module m;
-
   initial begin
     fork
       begin #1; end
@@ -7,5 +6,4 @@ module m;
     join_any
     disable fork;
   end
-
 endmodule
