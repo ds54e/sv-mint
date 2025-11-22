@@ -136,8 +136,28 @@ impl<'a> AstCollector<'a> {
     }
 
     fn record_decl(&mut self, node: RefNode<'_>, kind: DeclKind) -> Result<(), ParseError> {
-        if let Some((ident, loc, origin, _)) = self.lookup_identifier(node)? {
+        let is_decl_assign = matches!(node, RefNode::NetDeclAssignment(_) | RefNode::VariableDeclAssignment(_));
+        if let Some((ident, loc, origin, source)) = self.lookup_identifier(node)? {
             let module = self.scopes.last().cloned();
+            if is_decl_assign {
+                if let Some((op, lhs, rhs, start, end)) = scan_assignment_at(&source.text, origin) {
+                    let aloc = self.location_from_source(source.as_ref(), start, end);
+                    self.refs.push(Reference {
+                        name: ident.clone(),
+                        module: module.clone(),
+                        kind: ReferenceKind::Write,
+                        loc: loc.clone(),
+                    });
+                    self.write_offsets.insert(origin);
+                    self.assigns.push(Assignment {
+                        module: module.clone(),
+                        op,
+                        lhs,
+                        rhs,
+                        loc: aloc,
+                    });
+                }
+            }
             self.decls.push(Declaration {
                 kind,
                 name: ident,
