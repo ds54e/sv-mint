@@ -38,11 +38,6 @@ id = "vars_not_left_unused"
 - Return a list of `Violation` dictionaries with `rule_id`, `severity`, `message`, and `location`.
 - For project-specific rules, add subdirectories inside `plugins/` and point `sv-mint.toml` at the new scripts.
 
-## Diagnostics and Tooling
-- Use `logging.show_plugin_events = true` to measure per-rule latency.
-- Structured logs (`logging.format = "json"`) expose `sv-mint::event`, `sv-mint::stage`, and `sv-mint::plugin.stderr` categories for observability platforms.
-
 ## Provenance and License
-- This repository and documentation were generated and are maintained with the help of ChatGPT.
 - Rust dependencies follow MIT or Apache-2.0 licenses as declared in `Cargo.toml`.
 - sv-mint itself is distributed under the same terms as the repository license (see `LICENSE`).
