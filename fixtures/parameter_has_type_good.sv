@@ -1,6 +1,6 @@
 `default_nettype none
 
-module parameter_with_type;
+module parameter_has_type_good;
   parameter int WIDTH = 4;
   parameter signed [3:0] OFFSET = 0;
   parameter type T = int;

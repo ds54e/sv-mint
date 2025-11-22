@@ -1,6 +1,6 @@
 `default_nettype none
 
-module unused_port_unused_comment(
+module ports_not_left_unused_comment_good(
   input  logic debug_i,  // unused
   output logic ready_o
 );

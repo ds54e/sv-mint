@@ -1,6 +1,6 @@
 `default_nettype none
 
-module always_structured_ok(
+module always_is_structured_good(
   input  logic clk_i,
   input  logic rst_ni,
   input  logic a_i,

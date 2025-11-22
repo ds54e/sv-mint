@@ -1,7 +1,7 @@
 // Decl unused net compliant
 `default_nettype none
 
-module unused_net_compliant;
+module nets_not_left_unused_good;
 
 wire debug_tap; // unused
 

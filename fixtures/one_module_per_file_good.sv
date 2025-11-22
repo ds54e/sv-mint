@@ -1,6 +1,6 @@
 `default_nettype none
 
-module multiple_modules_ok;
+module one_module_per_file_good;
 endmodule
 
 `default_nettype wire

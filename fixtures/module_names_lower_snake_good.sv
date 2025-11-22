@@ -1,7 +1,6 @@
 `default_nettype none
 
-module include_child;
-  logic unused_signal;
+module module_names_lower_snake_good;
 endmodule
 
 `default_nettype wire

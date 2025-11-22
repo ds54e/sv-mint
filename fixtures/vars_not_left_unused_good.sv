@@ -1,7 +1,7 @@
 // Decl unused var compliant
 `default_nettype none
 
-module unused_var_compliant;
+module vars_not_left_unused_good;
 
 logic debug_shadow; // unused
 

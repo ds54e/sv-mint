@@ -1,7 +1,6 @@
 `default_nettype none
 
-module include_child;
-  logic unused_signal;
+module disable_targets_fork_only_good;
 endmodule
 
 `default_nettype wire

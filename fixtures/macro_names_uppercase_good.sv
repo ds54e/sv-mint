@@ -2,7 +2,8 @@
 
 `define GOOD_MACRO 1
 
-module macro_define_upper_ok;
+module macro_names_uppercase_good(output logic val_o);
+  assign val_o = `GOOD_MACRO;
 endmodule
 
 `default_nettype wire

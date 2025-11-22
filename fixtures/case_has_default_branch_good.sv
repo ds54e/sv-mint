@@ -1,7 +1,7 @@
 // Example unique case without default; all values covered
 `default_nettype none
 
-module case_missing_default_unique_ok (
+module case_has_default_branch_good (
   input  logic [1:0] state_i,
   output logic done_o
 );

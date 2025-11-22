@@ -25,207 +25,273 @@ fn run_with_config(path: &str, config: &str, expected: &[&str]) {
 }
 
 #[test]
-fn detects_unused_net_violation() {
-    run_fixture("fixtures/unused_net_violation.sv", "nets_not_left_unused");
+fn detects_nets_not_left_unused() {
+    run_fixture("fixtures/nets_not_left_unused_bad.sv", "nets_not_left_unused");
 }
 
 #[test]
-fn allows_marked_unused_net() {
-    run_fixture_success("fixtures/unused_net_compliant.sv");
+fn allows_unused_net_marked() {
+    run_fixture_success("fixtures/nets_not_left_unused_good.sv");
 }
 
 #[test]
-fn detects_unused_param_violation() {
-    run_fixture("fixtures/unused_param_violation.sv", "params_not_left_unused");
+fn detects_params_not_left_unused() {
+    run_fixture("fixtures/params_not_left_unused_bad.sv", "params_not_left_unused");
 }
 
 #[test]
-fn allows_marked_unused_param() {
-    run_fixture_success("fixtures/unused_param_compliant.sv");
+fn allows_unused_param_marked() {
+    run_fixture_success("fixtures/params_not_left_unused_good.sv");
 }
 
 #[test]
-fn detects_unused_var_violation() {
-    run_fixture("fixtures/unused_var_violation.sv", "vars_not_left_unused");
+fn detects_vars_not_left_unused() {
+    run_fixture("fixtures/vars_not_left_unused_bad.sv", "vars_not_left_unused");
 }
 
 #[test]
-fn allows_marked_unused_var() {
-    run_fixture_success("fixtures/unused_var_compliant.sv");
+fn allows_unused_var_marked() {
+    run_fixture_success("fixtures/vars_not_left_unused_good.sv");
 }
 
 #[test]
-fn detects_unused_port_violation() {
-    let mut cmd = Command::new(assert_cmd::cargo::cargo_bin!("sv-mint"));
-    cmd.arg("--disable").arg("instances_use_named_ports");
-    cmd.arg("fixtures/unused_port_violation.sv");
-    cmd.assert().failure().stdout(contains("ports_not_left_unused"));
+fn detects_ports_not_left_unused() {
+    run_fixture("fixtures/ports_not_left_unused_bad.sv", "ports_not_left_unused");
 }
 
 #[test]
-fn allows_used_ports() {
-    let mut cmd = Command::new(assert_cmd::cargo::cargo_bin!("sv-mint"));
-    cmd.arg("--disable").arg("instances_use_named_ports");
-    cmd.arg("fixtures/unused_port_compliant.sv");
-    cmd.assert().success();
+fn allows_ports_not_left_unused() {
+    run_fixture_success("fixtures/ports_not_left_unused_good.sv");
 }
 
 #[test]
-fn allows_unused_port_with_unused_comment() {
-    let mut cmd = Command::new(assert_cmd::cargo::cargo_bin!("sv-mint"));
-    cmd.arg("--disable").arg("instances_use_named_ports");
-    cmd.arg("fixtures/unused_port_unused_comment.sv");
-    cmd.assert().success();
+fn allows_ports_not_left_unused_with_comment() {
+    run_fixture_success("fixtures/ports_not_left_unused_comment_good.sv");
 }
 
 #[test]
-fn detects_multiple_nonblocking_assignments() {
-    run_fixture("fixtures/multiple_nonblocking.sv", "default_nettype_begins_with_none");
+fn detects_default_nettype_missing_none() {
+    run_fixture(
+        "fixtures/default_nettype_begins_with_none_bad.sv",
+        "default_nettype_begins_with_none",
+    );
 }
 
 #[test]
-fn detects_bare_always() {
-    run_fixture("fixtures/always_plain.sv", "always_is_structured");
-    let mut cmd = Command::new(assert_cmd::cargo::cargo_bin!("sv-mint"));
-    cmd.arg("--disable").arg("instances_use_named_ports");
-    cmd.arg("fixtures/always_structured_ok.sv");
-    cmd.assert().success();
+fn allows_default_nettype_declared() {
+    run_fixture_success("fixtures/default_nettype_begins_with_none_good.sv");
+}
+
+#[test]
+fn detects_default_nettype_missing_wire_reset() {
+    run_fixture(
+        "fixtures/default_nettype_ends_with_wire_bad.sv",
+        "default_nettype_ends_with_wire",
+    );
+}
+
+#[test]
+fn allows_default_nettype_reset_to_wire() {
+    run_fixture_success("fixtures/default_nettype_ends_with_wire_good.sv");
+}
+
+#[test]
+fn detects_always_is_structured() {
+    run_fixture("fixtures/always_is_structured_bad.sv", "always_is_structured");
+    run_fixture_success("fixtures/always_is_structured_good.sv");
+}
+
+#[test]
+fn detects_always_comb_blocking_violation() {
+    run_fixture(
+        "fixtures/always_comb_uses_blocking_bad.sv",
+        "always_comb_uses_blocking",
+    );
+    run_fixture_success("fixtures/always_comb_uses_blocking_good.sv");
+}
+
+#[test]
+fn detects_always_ff_blocking_violation() {
+    run_fixture(
+        "fixtures/always_ff_uses_nonblocking_bad.sv",
+        "always_ff_uses_nonblocking",
+    );
+    run_fixture_success("fixtures/always_ff_uses_nonblocking_good.sv");
+}
+
+#[test]
+fn detects_case_missing_default() {
+    run_fixture(
+        "fixtures/case_has_default_branch_bad.sv",
+        "case_has_default_branch",
+    );
+    run_fixture_success("fixtures/case_has_default_branch_good.sv");
 }
 
 #[test]
 fn detects_sensitivity_or() {
-    run_fixture("fixtures/sensitivity_or_violation.sv", "sensitivity_list_uses_commas");
-}
-
-#[test]
-fn allows_sensitivity_commas() {
-    run_fixture_success("fixtures/sensitivity_comma_ok.sv");
+    run_fixture(
+        "fixtures/sensitivity_list_uses_commas_bad.sv",
+        "sensitivity_list_uses_commas",
+    );
+    run_fixture_success("fixtures/sensitivity_list_uses_commas_good.sv");
 }
 
 #[test]
 fn detects_net_naming_violations() {
-    run_fixture("fixtures/net_lower_snake_violation.sv", "net_names_lower_snake");
-    let mut cmd = Command::new(assert_cmd::cargo::cargo_bin!("sv-mint"));
-    cmd.arg("--disable").arg("nets_not_left_unused");
-    cmd.arg("fixtures/net_lower_snake_ok.sv");
-    cmd.assert().success();
+    run_fixture("fixtures/net_names_lower_snake_bad.sv", "net_names_lower_snake");
+    run_fixture_success("fixtures/net_names_lower_snake_good.sv");
 }
 
 #[test]
 fn detects_var_naming_violations() {
-    run_fixture("fixtures/var_lower_snake_violation.sv", "var_names_lower_snake");
-    run_fixture_success("fixtures/var_lower_snake_ok.sv");
+    run_fixture("fixtures/var_names_lower_snake_bad.sv", "var_names_lower_snake");
+    run_fixture_success("fixtures/var_names_lower_snake_good.sv");
 }
 
 #[test]
 fn detects_parameter_naming_violations() {
-    run_fixture("fixtures/parameter_case_violation.sv", "parameter_names_uppercase");
-    let mut cmd = Command::new(assert_cmd::cargo::cargo_bin!("sv-mint"));
-    cmd.arg("--disable").arg("params_not_left_unused");
-    cmd.arg("fixtures/parameter_case_ok.sv");
-    cmd.assert().success();
+    run_fixture(
+        "fixtures/parameter_names_uppercase_bad.sv",
+        "parameter_names_uppercase",
+    );
+    run_fixture_success("fixtures/parameter_names_uppercase_good.sv");
 }
 
 #[test]
 fn detects_parameter_missing_type() {
-    run_fixture("fixtures/parameter_missing_type.sv", "parameter_has_type");
-}
-
-#[test]
-fn detects_parameter_range_only_type() {
-    run_fixture("fixtures/parameter_range_only_violation.sv", "parameter_has_type");
-}
-
-#[test]
-fn detects_localparam_missing_type() {
-    run_fixture("fixtures/localparam_missing_type.sv", "parameter_has_type");
-}
-
-#[test]
-fn allows_parameter_with_type() {
-    run_fixture_success("fixtures/parameter_with_type.sv");
+    run_fixture(
+        "fixtures/parameter_has_type_missing_type_bad.sv",
+        "parameter_has_type",
+    );
+    run_fixture(
+        "fixtures/parameter_has_type_range_only_bad.sv",
+        "parameter_has_type",
+    );
+    run_fixture(
+        "fixtures/parameter_has_type_localparam_bad.sv",
+        "parameter_has_type",
+    );
+    run_fixture_success("fixtures/parameter_has_type_good.sv");
 }
 
 #[test]
 fn detects_localparam_naming_violations() {
-    run_fixture("fixtures/localparam_case_violation.sv", "localparam_names_uppercase");
-    let mut cmd = Command::new(assert_cmd::cargo::cargo_bin!("sv-mint"));
-    cmd.arg("--disable").arg("params_not_left_unused");
-    cmd.arg("fixtures/localparam_case_ok.sv");
-    cmd.assert().success();
+    run_fixture(
+        "fixtures/localparam_names_uppercase_bad.sv",
+        "localparam_names_uppercase",
+    );
+    run_fixture_success("fixtures/localparam_names_uppercase_good.sv");
 }
 
 #[test]
 fn detects_multiple_modules() {
-    run_fixture("fixtures/multiple_modules_violation.sv", "one_module_per_file");
-    run_fixture_success("fixtures/multiple_modules_ok.sv");
+    run_fixture("fixtures/one_module_per_file_bad.sv", "one_module_per_file");
+    run_fixture_success("fixtures/one_module_per_file_good.sv");
 }
 
 #[test]
 fn detects_filename_mismatch() {
-    run_fixture("fixtures/module_filename_mismatch.sv", "module_name_matches_filename");
-    run_fixture_success("fixtures/module_filename_match_ok.sv");
+    run_fixture(
+        "fixtures/module_name_matches_filename_bad.sv",
+        "module_name_matches_filename",
+    );
+    run_fixture_success("fixtures/module_name_matches_filename_good.sv");
 }
 
 #[test]
-fn allows_unique_case_without_default() {
-    let mut cmd = Command::new(assert_cmd::cargo::cargo_bin!("sv-mint"));
-    cmd.arg("--disable").arg("instances_use_named_ports");
-    cmd.arg("fixtures/case_missing_default_unique_ok.sv");
-    cmd.assert().success();
+fn detects_module_name_case_violation() {
+    run_fixture(
+        "fixtures/module_names_lower_snake_bad.sv",
+        "module_names_lower_snake",
+    );
+    run_fixture_success("fixtures/module_names_lower_snake_good.sv");
 }
 
 #[test]
-fn detects_module_inst_violations() {
-    run_fixture("fixtures/module_inst_violation.sv", "instances_use_named_ports");
+fn detects_instances_use_named_ports() {
+    run_fixture(
+        "fixtures/instances_use_named_ports_bad.sv",
+        "instances_use_named_ports",
+    );
+    run_fixture_success("fixtures/instances_use_named_ports_good.sv");
 }
 
 #[test]
-fn detects_typedef_violations() {
-    run_fixture("fixtures/typedef_violation.sv", "enum_type_names_lower_snake_e");
+fn detects_enum_type_name_violation() {
+    run_fixture(
+        "fixtures/enum_type_names_lower_snake_e_bad.sv",
+        "enum_type_names_lower_snake_e",
+    );
+    run_fixture_success("fixtures/enum_type_names_lower_snake_e_good.sv");
+}
+
+#[test]
+fn detects_enum_value_case_violation() {
+    run_fixture("fixtures/enum_values_uppercase_bad.sv", "enum_values_uppercase");
+    run_fixture_success("fixtures/enum_values_uppercase_good.sv");
 }
 
 #[test]
 fn detects_function_scope_violations() {
     run_fixture(
-        "fixtures/function_scope_violation.sv",
+        "fixtures/functions_marked_automatic_or_static_bad.sv",
         "functions_marked_automatic_or_static",
     );
+    run_fixture_success("fixtures/functions_marked_automatic_or_static_good.sv");
 }
 
 #[test]
 fn detects_function_missing_types() {
-    run_fixture("fixtures/function_missing_types.sv", "functions_have_explicit_types");
-}
-
-#[test]
-fn allows_function_with_types() {
-    run_fixture_success("fixtures/function_with_explicit_types.sv");
+    run_fixture(
+        "fixtures/functions_have_explicit_types_bad.sv",
+        "functions_have_explicit_types",
+    );
+    run_fixture_success("fixtures/functions_have_explicit_types_good.sv");
 }
 
 #[test]
 fn detects_macro_undef_violations() {
-    run_fixture("fixtures/macro_violation.sv", "macros_close_with_undef");
+    run_fixture("fixtures/macros_close_with_undef_bad.sv", "macros_close_with_undef");
+    run_fixture_success("fixtures/macros_close_with_undef_good.sv");
+}
+
+#[test]
+fn detects_macro_prefix_violation() {
+    run_fixture(
+        "fixtures/macros_use_module_prefix_bad.sv",
+        "macros_use_module_prefix",
+    );
+    run_fixture_success("fixtures/macros_use_module_prefix_good.sv");
 }
 
 #[test]
 fn detects_define_upper_violations() {
-    run_fixture("fixtures/macro_define_upper_violation.sv", "macro_names_uppercase");
+    run_fixture("fixtures/macro_names_uppercase_bad.sv", "macro_names_uppercase");
     let mut cmd = Command::new(assert_cmd::cargo::cargo_bin!("sv-mint"));
     cmd.arg("--disable").arg("macros_not_unused");
     cmd.arg("--disable").arg("macros_close_with_undef");
-    cmd.arg("fixtures/macro_define_upper_ok.sv");
+    cmd.arg("fixtures/macro_names_uppercase_good.sv");
     cmd.assert().success();
 }
 
 #[test]
 fn detects_unused_macro() {
-    run_fixture("fixtures/macro_unused.sv", "macros_not_unused");
-    run_fixture_success("fixtures/macro_used.sv");
+    run_fixture("fixtures/macros_not_unused_bad.sv", "macros_not_unused");
+    run_fixture_success("fixtures/macros_not_unused_good.sv");
 }
 
 #[test]
-fn reports_include_file_path() {
+fn detects_disable_targets_fork_only() {
+    run_fixture(
+        "fixtures/disable_targets_fork_only_bad.sv",
+        "disable_targets_fork_only",
+    );
+    run_fixture_success("fixtures/disable_targets_fork_only_good.sv");
+}
+
+#[test]
+fn detects_module_instantiations_includes() {
     run_with_config(
         "fixtures/include_top.sv",
         "tests/include_config.toml",
@@ -234,105 +300,40 @@ fn reports_include_file_path() {
 }
 
 #[test]
-fn detects_always_comb_blocking_violation() {
-    run_fixture(
-        "fixtures/always_comb_blocking_violation.sv",
-        "always_comb_uses_blocking",
-    );
-}
-
-#[test]
-fn detects_always_ff_blocking_violation() {
-    run_fixture(
-        "fixtures/always_ff_blocking_violation.sv",
-        "always_ff_uses_nonblocking",
-    );
-}
-
-#[test]
-fn detects_case_missing_default_violation() {
-    run_fixture(
-        "fixtures/case_missing_default_violation.sv",
-        "case_has_default_branch",
-    );
-}
-
-#[test]
-fn detects_default_nettype_missing_reset() {
-    run_fixture(
-        "fixtures/default_nettype_no_reset_violation.sv",
-        "default_nettype_ends_with_wire",
-    );
-}
-
-#[test]
-fn detects_disable_fork_label_violation() {
-    run_fixture(
-        "fixtures/disable_fork_label_violation.sv",
-        "disable_targets_fork_only",
-    );
-}
-
-#[test]
-fn detects_enum_value_case_violation() {
-    run_fixture(
-        "fixtures/enum_values_case_violation.sv",
-        "enum_values_uppercase",
-    );
-}
-
-#[test]
-fn detects_macro_prefix_violation() {
-    run_fixture(
-        "fixtures/macros_use_module_prefix_violation.sv",
-        "macros_use_module_prefix",
-    );
-}
-
-#[test]
-fn detects_module_name_case_violation() {
-    run_fixture(
-        "fixtures/module_name_case_violation.sv",
-        "module_names_lower_snake",
-    );
-}
-
-#[test]
 fn detects_no_define_inside_package() {
     run_fixture(
-        "fixtures/no_define_inside_package_violation.sv",
+        "fixtures/no_define_inside_package_bad.sv",
         "no_define_inside_package",
     );
+    run_fixture_success("fixtures/no_define_inside_package_good.sv");
 }
 
 #[test]
-fn detects_one_package_per_file_violation() {
-    run_fixture(
-        "fixtures/one_package_per_file_violation.sv",
-        "one_package_per_file",
-    );
+fn detects_one_package_per_file() {
+    run_fixture("fixtures/one_package_per_file_bad.sv", "one_package_per_file");
+    run_fixture_success("fixtures/one_package_per_file_good.sv");
 }
 
 #[test]
-fn detects_port_name_lower_snake_violation() {
-    run_fixture(
-        "fixtures/port_names_lower_snake_violation.sv",
-        "port_names_lower_snake",
-    );
+fn detects_port_name_lower_snake() {
+    run_fixture("fixtures/port_names_lower_snake_bad.sv", "port_names_lower_snake");
+    run_fixture_success("fixtures/port_names_lower_snake_good.sv");
 }
 
 #[test]
-fn detects_port_direction_suffix_violation() {
+fn detects_port_direction_suffix() {
     run_fixture(
-        "fixtures/port_names_suffix_violation.sv",
+        "fixtures/port_names_have_direction_suffix_bad.sv",
         "port_names_have_direction_suffix",
     );
+    run_fixture_success("fixtures/port_names_have_direction_suffix_good.sv");
 }
 
 #[test]
-fn detects_typedef_lower_snake_t_violation() {
+fn detects_typedef_lower_snake_t() {
     run_fixture(
-        "fixtures/typedef_lower_snake_t_violation.sv",
+        "fixtures/typedef_names_lower_snake_t_bad.sv",
         "typedef_names_lower_snake_t",
     );
+    run_fixture_success("fixtures/typedef_names_lower_snake_t_good.sv");
 }

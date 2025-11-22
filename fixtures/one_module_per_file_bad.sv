@@ -1,6 +1,9 @@
 `default_nettype none
 
-module module_filename_match_ok;
+module foo;
+endmodule
+
+module bar;
 endmodule
 
 `default_nettype wire

@@ -1,6 +1,6 @@
 `default_nettype none
 
-module function_with_explicit_types;
+module functions_have_explicit_types_good;
   function automatic logic [7:0] acc_fn(
     input logic [7:0] a_i,
     input logic [7:0] b_i

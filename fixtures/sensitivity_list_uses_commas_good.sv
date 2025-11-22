@@ -1,6 +1,6 @@
 `default_nettype none
 
-module sensitivity_comma_ok;
+module sensitivity_list_uses_commas_good;
   logic clk_i;
   logic rst_ni;
   logic data_d;
