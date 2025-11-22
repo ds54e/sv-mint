@@ -11,6 +11,9 @@
 `` unused var <module>.<name> ``
 ### Remediation
 Delete the variable, wire it into surrounding logic, or annotate intentional placeholders with inline comments that include `unused` (e.g., `` logic debug_shadow; // unused ``).
+
+### Limitations
+- Implicit connections (`.*`, `.foo` shorthand) are not elaborated; they will be counted as unused.
 ### Good
 
 ```systemverilog
