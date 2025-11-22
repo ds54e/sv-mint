@@ -13,10 +13,8 @@ Flags files that never declare `` `default_nettype``. Requiring `` `default_nett
 
 ```systemverilog
 `default_nettype none
-
 module foo;
 endmodule
-
 `default_nettype wire
 ```
 
