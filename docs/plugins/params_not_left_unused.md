@@ -5,7 +5,7 @@
 
 ## Description
 - Detect parameters whose reference count stays at zero
-
+- Why: Unused parameters hint at dead configuration paths.
 ## Good
 
 ```systemverilog

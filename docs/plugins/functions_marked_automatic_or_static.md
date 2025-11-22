@@ -5,7 +5,7 @@
 
 ## Description
 - Functions in modules/interfaces/packages must declare `automatic` or `static`
-
+- Why: Explicit lifetime avoids unintended shared state or tool-dependent storage.
 ## Good
 
 ```systemverilog

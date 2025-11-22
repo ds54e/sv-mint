@@ -5,7 +5,7 @@
 
 ## Description
 - Ports follow lower_snake_case + direction suffix
-
+- Why: Consistent port naming improves readability and linting.
 ## Good
 
 ```systemverilog

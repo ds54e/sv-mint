@@ -5,7 +5,7 @@
 
 ## Description
 - Warn when a file declares more than one module
-
+- Why: Single-module files are easier to index, review, and build incrementally.
 ## Good
 
 ```systemverilog

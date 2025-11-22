@@ -5,7 +5,7 @@
 
 ## Description
 - Prefer comma-separated sensitivity lists instead of `or`
-
+- Why: Comma-separated sensitivity lists are the standard; `or` is deprecated and tool-dependent.
 ## Good
 
 ```systemverilog

@@ -5,7 +5,7 @@
 
 ## Description
 - Warn when a macro is defined but never used
-
+- Why: Dead macros bloat code and can mask refactors; prune them.
 ## Notes
 - A comment containing the words `used` or `reserved` (case-insensitive) in the macro definition block suppresses this warning.
 - For multi-line macros, place the comment on the final line without a trailing backslash to ensure it is detected.

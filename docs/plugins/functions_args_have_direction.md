@@ -5,7 +5,7 @@
 
 ## Description
 - Function arguments must specify a direction (`input`/`output`/`inout`/`ref`).
-
+- Why: Explicit directions document intent and avoid default-input ambiguity.
 ## Good
 
 ```systemverilog

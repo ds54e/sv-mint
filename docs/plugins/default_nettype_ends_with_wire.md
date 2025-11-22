@@ -5,7 +5,7 @@
 
 ## Description
 - Files must reset `default_nettype` back to `wire` near the end
-
+- Why: Resetting to wire prevents `default_nettype none` from leaking into later compilation units.
 ## Good
 
 ```systemverilog

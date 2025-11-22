@@ -5,7 +5,7 @@
 
 ## Description
 - Localparams must declare an explicit data type
-
+- Why: Explicit types avoid default widths and make intent clear for compile-time constants.
 ## Good
 
 ```systemverilog

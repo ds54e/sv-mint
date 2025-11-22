@@ -6,6 +6,7 @@
 ## Description
 - Warn when declared nets are never read or written.
 - Implicit `.*` connections are not elaborated; they will be counted as unused.
+- Why: Unused nets often mean wiring mistakes or dead logic.
 ## Good
 
 ```systemverilog

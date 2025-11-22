@@ -5,7 +5,7 @@
 
 ## Description
 - Module-local macros must be prefixed with the module name
-
+- Why: Prefixes avoid macro name collisions across modules or libraries.
 ## Good
 
 ```systemverilog

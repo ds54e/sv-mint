@@ -5,7 +5,7 @@
 
 ## Description
 - Typedef names (non-enum) must be lower_snake_case and end with `_t`
-
+- Why: `_t` snake-case names clearly mark typedefs versus signals.
 ## Good
 
 ```systemverilog

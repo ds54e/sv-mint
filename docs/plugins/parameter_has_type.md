@@ -5,7 +5,7 @@
 
 ## Description
 - Parameters must declare an explicit data type
-
+- Why: Explicit parameter types avoid implicit 32-bit defaults and synthesis surprises.
 ## Good
 
 ```systemverilog

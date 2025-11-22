@@ -5,7 +5,7 @@
 
 ## Description
 - Detect localparams whose reference count stays at zero
-
+- Why: Unused localparams imply stale configuration knobs or dead code.
 ## Good
 
 ```systemverilog

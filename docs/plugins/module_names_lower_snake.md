@@ -5,7 +5,7 @@
 
 ## Description
 - Modules must use lower_snake_case
-
+- Why: Consistent module naming improves readability and automation.
 ## Good
 
 ```systemverilog

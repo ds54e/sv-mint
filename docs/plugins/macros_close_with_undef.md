@@ -5,7 +5,7 @@
 
 ## Description
 - Local `` `define`` entries must be `` `undef``’d in the same file
-
+- Why: Undefining prevents macros from leaking into unrelated files.
 ## Good
 
 ```systemverilog

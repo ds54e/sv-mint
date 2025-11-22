@@ -5,7 +5,7 @@
 
 ## Description
 - Warn when a `case` statement lacks a `default` label (except for `unique`/`unique0 case`)
-
+- Why: Default branches prevent unintended latches and X-propagation when cases are unhandled.
 ## Good
 
 ```systemverilog
