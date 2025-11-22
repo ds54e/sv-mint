@@ -39,7 +39,7 @@ end
 
 ## Bad
 
-```
+```systemverilog
 module m;
 
   logic a, b, c;
@@ -60,10 +60,5 @@ module m;
   end
 
 endmodule
-```systemverilog
 
-```
-always @* begin
-  state_d = next_state;
-end
 ```
