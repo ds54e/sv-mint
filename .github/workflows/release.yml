@@ -155,7 +155,6 @@ jobs:
           cp sv-mint.toml "${DIST}/sv-mint.toml"
           cp README.md "${DIST}/README.md"
           cp LICENSE "${DIST}/LICENSE"
-          cp CHANGELOG.md "${DIST}/CHANGELOG.md"
           ARCHIVE="sv-mint-${{ matrix.os }}-${RELEASE_TAG}"
           if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
             (cd "${DIST}" && 7z a "../${ARCHIVE}.zip" . >/dev/null)
