@@ -232,3 +232,107 @@ fn reports_include_file_path() {
         &["include_child.sv", "vars_not_left_unused"],
     );
 }
+
+#[test]
+fn detects_always_comb_blocking_violation() {
+    run_fixture(
+        "fixtures/always_comb_blocking_violation.sv",
+        "always_comb_uses_blocking",
+    );
+}
+
+#[test]
+fn detects_always_ff_blocking_violation() {
+    run_fixture(
+        "fixtures/always_ff_blocking_violation.sv",
+        "always_ff_uses_nonblocking",
+    );
+}
+
+#[test]
+fn detects_case_missing_default_violation() {
+    run_fixture(
+        "fixtures/case_missing_default_violation.sv",
+        "case_has_default_branch",
+    );
+}
+
+#[test]
+fn detects_default_nettype_missing_reset() {
+    run_fixture(
+        "fixtures/default_nettype_no_reset_violation.sv",
+        "default_nettype_ends_with_wire",
+    );
+}
+
+#[test]
+fn detects_disable_fork_label_violation() {
+    run_fixture(
+        "fixtures/disable_fork_label_violation.sv",
+        "disable_targets_fork_only",
+    );
+}
+
+#[test]
+fn detects_enum_value_case_violation() {
+    run_fixture(
+        "fixtures/enum_values_case_violation.sv",
+        "enum_values_uppercase",
+    );
+}
+
+#[test]
+fn detects_macro_prefix_violation() {
+    run_fixture(
+        "fixtures/macros_use_module_prefix_violation.sv",
+        "macros_use_module_prefix",
+    );
+}
+
+#[test]
+fn detects_module_name_case_violation() {
+    run_fixture(
+        "fixtures/module_name_case_violation.sv",
+        "module_names_lower_snake",
+    );
+}
+
+#[test]
+fn detects_no_define_inside_package() {
+    run_fixture(
+        "fixtures/no_define_inside_package_violation.sv",
+        "no_define_inside_package",
+    );
+}
+
+#[test]
+fn detects_one_package_per_file_violation() {
+    run_fixture(
+        "fixtures/one_package_per_file_violation.sv",
+        "one_package_per_file",
+    );
+}
+
+#[test]
+fn detects_port_name_lower_snake_violation() {
+    run_fixture(
+        "fixtures/port_names_lower_snake_violation.sv",
+        "port_names_lower_snake",
+    );
+}
+
+#[test]
+fn detects_port_direction_suffix_violation() {
+    run_fixture(
+        "fixtures/port_names_suffix_violation.sv",
+        "port_names_have_direction_suffix",
+    );
+}
+
+#[test]
+fn detects_typedef_lower_snake_t_violation() {
+    run_fixture(
+        "fixtures/typedef_lower_snake_t_violation.sv",
+        "typedef_names_lower_snake_t",
+    );
+}
