@@ -116,7 +116,7 @@ stage = "raw_text"
     .expect("load defaults");
     assert_eq!(cfg.defaults.timeout_ms_per_file, 6000);
     assert_eq!(cfg.plugin.cmd, "python3");
-    assert_eq!(cfg.plugin.args, vec!["-u", "-B"]);
+    assert_eq!(cfg.plugin.args, vec!["-X", "utf8", "-u", "-B"]);
     assert_eq!(
         cfg.stages.enabled,
         vec![Stage::RawText, Stage::PpText, Stage::Cst, Stage::Ast]

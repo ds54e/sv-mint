@@ -212,7 +212,7 @@ fn default_plugin_cmd() -> String {
 }
 
 fn default_plugin_args() -> Vec<String> {
-    vec!["-u".to_string(), "-B".to_string()]
+    vec!["-X".to_string(), "utf8".to_string(), "-u".to_string(), "-B".to_string()]
 }
 
 fn default_enabled_stages() -> Vec<Stage> {
