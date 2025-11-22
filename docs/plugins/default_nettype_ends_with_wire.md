@@ -8,7 +8,7 @@
 
 ## Details
 
-Because `default_nettype` stays in effect for all subsequent compilation units, each file must reset it back to `wire` at the end so other sources aren’t accidentally processed with `none`. This rule looks at the last `default_nettype` directive and warns when it doesn’t restore `wire`.
+Because `default_nettype` stays in effect for all subsequent compilation units, each file that changes it must reset it back to `wire` at the end so other sources aren’t accidentally processed with `none`. This rule looks at the last `default_nettype` directive and warns when it doesn’t restore `wire`; files that never set `default_nettype` are ignored.
 ### Good
 
 ```systemverilog
