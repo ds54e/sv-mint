@@ -1,7 +1,30 @@
 # functions_explicit_return_type
 
-- **Stage**: `cst`
 - **Script**: `plugins/functions_explicit_return_type.cst.py`
-- **What it checks**: Flags `function` declarations that rely on implicit return types (e.g., `function foo(...);`) instead of an explicit type like `function logic foo(...);`.
-- **Rationale**: Implicit return types can hide signedness and width, leading to mismatches between callers and implementations.
-- **How to fix**: Add an explicit return type to the function header, including signedness and width as needed (`function logic signed [3:0] foo(...);`).
+- **Stage**: `cst`
+- **Key Inputs**: `cst_ir.tokens`, `cst_ir.nodes`, `cst_ir.line_starts`
+- **Summary**: Functions must declare an explicit return type; implicit return types are rejected.
+
+## Details
+
+### Message
+`` function must declare an explicit return type ``
+### Remediation
+Annotate the function header with a concrete return type (including width/signedness when needed).
+### Good
+
+```systemverilog
+function automatic logic signed [3:0] acc_fn(
+  input logic [1:0] a
+);
+  return a + 1'b1;
+endfunction
+```
+
+### Bad
+
+```systemverilog
+function acc_fn(input a_i, input b_i);
+  acc_fn = a_i + b_i;  // implicit return type
+endfunction
+```

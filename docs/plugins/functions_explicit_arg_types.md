@@ -1,7 +1,34 @@
 # functions_explicit_arg_types
 
-- **Stage**: `cst`
 - **Script**: `plugins/functions_explicit_arg_types.cst.py`
-- **What it checks**: Flags function arguments that omit explicit data types (e.g., `input a`), or use an implicit type equal to the identifier token.
-- **Rationale**: Untyped arguments default to 1-bit logic and can silently mis-size or mis-sign values when the function is reused.
-- **How to fix**: Annotate each argument with a full data type, including width and signedness as appropriate (`input logic signed [7:0] data_i`).
+- **Stage**: `cst`
+- **Key Inputs**: `cst_ir.tokens`, `cst_ir.nodes`, `cst_ir.line_starts`
+- **Summary**: Function arguments must declare explicit data types; implicit or identifier-only types are rejected.
+
+## Details
+
+### Message
+`` function arguments must declare explicit data types ``
+### Remediation
+Annotate every argument with a full data type (width and signedness as needed), not just the identifier.
+### Good
+
+```systemverilog
+function logic add(
+  input logic a,
+  input logic b
+);
+  return a + b;
+endfunction
+```
+
+### Bad
+
+```systemverilog
+function logic add(
+  input a,
+  input b  // implicit 1-bit type
+);
+  return a + b;
+endfunction
+```
