@@ -68,3 +68,7 @@
 4. Update/add tests (Rust schema checks + CLI smoke).
 5. Run full test suite; fix regressions.
 6. Document the change (README/AGENTS if needed) and push.
+
+## Current status / next steps
+- Schema bumped to v2 with `tok_kind_map` added; mode removed. All CST plugins still use existing fields and tests pass.
+- Next: start with function/parameter type linkage. Need to inspect sv-parser CST structure locally (no external network) by instrumenting a small debug dump to map `FunctionDeclaration`/`ParameterDeclaration` children. After mapping, extend `cst_ir` to include `return_type`/`ports` and param `type` IDs, emit ImplicitDataType as needed, then migrate `functions_have_explicit_types`/`parameter_has_type` and update tests. Proceed similarly for sensitivity lists, directives, instances, case flags in subsequent steps.
