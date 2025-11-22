@@ -32,12 +32,6 @@ id = "vars_not_left_unused"
    - `sv-mint --disable rule_a,rule_b path/to/file.sv` disables just the listed rules; specify multiple IDs or repeat `--disable` as needed.
    - When `--only` is present, any `--disable` that follows removes rules from that already-filtered set, and referencing a nonexistent `rule_id` raises an error.
 
-## Anatomy of a Rule
-- Rules live under `plugins/` and expose a `check(req)` function.
-- `req.stage` decides which payload type (`raw_text`, `pp_text`, `cst`, `ast`) is available.
-- Return a list of `Violation` dictionaries with `rule_id`, `severity`, `message`, and `location`.
-- For project-specific rules, add subdirectories inside `plugins/` and point `sv-mint.toml` at the new scripts.
-
 ## Provenance and License
 - Rust dependencies follow MIT or Apache-2.0 licenses as declared in `Cargo.toml`.
 - sv-mint itself is distributed under the same terms as the repository license (see `LICENSE`).
