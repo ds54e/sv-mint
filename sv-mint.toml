@@ -95,6 +95,9 @@ id = "enum_type_names_lower_snake_e"
 id = "enum_values_uppercase"
 
 [[rule]]
+id = "localparams_not_left_unused"
+
+[[rule]]
 id = "typedef_names_lower_snake_t"
 
 [[rule]]

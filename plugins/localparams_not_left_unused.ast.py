@@ -12,7 +12,8 @@ def check(req):
     line_cache = {}
     out = []
     for s in symbols:
-        if s.get("class") != "localparam":
+        cls = (s.get("class") or "").lower()
+        if cls != "param":
             continue
         refs = int(s.get("ref_count", s.get("read_count", 0) or 0) or 0)
         if refs == 0:
