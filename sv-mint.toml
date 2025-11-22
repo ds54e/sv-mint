@@ -91,7 +91,11 @@ id = "always_ff_uses_nonblocking"
 id = "functions_marked_automatic_or_static"
 
 [[rule]]
-id = "functions_have_explicit_types"
+id = "functions_explicit_return_type"
+stage = "cst"
+
+[[rule]]
+id = "functions_explicit_arg_types"
 stage = "cst"
 
 [[rule]]

@@ -4,7 +4,7 @@ use sv_mint::sv::driver::{SvDriver, SvParserCfg};
 
 #[test]
 fn parameter_missing_type_links_to_implicit_node() {
-    let ir = load_ir("fixtures/rules/parameter_has_type_missing_type_bad.sv");
+    let ir = load_ir("fixtures/rules/parameter_has_type/bad_missing_type.sv");
     let param = find_node(&ir, "ParameterDeclaration");
     let ty = field_id(param, "type");
     assert!(is_implicit_type(&ir, ty, None));
@@ -12,7 +12,7 @@ fn parameter_missing_type_links_to_implicit_node() {
 
 #[test]
 fn parameter_with_type_has_explicit_type_field() {
-    let ir = load_ir("fixtures/rules/parameter_has_type_good.sv");
+    let ir = load_ir("fixtures/rules/parameter_has_type/good.sv");
     let params = find_all_nodes(&ir, "ParameterDeclaration");
     assert!(!params.is_empty());
     for param in params {
@@ -23,7 +23,7 @@ fn parameter_with_type_has_explicit_type_field() {
 
 #[test]
 fn function_ports_expose_explicit_types() {
-    let ir = load_ir("fixtures/rules/functions_have_explicit_types_good.sv");
+    let ir = load_ir("fixtures/rules/functions_explicit_arg_types/good.sv");
     let func = find_node(&ir, "FunctionDeclaration");
     let ret = field_id(func, "return_type");
     assert!(!is_implicit_type(&ir, ret, None));
@@ -34,7 +34,7 @@ fn function_ports_expose_explicit_types() {
         .cloned()
         .unwrap_or_default();
     assert_eq!(ports.len(), 2);
-    let names = ["a_i", "b_i"];
+    let names = ["a", "b"];
     for (i, port) in ports.iter().enumerate() {
         let ty = port.get("type").and_then(|v| v.as_u64()).unwrap() as u32;
         let name_token = port.get("name_token").and_then(|v| v.as_u64()).map(|v| v as u32);
@@ -46,7 +46,7 @@ fn function_ports_expose_explicit_types() {
 
 #[test]
 fn function_missing_types_mark_ports_and_return() {
-    let ir = load_ir("fixtures/rules/functions_have_explicit_types_bad.sv");
+    let ir = load_ir("fixtures/rules/functions_explicit_return_type/bad.sv");
     let func = find_node(&ir, "FunctionDeclaration");
     let ret = field_id(func, "return_type");
     assert!(is_implicit_type(&ir, ret, None));
@@ -67,7 +67,7 @@ fn function_missing_types_mark_ports_and_return() {
 
 #[test]
 fn directives_capture_default_nettype() {
-    let ir = load_ir("fixtures/rules/functions_have_explicit_types_good.sv");
+    let ir = load_ir("fixtures/rules/functions_explicit_return_type/good.sv");
     let defaults: Vec<_> = ir.directives.iter().filter(|d| d.kind == "default_nettype").collect();
     assert_eq!(defaults.len(), 2);
     assert_eq!(defaults[0].value.as_deref(), Some("none"));
@@ -76,7 +76,7 @@ fn directives_capture_default_nettype() {
 
 #[test]
 fn always_events_track_or_separators() {
-    let ir = load_ir("fixtures/rules/sensitivity_list_uses_commas_bad.sv");
+    let ir = load_ir("fixtures/rules/sensitivity_list_uses_commas/bad.sv");
     let always = find_node(&ir, "AlwaysConstruct");
     let fields = &always.fields;
     assert_eq!(fields.get("always_kind").and_then(|v| v.as_str()), Some("ff"));
@@ -92,15 +92,19 @@ fn always_events_track_or_separators() {
 
 #[test]
 fn case_flags_indicate_unique_without_default() {
-    let ir = load_ir("fixtures/rules/case_has_default_branch_good.sv");
-    let case = find_node(&ir, "CaseStatement");
+    let ir = load_ir("fixtures/rules/case_has_default_branch/good.sv");
+    let cases = find_all_nodes(&ir, "CaseStatement");
+    let case = cases
+        .into_iter()
+        .find(|c| c.fields.get("is_unique").and_then(|v| v.as_bool()) == Some(true))
+        .unwrap();
     assert_eq!(case.fields.get("has_default").and_then(|v| v.as_bool()), Some(false));
     assert_eq!(case.fields.get("is_unique").and_then(|v| v.as_bool()), Some(true));
 }
 
 #[test]
 fn instance_connections_mark_positional_ports() {
-    let ir = load_ir("fixtures/rules/instances_use_named_ports_bad.sv");
+    let ir = load_ir("fixtures/rules/instances_use_named_ports/bad.sv");
     let insts = find_all_nodes(&ir, "HierarchicalInstance");
     assert_eq!(insts.len(), 3);
     let positional = insts.iter().any(|n| {

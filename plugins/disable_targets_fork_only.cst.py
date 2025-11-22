@@ -40,11 +40,14 @@ def _disable_label(tokens, first, last, text):
         if start is None or end is None:
             continue
         word = text[start:end].strip()
-        if word.lower() == "disable":
+        if not word:
+            continue
+        lower = word.lower()
+        if lower == "disable":
             continue
         if word == ";":
             break
-        if word.lower() == "fork":
+        if lower == "fork":
             return None
         return word
     return None
