@@ -7,7 +7,7 @@ module always_structured_ok(
   output logic b_o
 );
 
-always_ff @(posedge clk_i or negedge rst_ni) begin
+always_ff @(posedge clk_i, negedge rst_ni) begin
   b_o <= !rst_ni ? 1'b0 : a_i;
 end
 

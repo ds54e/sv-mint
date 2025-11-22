@@ -36,6 +36,10 @@ id = "always_is_structured"
 stage = "cst"
 
 [[rule]]
+id = "sensitivity_list_uses_commas"
+stage = "cst"
+
+[[rule]]
 id = "macros_close_with_undef"
 
 [[rule]]

@@ -93,6 +93,16 @@ fn detects_bare_always() {
 }
 
 #[test]
+fn detects_sensitivity_or() {
+    run_fixture("fixtures/sensitivity_or_violation.sv", "sensitivity_list_uses_commas");
+}
+
+#[test]
+fn allows_sensitivity_commas() {
+    run_fixture_success("fixtures/sensitivity_comma_ok.sv");
+}
+
+#[test]
 fn detects_net_naming_violations() {
     run_fixture("fixtures/net_lower_snake_violation.sv", "net_names_lower_snake");
     let mut cmd = Command::new(assert_cmd::cargo::cargo_bin!("sv-mint"));
