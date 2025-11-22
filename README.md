@@ -19,11 +19,6 @@ id = "macro_names_uppercase"
 id = "vars_not_left_unused"
 ```
 
-5. Narrow or relax checks directly from the CLI when experimenting:
-   - `sv-mint --only rule_x path/to/file.sv` runs only `rule_x`, temporarily disabling every other rule.
-   - `sv-mint --disable rule_a,rule_b path/to/file.sv` disables just the listed rules; specify multiple IDs or repeat `--disable` as needed.
-   - When `--only` is present, any `--disable` that follows removes rules from that already-filtered set, and referencing a nonexistent `rule_id` raises an error.
-
 ## Provenance and License
 - Rust dependencies follow MIT or Apache-2.0 licenses as declared in `Cargo.toml`.
 - sv-mint itself is distributed under the MIT License (see `LICENSE`).
