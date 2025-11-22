@@ -14,3 +14,4 @@ Remove the unused macro or use it where intended. For one-off local helpers, pre
 
 ### Limitations
 - A comment containing the words `used` or `reserved` (case-insensitive) in the macro definition block suppresses this warning.
+- For multi-line macros, place the comment on the final line of the definition (after the trailing backslash) to ensure it is detected.
