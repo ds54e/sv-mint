@@ -7,7 +7,7 @@ sv-mint is a SystemVerilog lint pipeline that combines a Rust core with Python p
 2. Add the extracted directory to your `PATH`, or call the binary via an absolute path.
 3. Lint your sources:
    ```bash
-   ./sv-mint --config ./sv-mint.toml path/to/files/foo.sv path/to/files/bar.sv
+   sv-mint --config sv-mint.toml path/to/foo.sv path/to/bar.sv
    ```
 ## Provenance and License
 - Rust dependencies follow MIT or Apache-2.0 licenses as declared in `Cargo.toml`.
