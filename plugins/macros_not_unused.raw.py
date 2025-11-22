@@ -32,21 +32,26 @@ def _has_unused_comment(text, offset):
         line_start = 0
     else:
         line_start += 1
-    line_end = text.find("\n", offset)
-    if line_end == -1:
-        line_end = len(text)
-    segment = text[line_start:line_end]
-    idx = offset - line_start
-    if idx < 0:
-        idx = 0
-    rest = segment[idx:]
-    pos = rest.find("//")
-    if pos != -1 and "unused" in rest[pos + 2 :].lower():
+    end = len(text)
+    cursor = line_start
+    while cursor < len(text):
+        nl = text.find("\n", cursor)
+        if nl == -1:
+            end = len(text)
+            break
+        line = text[cursor:nl]
+        end = nl
+        if not line.rstrip().endswith("\\"):
+            break
+        cursor = nl + 1
+    segment = text[line_start:end]
+    pos = segment.find("//")
+    if pos != -1 and "unused" in segment[pos + 2 :].lower():
         return True
-    pos_block = rest.find("/*")
+    pos_block = segment.find("/*")
     if pos_block != -1:
-        end = rest.find("*/", pos_block + 2)
-        if end != -1 and "unused" in rest[pos_block + 2 : end].lower():
+        end = segment.find("*/", pos_block + 2)
+        if end != -1 and "unused" in segment[pos_block + 2 : end].lower():
             return True
     return False
 
