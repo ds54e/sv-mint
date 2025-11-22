@@ -3,7 +3,7 @@
 - **Script**: `plugins/functions_explicit_return_type.cst.py`
 - **Stage**: `cst`
 - **Key Inputs**: `cst_ir.tokens`, `cst_ir.nodes`, `cst_ir.line_starts`
-- **Summary**: Functions must declare an explicit return type; implicit return types are rejected.
+- **Summary**: Functions must declare an explicit return type.
 
 ## Details
 
