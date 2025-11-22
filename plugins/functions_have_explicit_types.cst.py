@@ -16,7 +16,7 @@ def check(req):
         last = node.get("last_token")
         if first is None or last is None:
             continue
-        ret_token = _return_type_token(tokens, first, last, text)
+        ret_token = _return_type_token(cst, node, tokens, first, last, text)
         if ret_token is not None:
             loc = byte_span_to_loc(tokens[ret_token]["start"], tokens[ret_token]["end"], line_starts)
             out.append({
@@ -26,7 +26,7 @@ def check(req):
                 "location": loc,
             })
             continue
-        arg_token = _implicit_arg_token(tokens, first, last, text)
+        arg_token = _implicit_arg_token(cst, node, tokens, first, last, text)
         if arg_token is not None:
             loc = byte_span_to_loc(tokens[arg_token]["start"], tokens[arg_token]["end"], line_starts)
             out.append({
@@ -38,7 +38,10 @@ def check(req):
     return out
 
 
-def _return_type_token(tokens, first, last, text):
+def _return_type_token(cst, node, tokens, first, last, text):
+    implicit_node = _find_kind(cst, node, "ImplicitDataType")
+    if implicit_node is not None:
+        return implicit_node.get("first_token")
     saw_function = False
     type_seen = False
     ident_seen = 0
@@ -73,7 +76,10 @@ def _return_type_token(tokens, first, last, text):
     return None
 
 
-def _implicit_arg_token(tokens, first, last, text):
+def _implicit_arg_token(cst, node, tokens, first, last, text):
+    implicit = _find_kind(cst, node, "ImplicitDataType")
+    if implicit is not None:
+        return implicit.get("first_token")
     lparen = _find_token(tokens, first, last, "(")
     if lparen is None:
         return None
@@ -153,6 +159,23 @@ def _next_comma(tokens, start, end, text):
         elif word == "," and depth == 0:
             return i
     return end
+
+
+def _find_kind(cst, node, needle):
+    target = needle.lower()
+    stack = [node.get("id")]
+    while stack:
+        nid = stack.pop()
+        n = cst.nodes_by_id.get(nid)
+        if not n:
+            continue
+        kind_id = n.get("kind")
+        if kind_id is not None and 0 <= kind_id < len(cst.kinds):
+            name = cst.kinds[kind_id].lower()
+            if target in name:
+                return n
+        stack.extend(cst.children.get(nid, []))
+    return None
 
 
 def _type_keywords():
