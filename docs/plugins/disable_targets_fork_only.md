@@ -16,11 +16,28 @@ When disabling subprocesses, `disable fork` terminates all processes and `disabl
 ### Good
 
 ```systemverilog
+fork : fork_label
+  begin : thread_a
+    work_a();
+  end
+  begin : thread_b
+    work_b();
+  end
+join_any
 disable fork;
 ```
 
 ### Bad
 
 ```systemverilog
-disable worker_threads;
+fork : fork_label
+  begin : thread_a
+    work_a();
+  end
+  begin : thread_b
+    work_b();
+  end
+join_any
+// Non-compliant: relies on disabling a fork label
+disable fork_label;
 ```
