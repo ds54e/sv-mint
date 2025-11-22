@@ -9,7 +9,7 @@ def check(req):
     tokens = ir.get("tokens") or []
     line_starts = ir.get("line_starts") or [0]
     out = []
-    for node in cst.of_kind("ParameterDeclaration"):
+    for node in cst.of_kind("LocalParameterDeclaration"):
         fields = node.get("fields") or {}
         ty = _field_id(fields, "type")
         if ty is None or _is_implicit(cst, ty):
@@ -56,9 +56,9 @@ def _violation(tokens, tok_idx, line_starts):
         return None
     loc = byte_span_to_loc(start, end, line_starts)
     return {
-        "rule_id": "parameter_has_type",
+        "rule_id": "localparam_has_type",
         "severity": "warning",
-        "message": "parameter must declare an explicit data type",
+        "message": "localparam must declare an explicit data type",
         "location": loc,
     }
 
