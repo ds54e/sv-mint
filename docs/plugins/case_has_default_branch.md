@@ -1,7 +1,7 @@
 # case_has_default_branch
 
 - **Script**: `plugins/case_has_default_branch.cst.py`
-- **Stage**: `cst` (`mode = inline`)
+- **Stage**: `cst`
 - **Key Inputs**: `cst_ir.tokens`, `line_starts`, `pp_text`
 - **Summary**: Warn when a `case` statement lacks a `default` label (except for `unique`/`unique0 case`)
 

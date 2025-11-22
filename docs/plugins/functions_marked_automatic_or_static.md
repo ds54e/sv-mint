@@ -1,7 +1,7 @@
 # functions_marked_automatic_or_static
 
 - **Script**: `plugins/functions_marked_automatic_or_static.cst.py`
-- **Stage**: `cst` (`mode = inline`)
+- **Stage**: `cst`
 - **Key Inputs**: `cst_ir.tokens`, `line_starts`, `pp_text`
 - **Summary**: Functions in modules/interfaces/packages must declare `automatic` or `static`
 

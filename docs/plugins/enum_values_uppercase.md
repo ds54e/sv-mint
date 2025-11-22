@@ -1,7 +1,7 @@
 # enum_values_uppercase
 
 - **Script**: `plugins/enum_values_uppercase.cst.py`
-- **Stage**: `cst` (`mode = inline`)
+- **Stage**: `cst`
 - **Key Inputs**: `cst_ir.tokens`, `line_starts`, `pp_text`
 - **Summary**: Enum members must be UpperCamelCase or ALL_CAPS
 

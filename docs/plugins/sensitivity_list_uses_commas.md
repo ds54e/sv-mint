@@ -1,7 +1,7 @@
 # sensitivity_list_uses_commas
 
 - **Script**: `plugins/sensitivity_list_uses_commas.cst.py`
-- **Stage**: `cst` (`mode = inline`)
+- **Stage**: `cst`
 - **Key Inputs**: `cst_ir.tokens`, `line_starts`, `pp_text`
 - **Summary**: Prefer comma-separated sensitivity lists instead of `or`
 

@@ -1,7 +1,7 @@
 # always_is_structured
 
 - **Script**: `plugins/always_is_structured.cst.py`
-- **Stage**: `cst` (`mode = inline`)
+- **Stage**: `cst`
 - **Key Inputs**: `cst_ir.tokens`, `line_starts`, `pp_text`
 - **Summary**: Replace bare `always` with `always_ff`/`always_comb`/`always_latch`
 
