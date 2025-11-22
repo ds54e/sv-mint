@@ -10,12 +10,12 @@ sv-mint is a SystemVerilog lint pipeline that combines a Rust core with Python p
 
 ## Getting Started
 1. Download the latest release from GitHub (`sv-mint-vX.Y.Z-<platform>.tar.gz`/`.zip`) and extract it somewhere on your machine.
-2. Add the extracted directory (it contains `sv-mint`, `docs/`, `plugins/`, `sv-mint.toml`, and `LICENSE`) to your `PATH`, or call the binary via an absolute path.
+2. Add the extracted directory (it contains `sv-mint`, `plugins/`, `sv-mint.toml`, `LICENSE`, `CHANGELOG.md`, and this `README.md`) to your `PATH`, or call the binary via an absolute path.
 3. Lint your sources:
    ```bash
    ./sv-mint --config ./sv-mint.toml path/to/files/*.sv
    ```
-4. Tailor rules by editing `sv-mint.toml`. A section-by-section reference (including default values and stage behavior) lives in [`docs/configuration.md`](docs/configuration.md). The short version: declare your `[[rule]]` entries, point `[plugin]` at your Python interpreter, and let sv-mint’s built-in defaults cover everything else unless you need overrides.
+4. Tailor rules by editing `sv-mint.toml`. Declare your `[[rule]]` entries, point `[plugin]` at your Python interpreter, and let sv-mint’s built-in defaults cover everything else unless you need overrides.
 
 ### Sample `sv-mint.toml`
 
@@ -27,8 +27,6 @@ id = "macro_names_uppercase"
 id = "vars_not_left_unused"
 ```
 
-See [`docs/configuration.md`](docs/configuration.md) for every optional section, stage inference, and script resolution rules.
-
 5. Narrow or relax checks directly from the CLI when experimenting:
    - `sv-mint --only rule_x path/to/file.sv` runs only `rule_x`, temporarily disabling every other rule.
    - `sv-mint --disable rule_a,rule_b path/to/file.sv` disables just the listed rules; specify multiple IDs or repeat `--disable` as needed.
@@ -38,7 +36,6 @@ See [`docs/configuration.md`](docs/configuration.md) for every optional section,
 - Rules live under `plugins/` and expose a `check(req)` function.
 - `req.stage` decides which payload type (`raw_text`, `pp_text`, `cst`, `ast`) is available.
 - Return a list of `Violation` dictionaries with `rule_id`, `severity`, `message`, and `location`.
-- Document every bundled rule in `docs/plugins/<rule_id>.md` so users know how to remediate findings.
 - For project-specific rules, add subdirectories inside `plugins/` and point `sv-mint.toml` at the new scripts.
 
 ## Diagnostics and Tooling
@@ -49,4 +46,3 @@ See [`docs/configuration.md`](docs/configuration.md) for every optional section,
 - This repository and documentation were generated and are maintained with the help of ChatGPT.
 - Rust dependencies follow MIT or Apache-2.0 licenses as declared in `Cargo.toml`.
 - sv-mint itself is distributed under the same terms as the repository license (see `LICENSE`).
-- Internal maintenance notes (builds, releases, tests) are tracked in `docs/development.md`.
