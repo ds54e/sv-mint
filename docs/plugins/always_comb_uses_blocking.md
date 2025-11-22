@@ -1,13 +1,13 @@
 # always_comb_uses_blocking
 
-- **Script**: `plugins/always_comb_uses_blocking.cst.py`
-- **Stage**: `cst`
-- **Key Inputs**: `cst_ir.tokens`, `tok_kind_table`, `line_starts`, `pp_text`
-- **Summary**: Ban non-blocking assignments (`<=`) inside `always_comb`
+## Script
+- `plugins/always_comb_uses_blocking.cst.py`
 
-## Details
+## Description
 
-### Good
+- Prohibit non-blocking assignments (`<=`) inside `always_comb`
+
+## Good
 
 ```systemverilog
 module m;
@@ -18,7 +18,7 @@ module m;
 endmodule
 ```
 
-### Bad
+## Bad
 
 ```systemverilog
 module m;
