@@ -11,6 +11,9 @@
 `` unused param <module>.<name> ``
 ### Remediation
 Remove unused parameters, ensure configuration knobs are referenced, or annotate intentional placeholders with inline comments containing `unused` (for example, `` parameter bit EnableDbg = 0  // unused ``).
+
+### Limitations
+- A declaration-line comment containing the words `used` or `reserved` (case-insensitive) suppresses this warning.
 ### Good
 
 ```systemverilog
