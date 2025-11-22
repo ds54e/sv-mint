@@ -26,274 +26,274 @@ fn run_with_config(path: &str, config: &str, expected: &[&str]) {
 
 #[test]
 fn detects_nets_not_left_unused() {
-    run_fixture("fixtures/bad/nets_not_left_unused_bad.sv", "nets_not_left_unused");
+    run_fixture("fixtures/nets_not_left_unused_bad.sv", "nets_not_left_unused");
 }
 
 #[test]
 fn allows_unused_net_marked() {
-    run_fixture_success("fixtures/good/nets_not_left_unused_good.sv");
+    run_fixture_success("fixtures/nets_not_left_unused_good.sv");
 }
 
 #[test]
 fn detects_params_not_left_unused() {
-    run_fixture("fixtures/bad/params_not_left_unused_bad.sv", "params_not_left_unused");
+    run_fixture("fixtures/params_not_left_unused_bad.sv", "params_not_left_unused");
 }
 
 #[test]
 fn allows_unused_param_marked() {
-    run_fixture_success("fixtures/good/params_not_left_unused_good.sv");
+    run_fixture_success("fixtures/params_not_left_unused_good.sv");
 }
 
 #[test]
 fn detects_vars_not_left_unused() {
-    run_fixture("fixtures/bad/vars_not_left_unused_bad.sv", "vars_not_left_unused");
+    run_fixture("fixtures/vars_not_left_unused_bad.sv", "vars_not_left_unused");
 }
 
 #[test]
 fn allows_unused_var_marked() {
-    run_fixture_success("fixtures/good/vars_not_left_unused_good.sv");
+    run_fixture_success("fixtures/vars_not_left_unused_good.sv");
 }
 
 #[test]
 fn detects_ports_not_left_unused() {
-    run_fixture("fixtures/bad/ports_not_left_unused_bad.sv", "ports_not_left_unused");
+    run_fixture("fixtures/ports_not_left_unused_bad.sv", "ports_not_left_unused");
 }
 
 #[test]
 fn allows_ports_not_left_unused() {
-    run_fixture_success("fixtures/good/ports_not_left_unused_good.sv");
+    run_fixture_success("fixtures/ports_not_left_unused_good.sv");
 }
 
 #[test]
 fn allows_ports_not_left_unused_with_comment() {
-    run_fixture_success("fixtures/good/ports_not_left_unused_comment_good.sv");
+    run_fixture_success("fixtures/ports_not_left_unused_comment_good.sv");
 }
 
 #[test]
 fn detects_default_nettype_missing_none() {
     run_fixture(
-        "fixtures/bad/default_nettype_begins_with_none_bad.sv",
+        "fixtures/default_nettype_begins_with_none_bad.sv",
         "default_nettype_begins_with_none",
     );
 }
 
 #[test]
 fn allows_default_nettype_declared() {
-    run_fixture_success("fixtures/good/default_nettype_begins_with_none_good.sv");
+    run_fixture_success("fixtures/default_nettype_begins_with_none_good.sv");
 }
 
 #[test]
 fn detects_default_nettype_missing_wire_reset() {
     run_fixture(
-        "fixtures/bad/default_nettype_ends_with_wire_bad.sv",
+        "fixtures/default_nettype_ends_with_wire_bad.sv",
         "default_nettype_ends_with_wire",
     );
 }
 
 #[test]
 fn allows_default_nettype_reset_to_wire() {
-    run_fixture_success("fixtures/good/default_nettype_ends_with_wire_good.sv");
+    run_fixture_success("fixtures/default_nettype_ends_with_wire_good.sv");
 }
 
 #[test]
 fn detects_always_is_structured() {
-    run_fixture("fixtures/bad/always_is_structured_bad.sv", "always_is_structured");
-    run_fixture_success("fixtures/good/always_is_structured_good.sv");
+    run_fixture("fixtures/always_is_structured_bad.sv", "always_is_structured");
+    run_fixture_success("fixtures/always_is_structured_good.sv");
 }
 
 #[test]
 fn detects_always_comb_blocking_violation() {
     run_fixture(
-        "fixtures/bad/always_comb_uses_blocking_bad.sv",
+        "fixtures/always_comb_uses_blocking_bad.sv",
         "always_comb_uses_blocking",
     );
-    run_fixture_success("fixtures/good/always_comb_uses_blocking_good.sv");
+    run_fixture_success("fixtures/always_comb_uses_blocking_good.sv");
 }
 
 #[test]
 fn detects_always_ff_blocking_violation() {
     run_fixture(
-        "fixtures/bad/always_ff_uses_nonblocking_bad.sv",
+        "fixtures/always_ff_uses_nonblocking_bad.sv",
         "always_ff_uses_nonblocking",
     );
-    run_fixture_success("fixtures/good/always_ff_uses_nonblocking_good.sv");
+    run_fixture_success("fixtures/always_ff_uses_nonblocking_good.sv");
 }
 
 #[test]
 fn detects_case_missing_default() {
     run_fixture(
-        "fixtures/bad/case_has_default_branch_bad.sv",
+        "fixtures/case_has_default_branch_bad.sv",
         "case_has_default_branch",
     );
-    run_fixture_success("fixtures/good/case_has_default_branch_good.sv");
+    run_fixture_success("fixtures/case_has_default_branch_good.sv");
 }
 
 #[test]
 fn detects_sensitivity_or() {
     run_fixture(
-        "fixtures/bad/sensitivity_list_uses_commas_bad.sv",
+        "fixtures/sensitivity_list_uses_commas_bad.sv",
         "sensitivity_list_uses_commas",
     );
-    run_fixture_success("fixtures/good/sensitivity_list_uses_commas_good.sv");
+    run_fixture_success("fixtures/sensitivity_list_uses_commas_good.sv");
 }
 
 #[test]
 fn detects_net_naming_violations() {
-    run_fixture("fixtures/bad/net_names_lower_snake_bad.sv", "net_names_lower_snake");
-    run_fixture_success("fixtures/good/net_names_lower_snake_good.sv");
+    run_fixture("fixtures/net_names_lower_snake_bad.sv", "net_names_lower_snake");
+    run_fixture_success("fixtures/net_names_lower_snake_good.sv");
 }
 
 #[test]
 fn detects_var_naming_violations() {
-    run_fixture("fixtures/bad/var_names_lower_snake_bad.sv", "var_names_lower_snake");
-    run_fixture_success("fixtures/good/var_names_lower_snake_good.sv");
+    run_fixture("fixtures/var_names_lower_snake_bad.sv", "var_names_lower_snake");
+    run_fixture_success("fixtures/var_names_lower_snake_good.sv");
 }
 
 #[test]
 fn detects_parameter_naming_violations() {
     run_fixture(
-        "fixtures/bad/parameter_names_uppercase_bad.sv",
+        "fixtures/parameter_names_uppercase_bad.sv",
         "parameter_names_uppercase",
     );
-    run_fixture_success("fixtures/good/parameter_names_uppercase_good.sv");
+    run_fixture_success("fixtures/parameter_names_uppercase_good.sv");
 }
 
 #[test]
 fn detects_parameter_missing_type() {
     run_fixture(
-        "fixtures/bad/parameter_has_type_missing_type_bad.sv",
+        "fixtures/parameter_has_type_missing_type_bad.sv",
         "parameter_has_type",
     );
     run_fixture(
-        "fixtures/bad/parameter_has_type_range_only_bad.sv",
+        "fixtures/parameter_has_type_range_only_bad.sv",
         "parameter_has_type",
     );
     run_fixture(
-        "fixtures/bad/parameter_has_type_localparam_bad.sv",
+        "fixtures/parameter_has_type_localparam_bad.sv",
         "parameter_has_type",
     );
-    run_fixture_success("fixtures/good/parameter_has_type_good.sv");
+    run_fixture_success("fixtures/parameter_has_type_good.sv");
 }
 
 #[test]
 fn detects_localparam_naming_violations() {
     run_fixture(
-        "fixtures/bad/localparam_names_uppercase_bad.sv",
+        "fixtures/localparam_names_uppercase_bad.sv",
         "localparam_names_uppercase",
     );
-    run_fixture_success("fixtures/good/localparam_names_uppercase_good.sv");
+    run_fixture_success("fixtures/localparam_names_uppercase_good.sv");
 }
 
 #[test]
 fn detects_multiple_modules() {
-    run_fixture("fixtures/bad/one_module_per_file_bad.sv", "one_module_per_file");
-    run_fixture_success("fixtures/good/one_module_per_file_good.sv");
+    run_fixture("fixtures/one_module_per_file_bad.sv", "one_module_per_file");
+    run_fixture_success("fixtures/one_module_per_file_good.sv");
 }
 
 #[test]
 fn detects_filename_mismatch() {
     run_fixture(
-        "fixtures/bad/module_name_matches_filename_bad.sv",
+        "fixtures/module_name_matches_filename_bad.sv",
         "module_name_matches_filename",
     );
-    run_fixture_success("fixtures/good/module_name_matches_filename_good.sv");
+    run_fixture_success("fixtures/module_name_matches_filename_good.sv");
 }
 
 #[test]
 fn detects_module_name_case_violation() {
     run_fixture(
-        "fixtures/bad/module_names_lower_snake_bad.sv",
+        "fixtures/module_names_lower_snake_bad.sv",
         "module_names_lower_snake",
     );
-    run_fixture_success("fixtures/good/module_names_lower_snake_good.sv");
+    run_fixture_success("fixtures/module_names_lower_snake_good.sv");
 }
 
 #[test]
 fn detects_instances_use_named_ports() {
     run_fixture(
-        "fixtures/bad/instances_use_named_ports_bad.sv",
+        "fixtures/instances_use_named_ports_bad.sv",
         "instances_use_named_ports",
     );
-    run_fixture_success("fixtures/good/instances_use_named_ports_good.sv");
+    run_fixture_success("fixtures/instances_use_named_ports_good.sv");
 }
 
 #[test]
 fn detects_enum_type_name_violation() {
     run_fixture(
-        "fixtures/bad/enum_type_names_lower_snake_e_bad.sv",
+        "fixtures/enum_type_names_lower_snake_e_bad.sv",
         "enum_type_names_lower_snake_e",
     );
-    run_fixture_success("fixtures/good/enum_type_names_lower_snake_e_good.sv");
+    run_fixture_success("fixtures/enum_type_names_lower_snake_e_good.sv");
 }
 
 #[test]
 fn detects_enum_value_case_violation() {
-    run_fixture("fixtures/bad/enum_values_uppercase_bad.sv", "enum_values_uppercase");
-    run_fixture_success("fixtures/good/enum_values_uppercase_good.sv");
+    run_fixture("fixtures/enum_values_uppercase_bad.sv", "enum_values_uppercase");
+    run_fixture_success("fixtures/enum_values_uppercase_good.sv");
 }
 
 #[test]
 fn detects_function_scope_violations() {
     run_fixture(
-        "fixtures/bad/functions_marked_automatic_or_static_bad.sv",
+        "fixtures/functions_marked_automatic_or_static_bad.sv",
         "functions_marked_automatic_or_static",
     );
-    run_fixture_success("fixtures/good/functions_marked_automatic_or_static_good.sv");
+    run_fixture_success("fixtures/functions_marked_automatic_or_static_good.sv");
 }
 
 #[test]
 fn detects_function_missing_types() {
     run_fixture(
-        "fixtures/bad/functions_have_explicit_types_bad.sv",
+        "fixtures/functions_have_explicit_types_bad.sv",
         "functions_have_explicit_types",
     );
-    run_fixture_success("fixtures/good/functions_have_explicit_types_good.sv");
+    run_fixture_success("fixtures/functions_have_explicit_types_good.sv");
 }
 
 #[test]
 fn detects_macro_undef_violations() {
-    run_fixture("fixtures/bad/macros_close_with_undef_bad.sv", "macros_close_with_undef");
-    run_fixture_success("fixtures/good/macros_close_with_undef_good.sv");
+    run_fixture("fixtures/macros_close_with_undef_bad.sv", "macros_close_with_undef");
+    run_fixture_success("fixtures/macros_close_with_undef_good.sv");
 }
 
 #[test]
 fn detects_macro_prefix_violation() {
     run_fixture(
-        "fixtures/bad/macros_use_module_prefix_bad.sv",
+        "fixtures/macros_use_module_prefix_bad.sv",
         "macros_use_module_prefix",
     );
-    run_fixture_success("fixtures/good/macros_use_module_prefix_good.sv");
+    run_fixture_success("fixtures/macros_use_module_prefix_good.sv");
 }
 
 #[test]
 fn detects_define_upper_violations() {
-    run_fixture("fixtures/bad/macro_names_uppercase_bad.sv", "macro_names_uppercase");
+    run_fixture("fixtures/macro_names_uppercase_bad.sv", "macro_names_uppercase");
     let mut cmd = Command::new(assert_cmd::cargo::cargo_bin!("sv-mint"));
     cmd.arg("--disable").arg("macros_not_unused");
     cmd.arg("--disable").arg("macros_close_with_undef");
-    cmd.arg("fixtures/good/macro_names_uppercase_good.sv");
+    cmd.arg("fixtures/macro_names_uppercase_good.sv");
     cmd.assert().success();
 }
 
 #[test]
 fn detects_unused_macro() {
-    run_fixture("fixtures/bad/macros_not_unused_bad.sv", "macros_not_unused");
-    run_fixture_success("fixtures/good/macros_not_unused_good.sv");
+    run_fixture("fixtures/macros_not_unused_bad.sv", "macros_not_unused");
+    run_fixture_success("fixtures/macros_not_unused_good.sv");
 }
 
 #[test]
 fn detects_disable_targets_fork_only() {
     run_fixture(
-        "fixtures/bad/disable_targets_fork_only_bad.sv",
+        "fixtures/disable_targets_fork_only_bad.sv",
         "disable_targets_fork_only",
     );
-    run_fixture_success("fixtures/good/disable_targets_fork_only_good.sv");
+    run_fixture_success("fixtures/disable_targets_fork_only_good.sv");
 }
 
 #[test]
 fn detects_module_instantiations_includes() {
     run_with_config(
-        "fixtures/bad/include_top.sv",
+        "fixtures/include_top.sv",
         "tests/include_config.toml",
         &["include_child.sv", "vars_not_left_unused"],
     );
@@ -302,38 +302,38 @@ fn detects_module_instantiations_includes() {
 #[test]
 fn detects_no_define_inside_package() {
     run_fixture(
-        "fixtures/bad/no_define_inside_package_bad.sv",
+        "fixtures/no_define_inside_package_bad.sv",
         "no_define_inside_package",
     );
-    run_fixture_success("fixtures/good/no_define_inside_package_good.sv");
+    run_fixture_success("fixtures/no_define_inside_package_good.sv");
 }
 
 #[test]
 fn detects_one_package_per_file() {
-    run_fixture("fixtures/bad/one_package_per_file_bad.sv", "one_package_per_file");
-    run_fixture_success("fixtures/good/one_package_per_file_good.sv");
+    run_fixture("fixtures/one_package_per_file_bad.sv", "one_package_per_file");
+    run_fixture_success("fixtures/one_package_per_file_good.sv");
 }
 
 #[test]
 fn detects_port_name_lower_snake() {
-    run_fixture("fixtures/bad/port_names_lower_snake_bad.sv", "port_names_lower_snake");
-    run_fixture_success("fixtures/good/port_names_lower_snake_good.sv");
+    run_fixture("fixtures/port_names_lower_snake_bad.sv", "port_names_lower_snake");
+    run_fixture_success("fixtures/port_names_lower_snake_good.sv");
 }
 
 #[test]
 fn detects_port_direction_suffix() {
     run_fixture(
-        "fixtures/bad/port_names_have_direction_suffix_bad.sv",
+        "fixtures/port_names_have_direction_suffix_bad.sv",
         "port_names_have_direction_suffix",
     );
-    run_fixture_success("fixtures/good/port_names_have_direction_suffix_good.sv");
+    run_fixture_success("fixtures/port_names_have_direction_suffix_good.sv");
 }
 
 #[test]
 fn detects_typedef_lower_snake_t() {
     run_fixture(
-        "fixtures/bad/typedef_names_lower_snake_t_bad.sv",
+        "fixtures/typedef_names_lower_snake_t_bad.sv",
         "typedef_names_lower_snake_t",
     );
-    run_fixture_success("fixtures/good/typedef_names_lower_snake_t_good.sv");
+    run_fixture_success("fixtures/typedef_names_lower_snake_t_good.sv");
 }

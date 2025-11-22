@@ -26,7 +26,7 @@ show_plugin_events = false
 show_parse_events = false
 
 [svparser]
-include_paths = ["fixtures/bad"]
+include_paths = ["fixtures"]
 defines = []
 strip_comments = true
 ignore_include = false
