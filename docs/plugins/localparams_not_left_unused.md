@@ -12,9 +12,6 @@
 ### Remediation
 Remove unused localparams, ensure configuration knobs are referenced, or annotate intentional placeholders with inline comments containing `used` or `reserved`.
 
-### Limitations
-- A declaration-line comment containing the words `used` or `reserved` (case-insensitive) suppresses this warning.
-
 ### Good
 
 ```systemverilog
