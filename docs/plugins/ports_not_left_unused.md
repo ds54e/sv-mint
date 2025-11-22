@@ -11,6 +11,9 @@
 `` unused port <module>.<name> ``
 ### Remediation
 Remove or route the port, or mark intentional placeholders with an inline `unused` comment on the declaration line.
+
+### Limitations
+- Implicit connections (`.*`, `.foo` shorthand) are not elaborated; they will be counted as unused.
 ### Good
 
 ```systemverilog
