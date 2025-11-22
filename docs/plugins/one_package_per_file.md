@@ -8,8 +8,6 @@
 
 ## Details
 
-### Trigger
-Counts `package` keywords; if more than one appears, the rule reports the first occurrence.
 ### Message
 `` multiple package declarations in single file (pkg_name) ``
 ### Remediation

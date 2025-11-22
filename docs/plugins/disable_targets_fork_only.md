@@ -7,8 +7,6 @@
 
 ## Details
 
-### Trigger
-Walks CST `DisableStatement`; if it targets a label (anything other than `fork`), report it.
 ### Message
 `` disable block label is not portable; use disable fork ``
 ### Remediation

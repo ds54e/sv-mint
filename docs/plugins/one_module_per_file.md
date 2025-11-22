@@ -6,9 +6,6 @@
 
 ## Details
 
-### Trigger
-Counts module declarations in the AST payload; if more than one exists, every module after the first is reported.
-
 ### Message
 `` file must contain only one module declaration ``
 

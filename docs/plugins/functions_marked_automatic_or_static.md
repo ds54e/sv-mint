@@ -7,9 +7,6 @@
 
 ## Details
 
-### Trigger
-Finds CST `FunctionDeclaration` nodes and reports those whose header lacks `automatic` or `static`.
-
 ### Message
 `` functions in packages/modules/interfaces must declare automatic or static ``
 

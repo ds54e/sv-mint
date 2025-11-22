@@ -7,8 +7,6 @@
 
 ## Details
 
-### Trigger
-Filters `symbols` for `class == param` and flags entries with `ref_count` (or `read_count`) equal to zero.
 ### Message
 `` unused param <module>.<name> ``
 ### Remediation
@@ -42,6 +40,3 @@ module fifo #(parameter int Depth = 16,
 logic [Depth-1:0] mem_q;
 // ... implementation never looks at EnableDbg
 ```
-
-### Additional Tips
-Only comments on the declaration line are checked for the `unused` keyword. Macro-generated `localparam` entries should carry that inline note or be kept inside the guarding `ifdef`.

@@ -7,8 +7,6 @@
 
 ## Details
 
-### Trigger
-Ports with zero reads and zero writes in the same module, as measured from AST `refs`.
 ### Message
 `` unused port <module>.<name> ``
 ### Remediation

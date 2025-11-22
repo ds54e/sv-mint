@@ -7,8 +7,6 @@
 
 ## Details
 
-### Trigger
-Identifies `always_comb` nodes and flags any `op_le` (`<=`) tokens within the block. Falls back to text scanning when token info is missing.
 ### Message
 `` nonblocking '<=' inside always_comb ``
 ### Remediation
@@ -30,6 +28,3 @@ always_comb begin
   result_q <= a_i ^ b_i;  // violates combinational semantics
 end
 ```
-
-### Additional Tips
-Some tools infer flops when `<=` appears inside `always_comb`. Macros that hide the operator still trigger the rule after expansion, so provide separate helpers for blocking vs. non-blocking assignments.

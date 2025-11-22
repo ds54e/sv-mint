@@ -6,9 +6,6 @@
 
 ## Details
 
-### Trigger
-Checks AST declarations for `localparam`; if the name is not `UpperCamelCase` or `ALL_CAPS` (letters, digits, underscores allowed for ALL_CAPS), it reports a warning.
-
 ### Message
 `` localparam <name> should use UpperCamelCase or ALL_CAPS ``
 

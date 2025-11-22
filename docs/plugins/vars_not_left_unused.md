@@ -7,8 +7,6 @@
 
 ## Details
 
-### Trigger
-Looks for `var` symbols whose `read_count` and `write_count` both equal zero, reporting the declaration site.
 ### Message
 `` unused var <module>.<name> ``
 ### Remediation
@@ -38,6 +36,3 @@ logic enable;
 logic data_d;
 logic debug_shadow;  // never read or written
 ```
-
-### Additional Tips
-Only the declaration line is scanned for `unused`, so keep the inline note next to the symbol. Naming placeholders `*_unused` (and still referencing them) also communicates intent; for bundles of spare signals, group them into a single vector such as `logic [3:0] spare_signals = '0;`.

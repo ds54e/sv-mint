@@ -6,10 +6,6 @@
 
 ## Details
 
-### Trigger
-- Module declarations whose name differs from the filename (sans extension).
-- Package declarations whose name differs from the filename.
-
 ### Message
 `` module name <name> should match file name <stem> ``
 or

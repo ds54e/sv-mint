@@ -7,8 +7,6 @@
 
 ## Details
 
-### Trigger
-Enum members that are not `UpperCamelCase` or `ALL_CAPS`.
 ### Remediation
 Capitalize each word (`UartInterruptFrameErr`) or use ALL_CAPS (`UART_MODE_IDLE`) to match the doc's readability requirement.
 ### Good

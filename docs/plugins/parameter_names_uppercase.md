@@ -8,8 +8,6 @@
 
 ## Details
 
-### Trigger
-Flags `parameter` names that are not UpperCamelCase or ALL_CAPS.
 ### Message
 `` parameter <name> should use UpperCamelCase or ALL_CAPS ``
 ### Remediation

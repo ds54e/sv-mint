@@ -7,8 +7,6 @@
 
 ## Details
 
-### Trigger
-Walks each CST `CaseStatement`; if no `default` token appears, the rule reports the first token location.
 ### Message
 `` case statement must include a default item ``
 ### Remediation
@@ -40,6 +38,3 @@ case (opcode_i)
   4'h1: alu_d = SUB;
 endcase  // no default, unknown values pass silently
 ```
-
-### Additional Tips
-When wrapping `default` in `begin/end`, keep the colon directly after the token. Align macro-generated `default` blocks with the surrounding case body to reduce review slips.

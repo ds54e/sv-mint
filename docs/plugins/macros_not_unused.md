@@ -6,10 +6,6 @@
 
 ## Details
 
-### Trigger
-Scans `raw_text` for ``define NAME``, collects macro invocations (``NAME` anywhere in the source), and reports any defined macro that is never used.
-- If a macro is `undef`’d, it is treated as used and not reported.
-
 ### Message
 `` macro `<name>` is defined but never used ``
 

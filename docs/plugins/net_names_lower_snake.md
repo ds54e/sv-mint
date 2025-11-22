@@ -6,9 +6,6 @@
 
 ## Details
 
-### Trigger
-Checks AST symbol table for nets whose names do not match `^[a-z][a-z0-9_$]*$`.
-
 ### Message
 `` net names should use lower_snake_case (letters, digits, _, $ allowed): <name> ``
 

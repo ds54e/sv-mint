@@ -7,8 +7,6 @@
 
 ## Details
 
-### Trigger
-Identifies `always_ff` regions and warns whenever an `op_eq` (or fallback regex `=`) token appears inside.
 ### Message
 `` blocking '=' inside always_ff ``
 ### Remediation

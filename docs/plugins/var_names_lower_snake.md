@@ -6,9 +6,6 @@
 
 ## Details
 
-### Trigger
-Checks AST symbol table for variables whose names do not match `^[a-z][a-z0-9_$]*$`.
-
 ### Message
 `` var names should use lower_snake_case (letters, digits, _, $ allowed): <name> ``
 

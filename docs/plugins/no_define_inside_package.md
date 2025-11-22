@@ -8,14 +8,10 @@
 
 ## Details
 
-### Trigger
-Searches the package body for any `` `define`` tokens.
 ### Message
 `` prefer parameters over `define NAME inside package ``
 ### Remediation
 Publish constants via `parameter` or `localparam` instead of macros.
-### Additional Tips
-Transition legacy macros to `localparam` and consume them through `import foo_pkg::*;`.
 ### Good
 
 ```systemverilog

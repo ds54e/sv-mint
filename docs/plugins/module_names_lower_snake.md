@@ -8,8 +8,6 @@
 
 ## Details
 
-### Trigger
-Flags `module` declarations whose identifiers are not lower_snake_case.
 ### Message
 `` module <name> must use lower_snake_case ``
 ### Remediation

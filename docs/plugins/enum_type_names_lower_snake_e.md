@@ -7,9 +7,6 @@
 
 ## Details
 
-### Trigger
-Flags `typedef enum` names that are not `lower_snake_case` or do not end with `_e`.
-
 ### Message
 `` enum types should use lower_snake_case and end with _e: <name> ``
 

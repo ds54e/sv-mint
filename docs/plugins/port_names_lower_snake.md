@@ -8,8 +8,6 @@
 
 ## Details
 
-### Trigger
-Verifies that port names follow lower_snake_case before suffixes are considered.
 ### Message
 `` port <name> must use lower_snake_case ``
 ### Remediation

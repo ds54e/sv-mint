@@ -7,8 +7,6 @@
 
 ## Details
 
-### Trigger
-Selects `symbols` with `class="net"` where both `read_count` and `write_count` are zero, reporting the declaration location.
 ### Message
 `` unused net <module>.<name> ``
 ### Remediation
@@ -36,6 +34,3 @@ wire req_i;
 wire ack_o;
 wire debug_tap;  // declared but never read or written
 ```
-
-### Additional Tips
-Only comments on the declaration line are considered; multi-line blocks or preceding comments do not suppress the warning. When mass-migrating generated RTL, disable the rule via its `[[rule]]` entry so real leftovers remain visible.

@@ -7,9 +7,6 @@
 
 ## Details
 
-### Trigger
-Flags CST `AlwaysConstruct` nodes whose first token is `always` (case-insensitive) rather than `always_ff`, `always_comb`, or `always_latch`.
-
 ### Message
 `` use always_ff/always_comb/always_latch instead of bare always ``
 

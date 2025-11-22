@@ -8,8 +8,6 @@
 
 ## Details
 
-### Trigger
-Ensures macros defined inside modules start with the module name in uppercase.
 ### Message
 `` module-local macros must be prefixed with MODULE_NAME_ ``
 ### Remediation

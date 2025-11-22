@@ -7,9 +7,6 @@
 
 ## Details
 
-### Trigger
-Scans each `` `define NAME``; if `NAME` is not ALL_CAPS (`^[A-Z][A-Z0-9_]*$`), a warning is emitted.
-
 ### Message
 `` `define <name> should use ALL_CAPS ``
 

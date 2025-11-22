@@ -6,8 +6,6 @@
 - **Summary**: Require named `.port(signal)` connections
 
 ## Details
-### Trigger
-Detects instantiations that begin with positional arguments (no `.` inside the port list).
 ### Message
 `` use named port connections instead of positional arguments ``
 ### Remediation

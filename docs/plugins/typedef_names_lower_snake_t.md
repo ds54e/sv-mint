@@ -7,9 +7,6 @@
 
 ## Details
 
-### Trigger
-Flags `typedef` names (excluding enums) that are not `lower_snake_case` or do not end with `_t`.
-
 ### Message
 `` typedef names should use lower_snake_case and end with _t: <name> ``
 

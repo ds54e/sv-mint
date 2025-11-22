@@ -8,8 +8,6 @@
 
 ## Details
 
-### Trigger
-Finds local `` `define`` statements that never see an `` `undef`` in the same file.
 ### Message
 `` local macro <name> must be undefined before EOF ``
 ### Remediation

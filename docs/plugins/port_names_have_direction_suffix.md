@@ -8,8 +8,6 @@
 
 ## Details
 
-### Trigger
-Ensures `_i/_ni`, `_o/_no`, or `_io/_nio` suffixes match the declared port direction.
 ### Message
 `` port <name> must use suffix matching its direction ``
 ### Remediation
