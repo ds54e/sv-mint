@@ -27,14 +27,21 @@ end
 
 ```systemverilog
 always_comb begin
-  state_d = state_q;
+  state_d = next_state;
 end
 ```
 
 ### Bad
 
 ```systemverilog
-always @(posedge clk_i) begin
-  state_q <= state_d;
+always @(posedge clk_i or negedge rst_ni) begin
+  if (!rst_ni) state_q <= IDLE;
+  else state_q <= state_d;
+end
+```
+
+```systemverilog
+always @* begin
+  state_d = next_state;
 end
 ```
