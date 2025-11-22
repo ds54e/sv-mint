@@ -23,7 +23,7 @@ fn parameter_with_type_has_explicit_type_field() {
 
 #[test]
 fn function_ports_expose_explicit_types() {
-    let ir = load_ir("fixtures/rules/functions_explicit_arg_types/good.sv");
+    let ir = load_ir("fixtures/cst_ir/functions_explicit_arg_types_good.sv");
     let func = find_node(&ir, "FunctionDeclaration");
     let ret = field_id(func, "return_type");
     assert!(!is_implicit_type(&ir, ret, None));
@@ -44,7 +44,7 @@ fn function_ports_expose_explicit_types() {
 
 #[test]
 fn function_missing_types_mark_ports_and_return() {
-    let ir = load_ir("fixtures/rules/functions_explicit_return_type/bad.sv");
+    let ir = load_ir("fixtures/cst_ir/functions_explicit_return_type_bad.sv");
     let func = find_node(&ir, "FunctionDeclaration");
     let ret = field_id(func, "return_type");
     assert!(is_implicit_type(&ir, ret, None));
@@ -65,7 +65,7 @@ fn function_missing_types_mark_ports_and_return() {
 
 #[test]
 fn directives_capture_default_nettype() {
-    let ir = load_ir("fixtures/rules/functions_explicit_return_type/good.sv");
+    let ir = load_ir("fixtures/cst_ir/default_nettype_pair.sv");
     let defaults: Vec<_> = ir.directives.iter().filter(|d| d.kind == "default_nettype").collect();
     assert_eq!(defaults.len(), 2);
     assert_eq!(defaults[0].value.as_deref(), Some("none"));
@@ -102,7 +102,7 @@ fn case_flags_indicate_unique_without_default() {
 
 #[test]
 fn instance_connections_mark_positional_ports() {
-    let ir = load_ir("fixtures/rules/instances_use_named_ports/bad.sv");
+    let ir = load_ir("fixtures/cst_ir/instances_use_named_ports_bad.sv");
     let insts = find_all_nodes(&ir, "HierarchicalInstance");
     assert_eq!(insts.len(), 3);
     let positional = insts.iter().any(|n| {

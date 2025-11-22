@@ -54,10 +54,6 @@ id = "macros_not_unused"
 id = "macro_names_uppercase"
 
 [[rule]]
-id = "instances_use_named_ports"
-stage = "cst"
-
-[[rule]]
 id = "one_module_per_file"
 
 [[rule]]
