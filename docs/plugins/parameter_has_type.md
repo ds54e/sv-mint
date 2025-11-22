@@ -1,13 +1,12 @@
 # parameter_has_type
 
-- **Script**: `plugins/parameter_has_type.cst.py`
-- **Stage**: `cst`
-- **Key Inputs**: `cst_ir.tokens`, `line_starts`, `pp_text`
-- **Summary**: Parameters must declare an explicit data type
+## Script
+- `plugins/parameter_has_type.cst.py`
 
-## Details
+## Description
+- Parameters must declare an explicit data type
 
-### Good
+## Good
 
 ```systemverilog
 module m #(
@@ -17,7 +16,7 @@ module m #(
 endmodule
 ```
 
-### Bad
+## Bad
 
 ```systemverilog
 module m #(

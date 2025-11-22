@@ -1,12 +1,12 @@
 # var_names_lower_snake
 
-- **Script**: `plugins/var_names_lower_snake.ast.py`
-- **Stage**: `ast`
-- **Summary**: Warn when variable names are not lower_snake_case (letters, digits, `_`, `$` allowed)
+## Script
+- `plugins/var_names_lower_snake.ast.py`
 
-## Details
+## Description
+- Warn when variable names are not lower_snake_case (letters, digits, `_`, `$` allowed)
 
-### Good
+## Good
 
 ```systemverilog
 module m;
@@ -15,7 +15,7 @@ module m;
 endmodule
 ```
 
-### Bad
+## Bad
 
 ```systemverilog
 module m;

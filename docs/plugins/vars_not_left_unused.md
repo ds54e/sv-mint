@@ -1,15 +1,15 @@
 # vars_not_left_unused
 
-- **Script**: `plugins/vars_not_left_unused.ast.py`
-- **Stage**: `ast`
-- **Key Inputs**: `symbols` entries with `class == var`
-- **Summary**: Warn about variable declarations that are never referenced
+## Script
+- `plugins/vars_not_left_unused.ast.py`
 
-## Details
+## Description
+- Warn about variable declarations that are never referenced
 
-### Notes
+## Notes
 - Implicit `.*` connections are not elaborated; they will be counted as unused.
-### Good
+
+## Good
 
 ```systemverilog
 module m;
@@ -50,7 +50,7 @@ module m;
 endmodule
 ```
 
-### Bad
+## Bad
 
 ```systemverilog
 module m;

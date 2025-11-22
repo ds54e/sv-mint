@@ -1,13 +1,12 @@
 # port_names_have_direction_suffix
 
-- **Script**: `plugins/port_names_have_direction_suffix.ast.py`
-- **Stage**: `ast`
-- **Key Inputs**: `decls`, `symbols`, `ports`
-- **Summary**: `_i/_o/_io` suffixes must match port direction
+## Script
+- `plugins/port_names_have_direction_suffix.ast.py`
 
-## Details
+## Description
+- `_i/_o/_io` suffixes must match port direction
 
-### Good
+## Good
 
 ```systemverilog
 module m (
@@ -18,7 +17,7 @@ module m (
 endmodule
 ```
 
-### Bad
+## Bad
 
 ```systemverilog
 module m (

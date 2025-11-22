@@ -1,12 +1,12 @@
 # localparam_names_uppercase
 
-- **Script**: `plugins/localparam_names_uppercase.ast.py`
-- **Stage**: `ast`
-- **Summary**: Warn when `localparam` names are not UpperCamelCase or ALL_CAPS
+## Script
+- `plugins/localparam_names_uppercase.ast.py`
 
-## Details
+## Description
+- Warn when `localparam` names are not UpperCamelCase or ALL_CAPS
 
-### Good
+## Good
 
 ```systemverilog
 module m #(
@@ -16,7 +16,7 @@ module m #(
 endmodule
 ```
 
-### Bad
+## Bad
 
 ```systemverilog
 module m #(

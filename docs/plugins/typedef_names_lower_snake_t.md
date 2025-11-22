@@ -1,19 +1,18 @@
 # typedef_names_lower_snake_t
 
-- **Script**: `plugins/typedef_names_lower_snake_t.cst.py`
-- **Stage**: `cst`
-- **Key Inputs**: `cst_ir.tokens`, `line_starts`, `pp_text`
-- **Summary**: Typedef names (non-enum) must be lower_snake_case and end with `_t`
+## Script
+- `plugins/typedef_names_lower_snake_t.cst.py`
 
-## Details
+## Description
+- Typedef names (non-enum) must be lower_snake_case and end with `_t`
 
-### Good
+## Good
 
 ```systemverilog
 typedef logic [3:0] my_type_t;
 ```
 
-### Bad
+## Bad
 
 ```systemverilog
 typedef logic [3:0] MyType_t;

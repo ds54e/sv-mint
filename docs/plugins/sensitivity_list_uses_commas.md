@@ -1,13 +1,12 @@
 # sensitivity_list_uses_commas
 
-- **Script**: `plugins/sensitivity_list_uses_commas.cst.py`
-- **Stage**: `cst`
-- **Key Inputs**: `cst_ir.tokens`, `line_starts`, `pp_text`
-- **Summary**: Prefer comma-separated sensitivity lists instead of `or`
+## Script
+- `plugins/sensitivity_list_uses_commas.cst.py`
 
-## Details
+## Description
+- Prefer comma-separated sensitivity lists instead of `or`
 
-### Good
+## Good
 
 ```systemverilog
 `default_nettype none
@@ -27,7 +26,7 @@ endmodule
 `default_nettype wire
 ```
 
-### Bad
+## Bad
 
 ```systemverilog
 `default_nettype none

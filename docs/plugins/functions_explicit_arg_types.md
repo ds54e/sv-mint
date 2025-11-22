@@ -1,13 +1,12 @@
 # functions_explicit_arg_types
 
-- **Script**: `plugins/functions_explicit_arg_types.cst.py`
-- **Stage**: `cst`
-- **Key Inputs**: `cst_ir.tokens`, `cst_ir.nodes`, `cst_ir.line_starts`
-- **Summary**: Function arguments must declare explicit data types.
+## Script
+- `plugins/functions_explicit_arg_types.cst.py`
 
-## Details
+## Description
+- Function arguments must declare explicit data types.
 
-### Good
+## Good
 
 ```systemverilog
 function logic f (input logic a);
@@ -15,7 +14,7 @@ function logic f (input logic a);
 endfunction
 ```
 
-### Bad
+## Bad
 
 ```systemverilog
 function logic f (input a);

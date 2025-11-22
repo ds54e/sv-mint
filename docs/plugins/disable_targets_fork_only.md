@@ -1,13 +1,12 @@
 # disable_targets_fork_only
 
-- **Script**: `plugins/disable_targets_fork_only.cst.py`
-- **Stage**: `cst`
-- **Key Inputs**: `cst_ir.tokens`, `line_starts`, `pp_text`
-- **Summary**: `disable fork_label` is not portable
+## Script
+- `plugins/disable_targets_fork_only.cst.py`
 
-## Details
+## Description
+- `disable fork_label` is not portable
 
-### Good
+## Good
 
 ```systemverilog
 module m;
@@ -21,7 +20,7 @@ module m;
 endmodule
 ```
 
-### Bad
+## Bad
 
 ```systemverilog
 module m;

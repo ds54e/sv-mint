@@ -1,13 +1,12 @@
 # functions_marked_automatic_or_static
 
-- **Script**: `plugins/functions_marked_automatic_or_static.cst.py`
-- **Stage**: `cst`
-- **Key Inputs**: `cst_ir.tokens`, `line_starts`, `pp_text`
-- **Summary**: Functions in modules/interfaces/packages must declare `automatic` or `static`
+## Script
+- `plugins/functions_marked_automatic_or_static.cst.py`
 
-## Details
+## Description
+- Functions in modules/interfaces/packages must declare `automatic` or `static`
 
-### Good
+## Good
 
 ```systemverilog
 function automatic logic f1 (input logic a);
@@ -19,7 +18,7 @@ function static logic f2 (input logic a);
 endfunction
 ```
 
-### Bad
+## Bad
 
 ```systemverilog
 function logic f (input logic a);

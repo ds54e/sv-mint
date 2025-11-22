@@ -1,13 +1,12 @@
 # case_has_default_branch
 
-- **Script**: `plugins/case_has_default_branch.cst.py`
-- **Stage**: `cst`
-- **Key Inputs**: `cst_ir.tokens`, `line_starts`, `pp_text`
-- **Summary**: Warn when a `case` statement lacks a `default` label (except for `unique`/`unique0 case`)
+## Script
+- `plugins/case_has_default_branch.cst.py`
 
-## Details
+## Description
+- Warn when a `case` statement lacks a `default` label (except for `unique`/`unique0 case`)
 
-### Good
+## Good
 
 ```systemverilog
 module m;
@@ -36,7 +35,7 @@ module m;
 endmodule
 ```
 
-### Bad
+## Bad
 
 ```systemverilog
 module m;

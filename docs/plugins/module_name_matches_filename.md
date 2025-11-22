@@ -1,12 +1,12 @@
 # module_name_matches_filename
 
-- **Script**: `plugins/module_name_matches_filename.ast.py`
-- **Stage**: `ast`
-- **Summary**: Warn when the module or package name does not match the file name
+## Script
+- `plugins/module_name_matches_filename.ast.py`
 
-## Details
+## Description
+- Warn when the module or package name does not match the file name
 
-### Good
+## Good
 
 `module_filename_match_ok.sv`
 ```systemverilog
@@ -14,7 +14,7 @@ module good;
 endmodule
 ```
 
-### Bad
+## Bad
 
 `module_filename_mismatch.sv`
 ```systemverilog

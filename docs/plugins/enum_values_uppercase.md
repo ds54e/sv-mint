@@ -1,13 +1,12 @@
 # enum_values_uppercase
 
-- **Script**: `plugins/enum_values_uppercase.cst.py`
-- **Stage**: `cst`
-- **Key Inputs**: `cst_ir.tokens`, `line_starts`, `pp_text`
-- **Summary**: Enum members must be UpperCamelCase or ALL_CAPS
+## Script
+- `plugins/enum_values_uppercase.cst.py`
 
-## Details
+## Description
+- Enum members must be UpperCamelCase or ALL_CAPS
 
-### Good
+## Good
 
 ```systemverilog
 typedef enum int unsigned {
@@ -21,7 +20,7 @@ typedef enum int unsigned {
 } state_2_e;
 ```
 
-### Bad
+## Bad
 
 ```systemverilog
 typedef enum int unsigned {

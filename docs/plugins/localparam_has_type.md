@@ -1,13 +1,12 @@
 # localparam_has_type
 
-- **Script**: `plugins/localparam_has_type.cst.py`
-- **Stage**: `cst`
-- **Key Inputs**: `cst_ir.tokens`, `line_starts`, `pp_text`
-- **Summary**: Localparams must declare an explicit data type
+## Script
+- `plugins/localparam_has_type.cst.py`
 
-## Details
+## Description
+- Localparams must declare an explicit data type
 
-### Good
+## Good
 
 ```systemverilog
 module m #(
@@ -17,7 +16,7 @@ module m #(
 endmodule
 ```
 
-### Bad
+## Bad
 
 ```systemverilog
 module m #(

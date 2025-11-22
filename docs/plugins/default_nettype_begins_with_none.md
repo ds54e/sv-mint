@@ -1,13 +1,12 @@
 # default_nettype_begins_with_none
 
-- **Script**: `plugins/default_nettype_begins_with_none.cst.py`
-- **Stage**: `cst`
-- **Key Inputs**: `cst_ir.directives`, `line_starts`, `source_text`/`pp_text`
-- **Summary**: Require `` `default_nettype none`` in every file
+## Script
+- `plugins/default_nettype_begins_with_none.cst.py`
 
-## Details
+## Description
+- Require `` `default_nettype none`` in every file
 
-### Good
+## Good
 
 ```systemverilog
 `default_nettype none
@@ -16,7 +15,7 @@ endmodule
 `default_nettype wire
 ```
 
-### Bad
+## Bad
 
 ```systemverilog
 module m;

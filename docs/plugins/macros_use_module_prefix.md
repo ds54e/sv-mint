@@ -1,13 +1,12 @@
 # macros_use_module_prefix
 
-- **Script**: `plugins/macros_use_module_prefix.raw.py`
-- **Stage**: `raw_text`
-- **Key Inputs**: `text`, `path`
-- **Summary**: Module-local macros must be prefixed with the module name
+## Script
+- `plugins/macros_use_module_prefix.raw.py`
 
-## Details
+## Description
+- Module-local macros must be prefixed with the module name
 
-### Good
+## Good
 
 ```systemverilog
 module my_module;
@@ -15,7 +14,7 @@ module my_module;
 endmodule
 ```
 
-### Bad
+## Bad
 
 ```systemverilog
 module my_module;

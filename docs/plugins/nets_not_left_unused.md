@@ -1,15 +1,15 @@
 # nets_not_left_unused
 
-- **Script**: `plugins/nets_not_left_unused.ast.py`
-- **Stage**: `ast`
-- **Key Inputs**: `symbols` entries with `class == net`
-- **Summary**: Warn when declared nets are never read or written
+## Script
+- `plugins/nets_not_left_unused.ast.py`
 
-## Details
+## Description
+- Warn when declared nets are never read or written
 
-### Notes
+## Notes
 - Implicit `.*` connections are not elaborated; they will be counted as unused.
-### Good
+
+## Good
 
 ```systemverilog
 module m;
@@ -51,7 +51,7 @@ module m;
 endmodule
 ```
 
-### Bad
+## Bad
 
 ```systemverilog
 module m;

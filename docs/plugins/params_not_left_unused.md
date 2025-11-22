@@ -1,13 +1,12 @@
 # params_not_left_unused
 
-- **Script**: `plugins/params_not_left_unused.ast.py`
-- **Stage**: `ast`
-- **Key Inputs**: `symbols` entries with `class == param`
-- **Summary**: Detect parameters whose reference count stays at zero
+## Script
+- `plugins/params_not_left_unused.ast.py`
 
-## Details
+## Description
+- Detect parameters whose reference count stays at zero
 
-### Good
+## Good
 
 ```systemverilog
 module m #(
@@ -20,7 +19,7 @@ module m #(
 endmodule
 ```
 
-### Bad
+## Bad
 
 ```systemverilog
 module m #(

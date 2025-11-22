@@ -1,13 +1,12 @@
 # default_nettype_ends_with_wire
 
-- **Script**: `plugins/default_nettype_ends_with_wire.cst.py`
-- **Stage**: `cst`
-- **Key Inputs**: `cst_ir.directives`, `line_starts`, `source_text`/`pp_text`
-- **Summary**: Files must reset `default_nettype` back to `wire` near the end
+## Script
+- `plugins/default_nettype_ends_with_wire.cst.py`
 
-## Details
+## Description
+- Files must reset `default_nettype` back to `wire` near the end
 
-### Good
+## Good
 
 ```systemverilog
 `default_nettype none
@@ -21,7 +20,7 @@ module m;
 endmodule
 ```
 
-### Bad
+## Bad
 
 ```systemverilog
 `default_nettype none

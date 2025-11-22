@@ -1,13 +1,12 @@
 # always_ff_uses_nonblocking
 
-- **Script**: `plugins/always_ff_uses_nonblocking.cst.py`
-- **Stage**: `cst`
-- **Key Inputs**: `cst_ir.tokens`, `tok_kind_table`, `line_starts`, `pp_text`
-- **Summary**: Ban blocking `=` assignments inside `always_ff`
+## Script
+- `plugins/always_ff_uses_nonblocking.cst.py`
 
-## Details
+## Description
+- Ban blocking `=` assignments inside `always_ff`
 
-### Good
+## Good
 
 ```systemverilog
 module m;
@@ -18,7 +17,7 @@ module m;
 endmodule
 ```
 
-### Bad
+## Bad
 
 ```systemverilog
 module m;

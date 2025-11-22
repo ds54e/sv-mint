@@ -1,13 +1,12 @@
 # always_is_structured
 
-- **Script**: `plugins/always_is_structured.cst.py`
-- **Stage**: `cst`
-- **Key Inputs**: `cst_ir.tokens`, `line_starts`, `pp_text`
-- **Summary**: Replace bare `always` with `always_ff`/`always_comb`/`always_latch`
+## Script
+- `plugins/always_is_structured.cst.py`
 
-## Details
+## Description
+- Replace bare `always` with `always_ff`/`always_comb`/`always_latch`
 
-### Good
+## Good
 
 ```systemverilog
 module m;
@@ -38,7 +37,7 @@ always_comb begin
 end
 ```
 
-### Bad
+## Bad
 
 ```
 module m;

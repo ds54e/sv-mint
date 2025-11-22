@@ -1,13 +1,12 @@
 # parameter_names_uppercase
 
-- **Script**: `plugins/parameter_names_uppercase.ast.py`
-- **Stage**: `ast`
-- **Key Inputs**: `decls`, `symbols`, `ports`
-- **Summary**: Parameters must be UpperCamelCase
+## Script
+- `plugins/parameter_names_uppercase.ast.py`
 
-## Details
+## Description
+- Parameters must be UpperCamelCase
 
-### Good
+## Good
 
 ```systemverilog
 module m # (
@@ -16,7 +15,7 @@ module m # (
 endmodule
 ```
 
-### Bad
+## Bad
 
 ```systemverilog
 module m #(

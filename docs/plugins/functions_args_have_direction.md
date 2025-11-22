@@ -1,13 +1,12 @@
 # functions_args_have_direction
 
-- **Script**: `plugins/functions_args_have_direction.cst.py`
-- **Stage**: `cst`
-- **Key Inputs**: `cst_ir.tokens`, `cst_ir.nodes`, `cst_ir.line_starts`
-- **Summary**: Function arguments must specify a direction (`input`/`output`/`inout`/`ref`).
+## Script
+- `plugins/functions_args_have_direction.cst.py`
 
-## Details
+## Description
+- Function arguments must specify a direction (`input`/`output`/`inout`/`ref`).
 
-### Good
+## Good
 
 ```systemverilog
 function logic f (input logic a);
@@ -15,7 +14,7 @@ function logic f (input logic a);
 endfunction
 ```
 
-### Bad
+## Bad
 
 ```systemverilog
 function logic f (logic a);

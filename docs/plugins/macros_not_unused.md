@@ -1,16 +1,16 @@
 # macros_not_unused
 
-- **Script**: `plugins/macros_not_unused.raw.py`
-- **Stage**: `raw_text`
-- **Summary**: Warn when a macro is defined but never used
+## Script
+- `plugins/macros_not_unused.raw.py`
 
-## Details
+## Description
+- Warn when a macro is defined but never used
 
-### Notes
+## Notes
 - A comment containing the words `used` or `reserved` (case-insensitive) in the macro definition block suppresses this warning.
 - For multi-line macros, place the comment on the final line without a trailing backslash to ensure it is detected.
 
-### Good
+## Good
 
 ```systemverilog
 module m;
@@ -29,7 +29,7 @@ module m;
 endmodule
 ```
 
-### Bad
+## Bad
 
 ```systemverilog
 module m;

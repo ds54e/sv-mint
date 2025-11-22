@@ -1,19 +1,18 @@
 # macro_names_uppercase
 
-- **Script**: `plugins/macro_names_uppercase.raw.py`
-- **Stage**: `raw_text`
-- **Key Inputs**: `text`
-- **Summary**: `define` names must be ALL_CAPS
+## Script
+- `plugins/macro_names_uppercase.raw.py`
 
-## Details
+## Description
+- `define` names must be ALL_CAPS
 
-### Good
+## Good
 
 ```systemverilog
 `define MY_MACRO
 ```
 
-### Bad
+## Bad
 
 ```systemverilog
 `define my_macro

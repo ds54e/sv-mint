@@ -1,20 +1,19 @@
 # module_names_lower_snake
 
-- **Script**: `plugins/module_names_lower_snake.ast.py`
-- **Stage**: `ast`
-- **Key Inputs**: `decls`, `symbols`, `ports`
-- **Summary**: Modules must use lower_snake_case
+## Script
+- `plugins/module_names_lower_snake.ast.py`
 
-## Details
+## Description
+- Modules must use lower_snake_case
 
-### Good
+## Good
 
 ```systemverilog
 module my_module;
 endmodule
 ```
 
-### Bad
+## Bad
 
 ```systemverilog
 module MyModule;

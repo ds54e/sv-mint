@@ -1,13 +1,12 @@
 # port_names_lower_snake
 
-- **Script**: `plugins/port_names_lower_snake.ast.py`
-- **Stage**: `ast`
-- **Key Inputs**: `decls`, `symbols`, `ports`
-- **Summary**: Ports follow lower_snake_case + direction suffix
+## Script
+- `plugins/port_names_lower_snake.ast.py`
 
-## Details
+## Description
+- Ports follow lower_snake_case + direction suffix
 
-### Good
+## Good
 
 ```systemverilog
 module m (
@@ -18,7 +17,7 @@ module m (
 endmodule
 ```
 
-### Bad
+## Bad
 
 ```systemverilog
 module m1 (
