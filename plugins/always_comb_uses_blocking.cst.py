@@ -40,7 +40,7 @@ def check(req):
     if not ir:
         return []
     cst = Cst(ir)
-    text = ir.get("pp_text") or ""
+    text = ir.get("source_text") or ir.get("pp_text") or ""
     line_starts = ir.get("line_starts") or [0]
     tokens = ir.get("tokens") or []
     kinds = {name: i for i, name in enumerate(ir.get("tok_kind_table") or [])}

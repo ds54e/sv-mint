@@ -41,17 +41,9 @@ impl<'a> Serialize for StagePayload<'a> {
             StagePayload::PpText { text, defines } => PpTextPayload { text, defines }.serialize(serializer),
             StagePayload::Cst { cst_ir, has_cst } => {
                 if let Some(ir) = cst_ir {
-                    CstInlinePayload {
-                        mode: "inline",
-                        cst_ir: ir,
-                    }
-                    .serialize(serializer)
+                    CstFullPayload { cst_ir: ir }.serialize(serializer)
                 } else {
-                    CstNonePayload {
-                        mode: "none",
-                        has_cst: *has_cst,
-                    }
-                    .serialize(serializer)
+                    CstMissingPayload { has_cst: *has_cst }.serialize(serializer)
                 }
             }
             StagePayload::Ast(ast) => ast.serialize(serializer),
@@ -71,16 +63,12 @@ struct PpTextPayload<'a> {
 }
 
 #[derive(Serialize)]
-struct CstInlinePayload<'a> {
-    #[serde(rename = "mode")]
-    mode: &'static str,
+struct CstFullPayload<'a> {
     #[serde(rename = "cst_ir")]
     cst_ir: &'a CstIr,
 }
 
 #[derive(Serialize)]
-struct CstNonePayload {
-    #[serde(rename = "mode")]
-    mode: &'static str,
+struct CstMissingPayload {
     has_cst: bool,
 }

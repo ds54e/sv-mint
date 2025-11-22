@@ -5,13 +5,11 @@ def check(req):
     if req.get("stage") != "cst":
         return []
     payload = req.get("payload") or {}
-    if payload.get("mode") != "inline":
-        return []
     ir = payload.get("cst_ir") or {}
     cst = Cst(ir)
     tokens = ir.get("tokens") or []
     line_starts = ir.get("line_starts") or [0]
-    text = ir.get("pp_text") or ""
+    text = ir.get("source_text") or ir.get("pp_text") or ""
     out = []
     nodes = list(cst.of_kind("ParameterDeclaration")) + list(cst.of_kind("LocalParameterDeclaration"))
     for node in nodes:

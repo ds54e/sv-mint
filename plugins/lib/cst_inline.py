@@ -12,6 +12,7 @@ class Cst:
         self.toks = ir.get("tok_kind_table") or []
         self.nodes = ir.get("nodes") or []
         self.tokens = ir.get("tokens") or []
+        self.text = ir.get("source_text") or ir.get("pp_text") or ""
         self.nodes_by_id = {n["id"]: n for n in self.nodes}
         self.children = {}
         for n in self.nodes:
