@@ -4,7 +4,7 @@ use sv_mint::sv::driver::{SvDriver, SvParserCfg};
 
 #[test]
 fn parameter_missing_type_links_to_implicit_node() {
-    let ir = load_ir("fixtures/rules/parameter_has_type/bad_missing_type.sv");
+    let ir = load_ir("fixtures/cst_ir/parameter_missing_type.sv");
     let param = find_node(&ir, "ParameterDeclaration");
     let ty = field_id(param, "type");
     assert!(is_implicit_type(&ir, ty, None));
