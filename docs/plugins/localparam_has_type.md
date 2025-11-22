@@ -9,8 +9,6 @@
 
 ### Message
 `` localparam must declare an explicit data type ``
-### Remediation
-Declare an explicit data type for every `localparam`.
 ### Good
 
 ```systemverilog

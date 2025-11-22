@@ -9,8 +9,6 @@
 
 ### Message
 `` function arguments must specify direction (input/output/inout/ref) ``
-### Remediation
-Add an explicit direction to every function argument.
 ### Good
 
 ```systemverilog

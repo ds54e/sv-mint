@@ -9,8 +9,6 @@
 
 ### Message
 `` disable block label is not portable; use disable fork ``
-### Remediation
-When disabling subprocesses, `disable fork` terminates all processes and `disable thread_label` disables a specific thread. `disable fork_label` is non-compliant with SystemVerilog-2017 (Sections 9.6.2/9.6.3) and is inconsistently supported, so use `disable fork;` instead.
 ### Good
 
 ```systemverilog

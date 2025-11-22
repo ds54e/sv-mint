@@ -9,8 +9,6 @@
 
 ### Message
 `` port <name> must use lower_snake_case ``
-### Remediation
-Rename ports to lowercase snake case and then apply direction suffix rules.
 ### Good
 
 ```systemverilog

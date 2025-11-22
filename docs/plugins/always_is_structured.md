@@ -10,9 +10,6 @@
 ### Message
 `` use always_ff/always_comb/always_latch instead of bare always ``
 
-### Remediation
-Rewrite the process using one of the structured forms. For sequential logic, prefer `always_ff`; for combinational blocks, use `always_comb`; reserve `always_latch` for intentional latches.
-
 ### Good
 
 ```systemverilog

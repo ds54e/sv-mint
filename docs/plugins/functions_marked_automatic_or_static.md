@@ -10,9 +10,6 @@
 ### Message
 `` functions in packages/modules/interfaces must declare automatic or static ``
 
-### Remediation
-Add `automatic` (recommended) or `static` to the function declaration inside modules, interfaces, packages, or programs.
-
 ### Good
 
 ```systemverilog

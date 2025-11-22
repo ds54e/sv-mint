@@ -11,9 +11,6 @@
 or
 `` package name <name> should match file name <stem> ``
 
-### Remediation
-Rename the module/package or the file so they match (one module/package per file).
-
 ### Good
 
 `module_filename_match_ok.sv`

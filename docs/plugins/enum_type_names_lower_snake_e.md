@@ -10,9 +10,6 @@
 ### Message
 `` enum types should use lower_snake_case and end with _e: <name> ``
 
-### Remediation
-Rename enum types such as `uart_mode_e`, `aon_timer_state_e`, etc.
-
 ### Good
 
 ```systemverilog

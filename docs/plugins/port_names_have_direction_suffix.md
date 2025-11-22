@@ -9,8 +9,6 @@
 
 ### Message
 `` port <name> must use suffix matching its direction ``
-### Remediation
-Append `_i`, `_o`, or `_io` (with `_n` for active-low signals) so direction is obvious at call sites.
 ### Good
 
 ```systemverilog

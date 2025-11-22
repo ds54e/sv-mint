@@ -9,8 +9,6 @@
 
 ### Message
 `` case statement must include a default item ``
-### Remediation
-Add a `default` branch when using plain `case`. `unique`/`unique0` cases are exempt (the rule does not check exhaustiveness).
 ### Good
 
 ```systemverilog

@@ -9,8 +9,6 @@
 
 ### Message
 `` parameter must declare an explicit data type ``
-### Remediation
-Declare an explicit data type for every `parameter`.
 ### Good
 
 ```systemverilog

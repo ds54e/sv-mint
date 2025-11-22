@@ -9,9 +9,6 @@
 ### Message
 `` var names should use lower_snake_case (letters, digits, _, $ allowed): <name> ``
 
-### Remediation
-Rename variables to lower_snake_case, using `_` to separate words; `$` is permitted if needed.
-
 ### Good
 
 ```systemverilog

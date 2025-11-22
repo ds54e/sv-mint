@@ -9,8 +9,6 @@
 
 ### Message
 `` function arguments must declare explicit data types ``
-### Remediation
-Annotate every argument with a full data type (width and signedness as needed), not just the identifier.
 ### Good
 
 ```systemverilog

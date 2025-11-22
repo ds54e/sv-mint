@@ -9,9 +9,6 @@
 
 ### Message
 `` unused param <module>.<name> ``
-### Remediation
-Remove unused parameters, ensure configuration knobs are referenced, or annotate intentional placeholders with inline comments containing `used` or `reserved`. Localparams are covered by `localparams_not_left_unused`.
-
 ### Good
 
 ```systemverilog

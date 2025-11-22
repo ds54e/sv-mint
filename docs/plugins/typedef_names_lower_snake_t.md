@@ -10,9 +10,6 @@
 ### Message
 `` typedef names should use lower_snake_case and end with _t: <name> ``
 
-### Remediation
-Rename typedefs such as `data_width_t`, `foo_bar_t`, etc.
-
 ### Good
 
 ```systemverilog

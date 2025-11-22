@@ -9,8 +9,6 @@
 
 ### Message
 `` blocking '=' inside always_ff ``
-### Remediation
-Use non-blocking `<=` for sequential logic or refactor the assignment into combinational logic.
 ### Good
 
 ```systemverilog

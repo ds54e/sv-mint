@@ -10,9 +10,6 @@
 ### Message
 `` `define <name> should use ALL_CAPS ``
 
-### Remediation
-Rename macros to ALL_CAPS (e.g., `` `define MY_MACRO 1``).
-
 ### Good
 
 ```systemverilog

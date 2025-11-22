@@ -9,8 +9,6 @@
 
 ### Message
 `` nonblocking '<=' inside always_comb ``
-### Remediation
-Use blocking `=` inside combinational logic; if state is required, move the logic to `always_ff`.
 ### Good
 
 ```systemverilog

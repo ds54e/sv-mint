@@ -9,8 +9,6 @@
 
 ### Message
 `` function must declare an explicit return type ``
-### Remediation
-Annotate the function header with a concrete return type (including width/signedness when needed).
 ### Good
 
 ```systemverilog

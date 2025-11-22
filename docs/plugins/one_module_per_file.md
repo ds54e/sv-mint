@@ -9,9 +9,6 @@
 ### Message
 `` file must contain only one module declaration ``
 
-### Remediation
-Split modules into separate files so each file contains exactly one module declaration.
-
 ### Good
 
 ```systemverilog

@@ -9,8 +9,6 @@
 
 ### Message
 `` local macro <name> must be undefined before EOF ``
-### Remediation
-Add `` `undef`` once the macro is no longer needed.
 ### Good
 
 ```systemverilog

@@ -9,8 +9,6 @@
 
 ### Message
 `` use ',' separators in sensitivity lists instead of 'or' ``
-### Remediation
-Write event controls as `@(posedge clk, negedge rst_ni)` rather than `@(posedge clk or negedge rst_ni)` for portability and clarity.
 ### Good
 
 ```systemverilog
