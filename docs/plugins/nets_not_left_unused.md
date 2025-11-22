@@ -10,7 +10,7 @@
 ### Message
 `` unused net <module>.<name> ``
 ### Remediation
-Delete unused nets or annotate intentional placeholders with inline comments containing `used` or `reserved` (e.g., `` wire debug_tap; // reserved ``).
+Delete unused nets or annotate intentional placeholders with inline comments containing `used` or `reserved`.
 
 ### Behavior notes
 - Implicit `.*` connections are not elaborated; they will be counted as unused.

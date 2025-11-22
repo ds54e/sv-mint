@@ -10,7 +10,7 @@
 ### Message
 `` unused var <module>.<name> ``
 ### Remediation
-Delete the variable, wire it into surrounding logic, or annotate intentional placeholders with inline comments that include `used` or `reserved` (e.g., `` logic debug_shadow; // reserved ``).
+Delete the variable, wire it into surrounding logic, or annotate intentional placeholders with inline comments that include `used` or `reserved`.
 
 ### Behavior notes
 - Implicit `.*` connections are not elaborated; they will be counted as unused.
