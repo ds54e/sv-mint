@@ -11,3 +11,6 @@
 
 ### Remediation
 Remove the unused macro or use it where intended. For one-off local helpers, prefer inlining or deleting the dead definition.
+
+### Limitations
+- A comment containing the words `used` or `reserved` (case-insensitive) in the macro definition block suppresses this warning.
