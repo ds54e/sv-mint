@@ -18,10 +18,15 @@ Remove or route the port, or mark intentional placeholders with an inline `unuse
 ### Good
 
 ```systemverilog
-module my_block(input logic a_i, output logic b_o);
-  assign b_o = a_i;
+module m (
+  input logic a,
+  input logic b1, // reserved
+  input logic b2, // used
+  output logic c
+);
+  assign c = a;
 endmodule
-```
+```systemverilog
 
 ```systemverilog
 module fixture(
@@ -35,7 +40,10 @@ endmodule
 ### Bad
 
 ```systemverilog
-module idle_block(input logic debug_i, output logic ready_o);
-  assign ready_o = 1'b0;
+module m (
+  input logic a,
+  output logic b
+);
+  assign b = 1'b1;
 endmodule
-```
+```systemverilog

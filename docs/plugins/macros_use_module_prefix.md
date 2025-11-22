@@ -14,15 +14,15 @@ Rename macros to `FOO_CFG_*` if they live inside `module foo`.
 ### Good
 
 ```systemverilog
-module foo;
-  `define FOO_SET_CFG(val) cfg_q = (val)
+module my_module;
+  `define MY_MODULE_MACRO
 endmodule
-```
+```systemverilog
 
 ### Bad
 
 ```systemverilog
-module foo;
-  `define SET_CFG(val) cfg_q = (val);  // missing FOO_ prefix
+module my_module;
+  `define MACRO
 endmodule
-```
+```systemverilog

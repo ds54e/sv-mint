@@ -15,12 +15,15 @@ Remove unused localparams, ensure configuration knobs are referenced, or annotat
 ### Good
 
 ```systemverilog
-module foo;
-  localparam int Depth = 16;
-  logic [Depth-1:0] data;
-  assign data = {Depth{1'b0}};
+module m #(
+  localparam int MyParam1 = 1,
+  localparam int MyParam2 = 1, // reserved
+  localparam int MyParam3 = 1 // will be used later
+)(
+  input logic [MyParam1:0] a
+);
 endmodule
-```
+```systemverilog
 
 ```systemverilog
 module stub;
@@ -31,8 +34,8 @@ endmodule
 ### Bad
 
 ```systemverilog
-module fifo;
-  localparam bit EnableDbg = 0;
-  // EnableDbg is never referenced
+module m #(
+  localparam int MyParam = 1
+);
 endmodule
-```
+```systemverilog

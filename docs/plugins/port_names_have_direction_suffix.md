@@ -14,14 +14,21 @@ Append `_i`, `_o`, or `_io` (with `_n` for active-low signals) so direction is o
 ### Good
 
 ```systemverilog
-input  logic req_i;
-input  logic rst_ni;
-output logic data_o;
-```
+module m (
+  inout logic a_io
+  input logic b_i,
+  output logic c_o
+);
+endmodule
+```systemverilog
 
 ### Bad
 
 ```systemverilog
-input  logic req;
-output logic data_out;
-```
+module m (
+  inout logic a,
+  input logic b,
+  output logic c
+);
+endmodule
+```systemverilog

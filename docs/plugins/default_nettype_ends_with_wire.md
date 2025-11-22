@@ -12,14 +12,18 @@ Because `default_nettype` stays in effect for all subsequent compilation units, 
 
 ```systemverilog
 `default_nettype none
-module foo; endmodule
+
+module m;
+endmodule
+
 `default_nettype wire
-```
+```systemverilog
 
 ### Bad
 
 ```systemverilog
 `default_nettype none
-module foo; endmodule
-// missing reset to wire
-```
+
+module m;
+endmodule
+```systemverilog

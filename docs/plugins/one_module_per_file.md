@@ -15,16 +15,16 @@ Split modules into separate files so each file contains exactly one module decla
 ### Good
 
 ```systemverilog
-module single;
+module m;
 endmodule
-```
+```systemverilog
 
 ### Bad
 
 ```systemverilog
-module foo;
+module m1;
 endmodule
 
-module bar;
+module m2;
 endmodule
-```
+```systemverilog

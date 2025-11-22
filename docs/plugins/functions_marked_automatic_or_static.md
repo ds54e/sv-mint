@@ -16,15 +16,19 @@ Add `automatic` (recommended) or `static` to the function declaration inside mod
 ### Good
 
 ```systemverilog
-function automatic int add(input int a, input int b);
-  return a + b;
+function automatic logic f1 (input logic a);
+  return 1'b0;
 endfunction
-```
+
+function automatic logic f2 (input logic a);
+  return 1'b0;
+endfunction
+```systemverilog
 
 ### Bad
 
 ```systemverilog
-function int add(input int a, input int b);
-  return a + b;
+function logic f (input logic a);
+  return 1'b0;
 endfunction
-```
+```systemverilog

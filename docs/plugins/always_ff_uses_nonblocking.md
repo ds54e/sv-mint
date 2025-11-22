@@ -14,15 +14,21 @@ Use non-blocking `<=` for sequential logic or refactor the assignment into combi
 ### Good
 
 ```systemverilog
-always_ff @(posedge clk_i) begin
-  data_q <= data_d;  // non-blocking assignment inside always_ff
-end
-```
+module m;
+  logic a, clk;
+  always_ff @(posedge clk) begin
+    a <= 1'b1;
+  end
+endmodule
+```systemverilog
 
 ### Bad
 
 ```systemverilog
-always_ff @(posedge clk_i) begin
-  data_q = data_d;  // blocking assignment inside always_ff
-end
-```
+module m;
+  logic a, clk;
+  always_ff @(posedge clk) begin
+    a = 1'b1;
+  end
+endmodule
+```systemverilog

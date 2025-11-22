@@ -14,13 +14,28 @@ Declare a data type for every `localparam`, including signedness and width as ne
 ### Good
 
 ```systemverilog
-localparam int unsigned DEPTH = 16;
-localparam logic signed [3:0] OFFSET = -1;
-```
+`default_nettype none
+
+module localparam_has_type_good;
+  localparam int unsigned DEPTH = 16;
+  localparam logic signed [3:0] OFFSET = -1;
+  logic [DEPTH-1:0] data;
+  assign data = {DEPTH{1'b0}} + OFFSET;
+endmodule
+
+`default_nettype wire
+```systemverilog
 
 ### Bad
 
 ```systemverilog
-localparam DEPTH = 16;           // missing type
-localparam [7:0] OFFSET = 8'h0;  // range only
-```
+`default_nettype none
+
+module localparam_missing_type;
+  localparam DEPTH = 16;
+  logic [DEPTH-1:0] payload;
+  assign payload = {DEPTH{1'b0}};
+endmodule
+
+`default_nettype wire
+```systemverilog

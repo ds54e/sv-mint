@@ -14,22 +14,15 @@ Add an explicit direction to every function argument.
 ### Good
 
 ```systemverilog
-function logic add(
-  input logic a,
-  output logic sum_o
-);
-  sum_o = a;
-  return sum_o;
+function logic f (input logic a);
+  return a;
 endfunction
-```
+```systemverilog
 
 ### Bad
 
 ```systemverilog
-function logic add(
-  input logic a,
-  b  // missing direction
-);
-  return a + b;
+function logic f (logic a);
+  return a;
 endfunction
-```
+```systemverilog

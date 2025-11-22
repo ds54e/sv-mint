@@ -16,17 +16,17 @@ Rename enum types such as `uart_mode_e`, `aon_timer_state_e`, etc.
 ### Good
 
 ```systemverilog
-typedef enum logic [1:0] {
-  IDLE,
-  BUSY
-} uart_mode_e;
-```
+typedef enum int unsigned {
+  OFF,
+  ON
+} state_e;
+```systemverilog
 
 ### Bad
 
 ```systemverilog
-typedef enum logic [1:0] {
-  IDLE,
-  BUSY
-} UartMode_e;
-```
+typedef enum int unsigned {
+  OFF,
+  ON
+} state;
+```systemverilog

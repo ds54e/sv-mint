@@ -14,12 +14,18 @@ Rename parameters to `DataWidth` or `NumAlerts`; ALL_CAPS is not allowed.
 ### Good
 
 ```systemverilog
-parameter int DataWidth = 32;
-```
+module m # (
+  parameter int MyParam = 1
+);
+endmodule
+```systemverilog
 
 ### Bad
 
 ```systemverilog
-parameter int data_width = 32;
-parameter int DATA_WIDTH = 32;
-```
+module m #(
+  parameter int my_param = 1,
+  parameter int MY_PARAM = 1
+);
+endmodule
+```systemverilog

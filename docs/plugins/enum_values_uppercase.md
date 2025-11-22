@@ -12,16 +12,22 @@ Capitalize each word (`UartInterruptFrameErr`) or use ALL_CAPS (`UART_MODE_IDLE`
 ### Good
 
 ```systemverilog
-typedef enum logic [1:0] {
-  UartModeIdle,
-  UartModeBusy
-} uart_mode_e;
-```
+typedef enum int unsigned {
+  OFF,
+  ON
+} state_1_e;
+
+typedef enum int unsigned {
+  Off,
+  On
+} state_2_e;
+```systemverilog
 
 ### Bad
 
 ```systemverilog
-typedef enum logic [1:0] {
-  uart_mode_busy
-} uart_mode_e;
-```
+typedef enum int unsigned {
+  off,
+  on
+} state_e;
+```systemverilog

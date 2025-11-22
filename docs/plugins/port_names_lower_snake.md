@@ -14,13 +14,28 @@ Rename ports to lowercase snake case and then apply direction suffix rules.
 ### Good
 
 ```systemverilog
-input  logic req_i;
-output logic gnt_o;
-```
+module m (
+  inout logic my_port_1,
+  input logic my_port_2,
+  output logic my_port_3
+);
+endmodule
+```systemverilog
 
 ### Bad
 
 ```systemverilog
-input logic Req;
-output logic Grant;
-```
+module m1 (
+  inout logic MyPort1,
+  input logic MyPort2,
+  output logic MyPort3
+);
+endmodule
+
+module m2 (
+  inout logic MY_PORT_1,
+  input logic MY_PORT_2,
+  output logic MY_PORT_3
+);
+endmodule
+```systemverilog

@@ -14,13 +14,28 @@ Declare a data type for every `parameter`, such as `parameter int WIDTH = 4;`, `
 ### Good
 
 ```systemverilog
-parameter int WIDTH = 4;
-parameter signed [3:0] OFFSET = 0;
-parameter type T = int;
-```
+`default_nettype none
+
+module parameter_has_type_good;
+  parameter int WIDTH = 4;
+  parameter signed [3:0] OFFSET = 0;
+  parameter type T = int;
+  localparam T VALUE = T'(WIDTH + OFFSET);
+  logic [WIDTH-1:0] data;
+  assign data = VALUE[WIDTH-1:0];
+endmodule
+
+`default_nettype wire
+```systemverilog
 
 ### Bad
 
 ```systemverilog
-parameter WIDTH = 4;  // missing explicit type
-```
+`default_nettype none
+
+module parameter_missing_type;
+  parameter WIDTH = 4;
+endmodule
+
+`default_nettype wire
+```systemverilog

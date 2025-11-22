@@ -15,13 +15,17 @@ Rename variables to lower_snake_case, using `_` to separate words; `$` is permit
 ### Good
 
 ```systemverilog
-logic good_var;
-logic dollar_var;
-```
+module m;
+  logic my_var;
+  logic my_var$abc;
+endmodule
+```systemverilog
 
 ### Bad
 
 ```systemverilog
-logic BadVar;
-logic mixedCase;
-```
+module m;
+  logic MyVar;
+  logic MY_VAR;
+endmodule
+```systemverilog

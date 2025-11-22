@@ -18,12 +18,40 @@ Delete unused nets or annotate intentional placeholders with inline comments con
 ### Good
 
 ```systemverilog
-wire req_i;
-wire ack_o;
-wire busy;
+module m;
 
-assign busy = req_i & ack_o;  // net is driven and consumed
-```
+  wire a;
+  assign a = 1'bz;
+
+  wire b = 1'bz;
+
+  wire c1; // reserved
+  wire c2; // used
+
+  wire d;
+  function fn (in); return 1'b0; endfunction
+  wire e = fn(d);
+
+  wire f;
+  wire g = (f ? 1'b1 : 1'b0);
+
+  wire h;
+  always_comb begin
+    if (h) begin
+      $display(1);
+    end else begin
+      $display(0);
+    end
+  end
+
+  wire i;
+  initial begin
+    $display(i);
+  end
+
+
+endmodule
+```systemverilog
 
 ```systemverilog
 wire debug_tap;  // unused  (explicit intent keeps lint quiet)
@@ -32,7 +60,7 @@ wire debug_tap;  // unused  (explicit intent keeps lint quiet)
 ### Bad
 
 ```systemverilog
-wire req_i;
-wire ack_o;
-wire debug_tap;  // declared but never read or written
-```
+module m;
+  wire a;
+endmodule
+```systemverilog

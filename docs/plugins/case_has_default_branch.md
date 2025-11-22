@@ -14,11 +14,31 @@ Add a `default` branch when using plain `case`. `unique`/`unique0` cases are exe
 ### Good
 
 ```systemverilog
-unique case (state_q)  // unique → default not required
-  IDLE:   state_d = START;
-  START:  state_d = DONE;
-endcase
-```
+module m;
+
+  logic [1:0] a;
+  logic b, c;
+
+  always_comb begin
+    case (a)
+      2'd0: b = 1'b0;
+      2'd1: b = 1'b0;
+      2'd2: b = 1'b0;
+      default: b = 1'b0;
+    endcase
+  end
+
+  always_comb begin
+    unique case (a)
+      2'd0: c = 1'b0;
+      2'd1: c = 1'b0;
+      2'd2: c = 1'b0;
+      2'd3: c = 1'b0;
+    endcase
+  end
+
+endmodule
+```systemverilog
 
 ```systemverilog
 case (state_q)  // default required when not unique
@@ -31,8 +51,18 @@ endcase
 ### Bad
 
 ```systemverilog
-case (opcode_i)
-  4'h0: alu_d = ADD;
-  4'h1: alu_d = SUB;
-endcase  // no default, unknown values pass silently
-```
+module m;
+
+  logic [1:0] a;
+  logic b;
+
+  always_comb begin
+    case (a)
+      2'd0: b = 1'b0;
+      2'd1: b = 1'b0;
+      2'd2: b = 1'b0;
+    endcase
+  end
+
+endmodule
+```systemverilog

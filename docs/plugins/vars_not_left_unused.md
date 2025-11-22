@@ -18,14 +18,39 @@ Delete the variable, wire it into surrounding logic, or annotate intentional pla
 ### Good
 
 ```systemverilog
-logic enable;
-logic data_d;
-logic data_q;
+module m;
 
-always_ff @(posedge clk_i) begin
-  if (enable) data_q <= data_d;
-end
-```
+  logic a;
+  always_comb a = 1'b0;
+
+  logic b = 1'bz;
+
+  logic c1; // reserved
+  logic c2; // used
+
+  logic d;
+  function fn (in); return 1'b0; endfunction
+  logic e = fn(d);
+
+  logic f;
+  wire g = (f ? 1'b1 : 1'b0);
+
+  logic h;
+  always_comb begin
+    if (h) begin
+      $display(1);
+    end else begin
+      $display(0);
+    end
+  end
+
+  logic i;
+  initial begin
+    $display(i);
+  end
+
+endmodule
+```systemverilog
 
 ```systemverilog
 logic debug_shadow;  // unused (documented placeholder)
@@ -34,7 +59,7 @@ logic debug_shadow;  // unused (documented placeholder)
 ### Bad
 
 ```systemverilog
-logic enable;
-logic data_d;
-logic debug_shadow;  // never read or written
-```
+module m;
+  logic a;
+endmodule
+```systemverilog

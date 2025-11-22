@@ -18,14 +18,14 @@ Rename the module/package or the file so they match (one module/package per file
 
 `module_filename_match_ok.sv`
 ```systemverilog
-module module_filename_match_ok;
+module good;
 endmodule
-```
+```systemverilog
 
 ### Bad
 
 `module_filename_mismatch.sv`
 ```systemverilog
-module wrong_name;
+module not_bad;
 endmodule
-```
+```systemverilog

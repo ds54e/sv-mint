@@ -14,14 +14,12 @@ Add `` `undef`` once the macro is no longer needed.
 ### Good
 
 ```systemverilog
-`define _INC(x) ((x)+1)
-assign data_o = `_INC(data_i);
-`undef _INC
-```
+`define MY_MACRO(a) a
+`undef MY_MACRO
+```systemverilog
 
 ### Bad
 
 ```systemverilog
-`define _INC(x) ((x)+1)
-assign data_o = `_INC(data_i);  // leaks macro
-```
+`define MY_MACRO(a) a
+```systemverilog

@@ -15,13 +15,17 @@ Rename nets to lower_snake_case, using `_` to separate words; `$` is permitted i
 ### Good
 
 ```systemverilog
-wire good_name;
-wire dollar$name;
-```
+module m;
+  wire my_net;
+  wire my_net$abc;
+endmodule
+```systemverilog
 
 ### Bad
 
 ```systemverilog
-wire BadName;
-wire mixedCaseSig;
-```
+module m;
+  wire MyNet;
+  wire MY_NET;
+endmodule
+```systemverilog

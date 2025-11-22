@@ -14,21 +14,15 @@ Annotate every argument with a full data type (width and signedness as needed), 
 ### Good
 
 ```systemverilog
-function logic add(
-  input logic a,
-  input logic b
-);
-  return a + b;
+function logic f (input logic a);
+  return a;
 endfunction
-```
+```systemverilog
 
 ### Bad
 
 ```systemverilog
-function logic add(
-  input a,
-  input b  // implicit 1-bit type
-);
-  return a + b;
+function logic f (input a);
+  return a;
 endfunction
-```
+```systemverilog

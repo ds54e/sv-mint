@@ -12,14 +12,16 @@ Flags files that never declare `` `default_nettype``. Using the CST directives t
 
 ```systemverilog
 `default_nettype none
-module foo;
+
+module m;
 endmodule
+
 `default_nettype wire
-```
+```systemverilog
 
 ### Bad
 
 ```systemverilog
-module foo;
-endmodule  // no `default_nettype directive
-```
+module m;
+endmodule
+```systemverilog

@@ -14,13 +14,16 @@ Rename modules so they start with a lowercase letter and only use lowercase lett
 ### Good
 
 ```systemverilog
-module entropy_ctrl;
+module my_module;
 endmodule
-```
+```systemverilog
 
 ### Bad
 
 ```systemverilog
-module EntropyCtrl;
+module MyModule;
 endmodule
-```
+
+module MY_MODULE;
+endmodule
+```systemverilog

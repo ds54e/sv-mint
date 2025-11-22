@@ -16,19 +16,12 @@ Rename typedefs such as `data_width_t`, `foo_bar_t`, etc.
 ### Good
 
 ```systemverilog
-typedef logic [3:0] data_width_t;
-typedef struct packed {
-  logic a;
-  logic b;
-} packet_t;
-```
+typedef logic [3:0] my_type_t;
+```systemverilog
 
 ### Bad
 
 ```systemverilog
-typedef logic [3:0] DataWidth;
-typedef struct packed {
-  logic a;
-  logic b;
-} Packet;
-```
+typedef logic [3:0] MyType_t;
+typedef logic [3:0] MY_TYPE;
+```systemverilog

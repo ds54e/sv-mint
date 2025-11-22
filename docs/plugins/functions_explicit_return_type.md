@@ -14,17 +14,15 @@ Annotate the function header with a concrete return type (including width/signed
 ### Good
 
 ```systemverilog
-function automatic logic signed [3:0] acc_fn(
-  input logic [1:0] a
-);
-  return a + 1'b1;
+function automatic logic f (input logic a);
+  return 1'b0;
 endfunction
-```
+```systemverilog
 
 ### Bad
 
 ```systemverilog
-function acc_fn(input a_i, input b_i);
-  acc_fn = a_i + b_i;  // implicit return type
+function automatic f (input logic a);
+  return 1'b0;
 endfunction
-```
+```systemverilog

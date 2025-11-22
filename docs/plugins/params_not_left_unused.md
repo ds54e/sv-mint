@@ -15,11 +15,15 @@ Remove unused parameters, ensure configuration knobs are referenced, or annotate
 ### Good
 
 ```systemverilog
-module fifo #(parameter int Depth = 16) (
-  input  logic [$clog2(Depth):0] addr_i,
-  ...
+module m #(
+  parameter int MyParam1 = 1,
+  parameter int MyParam2 = 1, // reserved
+  parameter int MyParam3 = 1 // will be used later
+)(
+  input logic [MyParam1:0] a
 );
-```
+endmodule
+```systemverilog
 
 ```systemverilog
 module stub #(
@@ -31,11 +35,8 @@ endmodule
 ### Bad
 
 ```systemverilog
-module fifo #(parameter int Depth = 16,
-              parameter bit EnableDbg = 0) (
-  input  logic [$clog2(Depth)-1:0] addr_i
+module m #(
+  parameter int MyParam = 1
 );
-
-logic [Depth-1:0] mem_q;
-// ... implementation never looks at EnableDbg
-```
+endmodule
+```systemverilog

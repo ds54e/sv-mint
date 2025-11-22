@@ -14,15 +14,21 @@ Use blocking `=` inside combinational logic; if state is required, move the logi
 ### Good
 
 ```systemverilog
-always_comb begin
-  result_d = a_i;  // blocking assignments only
-end
-```
+module m;
+  logic a;
+  always_comb begin
+    a = 1'b1;
+  end
+endmodule
+```systemverilog
 
 ### Bad
 
 ```systemverilog
-always_comb begin
-  result_q <= a_i;  // violates combinational semantics
-end
-```
+module m;
+  logic a;
+  always_comb begin
+    a <= 1'b1;
+  end
+endmodule
+```systemverilog

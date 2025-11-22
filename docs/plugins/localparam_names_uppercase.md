@@ -15,13 +15,18 @@ Rename localparams to follow UpperCamelCase (e.g., `WidthParam`) or ALL_CAPS (e.
 ### Good
 
 ```systemverilog
-localparam int BUS_WIDTH = 32;
-localparam int WidthParam = 16;
-```
+module m #(
+  localparam int MyParam = 1,
+  localparam int MY_CONST = 1
+);
+endmodule
+```systemverilog
 
 ### Bad
 
 ```systemverilog
-localparam int bus_width = 32;
-localparam int mixedCase_param = 16;
-```
+module m #(
+  localparam int my_const = 1
+);
+endmodule
+```systemverilog
