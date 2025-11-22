@@ -31,12 +31,6 @@ module m;
 endmodule
 ```
 
-```systemverilog
-always_comb begin
-  state_d = next_state;
-end
-```
-
 ## Bad
 
 ```systemverilog
