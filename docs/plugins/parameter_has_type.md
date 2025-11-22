@@ -10,7 +10,7 @@
 ### Message
 `` parameter must declare an explicit data type ``
 ### Remediation
-Declare an explicit data type for every `parameter`; a bit range alone is not sufficient. Localparams are covered by `localparam_has_type`.
+Declare an explicit data type for every `parameter`.
 ### Good
 
 ```systemverilog

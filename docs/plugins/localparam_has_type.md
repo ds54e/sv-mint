@@ -10,7 +10,7 @@
 ### Message
 `` localparam must declare an explicit data type ``
 ### Remediation
-Declare a data type for every `localparam`, including signedness and width as needed. A bit range alone (e.g., `localparam [7:0] DEPTH = 8;`) is not sufficient—include a type keyword like `int`/`logic`.
+Declare a data type for every `localparam`, including signedness and width as needed.
 ### Good
 
 ```systemverilog
