@@ -1,9 +1,5 @@
-`default_nettype none
-
-module foo;
+module m1;
 endmodule
 
-module bar;
+module m2;
 endmodule
-
-`default_nettype wire

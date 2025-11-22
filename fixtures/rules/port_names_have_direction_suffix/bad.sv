@@ -1,9 +1,7 @@
-`default_nettype none
-
-module port_names_suffix_violation(
-  input logic clk,
-  output logic data
+module m (
+  inout logic a,
+  input logic b,
+  output logic c
 );
 endmodule
 
-`default_nettype wire

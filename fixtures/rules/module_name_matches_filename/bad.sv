@@ -1,6 +1,2 @@
-`default_nettype none
-
-module wrong_name;
+module not_bad;
 endmodule
-
-`default_nettype wire

@@ -1,6 +1,3 @@
-`default_nettype none
-
-module module_names_lower_snake_good;
+module my_module;
 endmodule
 
-`default_nettype wire

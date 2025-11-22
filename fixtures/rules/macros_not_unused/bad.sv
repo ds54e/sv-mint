@@ -1,7 +1,13 @@
-`default_nettype none
-`define UNUSED_MACRO 1
+module m;
 
-module macro_unused;
+  `define MACRO_A(a) a
+  `define MACRO_B(b) b
+  `define MACRO_C(c) \
+    if (c) begin \
+      $display(1); \
+    end else else \
+      $display(0); \
+    end
+
 endmodule
 
-`default_nettype wire

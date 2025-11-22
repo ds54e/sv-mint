@@ -1,8 +1,5 @@
-`default_nettype none
-
-module var_lower_snake_violation;
-  int BadVar;
-  initial BadVar = 0;
+module m;
+  logic MyVar;
+  logic MY_VAR;
 endmodule
 
-`default_nettype wire

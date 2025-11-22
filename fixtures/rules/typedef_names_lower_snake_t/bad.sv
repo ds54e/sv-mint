@@ -1,9 +1,2 @@
-`default_nettype none
-
-typedef logic [3:0] BadType;
-
-module typedef_lower_snake_t_violation;
-  BadType data;
-endmodule
-
-`default_nettype wire
+typedef logic [3:0] MyType_t;
+typedef logic [3:0] MY_TYPE;

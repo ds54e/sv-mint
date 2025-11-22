@@ -1,10 +1,6 @@
-`default_nettype none
-
-module port_names_have_direction_suffix_good(
-  input logic clk_i,
-  output logic data_o
+module m (
+  inout logic a_io
+  input logic b_i,
+  output logic c_o
 );
-  assign data_o = clk_i;
 endmodule
-
-`default_nettype wire

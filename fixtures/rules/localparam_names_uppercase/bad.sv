@@ -1,7 +1,5 @@
-`default_nettype none
-
-module localparam_case_violation;
-  localparam int bad_param = 1;
+module m #(
+  localparam int my_const = 1
+);
 endmodule
 
-`default_nettype wire

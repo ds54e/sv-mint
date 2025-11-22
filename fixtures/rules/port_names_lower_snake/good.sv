@@ -1,10 +1,6 @@
-`default_nettype none
-
-module port_names_lower_snake_good(
-  input logic clk_i,
-  output logic data_o
+module m (
+  inout logic my_port_1,
+  input logic my_port_2,
+  output logic my_port_3
 );
-  assign data_o = clk_i;
 endmodule
-
-`default_nettype wire

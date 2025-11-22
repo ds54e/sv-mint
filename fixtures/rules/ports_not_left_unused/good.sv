@@ -1,7 +1,9 @@
-`default_nettype none
-
-module ports_not_left_unused_good(input logic a_i, output logic b_o);
-  assign b_o = a_i;
+module m (
+  input logic a,
+  input logic b1, // reserved
+  input logic b2, // used
+  output logic c
+);
+  assign c = a;
 endmodule
 
-`default_nettype wire

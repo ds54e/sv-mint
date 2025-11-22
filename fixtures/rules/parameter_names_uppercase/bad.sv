@@ -1,7 +1,5 @@
-`default_nettype none
-
-module parameter_case_violation;
-  parameter int data_width = 32;
+module m #(
+  parameter int my_param = 1,
+  parameter int MY_PARAM = 1
+);
 endmodule
-
-`default_nettype wire

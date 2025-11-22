@@ -1,8 +1,5 @@
-// Decl unused localparam violation
-`default_nettype none
-
-module unused_localparam_violation;
-  localparam int EnableDbg = 0;
+module m #(
+  localparam int MyParam = 1
+);
 endmodule
 
-`default_nettype wire

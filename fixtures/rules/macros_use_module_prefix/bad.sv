@@ -1,7 +1,4 @@
-`default_nettype none
-
-module foo;
-`define BAR 1
+module my_module;
+  `define MACRO
 endmodule
 
-`default_nettype wire

@@ -1,7 +1,5 @@
-`default_nettype none
-
-module net_lower_snake_violation;
-  wire BadName;
+module m;
+  wire MyNet;
+  wire MY_NET;
 endmodule
 
-`default_nettype wire

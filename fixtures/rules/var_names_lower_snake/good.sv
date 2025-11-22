@@ -1,12 +1,5 @@
-`default_nettype none
-
-module var_lower_snake_ok;
-  output logic good_var;
-  output logic dollar_var;
-  int good_local;
-  assign good_var = 1'b0;
-  assign dollar_var = good_var;
-  initial good_local = 0;
+module m;
+  logic my_var;
+  logic my_var$abc;
 endmodule
 
-`default_nettype wire

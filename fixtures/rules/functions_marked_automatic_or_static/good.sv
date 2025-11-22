@@ -1,9 +1,8 @@
-`default_nettype none
+function automatic logic f1 (input logic a);
+  return 1'b0;
+endfunction
 
-module functions_marked_automatic_or_static_good;
-  function automatic int add(input int a, input int b);
-    add = a + b;
-  endfunction
-endmodule
+function automatic logic f2 (input logic a);
+  return 1'b0;
+endfunction
 
-`default_nettype wire

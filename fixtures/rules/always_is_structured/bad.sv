@@ -1,6 +1,6 @@
 module m;
 
-  logic a, b;
+  logic a, b, c;
   logic clk;
 
   always @(posedge clk) begin
@@ -12,8 +12,6 @@ module m;
       b <= 1'b1;
     end
   end
-
-  logic c;
 
   always @* begin
     c = 1'b1;
