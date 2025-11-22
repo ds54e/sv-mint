@@ -1,11 +1,19 @@
-`default_nettype none
-`define USED_MACRO(x) (x + 1)
+module m;
 
-module macro_used;
-  localparam int FOO = `USED_MACRO(1);
-  output logic [7:0] bar_o;
-  assign bar_o = FOO;
+  `define MACRO_A(a) a
+  `define MACRO_B(b) b
+  `define MACRO_C(c) \
+    if (c) begin \
+      $display(1); \
+    end else else \
+      $display(0); \
+    end
+
+  wire y = `MACRO_A(1'b1);
+  wire z = `MACRO_B(1'b0);
+
+  initial begin
+    `MACRO_C(1'b1)
+  end
+
 endmodule
-
-`undef USED_MACRO
-`default_nettype wire

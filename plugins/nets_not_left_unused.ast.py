@@ -1,6 +1,7 @@
 import re
 
-UNUSED_WORD = re.compile(r"\bunused\b", re.IGNORECASE)
+USED_WORD = re.compile(r"\bused\b", re.IGNORECASE)
+RESERVED_WORD = re.compile(r"\breserved\b", re.IGNORECASE)
 
 def check(req):
     if req.get("stage") != "ast":
@@ -15,7 +16,8 @@ def check(req):
         reads = int(s.get("read_count", 0) or 0)
         writes = int(s.get("write_count", 0) or 0)
         if reads == 0 and writes == 0:
-            if _has_unused_comment(line_cache, s.get("loc")):
+            note = _has_usage_comment(line_cache, s.get("loc"))
+            if note:
                 continue
             out.append(
                 {
@@ -29,7 +31,7 @@ def check(req):
             )
     return out
 
-def _has_unused_comment(cache, loc):
+def _has_usage_comment(cache, loc):
     if not loc:
         return False
     path = loc.get("file")
@@ -48,13 +50,14 @@ def _has_unused_comment(cache, loc):
     length = len(rest)
     while i < length:
         if rest.startswith("//", i):
-            return bool(UNUSED_WORD.search(rest[i + 2 :]))
+            comment = rest[i + 2 :]
+            return bool(USED_WORD.search(comment) or RESERVED_WORD.search(comment))
         if rest.startswith("/*", i):
             end = rest.find("*/", i + 2)
             if end == -1:
                 return False
             comment = rest[i + 2 : end]
-            if UNUSED_WORD.search(comment):
+            if USED_WORD.search(comment) or RESERVED_WORD.search(comment):
                 return True
             i = end + 2
             continue

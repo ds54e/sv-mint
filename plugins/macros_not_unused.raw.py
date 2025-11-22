@@ -2,6 +2,8 @@ import re
 
 DEFINE_PATTERN = re.compile(r"(?m)^\s*`define\s+([A-Za-z_]\w*)")
 USE_PATTERN = re.compile(r"`([A-Za-z_]\w*)")
+USED_WORD = re.compile(r"\bused\b", re.IGNORECASE)
+RESERVED_WORD = re.compile(r"\breserved\b", re.IGNORECASE)
 
 def check(req):
     if req.get("stage") != "raw_text":
@@ -46,13 +48,17 @@ def _has_unused_comment(text, offset):
         cursor = nl + 1
     segment = text[line_start:end]
     pos = segment.find("//")
-    if pos != -1 and "unused" in segment[pos + 2 :].lower():
-        return True
+    if pos != -1:
+        comment = segment[pos + 2 :]
+        if USED_WORD.search(comment) or RESERVED_WORD.search(comment):
+            return True
     pos_block = segment.find("/*")
     if pos_block != -1:
         end = segment.find("*/", pos_block + 2)
-        if end != -1 and "unused" in segment[pos_block + 2 : end].lower():
-            return True
+        if end != -1:
+            comment = segment[pos_block + 2 : end]
+            if USED_WORD.search(comment) or RESERVED_WORD.search(comment):
+                return True
     return False
 
 def _byte_loc(text, index):
