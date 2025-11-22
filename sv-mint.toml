@@ -27,19 +27,15 @@ id = "disable_targets_fork_only"
 
 [[rule]]
 id = "default_nettype_begins_with_none"
-stage = "cst"
 
 [[rule]]
 id = "default_nettype_ends_with_wire"
-stage = "cst"
 
 [[rule]]
 id = "always_is_structured"
-stage = "cst"
 
 [[rule]]
 id = "sensitivity_list_uses_commas"
-stage = "cst"
 
 [[rule]]
 id = "macros_close_with_undef"
@@ -82,32 +78,24 @@ id = "functions_marked_automatic_or_static"
 
 [[rule]]
 id = "functions_explicit_return_type"
-stage = "cst"
 
 [[rule]]
 id = "functions_explicit_arg_types"
-stage = "cst"
 
 [[rule]]
 id = "functions_args_have_direction"
-stage = "cst"
 
 [[rule]]
 id = "localparam_has_type"
-stage = "cst"
 
 [[rule]]
 id = "enum_type_names_lower_snake_e"
-stage = "cst"
 
 [[rule]]
 id = "enum_values_uppercase"
-stage = "cst"
 
 [[rule]]
 id = "typedef_names_lower_snake_t"
-stage = "cst"
 
 [[rule]]
 id = "parameter_has_type"
-stage = "cst"
