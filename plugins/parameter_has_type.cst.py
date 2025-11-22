@@ -18,7 +18,10 @@ def check(req):
         last = node.get("last_token")
         if first is None or last is None:
             continue
-        if _has_type(tokens, first, last, text):
+        first_word = _tok_text(tokens[first], text).lower()
+        if first_word == "localparam":
+            continue
+        if _has_explicit_type(cst, node) or _has_type_tokens(tokens, first, last, text):
             continue
         start = tokens[first].get("start")
         end = tokens[first].get("end")
@@ -34,23 +37,55 @@ def check(req):
     return out
 
 
-def _has_type(tokens, first, last, text):
+def _has_explicit_type(cst, node):
+    stack = [node.get("id")]
+    while stack:
+        nid = stack.pop()
+        n = cst.nodes_by_id.get(nid)
+        if not n:
+            continue
+        kind_name = _kind_name(cst, n)
+        if "ImplicitDataType" in kind_name:
+            return False
+        if kind_name.endswith("DataType") or kind_name.endswith("NetType"):
+            return True
+        for child in cst.children.get(nid, []):
+            stack.append(child)
+    return False
+
+
+def _kind_name(cst, node):
+    kind_id = node.get("kind")
+    if kind_id is None:
+        return ""
+    if 0 <= kind_id < len(cst.kinds):
+        return cst.kinds[kind_id]
+    return ""
+
+
+def _has_type_tokens(tokens, first, last, text):
     saw_parameter = False
+    ident_count = 0
     for tok in tokens[first:last + 1]:
-        word = _tok_text(tok, text).lower()
+        word = _tok_text(tok, text)
         if not word:
             continue
+        low = word.lower()
         if not saw_parameter:
-            if word == "parameter":
+            if low == "parameter":
                 saw_parameter = True
             continue
-        if word in ("type", "bit", "logic", "reg", "int", "integer", "longint", "shortint",
-                    "byte", "time", "realtime", "real", "shortreal", "string", "wire",
-                    "signed", "unsigned") or word.startswith("["):
+        if word in ("=", ",", ";"):
+            break
+        if low == "type" or word.startswith("["):
             return True
+        if word == "::":
+            continue
         if word.isidentifier():
-            # hit the identifier without seeing a type/range
-            return False
+            ident_count += 1
+            if ident_count >= 2:
+                # type token + param identifier observed
+                return True
     return False
 
 
