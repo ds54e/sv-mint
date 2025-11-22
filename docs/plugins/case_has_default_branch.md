@@ -40,17 +40,9 @@ module m;
 endmodule
 ```
 
-```systemverilog
-case (state_q)  // default required when not unique
-  IDLE:   state_d = START;
-  START:  state_d = DONE;
-  default: state_d = IDLE;  // handle unexpected states
-endcase
-```
-
 ### Bad
 
-```
+```systemverilog
 module m;
 
   logic [1:0] a;
@@ -65,4 +57,4 @@ module m;
   end
 
 endmodule
-```systemverilog
+```
