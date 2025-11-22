@@ -9,9 +9,6 @@
 ### Message
 `` localparam <name> should use UpperCamelCase or ALL_CAPS ``
 
-### Remediation
-Rename localparams to UpperCamelCase or ALL_CAPS.
-
 ### Good
 
 ```systemverilog
