@@ -11,4 +11,4 @@ sv-mint is a SystemVerilog lint pipeline that combines a Rust core with Python p
    ```
 ## Provenance and License
 - Rust dependencies follow MIT or Apache-2.0 licenses as declared in `Cargo.toml`.
-- sv-mint itself is distributed under the MIT License (see `LICENSE`).
+- sv-mint itself is distributed under the MIT License.
