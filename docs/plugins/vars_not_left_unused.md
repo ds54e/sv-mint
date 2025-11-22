@@ -13,7 +13,6 @@
 Delete the variable, wire it into surrounding logic, or annotate intentional placeholders with inline comments that include `unused` (e.g., `` logic debug_shadow; // unused ``).
 
 ### Limitations
-- Implicit named port shorthand (e.g., `.foo`) is elaborated and counted as a use.
 - Implicit `.*` connections are not elaborated; they will be counted as unused.
 - If the declaration line contains a comment with the words `used` or `reserved` (case-insensitive), the warning is suppressed.
 ### Good
