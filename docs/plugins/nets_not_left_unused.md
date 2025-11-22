@@ -53,14 +53,10 @@ module m;
 endmodule
 ```
 
-```systemverilog
-wire debug_tap;  // unused  (explicit intent keeps lint quiet)
-```
-
 ### Bad
 
-```
+```systemverilog
 module m;
   wire a;
 endmodule
-```systemverilog
+```

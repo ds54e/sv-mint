@@ -25,18 +25,11 @@ module m #(
 endmodule
 ```
 
-```systemverilog
-module stub #(
-  parameter bit EnableDbg = 0  // unused (intentionally reserved knob)
-) ();
-endmodule
-```
-
 ### Bad
 
-```
+```systemverilog
 module m #(
   parameter int MyParam = 1
 );
 endmodule
-```systemverilog
+```

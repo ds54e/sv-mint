@@ -25,17 +25,11 @@ module m #(
 endmodule
 ```
 
-```systemverilog
-module stub;
-  localparam int EnableDbg = 0;  // reserved
-endmodule
-```
-
 ### Bad
 
-```
+```systemverilog
 module m #(
   localparam int MyParam = 1
 );
 endmodule
-```systemverilog
+```
