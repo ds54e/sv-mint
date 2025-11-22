@@ -5,9 +5,11 @@ use std::path::{Path, PathBuf};
 
 fn main() {
     println!("cargo:rerun-if-changed=fixtures/rules");
+    println!("cargo:rerun-if-changed=sv-mint.toml");
     let out_dir = std::env::var("OUT_DIR").expect("OUT_DIR");
     let dest = PathBuf::from(out_dir).join("cli_fixtures.rs");
-    let cases = collect_cases(Path::new("fixtures/rules"));
+    let allowed = load_rule_ids(Path::new("sv-mint.toml"));
+    let cases = collect_cases(Path::new("fixtures/rules"), &allowed);
     let mut file = File::create(dest).expect("create cli_fixtures.rs");
     for case in cases {
         if case.expect_fail {
@@ -36,7 +38,7 @@ struct Case {
     fn_name: String,
 }
 
-fn collect_cases(root: &Path) -> Vec<Case> {
+fn collect_cases(root: &Path, allowed: &HashSet<String>) -> Vec<Case> {
     let mut out = Vec::new();
     let mut rules: Vec<_> = fs::read_dir(root)
         .expect("read fixtures/rules")
@@ -46,6 +48,9 @@ fn collect_cases(root: &Path) -> Vec<Case> {
     rules.sort_by_key(|e| e.file_name());
     for entry in rules {
         let rule = entry.file_name().to_string_lossy().to_string();
+        if !allowed.is_empty() && !allowed.contains(&rule) {
+            continue;
+        }
         let mut files: Vec<_> = fs::read_dir(entry.path())
             .unwrap()
             .filter_map(|e| e.ok())
@@ -91,6 +96,26 @@ fn assign_fn_names(cases: &mut [Case]) {
         }
         case.fn_name = name;
     }
+}
+
+fn load_rule_ids(path: &Path) -> HashSet<String> {
+    let text = match fs::read_to_string(path) {
+        Ok(t) => t,
+        Err(_) => return HashSet::new(),
+    };
+    let value: toml::Value = match toml::from_str(&text) {
+        Ok(v) => v,
+        Err(_) => return HashSet::new(),
+    };
+    let mut ids = HashSet::new();
+    if let Some(rules) = value.get("rule").and_then(|v| v.as_array()) {
+        for rule in rules {
+            if let Some(id) = rule.get("id").and_then(|v| v.as_str()) {
+                ids.insert(id.to_string());
+            }
+        }
+    }
+    ids
 }
 
 fn sanitize(raw: &str) -> String {

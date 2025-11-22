@@ -75,9 +75,6 @@ id = "port_names_lower_snake"
 id = "port_names_have_direction_suffix"
 
 [[rule]]
-id = "no_define_inside_package"
-
-[[rule]]
 id = "one_package_per_file"
 
 [[rule]]
