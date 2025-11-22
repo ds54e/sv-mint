@@ -14,14 +14,15 @@ def check(req):
             macro = match.group(1)
             if macro.upper().startswith(prefix):
                 continue
-            out.append({
-                "rule_id": "macros_use_module_prefix",
-                "severity": "warning",
-                "message": f"`define {macro} inside module {name} must be prefixed with {prefix}",
-                "location": _byte_loc(text, offset + match.start(1)),
-            })
+            out.append(
+                {
+                    "rule_id": "macros_use_module_prefix",
+                    "severity": "warning",
+                    "message": f"`define {macro} inside module {name} must be prefixed with {prefix}",
+                    "location": _byte_loc(text, offset + match.start(1)),
+                }
+            )
     return out
-
 
 def _module_ranges(text):
     ranges = []
@@ -32,7 +33,6 @@ def _module_ranges(text):
         if end is not None:
             ranges.append((start, end, name))
     return ranges
-
 
 def _find_matching_end(text, start):
     depth = 1
@@ -46,7 +46,6 @@ def _find_matching_end(text, start):
                 return idx
         idx += 1
     return None
-
 
 def _byte_loc(text, index):
     line = text.count("\n", 0, index) + 1

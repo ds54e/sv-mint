@@ -1,6 +1,5 @@
 import re
 
-
 def check(req):
     if req.get("stage") != "raw_text":
         return []
@@ -16,14 +15,15 @@ def check(req):
             name = match.group(1)
             if name in undefs:
                 continue
-            out.append({
-                "rule_id": "macros_close_with_undef",
-                "severity": "warning",
-                "message": f"`define {name} must be undefined at end of file",
-                "location": _byte_loc(text, match.start(1)),
-            })
+            out.append(
+                {
+                    "rule_id": "macros_close_with_undef",
+                    "severity": "warning",
+                    "message": f"`define {name} must be undefined at end of file",
+                    "location": _byte_loc(text, match.start(1)),
+                }
+            )
     return out
-
 
 def _byte_loc(text, index):
     line = text.count("\n", 0, index) + 1

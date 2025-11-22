@@ -1,7 +1,6 @@
 import re
 from pathlib import Path
 
-
 def check(req):
     if req.get("stage") != "ast":
         return []
@@ -16,15 +15,16 @@ def check(req):
                 continue
             name = d.get("name")
             if name and name != stem:
-                out.append({
-                    "rule_id": "module_name_matches_filename",
-                    "severity": "warning",
-                    "message": f"module name {name} should match file name {stem}",
-                    "location": d.get("loc"),
-                })
+                out.append(
+                    {
+                        "rule_id": "module_name_matches_filename",
+                        "severity": "warning",
+                        "message": f"module name {name} should match file name {stem}",
+                        "location": d.get("loc"),
+                    }
+                )
         out.extend(_check_package_name(path, stem))
     return out
-
 
 def _check_package_name(path, stem):
     if not path or not stem:
@@ -41,13 +41,14 @@ def _check_package_name(path, stem):
         return []
     start = m.start(1)
     loc = _loc(text, start)
-    return [{
-        "rule_id": "module_name_matches_filename",
-        "severity": "warning",
-        "message": f"package name {name} should match file name {stem}",
-        "location": loc,
-    }]
-
+    return [
+        {
+            "rule_id": "module_name_matches_filename",
+            "severity": "warning",
+            "message": f"package name {name} should match file name {stem}",
+            "location": loc,
+        }
+    ]
 
 def _loc(text, index):
     line = text.count("\n", 0, index) + 1

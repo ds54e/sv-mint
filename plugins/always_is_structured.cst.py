@@ -1,6 +1,5 @@
 from lib.cst_inline import Cst, byte_span_to_loc
 
-
 def check(req):
     if req.get("stage") != "cst":
         return []
@@ -23,10 +22,12 @@ def check(req):
         if start is None or end is None:
             continue
         loc = byte_span_to_loc(start, end, line_starts)
-        out.append({
-            "rule_id": "always_is_structured",
-            "severity": "warning",
-            "message": "use always_ff/always_comb/always_latch instead of bare always",
-            "location": loc,
-        })
+        out.append(
+            {
+                "rule_id": "always_is_structured",
+                "severity": "warning",
+                "message": "use always_ff/always_comb/always_latch instead of bare always",
+                "location": loc,
+            }
+        )
     return out

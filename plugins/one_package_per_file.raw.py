@@ -2,7 +2,6 @@ import re
 
 PACKAGE_RE = re.compile(r"(?m)^\s*package\s+([A-Za-z_][\w$]*)")
 
-
 def check(req):
     if req.get("stage") != "raw_text":
         return []
@@ -12,13 +11,14 @@ def check(req):
     if len(packages) <= 1:
         return []
     first = packages[0]
-    return [{
-        "rule_id": "one_package_per_file",
-        "severity": "warning",
-        "message": f"multiple package declarations in single file ({first.group(1)})",
-        "location": _byte_loc(text, first.start()),
-    }]
-
+    return [
+        {
+            "rule_id": "one_package_per_file",
+            "severity": "warning",
+            "message": f"multiple package declarations in single file ({first.group(1)})",
+            "location": _byte_loc(text, first.start()),
+        }
+    ]
 
 def _byte_loc(text, index):
     line = text.count("\n", 0, index) + 1

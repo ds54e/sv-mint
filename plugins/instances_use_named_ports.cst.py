@@ -1,6 +1,5 @@
 from lib.cst_inline import Cst, byte_span_to_loc
 
-
 def check(req):
     if req.get("stage") != "cst":
         return []
@@ -24,10 +23,12 @@ def check(req):
                 tokens[tok].get("end"),
                 line_starts,
             )
-            out.append({
-                "rule_id": "instances_use_named_ports",
-                "severity": "warning",
-                "message": "use named port connections instead of positional arguments",
-                "location": loc,
-            })
+            out.append(
+                {
+                    "rule_id": "instances_use_named_ports",
+                    "severity": "warning",
+                    "message": "use named port connections instead of positional arguments",
+                    "location": loc,
+                }
+            )
     return out

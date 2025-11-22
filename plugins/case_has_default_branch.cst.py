@@ -1,6 +1,5 @@
 from lib.cst_inline import Cst, byte_span_to_loc
 
-
 def check(req):
     if req.get("stage") != "cst":
         return []
@@ -21,10 +20,12 @@ def check(req):
             continue
         anchor = tokens[first]
         loc = byte_span_to_loc(anchor.get("start"), anchor.get("end"), line_starts)
-        out.append({
-            "rule_id": "case_has_default_branch",
-            "severity": "warning",
-            "message": "case statement must include a default item",
-            "location": loc,
-        })
+        out.append(
+            {
+                "rule_id": "case_has_default_branch",
+                "severity": "warning",
+                "message": "case statement must include a default item",
+                "location": loc,
+            }
+        )
     return out

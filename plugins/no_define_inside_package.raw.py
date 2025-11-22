@@ -4,7 +4,6 @@ PACKAGE_RE = re.compile(r"(?m)^\s*package\s+([A-Za-z_][\w$]*)")
 ENDPACKAGE_RE = re.compile(r"(?m)^\s*endpackage(?:\s*:\s*([A-Za-z_][\w$]*))?")
 DEFINE_RE = re.compile(r"(?m)^\s*`define\s+([A-Za-z_][\w$]*)")
 
-
 def check(req):
     if req.get("stage") != "raw_text":
         return []
@@ -20,14 +19,15 @@ def check(req):
     out = []
     for match in DEFINE_RE.finditer(body):
         name = match.group(1)
-        out.append({
-            "rule_id": "no_define_inside_package",
-            "severity": "warning",
-            "message": f"prefer parameters over `define {name} inside package",
-            "location": _byte_loc(text, body_start + match.start()),
-        })
+        out.append(
+            {
+                "rule_id": "no_define_inside_package",
+                "severity": "warning",
+                "message": f"prefer parameters over `define {name} inside package",
+                "location": _byte_loc(text, body_start + match.start()),
+            }
+        )
     return out
-
 
 def _byte_loc(text, index):
     line = text.count("\n", 0, index) + 1

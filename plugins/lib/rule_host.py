@@ -3,14 +3,12 @@ import json
 import sys
 from pathlib import Path
 
-
 def prepend_paths():
     base = Path(__file__).resolve().parent.parent
     lib = base / "lib"
     for entry in (str(base), str(lib)):
         if entry not in sys.path:
             sys.path.insert(0, entry)
-
 
 def load_module(path, index):
     spec = importlib.util.spec_from_file_location(f"sv_mint_rule_{index}", path)
@@ -19,7 +17,6 @@ def load_module(path, index):
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
-
 
 def main():
     prepend_paths()
@@ -39,11 +36,13 @@ def main():
         rules_by_stage = {}
         for stage_name, ids in stage_rules.items():
             rules_by_stage[stage_name] = set(ids or [])
-        script_meta.append({
-            "stages": set(stages),
-            "rules": rules_by_stage,
-            "path": str(Path(path)),
-        })
+        script_meta.append(
+            {
+                "stages": set(stages),
+                "rules": rules_by_stage,
+                "path": str(Path(path)),
+            }
+        )
     print(json.dumps({"type": "ready"}))
     sys.stdout.flush()
     for line in sys.stdin:
@@ -85,7 +84,6 @@ def main():
             break
         print(json.dumps({"type": "violations", "violations": results}))
         sys.stdout.flush()
-
 
 if __name__ == "__main__":
     main()

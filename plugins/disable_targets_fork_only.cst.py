@@ -1,6 +1,5 @@
 from lib.cst_inline import Cst, byte_span_to_loc
 
-
 def check(req):
     if req.get("stage") != "cst":
         return []
@@ -26,18 +25,19 @@ def check(req):
         if start is None or end is None:
             continue
         loc = byte_span_to_loc(start, end, line_starts)
-        out.append({
-            "rule_id": "disable_targets_fork_only",
-            "severity": "warning",
-            "message": "disable fork label is not portable; prefer disable fork",
-            "location": loc,
-        })
+        out.append(
+            {
+                "rule_id": "disable_targets_fork_only",
+                "severity": "warning",
+                "message": "disable fork label is not portable; prefer disable fork",
+                "location": loc,
+            }
+        )
     return out
-
 
 def _disable_label(tokens, first, last, text):
     # Expect pattern: disable <id_or_fork> ... ;
-    for tok in tokens[first:last + 1]:
+    for tok in tokens[first : last + 1]:
         start = tok.get("start")
         end = tok.get("end")
         if start is None or end is None:

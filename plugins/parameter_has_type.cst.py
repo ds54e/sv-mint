@@ -1,6 +1,5 @@
 from lib.cst_inline import Cst, byte_span_to_loc
 
-
 def check(req):
     if req.get("stage") != "cst":
         return []
@@ -10,7 +9,9 @@ def check(req):
     tokens = ir.get("tokens") or []
     line_starts = ir.get("line_starts") or [0]
     out = []
-    nodes = list(cst.of_kind("ParameterDeclaration")) + list(cst.of_kind("LocalParameterDeclaration"))
+    nodes = list(cst.of_kind("ParameterDeclaration")) + list(
+        cst.of_kind("LocalParameterDeclaration")
+    )
     for node in nodes:
         fields = node.get("fields") or {}
         ty = _field_id(fields, "type")
@@ -22,7 +23,6 @@ def check(req):
                     out.append(violation)
     return out
 
-
 def _field_id(fields, key):
     val = fields.get(key)
     if val is None:
@@ -32,7 +32,6 @@ def _field_id(fields, key):
     if isinstance(val, float):
         return int(val)
     return None
-
 
 def _is_implicit(cst, node_id):
     node = cst.nodes_by_id.get(node_id)
@@ -50,7 +49,6 @@ def _is_implicit(cst, node_id):
         return True
     return False
 
-
 def _violation(tokens, tok_idx, line_starts):
     tok = tokens[tok_idx] if tok_idx is not None and tok_idx < len(tokens) else None
     if not tok:
@@ -66,7 +64,6 @@ def _violation(tokens, tok_idx, line_starts):
         "message": "parameter must declare an explicit data type",
         "location": loc,
     }
-
 
 def _kind_name(cst, node):
     kind_id = node.get("kind", -1)

@@ -3,7 +3,12 @@ import bisect
 def byte_span_to_loc(start, end, line_starts):
     i = bisect.bisect_right(line_starts, start) - 1
     j = bisect.bisect_right(line_starts, end) - 1
-    return {"line": i + 1, "col": start - line_starts[i] + 1, "end_line": j + 1, "end_col": end - line_starts[j] + 1}
+    return {
+        "line": i + 1,
+        "col": start - line_starts[i] + 1,
+        "end_line": j + 1,
+        "end_col": end - line_starts[j] + 1,
+    }
 
 class Cst:
     def __init__(self, ir):

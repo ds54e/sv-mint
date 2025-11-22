@@ -13,14 +13,15 @@ def check(req):
         if _is_upper(name):
             continue
         loc = decl.get("loc") or {"line": 1, "col": 1, "end_line": 1, "end_col": 1}
-        out.append({
-            "rule_id": "parameter_names_uppercase",
-            "severity": "warning",
-            "message": f"parameter {name} should use UpperCamelCase or ALL_CAPS",
-            "location": loc,
-        })
+        out.append(
+            {
+                "rule_id": "parameter_names_uppercase",
+                "severity": "warning",
+                "message": f"parameter {name} should use UpperCamelCase or ALL_CAPS",
+                "location": loc,
+            }
+        )
     return out
-
 
 def _is_upper(name):
     if not name:

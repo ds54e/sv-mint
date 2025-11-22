@@ -1,6 +1,5 @@
 from lib.cst_inline import Cst, byte_span_to_loc
 
-
 def check(req):
     if req.get("stage") != "cst":
         return []
@@ -16,7 +15,12 @@ def check(req):
         if ret_id is None or _is_implicit(cst, ret_id):
             tok = _function_name_token(cst, node)
             if tok is not None:
-                violation = _violation(tokens, tok, line_starts, "function must declare an explicit return type")
+                violation = _violation(
+                    tokens,
+                    tok,
+                    line_starts,
+                    "function must declare an explicit return type",
+                )
                 if violation:
                     out.append(violation)
             continue
@@ -26,12 +30,16 @@ def check(req):
                 if tok is None:
                     tok = _function_name_token(cst, node)
                 if tok is not None:
-                    violation = _violation(tokens, tok, line_starts, "function arguments must declare explicit data types")
+                    violation = _violation(
+                        tokens,
+                        tok,
+                        line_starts,
+                        "function arguments must declare explicit data types",
+                    )
                     if violation:
                         out.append(violation)
                 break
     return out
-
 
 def _field_id(fields, key):
     val = fields.get(key)
@@ -42,7 +50,6 @@ def _field_id(fields, key):
     if isinstance(val, float):
         return int(val)
     return None
-
 
 def _is_implicit(cst, node_id):
     node = cst.nodes_by_id.get(node_id)
@@ -60,7 +67,6 @@ def _is_implicit(cst, node_id):
         return True
     return False
 
-
 def _is_implicit_port(cst, port):
     ty = port.get("type")
     if ty is None:
@@ -72,10 +78,11 @@ def _is_implicit_port(cst, port):
         return True
     name_tok = port.get("name_token")
     if name_tok is not None and _kind_name(cst, node) == "DataType":
-        if node.get("first_token") == int(name_tok) and node.get("last_token") == int(name_tok):
+        if node.get("first_token") == int(name_tok) and node.get("last_token") == int(
+            name_tok
+        ):
             return True
     return False
-
 
 def _function_name_token(cst, node):
     stack = list(node.get("children") or cst.children.get(node.get("id"), []))
@@ -89,13 +96,11 @@ def _function_name_token(cst, node):
         stack.extend(child.get("children") or cst.children.get(cid, []))
     return None
 
-
 def _kind_name(cst, node):
     kind_id = node.get("kind", -1)
     if kind_id < 0 or kind_id >= len(cst.kinds):
         return ""
     return cst.kinds[kind_id]
-
 
 def _violation(tokens, tok_idx, line_starts, msg):
     tok = tokens[tok_idx] if tok_idx is not None and tok_idx < len(tokens) else None

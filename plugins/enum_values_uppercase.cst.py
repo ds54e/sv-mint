@@ -2,10 +2,12 @@ import re
 
 from lib.cst_inline import byte_span_to_loc
 
-TYPEDEF_ENUM_RE = re.compile(r"typedef\s+enum(?P<head>[\s\S]*?)\{(?P<body>[\s\S]*?)\}\s*(?P<name>[A-Za-z_]\w*)\s*;", re.DOTALL)
+TYPEDEF_ENUM_RE = re.compile(
+    r"typedef\s+enum(?P<head>[\s\S]*?)\{(?P<body>[\s\S]*?)\}\s*(?P<name>[A-Za-z_]\w*)\s*;",
+    re.DOTALL,
+)
 UPPER_CAMEL = re.compile(r"^[A-Z][A-Za-z0-9]*$")
 ALL_CAPS = re.compile(r"^[A-Z][A-Z0-9_]*$")
-
 
 def check(req):
     if req.get("stage") != "cst":
@@ -22,14 +24,17 @@ def check(req):
             off = body_off + rel
             loc = byte_span_to_loc(off, off + len(member), line_starts)
             if not (UPPER_CAMEL.match(member) or ALL_CAPS.match(member)):
-                out.append({
-                    "rule_id": "enum_values_uppercase",
-                    "severity": "warning",
-                    "message": "enum values should use UpperCamelCase or ALL_CAPS: {}".format(member),
-                    "location": loc,
-                })
+                out.append(
+                    {
+                        "rule_id": "enum_values_uppercase",
+                        "severity": "warning",
+                        "message": "enum values should use UpperCamelCase or ALL_CAPS: {}".format(
+                            member
+                        ),
+                        "location": loc,
+                    }
+                )
     return out
-
 
 def _enum_entries(body):
     out = []
@@ -51,7 +56,6 @@ def _enum_entries(body):
         rel = token_start + body[token_start:].find(name)
         out.append((name, rel))
     return out
-
 
 def _head_ident(chunk):
     m = re.match(r"\s*([A-Za-z_]\w*)", chunk)

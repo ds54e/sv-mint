@@ -18,10 +18,12 @@ def check(req):
         if not name or any(name.endswith(sfx) for sfx in allowed):
             continue
         loc = port.get("loc") or {"line": 1, "col": 1, "end_line": 1, "end_col": 1}
-        out.append({
-            "rule_id": "port_names_have_direction_suffix",
-            "severity": "warning",
-            "message": f"{name} must end with {' or '.join(allowed)}",
-            "location": loc,
-        })
+        out.append(
+            {
+                "rule_id": "port_names_have_direction_suffix",
+                "severity": "warning",
+                "message": f"{name} must end with {' or '.join(allowed)}",
+                "location": loc,
+            }
+        )
     return out

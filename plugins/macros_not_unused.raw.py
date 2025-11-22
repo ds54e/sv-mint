@@ -3,7 +3,6 @@ import re
 DEFINE_PATTERN = re.compile(r"(?m)^\s*`define\s+([A-Za-z_]\w*)")
 USE_PATTERN = re.compile(r"`([A-Za-z_]\w*)")
 
-
 def check(req):
     if req.get("stage") != "raw_text":
         return []
@@ -17,14 +16,15 @@ def check(req):
             continue
         if _has_unused_comment(text, start):
             continue
-        out.append({
-            "rule_id": "macros_not_unused",
-            "severity": "warning",
-            "message": f"macro `{name}` is defined but never used",
-            "location": _byte_loc(text, start),
-        })
+        out.append(
+            {
+                "rule_id": "macros_not_unused",
+                "severity": "warning",
+                "message": f"macro `{name}` is defined but never used",
+                "location": _byte_loc(text, start),
+            }
+        )
     return out
-
 
 def _has_unused_comment(text, offset):
     line_start = text.rfind("\n", 0, offset)
@@ -49,7 +49,6 @@ def _has_unused_comment(text, offset):
         if end != -1 and "unused" in rest[pos_block + 2 : end].lower():
             return True
     return False
-
 
 def _byte_loc(text, index):
     line = text.count("\n", 0, index) + 1

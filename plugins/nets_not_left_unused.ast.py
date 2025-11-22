@@ -2,7 +2,6 @@ import re
 
 UNUSED_WORD = re.compile(r"\bunused\b", re.IGNORECASE)
 
-
 def check(req):
     if req.get("stage") != "ast":
         return []
@@ -18,14 +17,17 @@ def check(req):
         if reads == 0 and writes == 0:
             if _has_unused_comment(line_cache, s.get("loc")):
                 continue
-            out.append({
-                "rule_id": "nets_not_left_unused",
-                "severity": "warning",
-                "message": f"unused net {s.get('module','')}.{s.get('name','')}",
-                "location": s.get("loc", {"line":1,"col":1,"end_line":1,"end_col":1})
-            })
+            out.append(
+                {
+                    "rule_id": "nets_not_left_unused",
+                    "severity": "warning",
+                    "message": f"unused net {s.get('module','')}.{s.get('name','')}",
+                    "location": s.get(
+                        "loc", {"line": 1, "col": 1, "end_line": 1, "end_col": 1}
+                    ),
+                }
+            )
     return out
-
 
 def _has_unused_comment(cache, loc):
     if not loc:
@@ -41,24 +43,23 @@ def _has_unused_comment(cache, loc):
     if start_col < 1:
         start_col = 1
     line = lines[line_idx]
-    rest = line[start_col - 1:]
+    rest = line[start_col - 1 :]
     i = 0
     length = len(rest)
     while i < length:
         if rest.startswith("//", i):
-            return bool(UNUSED_WORD.search(rest[i + 2:]))
+            return bool(UNUSED_WORD.search(rest[i + 2 :]))
         if rest.startswith("/*", i):
             end = rest.find("*/", i + 2)
             if end == -1:
                 return False
-            comment = rest[i + 2:end]
+            comment = rest[i + 2 : end]
             if UNUSED_WORD.search(comment):
                 return True
             i = end + 2
             continue
         i += 1
     return False
-
 
 def _lines_for_file(cache, path):
     if not path:
