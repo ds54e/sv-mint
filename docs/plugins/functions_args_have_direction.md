@@ -3,7 +3,7 @@
 - **Script**: `plugins/functions_args_have_direction.cst.py`
 - **Stage**: `cst`
 - **Key Inputs**: `cst_ir.tokens`, `cst_ir.nodes`, `cst_ir.line_starts`
-- **Summary**: Function arguments must specify a direction (`input`/`output`/`inout`/`ref`); omitted directions are rejected.
+- **Summary**: Function arguments must specify a direction (`input`/`output`/`inout`/`ref`).
 
 ## Details
 
