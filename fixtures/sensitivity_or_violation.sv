@@ -1,0 +1,15 @@
+`default_nettype none
+
+module sensitivity_or_violation;
+  logic clk_i;
+  logic rst_ni;
+  logic data_d;
+  logic data_q;
+
+  always_ff @(posedge clk_i or negedge rst_ni) begin
+    if (!rst_ni) data_q <= '0;
+    else data_q <= data_d;
+  end
+endmodule
+
+`default_nettype wire
