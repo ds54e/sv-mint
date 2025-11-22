@@ -10,24 +10,26 @@ def check(req):
         name = decl.get("name") or ""
         if not name:
             continue
-        if _is_upper(name):
+        if _is_upper_camel(name):
             continue
         loc = decl.get("loc") or {"line": 1, "col": 1, "end_line": 1, "end_col": 1}
         out.append(
             {
                 "rule_id": "parameter_names_uppercase",
                 "severity": "warning",
-                "message": f"parameter {name} should use UpperCamelCase or ALL_CAPS",
+                "message": f"parameter {name} should use UpperCamelCase",
                 "location": loc,
             }
         )
     return out
 
-def _is_upper(name):
+def _is_upper_camel(name):
     if not name:
         return False
-    if name[0].isupper() and name.replace("_", "").isalnum():
-        return True
     if name.isupper():
-        return True
-    return False
+        return False
+    if "_" in name:
+        return False
+    if not name[0].isupper():
+        return False
+    return name.isalnum()
