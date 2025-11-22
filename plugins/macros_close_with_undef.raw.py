@@ -1,13 +1,12 @@
 import re
 
-from lib.raw_text_helpers import byte_loc, raw_inputs
-
 
 def check(req):
-    inputs = raw_inputs(req)
-    if not inputs:
+    if req.get("stage") != "raw_text":
         return []
-    text, path = inputs
+    payload = req.get("payload") or {}
+    text = payload.get("text") or ""
+    path = req.get("path") or ""
     macros_file = path.endswith("_macros.svh")
     defines = list(re.finditer(r"(?m)^\s*`define\s+([A-Za-z_]\w*)", text))
     undefs = {m.group(1) for m in re.finditer(r"`undef\s+([A-Za-z_]\w*)", text)}
@@ -21,6 +20,13 @@ def check(req):
                 "rule_id": "macros_close_with_undef",
                 "severity": "warning",
                 "message": f"`define {name} must be undefined at end of file",
-                "location": byte_loc(text, match.start(1)),
+                "location": _byte_loc(text, match.start(1)),
             })
     return out
+
+
+def _byte_loc(text, index):
+    line = text.count("\n", 0, index) + 1
+    prev = text.rfind("\n", 0, index)
+    col = index + 1 if prev < 0 else index - prev
+    return {"line": line, "col": col, "end_line": line, "end_col": col + 1}

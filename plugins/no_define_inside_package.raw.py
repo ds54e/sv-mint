@@ -1,17 +1,15 @@
 import re
 
-from lib.raw_text_helpers import byte_loc, raw_inputs
-
 PACKAGE_RE = re.compile(r"(?m)^\s*package\s+([A-Za-z_][\w$]*)")
 ENDPACKAGE_RE = re.compile(r"(?m)^\s*endpackage(?:\s*:\s*([A-Za-z_][\w$]*))?")
 DEFINE_RE = re.compile(r"(?m)^\s*`define\s+([A-Za-z_][\w$]*)")
 
 
 def check(req):
-    inputs = raw_inputs(req)
-    if not inputs:
+    if req.get("stage") != "raw_text":
         return []
-    text, _ = inputs
+    payload = req.get("payload") or {}
+    text = payload.get("text") or ""
     packages = list(PACKAGE_RE.finditer(text))
     endpackages = list(ENDPACKAGE_RE.finditer(text))
     if not packages or not endpackages:
@@ -26,6 +24,13 @@ def check(req):
             "rule_id": "no_define_inside_package",
             "severity": "warning",
             "message": f"prefer parameters over `define {name} inside package",
-            "location": byte_loc(text, body_start + match.start()),
+            "location": _byte_loc(text, body_start + match.start()),
         })
     return out
+
+
+def _byte_loc(text, index):
+    line = text.count("\n", 0, index) + 1
+    prev = text.rfind("\n", 0, index)
+    col = index + 1 if prev < 0 else index - prev
+    return {"line": line, "col": col, "end_line": line, "end_col": col + 1}

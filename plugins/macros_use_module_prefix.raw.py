@@ -1,13 +1,10 @@
 import re
 
-from lib.raw_text_helpers import byte_loc, raw_inputs
-
-
 def check(req):
-    inputs = raw_inputs(req)
-    if not inputs:
+    if req.get("stage") != "raw_text":
         return []
-    text, _ = inputs
+    payload = req.get("payload") or {}
+    text = payload.get("text") or ""
     out = []
     for start, end, name in _module_ranges(text):
         prefix = f"{name.upper()}_"
@@ -21,7 +18,7 @@ def check(req):
                 "rule_id": "macros_use_module_prefix",
                 "severity": "warning",
                 "message": f"`define {macro} inside module {name} must be prefixed with {prefix}",
-                "location": byte_loc(text, offset + match.start(1)),
+                "location": _byte_loc(text, offset + match.start(1)),
             })
     return out
 
@@ -49,3 +46,10 @@ def _find_matching_end(text, start):
                 return idx
         idx += 1
     return None
+
+
+def _byte_loc(text, index):
+    line = text.count("\n", 0, index) + 1
+    prev = text.rfind("\n", 0, index)
+    col = index + 1 if prev < 0 else index - prev
+    return {"line": line, "col": col, "end_line": line, "end_col": col + 1}
