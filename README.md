@@ -9,8 +9,6 @@ sv-mint is a SystemVerilog lint pipeline that combines a Rust core with Python p
    ```bash
    ./sv-mint --config ./sv-mint.toml path/to/files/foo.sv path/to/files/bar.sv
    ```
-4. Tailor rules by editing `sv-mint.toml`. Declare your `[[rule]]` entries, point `[plugin]` at your Python interpreter, and let sv-mint’s built-in defaults cover everything else unless you need overrides.
-
 ### Sample `sv-mint.toml`
 
 ```toml
