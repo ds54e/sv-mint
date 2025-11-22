@@ -148,70 +148,8 @@ impl PythonHost {
             rules,
         };
         self.send(&req)?;
-        let resp = match self.recv() {
-            Ok(r) => r,
-            Err(e @ PluginError::Timeout { .. }) => {
-                let elapsed = t0.elapsed().as_millis();
-                log_event(
-                    Ev::new(Event::PluginTimeout, &path_s)
-                        .with_stage(stage_name)
-                        .with_duration_ms(elapsed),
-                );
-                self.log_stderr(&path_s, stage_name);
-                return Err(e);
-            }
-            Err(e @ PluginError::ExitCode { code }) => {
-                let elapsed = t0.elapsed().as_millis();
-                log_event(
-                    Ev::new(Event::PluginExitNonzero, &path_s)
-                        .with_stage(stage_name)
-                        .with_duration_ms(elapsed)
-                        .with_exit_code(code),
-                );
-                self.log_stderr(&path_s, stage_name);
-                return Err(e);
-            }
-            Err(e) => {
-                let elapsed = t0.elapsed().as_millis();
-                let detail = e.to_string();
-                let mut ev = Ev::new(Event::PluginError, &path_s)
-                    .with_stage(stage_name)
-                    .with_duration_ms(elapsed);
-                ev = ev.with_message(&detail);
-                log_event(ev);
-                self.log_stderr(&path_s, stage_name);
-                return Err(e);
-            }
-        };
-        let (resp, response_bytes) = resp;
-        let violations = match resp {
-            HostResponse::Violations { violations } => violations,
-            HostResponse::Error { detail, script } => {
-                let mut detail = detail.unwrap_or_else(|| "plugin error".to_string());
-                if let Some(script_path) = script.as_deref() {
-                    detail.push_str(&format!(" (script {script_path})"));
-                }
-                let elapsed = t0.elapsed().as_millis();
-                let mut ev = Ev::new(Event::PluginError, &path_s)
-                    .with_stage(stage_name)
-                    .with_duration_ms(elapsed);
-                ev = ev.with_message(&detail);
-                log_event(ev);
-                self.log_stderr(&path_s, stage_name);
-                return Err(PluginError::ProtocolError { detail });
-            }
-            HostResponse::Ready => {
-                let detail = "unexpected ready response".to_string();
-                let elapsed = t0.elapsed().as_millis();
-                let mut ev = Ev::new(Event::PluginError, &path_s)
-                    .with_stage(stage_name)
-                    .with_duration_ms(elapsed);
-                ev = ev.with_message(&detail);
-                log_event(ev);
-                self.log_stderr(&path_s, stage_name);
-                return Err(PluginError::ProtocolError { detail });
-            }
-        };
+        let (resp, response_bytes) = self.recv_with_logging(&path_s, stage_name, t0)?;
+        let violations = self.handle_response(resp, &path_s, stage_name, t0)?;
         let adjusted = self.apply_overrides(violations);
         self.log_stderr(&path_s, stage_name);
         let elapsed = t0.elapsed().as_millis();
@@ -245,6 +183,86 @@ impl PythonHost {
             (HostResponse::Violations { .. }, _) => Err(PluginError::ProtocolError {
                 detail: "unexpected violations response during init".to_string(),
             }),
+        }
+    }
+
+    fn recv_with_logging(
+        &mut self,
+        path: &str,
+        stage: &str,
+        start: Instant,
+    ) -> Result<(HostResponse, usize), PluginError> {
+        match self.recv() {
+            Ok(r) => Ok(r),
+            Err(e @ PluginError::Timeout { .. }) => {
+                let elapsed = start.elapsed().as_millis();
+                log_event(
+                    Ev::new(Event::PluginTimeout, path)
+                        .with_stage(stage)
+                        .with_duration_ms(elapsed),
+                );
+                self.log_stderr(path, stage);
+                Err(e)
+            }
+            Err(e @ PluginError::ExitCode { code }) => {
+                let elapsed = start.elapsed().as_millis();
+                log_event(
+                    Ev::new(Event::PluginExitNonzero, path)
+                        .with_stage(stage)
+                        .with_duration_ms(elapsed)
+                        .with_exit_code(code),
+                );
+                self.log_stderr(path, stage);
+                Err(e)
+            }
+            Err(e) => {
+                let elapsed = start.elapsed().as_millis();
+                let detail = e.to_string();
+                let mut ev = Ev::new(Event::PluginError, path)
+                    .with_stage(stage)
+                    .with_duration_ms(elapsed);
+                ev = ev.with_message(&detail);
+                log_event(ev);
+                self.log_stderr(path, stage);
+                Err(e)
+            }
+        }
+    }
+
+    fn handle_response(
+        &mut self,
+        resp: HostResponse,
+        path: &str,
+        stage: &str,
+        start: Instant,
+    ) -> Result<Vec<Violation>, PluginError> {
+        match resp {
+            HostResponse::Violations { violations } => Ok(violations),
+            HostResponse::Error { detail, script } => {
+                let mut detail = detail.unwrap_or_else(|| "plugin error".to_string());
+                if let Some(script_path) = script.as_deref() {
+                    detail.push_str(&format!(" (script {script_path})"));
+                }
+                let elapsed = start.elapsed().as_millis();
+                let mut ev = Ev::new(Event::PluginError, path)
+                    .with_stage(stage)
+                    .with_duration_ms(elapsed);
+                ev = ev.with_message(&detail);
+                log_event(ev);
+                self.log_stderr(path, stage);
+                Err(PluginError::ProtocolError { detail })
+            }
+            HostResponse::Ready => {
+                let detail = "unexpected ready response".to_string();
+                let elapsed = start.elapsed().as_millis();
+                let mut ev = Ev::new(Event::PluginError, path)
+                    .with_stage(stage)
+                    .with_duration_ms(elapsed);
+                ev = ev.with_message(&detail);
+                log_event(ev);
+                self.log_stderr(path, stage);
+                Err(PluginError::ProtocolError { detail })
+            }
         }
     }
 

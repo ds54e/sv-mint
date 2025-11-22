@@ -65,13 +65,7 @@ fn main() -> ExitCode {
         }
     };
 
-    if summary.had_error {
-        ExitCode::from(3)
-    } else if summary.violations > 0 {
-        ExitCode::from(2)
-    } else {
-        ExitCode::from(0)
-    }
+    summary.exit_code()
 }
 
 fn gather_inputs(direct: &[PathBuf]) -> Result<Vec<PathBuf>, ConfigError> {

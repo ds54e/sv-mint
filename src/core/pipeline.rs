@@ -13,6 +13,7 @@ use anyhow::{anyhow, Result};
 use serde::Serialize;
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
+use std::process::ExitCode;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::time::Instant;
 use tracing::{debug, error};
@@ -20,6 +21,18 @@ use tracing::{debug, error};
 pub struct RunSummary {
     pub violations: usize,
     pub had_error: bool,
+}
+
+impl RunSummary {
+    pub fn exit_code(&self) -> ExitCode {
+        if self.had_error {
+            ExitCode::from(3)
+        } else if self.violations > 0 {
+            ExitCode::from(2)
+        } else {
+            ExitCode::from(0)
+        }
+    }
 }
 
 pub struct Pipeline<'a> {
