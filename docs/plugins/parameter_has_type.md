@@ -1,8 +1,8 @@
 # parameter_has_type
 
-- **Script**: `plugins/parameter_has_type.raw.py`
-- **Stage**: `raw_text`
-- **Key Inputs**: `text`
+- **Script**: `plugins/parameter_has_type.cst.py`
+- **Stage**: `cst` (`mode = inline`)
+- **Key Inputs**: `cst_ir.tokens`, `line_starts`, `pp_text`
 - **Summary**: Parameters must declare an explicit data type
 
 ## Details

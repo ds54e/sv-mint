@@ -101,4 +101,4 @@ stage = "cst"
 
 [[rule]]
 id = "parameter_has_type"
-stage = "raw_text"
+stage = "cst"
