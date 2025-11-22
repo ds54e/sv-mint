@@ -7,7 +7,7 @@
 
 ## Details
 
-### Limitations
+### Notes
 - Implicit `.*` connections are not elaborated; they will be counted as unused.
 ### Good
 

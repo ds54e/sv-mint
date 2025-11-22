@@ -7,7 +7,7 @@
 
 ## Details
 
-### Limitations
+### Notes
 - Implicit connections (`.*`, `.foo` shorthand) are not elaborated; they will be counted as unused.
 - If the declaration line contains a comment with the words `used` or `reserved` (case-insensitive), the warning is suppressed.
 ### Good
