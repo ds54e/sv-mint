@@ -1,6 +1,3 @@
-function logic add(
-  input logic a,
-  b // missing direction
-);
-  return a + b;
+function logic f (logic a);
+  return a;
 endfunction

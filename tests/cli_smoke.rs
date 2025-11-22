@@ -20,10 +20,7 @@ fn fixture_rule_id(path: &str) -> String {
             return dir.to_string();
         }
     }
-    let name = p
-        .file_name()
-        .and_then(|s| s.to_str())
-        .unwrap_or(path);
+    let name = p.file_name().and_then(|s| s.to_str()).unwrap_or(path);
     let trimmed = name.trim_end_matches(".sv");
     if let Some(found) = rule_ids()
         .iter()

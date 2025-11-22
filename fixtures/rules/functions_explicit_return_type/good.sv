@@ -1,9 +1,6 @@
-`default_nettype none
-
-function automatic logic fn (
-  input logic [1:0] a
+function logic add(
+  input logic a,
+  b // missing direction
 );
-  return 1'b0;
+  return a + b;
 endfunction
-
-`default_nettype wire

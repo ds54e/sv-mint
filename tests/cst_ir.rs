@@ -158,11 +158,6 @@ fn node_by_id(ir: &CstIr, id: u32) -> &NodeRec {
     ir.nodes.iter().find(|n| n.id == id).unwrap()
 }
 
-fn token_text(ir: &CstIr, tok_id: usize) -> String {
-    let tok = &ir.tokens[tok_id];
-    ir.source_text[tok.start as usize..tok.end as usize].trim().to_string()
-}
-
 fn is_implicit_type(ir: &CstIr, type_id: u32, name_token: Option<u32>) -> bool {
     let node = node_by_id(ir, type_id);
     let kind = kind_name(ir, type_id);
