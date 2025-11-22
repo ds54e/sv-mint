@@ -6,9 +6,6 @@
 
 ## Details
 
-### Message
-`` file must contain only one module declaration ``
-
 ### Good
 
 ```systemverilog

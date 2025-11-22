@@ -7,9 +7,6 @@
 
 ## Details
 
-### Message
-`` `define <name> should use ALL_CAPS ``
-
 ### Good
 
 ```systemverilog

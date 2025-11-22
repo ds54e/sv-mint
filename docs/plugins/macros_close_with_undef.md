@@ -7,8 +7,6 @@
 
 ## Details
 
-### Message
-`` local macro <name> must be undefined before EOF ``
 ### Good
 
 ```systemverilog

@@ -7,8 +7,6 @@
 
 ## Details
 
-### Message
-`` function arguments must specify direction (input/output/inout/ref) ``
 ### Good
 
 ```systemverilog

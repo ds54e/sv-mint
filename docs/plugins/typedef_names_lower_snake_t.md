@@ -7,9 +7,6 @@
 
 ## Details
 
-### Message
-`` typedef names should use lower_snake_case and end with _t: <name> ``
-
 ### Good
 
 ```systemverilog

@@ -7,8 +7,6 @@
 
 ## Details
 
-### Message
-`` unused localparam <module>.<name> ``
 ### Good
 
 ```systemverilog

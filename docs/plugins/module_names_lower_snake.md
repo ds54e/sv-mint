@@ -7,8 +7,6 @@
 
 ## Details
 
-### Message
-`` module <name> must use lower_snake_case ``
 ### Good
 
 ```systemverilog

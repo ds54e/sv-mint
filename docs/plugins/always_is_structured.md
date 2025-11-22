@@ -7,9 +7,6 @@
 
 ## Details
 
-### Message
-`` use always_ff/always_comb/always_latch instead of bare always ``
-
 ### Good
 
 ```systemverilog

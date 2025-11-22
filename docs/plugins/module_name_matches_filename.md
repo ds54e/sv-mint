@@ -6,11 +6,6 @@
 
 ## Details
 
-### Message
-`` module name <name> should match file name <stem> ``
-or
-`` package name <name> should match file name <stem> ``
-
 ### Good
 
 `module_filename_match_ok.sv`

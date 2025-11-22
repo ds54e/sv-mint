@@ -7,8 +7,6 @@
 
 ## Details
 
-### Message
-`` function arguments must declare explicit data types ``
 ### Good
 
 ```systemverilog

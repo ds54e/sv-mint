@@ -6,9 +6,6 @@
 
 ## Details
 
-### Message
-`` macro `<name>` is defined but never used ``
-
 ### Limitations
 - A comment containing the words `used` or `reserved` (case-insensitive) in the macro definition block suppresses this warning.
 - For multi-line macros, place the comment on the final line without a trailing backslash to ensure it is detected.

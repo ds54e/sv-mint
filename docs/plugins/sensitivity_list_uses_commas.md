@@ -7,8 +7,6 @@
 
 ## Details
 
-### Message
-`` use ',' separators in sensitivity lists instead of 'or' ``
 ### Good
 
 ```systemverilog

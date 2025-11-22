@@ -7,9 +7,6 @@
 
 ## Details
 
-### Message
-`` enum types should use lower_snake_case and end with _e: <name> ``
-
 ### Good
 
 ```systemverilog

@@ -7,9 +7,6 @@
 
 ## Details
 
-### Message
-`` functions in packages/modules/interfaces must declare automatic or static ``
-
 ### Good
 
 ```systemverilog

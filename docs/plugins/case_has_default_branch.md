@@ -7,8 +7,6 @@
 
 ## Details
 
-### Message
-`` case statement must include a default item ``
 ### Good
 
 ```systemverilog

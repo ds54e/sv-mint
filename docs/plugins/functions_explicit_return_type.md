@@ -7,8 +7,6 @@
 
 ## Details
 
-### Message
-`` function must declare an explicit return type ``
 ### Good
 
 ```systemverilog

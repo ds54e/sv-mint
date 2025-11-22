@@ -7,8 +7,6 @@
 
 ## Details
 
-### Message
-`` nonblocking '<=' inside always_comb ``
 ### Good
 
 ```systemverilog

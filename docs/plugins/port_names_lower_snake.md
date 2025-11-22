@@ -7,8 +7,6 @@
 
 ## Details
 
-### Message
-`` port <name> must use lower_snake_case ``
 ### Good
 
 ```systemverilog

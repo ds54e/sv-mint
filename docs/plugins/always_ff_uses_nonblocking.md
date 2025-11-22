@@ -7,8 +7,6 @@
 
 ## Details
 
-### Message
-`` blocking '=' inside always_ff ``
 ### Good
 
 ```systemverilog

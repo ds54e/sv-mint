@@ -7,8 +7,6 @@
 
 ## Details
 
-### Message
-`` unused param <module>.<name> ``
 ### Good
 
 ```systemverilog

@@ -7,8 +7,6 @@
 
 ## Details
 
-### Message
-`` unused var <module>.<name> ``
 ### Limitations
 - Implicit `.*` connections are not elaborated; they will be counted as unused.
 ### Good

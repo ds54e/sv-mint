@@ -7,8 +7,6 @@
 
 ## Details
 
-### Message
-`` port <name> must use suffix matching its direction ``
 ### Good
 
 ```systemverilog

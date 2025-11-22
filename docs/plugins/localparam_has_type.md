@@ -7,8 +7,6 @@
 
 ## Details
 
-### Message
-`` localparam must declare an explicit data type ``
 ### Good
 
 ```systemverilog

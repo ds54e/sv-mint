@@ -7,8 +7,6 @@
 
 ## Details
 
-### Message
-`` parameter <name> should use UpperCamelCase ``
 ### Good
 
 ```systemverilog

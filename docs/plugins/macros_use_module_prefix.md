@@ -7,8 +7,6 @@
 
 ## Details
 
-### Message
-`` module-local macros must be prefixed with MODULE_NAME_ ``
 ### Good
 
 ```systemverilog

@@ -7,8 +7,6 @@
 
 ## Details
 
-### Message
-`` disable block label is not portable; use disable fork ``
 ### Good
 
 ```systemverilog

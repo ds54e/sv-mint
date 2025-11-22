@@ -6,9 +6,6 @@
 
 ## Details
 
-### Message
-`` localparam <name> should use UpperCamelCase or ALL_CAPS ``
-
 ### Good
 
 ```systemverilog

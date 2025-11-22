@@ -6,9 +6,6 @@
 
 ## Details
 
-### Message
-`` var names should use lower_snake_case (letters, digits, _, $ allowed): <name> ``
-
 ### Good
 
 ```systemverilog
