@@ -10,11 +10,10 @@
 ### Message
 `` unused net <module>.<name> ``
 ### Remediation
-Delete unused nets or annotate intentional placeholders with inline comments containing `unused` (e.g., `` wire debug_tap; // unused ``).
+Delete unused nets or annotate intentional placeholders with inline comments containing `used` or `reserved` (e.g., `` wire debug_tap; // reserved ``).
 
 ### Behavior notes
 - Implicit `.*` connections are not elaborated; they will be counted as unused.
-- If the declaration line contains a comment with the words `used` or `reserved` (case-insensitive), the warning is suppressed.
 ### Good
 
 ```systemverilog
