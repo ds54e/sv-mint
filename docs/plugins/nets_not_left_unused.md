@@ -11,6 +11,9 @@
 `` unused net <module>.<name> ``
 ### Remediation
 Delete unused nets or annotate intentional placeholders with inline comments containing `unused` (e.g., `` wire debug_tap; // unused ``).
+
+### Limitations
+- Implicit connections (`.*`, `.foo` shorthand) are not elaborated here; if the parser does not emit explicit identifiers for them, those nets may still be reported as unused. Prefer explicit named connections when checking this rule.
 ### Good
 
 ```systemverilog
