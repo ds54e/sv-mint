@@ -52,14 +52,10 @@ module m;
 endmodule
 ```
 
-```systemverilog
-logic debug_shadow;  // unused (documented placeholder)
-```
-
 ### Bad
 
-```
+```systemverilog
 module m;
   logic a;
 endmodule
-```systemverilog
+```

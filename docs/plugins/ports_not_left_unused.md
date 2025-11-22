@@ -28,22 +28,13 @@ module m (
 endmodule
 ```
 
-```systemverilog
-module fixture(
-  input  logic debug_i,  // unused
-  output logic ready_o
-);
-  assign ready_o = 1'b0;
-endmodule
-```
-
 ### Bad
 
-```
+```systemverilog
 module m (
   input logic a,
   output logic b
 );
   assign b = 1'b1;
 endmodule
-```systemverilog
+```
