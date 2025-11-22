@@ -10,8 +10,6 @@
 `` use named port connections instead of positional arguments ``
 ### Remediation
 Rewrite as `.clk(clk)` style to remove ordering hazards.
-### Notes
-Formatting tools such as `verible-verilog-format --named-port-formatting` help during migrations.
 ### Good
 
 ```systemverilog

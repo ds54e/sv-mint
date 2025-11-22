@@ -11,8 +11,6 @@
 `` blocking '=' inside always_ff ``
 ### Remediation
 Use non-blocking `<=` for sequential logic or refactor the assignment into combinational logic.
-### Notes
-Falls back to text scanning when token data is unavailable.
 ### Good
 
 ```systemverilog

@@ -11,8 +11,6 @@
 `` unused param <module>.<name> ``
 ### Remediation
 Remove unused parameters, ensure configuration knobs are referenced, or annotate intentional placeholders with inline comments containing `unused` (for example, `` parameter bit EnableDbg = 0  // unused ``).
-### Notes
-The rule treats both `parameter` and `localparam` symbols identically because the AST reports them under the `param` class.
 ### Good
 
 ```systemverilog

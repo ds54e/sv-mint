@@ -11,8 +11,6 @@
 `` unused net <module>.<name> ``
 ### Remediation
 Delete unused nets or annotate intentional placeholders with inline comments containing `unused` (e.g., `` wire debug_tap; // unused ``).
-### Notes
-AST data reflects the post-include source, so nets referenced only under conditional compilation may appear unused if `ignore_include` is enabled.
 ### Good
 
 ```systemverilog

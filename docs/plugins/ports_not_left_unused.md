@@ -11,8 +11,6 @@
 `` unused port <module>.<name> ``
 ### Remediation
 Remove or route the port, or mark intentional placeholders with an inline `unused` comment on the declaration line.
-### Notes
-Only in-module references are counted; external instance connections do not satisfy the rule.
 ### Good
 
 ```systemverilog

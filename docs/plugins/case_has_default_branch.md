@@ -11,8 +11,6 @@
 `` case statement must include a default item ``
 ### Remediation
 Add a `default` branch when using plain `case`. `unique`/`unique0` cases are exempt (the rule does not check exhaustiveness).
-### Notes
-The pass inspects preprocessed `pp_text`, so macros that expand to `default` must emit the token after preprocessing.
 ### Good
 
 ```systemverilog

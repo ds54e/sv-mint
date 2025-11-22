@@ -11,6 +11,3 @@
 
 ### Remediation
 Remove the unused macro or use it where intended. For one-off local helpers, prefer inlining or deleting the dead definition.
-
-### Notes
-This rule operates on pre-preprocessor text, so comments and disabled code (`ifdef` branches) still count as “usage” if they include ``NAME`.
