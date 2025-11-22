@@ -15,7 +15,7 @@ Use blocking `=` inside combinational logic; if state is required, move the logi
 
 ```systemverilog
 always_comb begin
-  result_d = a_i ^ b_i;  // blocking assignments only
+  result_d = a_i;  // blocking assignments only
 end
 ```
 
@@ -23,6 +23,6 @@ end
 
 ```systemverilog
 always_comb begin
-  result_q <= a_i ^ b_i;  // violates combinational semantics
+  result_q <= a_i;  // violates combinational semantics
 end
 ```
