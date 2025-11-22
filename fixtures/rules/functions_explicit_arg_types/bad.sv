@@ -1,6 +1,3 @@
-function logic add(
-  input a,
-  input b
-);
-  return 1'b0;
+function logic f (input a);
+  return a;
 endfunction

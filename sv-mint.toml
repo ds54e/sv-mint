@@ -99,6 +99,10 @@ id = "functions_explicit_arg_types"
 stage = "cst"
 
 [[rule]]
+id = "functions_args_have_direction"
+stage = "cst"
+
+[[rule]]
 id = "enum_type_names_lower_snake_e"
 stage = "cst"
 
