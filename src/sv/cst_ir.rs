@@ -40,6 +40,7 @@ pub struct CstIr {
     pub include: CstIncludeFlags,
     pub pp_text: Option<String>,
     pub kind_table: Vec<String>,
+    pub tok_kind_map: std::collections::HashMap<String, u16>,
     pub tok_kind_table: Vec<String>,
     pub tokens: Vec<TokenRec>,
     pub nodes: Vec<NodeRec>,
@@ -115,7 +116,7 @@ impl CstBuilder {
 
     fn finish(self) -> CstIr {
         CstIr {
-            schema: 1,
+            schema: 2,
             format: "json",
             sv_parser: self.sv_parser,
             file: self.file,
@@ -128,6 +129,7 @@ impl CstBuilder {
             },
             pp_text: Some(self.pp_text),
             kind_table: self.kind_table,
+            tok_kind_map: self.tok_kind_map,
             tok_kind_table: self.tok_kind_table,
             tokens: self.tokens,
             nodes: self.nodes,
