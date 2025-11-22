@@ -14,17 +14,15 @@ Use non-blocking `<=` for sequential logic or refactor the assignment into combi
 ### Good
 
 ```systemverilog
-always_ff @(posedge clk_i, negedge rst_ni) begin
-  if (!rst_ni) data_q <= '0;
-  else data_q <= data_d;
+always_ff @(posedge clk_i) begin
+  data_q <= data_d;  // non-blocking assignment inside always_ff
 end
 ```
 
 ### Bad
 
 ```systemverilog
-always_ff @(posedge clk_i, negedge rst_ni) begin
-  if (!rst_ni) data_q = '0;
-  else data_q = data_d;  // blocking assignment inside always_ff
+always_ff @(posedge clk_i) begin
+  data_q = data_d;  // blocking assignment inside always_ff
 end
 ```
