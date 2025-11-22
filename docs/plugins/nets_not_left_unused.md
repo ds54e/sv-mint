@@ -12,7 +12,7 @@
 ### Remediation
 Delete unused nets or annotate intentional placeholders with inline comments containing `used` or `reserved`.
 
-### Behavior notes
+### Limitations
 - Implicit `.*` connections are not elaborated; they will be counted as unused.
 ### Good
 
