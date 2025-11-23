@@ -14,23 +14,19 @@ def check(req):
         port = (node.get("fields") or {}).get("port") or {}
         if not _is_implicit_port(cst, port):
             continue
-        func_id = _enclosing_function_id(cst, node)
-        if func_id is None or func_id in reported:
+        task_id = _enclosing_task_id(cst, node)
+        if task_id is None or task_id in reported:
             continue
-        func_node = cst.nodes_by_id.get(func_id)
+        task_node = cst.nodes_by_id.get(task_id)
         tok = port.get("name_token")
-        if tok is None and func_node is not None:
-            tok = _function_name_token(cst, func_node)
-        if tok is not None:
-            violation = _violation(
-                tokens,
-                tok,
-                line_starts,
-                "function arguments must declare explicit data types",
-            )
-            if violation:
-                out.append(violation)
-                reported.add(func_id)
+        if tok is None and task_node is not None:
+            tok = _task_name_token(cst, task_node)
+        if tok is None:
+            continue
+        violation = _violation(tokens, tok, line_starts)
+        if violation:
+            out.append(violation)
+            reported.add(task_id)
     return out
 
 def _is_implicit_port(cst, port):
@@ -48,25 +44,19 @@ def _is_implicit_port(cst, port):
             return True
     return False
 
-def _function_name_token(cst, node):
+def _task_name_token(cst, node):
     stack = list(node.get("children") or cst.children.get(node.get("id"), []))
     while stack:
         cid = stack.pop()
         child = cst.nodes_by_id.get(cid)
         if not child:
             continue
-        if _kind_name(cst, child) == "FunctionIdentifier":
+        if _kind_name(cst, child) == "TaskIdentifier":
             return child.get("first_token")
         stack.extend(child.get("children") or cst.children.get(cid, []))
     return None
 
-def _kind_name(cst, node):
-    kind_id = node.get("kind", -1)
-    if kind_id < 0 or kind_id >= len(cst.kinds):
-        return ""
-    return cst.kinds[kind_id]
-
-def _violation(tokens, tok_idx, line_starts, msg):
+def _violation(tokens, tok_idx, line_starts):
     tok = tokens[tok_idx] if tok_idx is not None and tok_idx < len(tokens) else None
     if not tok:
         return None
@@ -76,16 +66,22 @@ def _violation(tokens, tok_idx, line_starts, msg):
         return None
     loc = byte_span_to_loc(start, end, line_starts)
     return {
-        "rule_id": "functions_explicit_arg_types",
+        "rule_id": "tasks_explicit_arg_types",
         "severity": "warning",
-        "message": msg,
+        "message": "task arguments must declare explicit data types",
         "location": loc,
     }
 
-def _enclosing_function_id(cst, node):
+def _kind_name(cst, node):
+    kind_id = node.get("kind", -1)
+    if kind_id < 0 or kind_id >= len(cst.kinds):
+        return ""
+    return cst.kinds[kind_id]
+
+def _enclosing_task_id(cst, node):
     current = node
     while current:
-        if _kind_name(cst, current) == "FunctionDeclaration":
+        if _kind_name(cst, current) == "TaskDeclaration":
             return current.get("id")
         parent_id = current.get("parent")
         if parent_id is None:

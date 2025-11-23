@@ -86,6 +86,9 @@ id = "functions_explicit_arg_types"
 id = "functions_args_have_direction"
 
 [[rule]]
+id = "tasks_explicit_arg_types"
+
+[[rule]]
 id = "tasks_args_have_direction"
 
 [[rule]]
