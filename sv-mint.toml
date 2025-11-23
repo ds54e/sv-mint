@@ -92,6 +92,9 @@ id = "tasks_explicit_arg_types"
 id = "tasks_args_have_direction"
 
 [[rule]]
+id = "tasks_marked_automatic_or_static"
+
+[[rule]]
 id = "localparam_has_type"
 
 [[rule]]
